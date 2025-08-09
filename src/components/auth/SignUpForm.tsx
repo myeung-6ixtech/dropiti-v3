@@ -7,31 +7,28 @@ export default function SignUpForm() {
   const [isChecked, setIsChecked] = useState(false);
   
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
-        >
+    <div className="auth-form-wrapper">
+      <div className="auth-section-spacing">
+        <Link href="/" className="auth-back-link">
           ← Back to dashboard
         </Link>
       </div>
       
       <div>
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="auth-section-spacing">
+          <h1 className="auth-title">
             Create Account
           </h1>
-          <p className="text-gray-600">
+          <p className="auth-subtitle">
             Enter your details to create your account.
           </p>
         </div>
         
-        <form className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <form className="auth-form">
+          <div className="auth-form-row">
             {/* First Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="auth-label">
                 First name <span className="text-red-500">*</span>
               </label>
               <input
@@ -39,13 +36,13 @@ export default function SignUpForm() {
                 id="fname"
                 name="fname"
                 placeholder="Enter your first name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900"
+                className="auth-input"
                 required
               />
             </div>
             {/* Last Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="auth-label">
                 Last name <span className="text-red-500">*</span>
               </label>
               <input
@@ -53,7 +50,7 @@ export default function SignUpForm() {
                 id="lname"
                 name="lname"
                 placeholder="Enter your last name"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900"
+                className="auth-input"
                 required
               />
             </div>
@@ -61,7 +58,7 @@ export default function SignUpForm() {
           
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="auth-label">
               Email address <span className="text-red-500">*</span>
             </label>
             <input
@@ -69,27 +66,27 @@ export default function SignUpForm() {
               id="email"
               name="email"
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900"
+              className="auth-input"
               required
             />
           </div>
           
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="auth-label">
               Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
                 placeholder="Enter your password"
                 type={showPassword ? "text" : "password"}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900"
+                className="auth-input-with-icon"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-sm text-gray-500 hover:text-gray-700"
+                className="auth-input-icon"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -103,34 +100,28 @@ export default function SignUpForm() {
               type="checkbox"
               checked={isChecked}
               onChange={(e) => setIsChecked(e.target.checked)}
-              className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded mt-0.5"
+              className="auth-checkbox mt-0.5"
             />
-            <label htmlFor="terms" className="text-sm text-gray-600">
+            <label htmlFor="terms" className="auth-text">
               By creating an account, you agree to our{" "}
-              <span className="text-gray-900 font-medium">Terms and Conditions</span>{" "}
+              <span className="auth-link">Terms and Conditions</span>{" "}
               and{" "}
-              <span className="text-gray-900 font-medium">Privacy Policy</span>
+              <span className="auth-link">Privacy Policy</span>
             </label>
           </div>
           
           {/* Button */}
           <div>
-            <button
-              type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-            >
+            <button type="submit" className="auth-button">
               Create account
             </button>
           </div>
         </form>
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600">
+        <div className="auth-section-spacing text-center">
+          <p className="auth-text-center">
             Already have an account?{" "}
-            <Link
-              href="/auth/signin"
-              className="font-medium text-gray-900 hover:text-gray-700"
-            >
+            <Link href="/auth/signin" className="auth-link">
               Sign in
             </Link>
           </p>

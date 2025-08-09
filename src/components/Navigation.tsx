@@ -18,7 +18,7 @@ export default function Navigation() {
           <div className="flex items-center">
             <Link href="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
               <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">PropertiesApp</span>
+              <span className="ml-2 text-xl font-bold text-gray-900">dropiti</span>
             </Link>
           </div>
           

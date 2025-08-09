@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { MapPinIcon, HomeIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -10,9 +11,13 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property, onViewDetails }: PropertyCardProps) {
+  const router = useRouter();
+
   const handleViewDetails = () => {
     if (onViewDetails) {
       onViewDetails(property.id);
+    } else {
+      router.push(`/property/${property.id}`);
     }
   };
 

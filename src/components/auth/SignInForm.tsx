@@ -33,35 +33,32 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
-        >
+    <div className="auth-form-wrapper">
+      <div className="auth-section-spacing">
+        <Link href="/" className="auth-back-link">
           ← Back to dashboard
         </Link>
       </div>
       
       <div>
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="auth-section-spacing">
+          <h1 className="auth-title">
             Sign In
           </h1>
-          <p className="text-gray-600">
+          <p className="auth-subtitle">
             Enter your email and password to sign in to your account.
           </p>
         </div>
         
         {error && (
-          <div className="mb-6 p-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+          <div className="auth-error">
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="auth-form">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="auth-label">
               Email address <span className="text-red-500">*</span>
             </label>
             <input 
@@ -69,13 +66,13 @@ export default function SignInForm() {
               placeholder="Enter your email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900"
+              className="auth-input"
               required
             />
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="auth-label">
               Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
@@ -84,13 +81,13 @@ export default function SignInForm() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900"
+                className="auth-input-with-icon"
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-4 flex items-center text-sm text-gray-500 hover:text-gray-700"
+                className="auth-input-icon"
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -103,16 +100,13 @@ export default function SignInForm() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-gray-600 focus:ring-gray-500 border-gray-300 rounded"
+                className="auth-checkbox"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+              <label htmlFor="remember-me" className="auth-checkbox-label">
                 Remember me
               </label>
             </div>
-            <Link
-              href="/reset-password"
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
+            <Link href="/reset-password" className="auth-link-secondary">
               Forgot password?
             </Link>
           </div>
@@ -121,20 +115,17 @@ export default function SignInForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="auth-button"
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
 
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600">
+        <div className="auth-section-spacing text-center">
+          <p className="auth-text-center">
             Don't have an account?{" "}
-            <Link
-              href="/auth/signup"
-              className="font-medium text-gray-900 hover:text-gray-700"
-            >
+            <Link href="/auth/signup" className="auth-link">
               Sign up
             </Link>
           </p>

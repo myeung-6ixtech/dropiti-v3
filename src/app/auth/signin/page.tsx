@@ -4,34 +4,34 @@ import SignInForm from '@/components/auth/SignInForm';
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen">
+    <div className="auth-container">
       {/* Left Side - Form (50%) */}
-      <div className="flex-1 flex flex-col justify-center px-6 py-12 bg-white">
+      <div className="auth-form-section">
         <SignInForm />
       </div>
 
       {/* Right Side - Content (50%) */}
-      <div className="hidden lg:block flex-1 bg-gray-100">
-        <div className="h-full flex flex-col justify-center items-center text-center p-12">
+      <div className="auth-content-section">
+        <div className="auth-content-wrapper">
           <div className="max-w-md">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Welcome to PropertiesApp
+            <h2 className="auth-heading">
+              Welcome to Dropiti
             </h2>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="auth-description">
               Find your perfect property or list your space with our comprehensive real estate platform.
             </p>
-            <div className="space-y-3">
-              <div className="flex items-center justify-center space-x-3">
-                <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-                <span className="text-gray-700">Search thousands of properties</span>
+            <div className="auth-content-spacing">
+              <div className="auth-feature-item">
+                <div className="auth-feature-dot"></div>
+                <span className="auth-feature-text">Search thousands of properties</span>
               </div>
-              <div className="flex items-center justify-center space-x-3">
-                <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-                <span className="text-gray-700">Secure authentication</span>
+              <div className="auth-feature-item">
+                <div className="auth-feature-dot"></div>
+                <span className="auth-feature-text">Secure authentication</span>
               </div>
-              <div className="flex items-center justify-center space-x-3">
-                <div className="w-2 h-2 bg-gray-600 rounded-full"></div>
-                <span className="text-gray-700">Manage your properties</span>
+              <div className="auth-feature-item">
+                <div className="auth-feature-dot"></div>
+                <span className="auth-feature-text">Manage your properties</span>
               </div>
             </div>
           </div>
