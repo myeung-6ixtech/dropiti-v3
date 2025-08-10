@@ -2,36 +2,52 @@
  * Utility functions for the Dropiti application
  */
 
+// Address interface for type safety
+interface AddressObject {
+  unit?: string;
+  floor?: string;
+  block?: string;
+  buildingName?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  district?: string;
+  state?: string;
+  country?: string;
+  street?: string;
+  apartmentEstate?: string;
+}
+
 /**
  * Safely formats an address for display
  * Handles both string addresses and address objects
  */
-export function formatAddress(address: any): string {
+export function formatAddress(address: unknown): string {
   if (!address) return 'Address not specified';
-  
+
   // If address is already a string, return it
   if (typeof address === 'string') return address;
-  
+
   // If address is an object, format it
-  if (typeof address === 'object') {
+  if (typeof address === 'object' && address !== null) {
+    const addressObj = address as AddressObject;
     const parts = [];
-    
+
     // Check for all possible address fields
-    if (address.unit) parts.push(`Unit ${address.unit}`);
-    if (address.floor) parts.push(`Floor ${address.floor}`);
-    if (address.block) parts.push(address.block);
-    if (address.buildingName) parts.push(address.buildingName);
-    if (address.addressLine1) parts.push(address.addressLine1);
-    if (address.addressLine2) parts.push(address.addressLine2);
-    if (address.district) parts.push(address.district);
-    if (address.state) parts.push(address.state);
-    if (address.country) parts.push(address.country);
-    if (address.street) parts.push(address.street);
-    if (address.apartmentEstate) parts.push(address.apartmentEstate);
-    
+    if (addressObj.unit) parts.push(`Unit ${addressObj.unit}`);
+    if (addressObj.floor) parts.push(`Floor ${addressObj.floor}`);
+    if (addressObj.block) parts.push(addressObj.block);
+    if (addressObj.buildingName) parts.push(addressObj.buildingName);
+    if (addressObj.addressLine1) parts.push(addressObj.addressLine1);
+    if (addressObj.addressLine2) parts.push(addressObj.addressLine2);
+    if (addressObj.district) parts.push(addressObj.district);
+    if (addressObj.state) parts.push(addressObj.state);
+    if (addressObj.country) parts.push(addressObj.country);
+    if (addressObj.street) parts.push(addressObj.street);
+    if (addressObj.apartmentEstate) parts.push(addressObj.apartmentEstate);
+
     return parts.length > 0 ? parts.join(', ') : 'Address not specified';
   }
-  
+
   return 'Address not specified';
 }
 

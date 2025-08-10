@@ -1,7 +1,7 @@
 // Server-side GraphQL client for API routes
-export const executeGraphQLRequest = async <T = any>(
+export const executeGraphQLRequest = async <T = unknown>(
   query: string, 
-  variables?: any,
+  variables?: Record<string, unknown>,
   endpoint?: string
 ): Promise<T> => {
   try {
@@ -43,7 +43,7 @@ export const executeGraphQLRequest = async <T = any>(
 };
 
 // Helper function to execute queries
-export const executeQuery = async <T = any>(query: string, variables?: any): Promise<T> => {
+export const executeQuery = async <T = unknown>(query: string, variables?: Record<string, unknown>): Promise<T> => {
   try {
     return await executeGraphQLRequest<T>(query, variables);
   } catch (error) {
@@ -53,7 +53,7 @@ export const executeQuery = async <T = any>(query: string, variables?: any): Pro
 };
 
 // Helper function to execute mutations
-export const executeMutation = async <T = any>(mutation: string, variables?: any): Promise<T> => {
+export const executeMutation = async <T = unknown>(mutation: string, variables?: Record<string, unknown>): Promise<T> => {
   try {
     return await executeGraphQLRequest<T>(mutation, variables);
   } catch (error) {

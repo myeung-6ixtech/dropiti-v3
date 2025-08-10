@@ -60,13 +60,40 @@ export const propertiesAPI = {
   },
 
   // Create a new property
-  createProperty: async (propertyData: any) => {
+      createProperty: async (propertyData: {
+      title: string;
+      description: string;
+      location: string;
+      price: number;
+      bedrooms: number;
+      bathrooms: number;
+      imageUrl?: string;
+      details?: Record<string, unknown>;
+      rules?: string[];
+      amenities?: string[];
+      minimumLease?: number;
+      availableDate?: string | null;
+      ownerId: string;
+    }) => {
     const response = await apiClient.post('/properties/create-property', propertyData);
     return response.data;
   },
 
   // Update an existing property
-  updateProperty: async (id: string, updates: any) => {
+      updateProperty: async (id: string, updates: {
+      title?: string;
+      description?: string;
+      location?: string;
+      price?: number;
+      bedrooms?: number;
+      bathrooms?: number;
+      imageUrl?: string;
+      details?: Record<string, unknown>;
+      rules?: string[];
+      amenities?: string[];
+      minimumLease?: number;
+      availableDate?: string | null;
+    }) => {
     const response = await apiClient.put('/properties/update-property', { id, updates });
     return response.data;
   },
@@ -106,7 +133,15 @@ export const usersAPI = {
   },
 
   // Update user profile
-  updateProfile: async (userId: string, updates: any) => {
+      updateProfile: async (userId: string, updates: {
+      name?: string;
+      email?: string;
+      avatar?: string;
+      location?: string;
+      about?: string;
+      languages?: string[];
+      responseTime?: string;
+    }) => {
     const response = await apiClient.put(`/users/profile`, { userId, updates });
     return response.data;
   },
@@ -115,7 +150,15 @@ export const usersAPI = {
 // Search API (placeholder for future endpoints)
 export const searchAPI = {
   // Search properties with advanced filters
-  searchProperties: async (searchParams: any) => {
+      searchProperties: async (searchParams: {
+      location?: string;
+      minPrice?: number;
+      maxPrice?: number;
+      bedrooms?: number;
+      type?: string;
+      limit?: number;
+      offset?: number;
+    }) => {
     const response = await apiClient.post('/search/properties', searchParams);
     return response.data;
   },

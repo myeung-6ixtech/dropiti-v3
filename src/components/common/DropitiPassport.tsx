@@ -10,7 +10,6 @@ import {
   BriefcaseIcon,
   HeartIcon,
   GlobeAltIcon,
-  HomeIcon
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassportProps {

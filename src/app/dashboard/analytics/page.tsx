@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChartBarIcon, TrendingUpIcon, UsersIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, UsersIcon, HomeIcon } from '@heroicons/react/24/outline';
 
 export default function AnalyticsPage() {
   const [stats] = useState([
@@ -27,7 +27,7 @@ export default function AnalyticsPage() {
       value: '$280,000',
       change: '+12%',
       changeType: 'increase',
-      icon: TrendingUpIcon
+      icon: UsersIcon
     },
     {
       id: 4,

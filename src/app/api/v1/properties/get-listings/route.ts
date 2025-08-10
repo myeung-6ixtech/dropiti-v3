@@ -15,7 +15,13 @@ export async function GET(request: NextRequest) {
   try {
 
     // Build filters object using PropertyService filter interface
-    const filters: any = {};
+    const filters: {
+      location?: string;
+      minPrice?: number;
+      maxPrice?: number;
+      bedrooms?: number;
+      type?: string;
+    } = {};
     
     if (location) {
       filters.location = location; // PropertyService will handle the _ilike mapping
@@ -39,19 +45,48 @@ export async function GET(request: NextRequest) {
 
     // Use PropertyService instead of direct GraphQL query
     const data = await PropertyService.getProperties(limit, offset, Object.keys(filters).length > 0 ? filters : undefined);
+    
+    // Type the GraphQL response
+    type PropertyResponse = {
+      real_estate_property_listing: Array<{
+        id: string;
+        title: string;
+        description: string;
+        address: unknown;
+        rental_price: number | null;
+        num_bedroom: number | null;
+        num_bathroom: number | null;
+        display_image: string | null;
+        uploaded_images: string[] | null;
+        property_type: string;
+        furnished: string | null;
+        pets_allowed: boolean | null;
+        amenities: string[] | null;
+        availability_date: string | null;
+        created_at: string;
+      }>;
+      real_estate_property_listing_aggregate: {
+        aggregate: {
+          count: number;
+        };
+      };
+    };
+    
+    const typedData = data as PropertyResponse;
+    
     // Check if data exists and has the expected structure
-    if (!data || !data.real_estate_property_listing) {
-      console.error('Invalid data structure received:', data);
+    if (!typedData || !typedData.real_estate_property_listing) {
+      console.error('Invalid data structure received:', typedData);
       return NextResponse.json(
         { error: 'Invalid data structure received from GraphQL' },
         { status: 500 }
       );
     }
     
-    console.log('Total properties:', data.real_estate_property_listing_aggregate?.aggregate?.count);
+    console.log('Total properties:', typedData.real_estate_property_listing_aggregate?.aggregate?.count);
     
     // Transform the data to match your frontend expectations
-    const transformedProperties = data.real_estate_property_listing.map((property: any) => ({
+    const transformedProperties = typedData.real_estate_property_listing.map((property) => ({
       id: property.id,
       title: property.title,
       description: property.description,
@@ -78,10 +113,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: transformedProperties,
       pagination: {
-        total: data.real_estate_property_listing_aggregate?.aggregate?.count || 0,
+        total: typedData.real_estate_property_listing_aggregate?.aggregate?.count || 0,
         limit,
         offset,
-        hasMore: offset + limit < (data.real_estate_property_listing_aggregate?.aggregate?.count || 0),
+        hasMore: offset + limit < (typedData.real_estate_property_listing_aggregate?.aggregate?.count || 0),
       },
     });
   } catch (error) {

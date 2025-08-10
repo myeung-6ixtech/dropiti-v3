@@ -17,7 +17,17 @@ interface Step3AddressProps {
       country?: string;
     };
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { address?: {
+    unit?: string;
+    floor?: string;
+    block?: string;
+    buildingName?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    district?: string;
+    state?: string;
+    country?: string;
+  } }) => void;
 }
 
 export default function Step3Address({ data, onUpdate }: Step3AddressProps) {

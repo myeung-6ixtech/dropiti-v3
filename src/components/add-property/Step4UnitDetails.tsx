@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { 
   HomeIcon, 
   ArrowsPointingOutIcon,
-  BedDoubleIcon,
   WifiIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
@@ -20,7 +19,14 @@ interface Step4UnitDetailsProps {
       petsAllowed?: boolean;
     };
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { unitDetails?: {
+    grossArea?: number;
+    netArea?: number;
+    bedrooms?: number;
+    bathrooms?: number;
+    furnished?: 'fully' | 'partially' | 'non-furnished';
+    petsAllowed?: boolean;
+  } }) => void;
 }
 
 export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsProps) {

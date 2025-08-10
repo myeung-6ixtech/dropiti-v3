@@ -6,12 +6,8 @@ import Image from 'next/image';
 import { 
   MapPinIcon, 
   HomeIcon, 
-  CurrencyDollarIcon, 
-  UserIcon,
   CalendarIcon,
   StarIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   HeartIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
@@ -151,7 +147,10 @@ export default function PropertyDetailPage() {
     router.push(`/dashboard/chat?landlord=${property.landlord.id}`);
   };
 
-  const handleOfferSubmit = (offerData: any) => {
+  const handleOfferSubmit = (offerData: {
+    amount: number;
+    message: string;
+  }) => {
     // Handle the offer submission here
     console.log('Offer submitted:', offerData);
     // You can add API call here to submit the offer

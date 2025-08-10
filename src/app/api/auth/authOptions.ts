@@ -88,8 +88,6 @@ export const authOptions: NextAuthOptions = {
         };
       } catch (error) {
         console.error('Firebase auth error:', error);
-        console.error('Error code:', (error as any).code);
-        console.error('Error message:', (error as any).message);
         return null;
       }
       }

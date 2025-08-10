@@ -12,7 +12,7 @@ interface Step1PropertyTypeProps {
     propertyType?: 'residential' | 'commercial';
     residentialType?: 'serviced-apartment' | 'village-house' | 'apartment' | 'condo';
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { propertyType?: string; residentialType?: string }) => void;
 }
 
 const propertyTypes = [

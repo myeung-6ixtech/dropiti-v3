@@ -42,7 +42,7 @@ export default function CreateOfferModal({
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (field: keyof OfferData, value: any) => {
+  const handleInputChange = (field: keyof OfferData, value: string | number) => {
     setOfferData(prev => ({
       ...prev,
       [field]: value

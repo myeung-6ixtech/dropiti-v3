@@ -13,6 +13,17 @@ export interface PropertyFilters {
   parking?: boolean;
 }
 
+// Hasura filter interface for GraphQL queries
+interface HasuraFilters {
+  address?: { _ilike: string };
+  rental_price?: { _gte?: number; _lte?: number };
+  num_bedroom?: { _gte: number };
+  property_type?: { _eq: string };
+  furnished?: { _eq: string };
+  pets_allowed?: { _eq: boolean };
+  is_public?: { _eq: boolean };
+}
+
 // Re-export types for backward compatibility
 export type { Property, CreatePropertyInput, UpdatePropertyInput };
 
@@ -180,7 +191,7 @@ export class PropertyService {
   }
 
   private static buildFilters(filters: PropertyFilters) {
-    const hasuraFilters: any = {};
+    const hasuraFilters: HasuraFilters = {};
 
     if (filters.location) {
       // Map location to address field - you might need to adjust this based on your address structure

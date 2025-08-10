@@ -44,7 +44,21 @@ export async function PUT(request: NextRequest) {
     }
 
     // Prepare updates object, ensuring proper data types
-    const preparedUpdates: any = {};
+    const preparedUpdates: {
+      title?: string;
+      description?: string;
+      location?: string;
+      price?: number;
+      bedrooms?: number;
+      bathrooms?: number;
+      imageUrl?: string;
+      details?: Record<string, unknown>;
+      rules?: string[];
+      amenities?: string[];
+      minimumLease?: number;
+      availableDate?: string | null;
+      updatedAt: string;
+    } = {};
     
     if (updates.title) preparedUpdates.title = updates.title;
     if (updates.description) preparedUpdates.description = updates.description;

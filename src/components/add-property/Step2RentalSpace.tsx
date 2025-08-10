@@ -12,7 +12,7 @@ interface Step2RentalSpaceProps {
   data?: {
     rentalSpace?: 'entire-apartment' | 'partial-apartment' | 'shared-space' | 'private-room';
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { rentalSpace?: string }) => void;
 }
 
 const rentalSpaces = [

@@ -37,11 +37,6 @@ export default function PropertyCard({ property, onViewDetails }: PropertyCardPr
             <HomeIcon className="h-16 w-16 text-gray-400" />
           </div>
         )}
-        {!property.available && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
-            Not Available
-          </div>
-        )}
       </div>
 
       {/* Property Details */}

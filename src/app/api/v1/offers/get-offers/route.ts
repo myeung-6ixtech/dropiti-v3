@@ -81,11 +81,11 @@ export async function GET(request: NextRequest) {
     // Filter offers based on type
     let filteredOffers = data.offers;
     if (type === 'incoming') {
-      filteredOffers = data.offers.filter((offer: any) => 
+      filteredOffers = data.offers.filter((offer: { property: { ownerId: string }; userId: string }) => 
         offer.property.ownerId === userId
       );
     } else if (type === 'outgoing') {
-      filteredOffers = data.offers.filter((offer: any) => 
+      filteredOffers = data.offers.filter((offer: { property: { ownerId: string }; userId: string }) => 
         offer.userId === userId
       );
     }

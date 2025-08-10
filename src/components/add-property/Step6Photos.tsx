@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { 
   PhotoIcon, 
-  XMarkIcon,
   ArrowUpTrayIcon,
   TrashIcon
 } from '@heroicons/react/24/outline';
@@ -12,7 +11,7 @@ interface Step6PhotosProps {
   data?: {
     photos?: File[];
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { photos?: File[] }) => void;
 }
 
 export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {

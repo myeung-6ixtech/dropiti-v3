@@ -16,7 +16,12 @@ interface Step7RentalDetailsProps {
       availableDate?: Date | string | null;
     };
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { rentalDetails?: {
+    listingName?: string;
+    listingDescription?: string;
+    rentalPrice?: number;
+    availableDate?: Date | string | null;
+  } }) => void;
 }
 
 export default function Step7RentalDetails({ data, onUpdate }: Step7RentalDetailsProps) {

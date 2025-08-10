@@ -4,8 +4,6 @@ import { useState } from 'react';
 import { 
   WifiIcon,
   TvIcon,
-  SnowflakeIcon,
-  SwimmerIcon,
   TruckIcon,
   ShieldCheckIcon,
   KeyIcon,
@@ -23,7 +21,7 @@ interface Step5AmenitiesProps {
   data?: {
     amenities?: string[];
   };
-  onUpdate: (data: any) => void;
+  onUpdate: (data: { amenities?: string[] }) => void;
 }
 
 const amenities = [
@@ -36,7 +34,7 @@ const amenities = [
   {
     id: 'air-conditioning',
     name: 'Air Conditioning',
-    icon: SnowflakeIcon,
+    icon: HeartIcon,
     category: 'Climate Control'
   },
   {
@@ -84,7 +82,7 @@ const amenities = [
   {
     id: 'pool',
     name: 'Swimming Pool',
-    icon: SwimmerIcon,
+    icon: HeartIcon,
     category: 'Recreation'
   },
   {

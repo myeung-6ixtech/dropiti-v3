@@ -1,5 +1,5 @@
 // Common GraphQL response types
-export interface GraphQLResponse<T = any> {
+export interface GraphQLResponse<T = unknown> {
     data?: T;
     errors?: GraphQLError[];
   }
@@ -11,17 +11,17 @@ export interface GraphQLResponse<T = any> {
       column: number;
     }>;
     path?: string[];
-    extensions?: Record<string, any>;
+    extensions?: Record<string, unknown>;
   }
   
   // Hasura specific types
-  export interface HasuraResponse<T = any> {
+  export interface HasuraResponse<T = unknown> {
     data: T;
     errors?: GraphQLError[];
   }
   
   // Common query/mutation result types
-  export interface QueryResult<T = any> {
+  export interface QueryResult<T = unknown> {
     data: T;
     loading: boolean;
     error?: Error;
@@ -51,7 +51,7 @@ export interface CreatePropertyInput {
   bedrooms: number;
   bathrooms: number;
   imageUrl?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   rules?: string[];
   amenities?: string[];
   minimumLease?: number;
@@ -67,7 +67,7 @@ export interface UpdatePropertyInput {
   bedrooms?: number;
   bathrooms?: number;
   imageUrl?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   rules?: string[];
   amenities?: string[];
   minimumLease?: number;
@@ -80,12 +80,12 @@ export interface UpdatePropertyInput {
   }
   
   export interface UpdateInput<T> {
-    where: Record<string, any>;
+    where: Record<string, unknown>;
     _set: Partial<T>;
   }
   
   export interface DeleteInput {
-    where: Record<string, any>;
+    where: Record<string, unknown>;
   }
   
   // Pagination types

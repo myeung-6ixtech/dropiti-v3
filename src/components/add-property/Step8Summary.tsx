@@ -10,7 +10,34 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface Step8SummaryProps {
-  data?: any;
+  data?: {
+    propertyType?: string;
+    residentialType?: string;
+    rentalSpace?: string;
+    address?: {
+      unit?: string;
+      floor?: string;
+      buildingName?: string;
+      addressLine1?: string;
+      district?: string;
+    };
+    unitDetails?: {
+      grossArea?: number;
+      netArea?: number;
+      bedrooms?: number;
+      bathrooms?: number;
+      furnished?: string;
+      petsAllowed?: boolean;
+    };
+    amenities?: string[];
+    photos?: File[];
+    rentalDetails?: {
+      listingName?: string;
+      listingDescription?: string;
+      rentalPrice?: number;
+      availableDate?: Date | string | null;
+    };
+  };
   onSubmit: () => void;
   isSubmitting?: boolean;
 }
@@ -26,25 +53,25 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
 
   const getPropertyTypeDisplay = () => {
     if (data?.propertyType === 'residential') {
-      const types = {
+      const types: Record<string, string> = {
         'serviced-apartment': 'Serviced Apartment',
         'village-house': 'Village House',
         'apartment': 'Apartment',
         'condo': 'Condominium',
       };
-      return types[data?.residentialType] || 'Residential';
+      return types[data.residentialType || ''] || 'Residential';
     }
     return data?.propertyType || 'Not specified';
   };
 
   const getRentalSpaceDisplay = () => {
-    const types = {
+    const types: Record<string, string> = {
       'entire-apartment': 'Entire Apartment',
       'partial-apartment': 'Partial Apartment',
       'shared-space': 'Shared Space',
       'private-room': 'Private Room',
     };
-    return types[data?.rentalSpace] || 'Not specified';
+    return types[data?.rentalSpace || ''] || 'Not specified';
   };
 
   return (

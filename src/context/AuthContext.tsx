@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: any | null;
+  user: {
+    id: string;
+    email: string;
+    name?: string;
+    avatar?: string;
+  } | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
 }

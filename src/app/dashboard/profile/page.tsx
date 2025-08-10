@@ -113,7 +113,7 @@ export default function ProfilePage() {
     setTempProfile(profile);
   }, [profile]);
 
-  const handleInputChange = (field: keyof UserProfile, value: any) => {
+  const handleInputChange = (field: keyof UserProfile, value: string | string[]) => {
     setTempProfile(prev => ({
       ...prev,
       [field]: value

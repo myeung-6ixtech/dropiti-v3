@@ -6,7 +6,6 @@ import {
   CheckCircleIcon,
   MapPinIcon,
   CalendarIcon,
-  ClockIcon,
   ChatBubbleLeftRightIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
