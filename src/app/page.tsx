@@ -39,107 +39,69 @@ export default function HomePage() {
                 <p className="mt-3 text-base text-gray-600 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                   Discover thousands of properties for rent and sale. Search by location, bedrooms, and price to find your ideal home.
                 </p>
-                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                  <div className="rounded-md shadow-lg">
-                    <a
-                      href="#search"
-                      className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors duration-200 shadow-sm"
-                    >
-                      Start Searching
-                    </a>
-                  </div>
+                
+                {/* Integrated Search Bar */}
+                <div className="mt-8 sm:mt-10">
+                  <form onSubmit={handleSearch} className="max-w-4xl mx-auto lg:mx-0">
+                    <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
+                      {/* Location */}
+                      <div className="flex-1 relative">
+                        <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                          type="text"
+                          value={searchData.location}
+                          onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
+                          placeholder="Enter city, neighborhood..."
+                          className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl"
+                        />
+                      </div>
+
+                      {/* Bedrooms */}
+                      <div className="flex-1 relative">
+                        <HomeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <select
+                          value={searchData.bedrooms}
+                          onChange={(e) => setSearchData({ ...searchData, bedrooms: e.target.value })}
+                          className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 bg-transparent rounded-xl appearance-none cursor-pointer"
+                        >
+                          <option value="">Any Bedrooms</option>
+                          <option value="1">1 Bedroom</option>
+                          <option value="2">2 Bedrooms</option>
+                          <option value="3">3 Bedrooms</option>
+                          <option value="4">4 Bedrooms</option>
+                          <option value="5">5+ Bedrooms</option>
+                        </select>
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                          <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Max Price */}
+                      <div className="flex-1 relative">
+                        <CurrencyDollarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <input
+                          type="number"
+                          value={searchData.maxPrice}
+                          onChange={(e) => setSearchData({ ...searchData, maxPrice: e.target.value })}
+                          placeholder="Max Price"
+                          className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl"
+                        />
+                      </div>
+
+                      {/* Search Button */}
+                      <button
+                        type="submit"
+                        className="flex-shrink-0 w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      >
+                        <MagnifyingGlassIcon className="h-6 w-6 text-white" />
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </main>
-          </div>
-        </div>
-      </div>
-
-      {/* Search Section */}
-      <div id="search" className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Search Properties
-            </h2>
-            <p className="mt-4 text-lg text-gray-600">
-              Find your dream property with our advanced search
-            </p>
-          </div>
-
-          <div className="mt-8 max-w-3xl mx-auto">
-            <form onSubmit={handleSearch} className="bg-white shadow-xl rounded-lg p-6 border border-gray-200">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {/* Location */}
-                <div>
-                  <label htmlFor="location" className="form-label">
-                    Location
-                  </label>
-                  <div className="mt-1 relative">
-                    <MapPinIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <input
-                      type="text"
-                      id="location"
-                      value={searchData.location}
-                      onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
-                      placeholder="Enter city, neighborhood..."
-                      className="input-field pl-10"
-                    />
-                  </div>
-                </div>
-
-                {/* Bedrooms */}
-                <div>
-                  <label htmlFor="bedrooms" className="form-label">
-                    Bedrooms
-                  </label>
-                  <div className="mt-1 relative">
-                    <HomeIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <select
-                      id="bedrooms"
-                      value={searchData.bedrooms}
-                      onChange={(e) => setSearchData({ ...searchData, bedrooms: e.target.value })}
-                      className="input-field pl-10"
-                    >
-                      <option value="">Any</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="5">5+</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Max Price */}
-                <div>
-                  <label htmlFor="maxPrice" className="form-label">
-                    Max Price
-                  </label>
-                  <div className="mt-1 relative">
-                    <CurrencyDollarIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <input
-                      type="number"
-                      id="maxPrice"
-                      value={searchData.maxPrice}
-                      onChange={(e) => setSearchData({ ...searchData, maxPrice: e.target.value })}
-                      placeholder="Enter max price..."
-                      className="input-field pl-10"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <button
-                  type="submit"
-                  className="w-full flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 shadow-sm"
-                >
-                  <MagnifyingGlassIcon className="h-5 w-5 mr-2" />
-                  Search Properties
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </div>

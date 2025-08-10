@@ -276,7 +276,11 @@
 
   /* Sidebar */
   .dashboard-sidebar {
-    @apply w-64 bg-white shadow-xl flex-shrink-0;
+    @apply w-64 bg-white shadow-xl flex-shrink-0 transition-all duration-300 ease-in-out;
+  }
+
+  .dashboard-sidebar.collapsed {
+    @apply w-20;
   }
 
   /* Mobile sidebar - fixed overlay */
@@ -298,12 +302,20 @@
     @apply flex flex-col h-full;
   }
 
-  .dashboard-sidebar-header {
-    @apply flex items-center justify-between h-16 px-6 border-b border-gray-200;
+  .dashboard-sidebar-toggle {
+    @apply flex justify-end p-3 border-b border-gray-200;
+  }
+
+  .dashboard-sidebar-toggle-button {
+    @apply p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors;
+  }
+
+  .dashboard-sidebar-close {
+    @apply p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors;
   }
 
   .dashboard-sidebar-brand {
-    @apply flex items-center;
+    @apply flex items-center justify-center px-6 py-4 border-b border-gray-200;
   }
 
   .dashboard-sidebar-brand-icon {
@@ -314,8 +326,42 @@
     @apply ml-2 text-xl font-semibold text-gray-900;
   }
 
-  .dashboard-sidebar-close {
-    @apply lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100;
+  .dashboard-sidebar.collapsed .dashboard-sidebar-brand-text,
+  .dashboard-sidebar.collapsed .dashboard-user-info,
+  .dashboard-sidebar.collapsed .dashboard-view-toggle-title,
+  .dashboard-sidebar.collapsed .dashboard-view-toggle-buttons,
+  .dashboard-sidebar.collapsed .dashboard-navigation-title,
+  .dashboard-sidebar.collapsed .dashboard-nav-item span,
+  .dashboard-sidebar.collapsed .dashboard-footer-links {
+    @apply hidden;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-sidebar-brand {
+    @apply justify-center px-2 py-4;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-sidebar-brand-icon {
+    @apply ml-0;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-user-section {
+    @apply px-2 py-4;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-user-avatar {
+    @apply mx-auto;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-view-toggle {
+    @apply px-2 py-4;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-navigation {
+    @apply px-2 py-4;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-sidebar-footer {
+    @apply px-2 py-4;
   }
 
   .dashboard-user-section {
@@ -399,36 +445,10 @@
     @apply flex-1 flex flex-col min-w-0;
   }
 
-  .dashboard-topbar {
-    @apply sticky top-0 z-10 bg-white shadow-sm border-b border-gray-200;
-  }
 
-  .dashboard-topbar-content {
-    @apply flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8;
-  }
-
-  .dashboard-topbar-left {
-    @apply flex items-center;
-  }
-
-  .dashboard-topbar-menu-button {
-    @apply lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100;
-  }
-
-  .dashboard-topbar-title {
-    @apply ml-4 lg:ml-0 text-2xl font-bold text-gray-900;
-  }
-
-  .dashboard-topbar-right {
-    @apply flex items-center space-x-4;
-  }
-
-  .dashboard-topbar-welcome {
-    @apply text-sm text-gray-600;
-  }
 
   .dashboard-content {
-    @apply flex-1 py-6 px-4 sm:px-6 lg:px-8;
+    @apply flex-1 py-8 px-4 sm:px-6 lg:px-8;
   }
 
   /* Dashboard Mobile Backdrop */

@@ -1,0 +1,247 @@
+'use client';
+
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { 
+  StarIcon, 
+  CheckCircleIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  CalendarIcon,
+  HomeIcon
+} from '@heroicons/react/24/outline';
+
+interface Landlord {
+  id: string;
+  name: string;
+  avatar: string;
+  rating: number;
+  reviewCount: number;
+  responseTime: string;
+  verified: boolean;
+}
+
+interface PropertyPricingCardProps {
+  price: number;
+  deposit: number;
+  availableDate: Date;
+  minimumLease: number;
+  landlord: Landlord;
+  details: {
+    type: string;
+    furnished: string;
+    petsAllowed: boolean;
+  };
+  onCreateOffer: () => void;
+  onChatWithLandlord: () => void;
+}
+
+export default function PropertyPricingCard({
+  price,
+  deposit,
+  availableDate,
+  minimumLease,
+  landlord,
+  details,
+  onCreateOffer,
+  onChatWithLandlord
+}: PropertyPricingCardProps) {
+  const [showContactInfo, setShowContactInfo] = useState(false);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-HK', {
+      style: 'currency',
+      currency: 'HKD',
+      minimumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString('en-US', { 
+      month: 'long', 
+      year: 'numeric' 
+    });
+  };
+
+  return (
+    <div className="lg:col-span-1">
+      <div className="sticky top-8 space-y-4">
+        {/* Pricing Card */}
+        <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
+          <div className="flex items-baseline justify-between mb-4">
+            <div>
+              <span className="text-2xl font-bold text-gray-900">
+                {formatCurrency(price)}
+              </span>
+              <span className="text-gray-600 ml-1">/month</span>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-500">Available</p>
+              <p className="text-sm font-medium text-gray-900">
+                {formatDate(availableDate)}
+              </p>
+            </div>
+          </div>
+
+          {/* Additional Costs */}
+          <div className="space-y-2 py-4 border-t border-gray-200">
+            <div className="flex justify-between">
+              <span className="text-gray-600">Security deposit</span>
+              <span className="font-medium">{formatCurrency(deposit)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Utilities</span>
+              <span className="font-medium">Included</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-4">
+            <button
+              onClick={onCreateOffer}
+              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Create Offer
+            </button>
+          </div>
+
+          {/* Contact Info */}
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-500 text-center">
+              No booking fees • Secure payment
+            </p>
+          </div>
+        </div>
+
+        {/* Landlord Highlight Card - Airbnb Inspired */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+          <div className="flex items-start space-x-4 mb-4">
+            <div className="relative">
+              <Image
+                src={landlord.avatar}
+                alt={landlord.name}
+                width={64}
+                height={64}
+                className="rounded-full object-cover"
+              />
+              {landlord.verified && (
+                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                  <CheckCircleIcon className="h-3 w-3 text-white" />
+                </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center space-x-2 mb-1">
+                <Link 
+                  href={`/user/${landlord.id}`}
+                  className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
+                >
+                  {landlord.name}
+                </Link>
+                {landlord.verified && (
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                    Verified
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center space-x-1 mb-2">
+                <StarIcon className="h-4 w-4 text-yellow-400" />
+                <span className="font-medium text-gray-900">{landlord.rating}</span>
+                <span className="text-gray-500">•</span>
+                <span className="text-gray-600">{landlord.reviewCount} reviews</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Actions */}
+          <div className="flex flex-col space-y-2 mb-4">
+            <button
+              onClick={onChatWithLandlord}
+              className="w-full bg-white text-blue-600 py-3 px-4 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            >
+              Chat with Landlord
+            </button>
+            {/* <button 
+              onClick={() => setShowContactInfo(!showContactInfo)}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+            >
+              <PhoneIcon className="h-4 w-4" />
+              <span>Contact</span>
+            </button>
+            <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
+              <EnvelopeIcon className="h-4 w-4" />
+              <span>Message</span>
+            </button> */}
+          </div>
+
+          {/* Contact Information (Expandable) */}
+          {showContactInfo && (
+            <div className="pt-4 border-t border-gray-200 space-y-3">
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <PhoneIcon className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Phone</span>
+                </div>
+                <span className="text-sm font-medium text-gray-900">+852 1234 5678</span>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-2">
+                  <EnvelopeIcon className="h-4 w-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Email</span>
+                </div>
+                <span className="text-sm font-medium text-gray-900">sarah.j@email.com</span>
+              </div>
+            </div>
+          )}
+
+          {/* Host Stats */}
+          <div className="pt-4 border-t border-gray-200">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-lg font-semibold text-gray-900">98%</div>
+                <div className="text-xs text-gray-500">Response rate</div>
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-gray-900">1h</div>
+                <div className="text-xs text-gray-500">Avg. response</div>
+              </div>
+              <div>
+                <div className="text-lg font-semibold text-gray-900">5</div>
+                <div className="text-xs text-gray-500">Properties</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Quick Info */}
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+          <h3 className="font-semibold text-gray-900 mb-3">Quick facts</h3>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <CalendarIcon className="h-4 w-4 text-gray-400" />
+                <span className="text-gray-600">Minimum lease:</span>
+              </div>
+              <span className="font-medium">{minimumLease} months</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <HomeIcon className="h-4 w-4 text-gray-400" />
+                <span className="text-gray-600">Furnished:</span>
+              </div>
+              <span className="font-medium">{details.furnished}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="h-4 w-4 text-gray-400">🐾</div>
+                <span className="text-gray-600">Pets:</span>
+              </div>
+              <span className="font-medium">{details.petsAllowed ? 'Allowed' : 'Not allowed'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

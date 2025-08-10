@@ -1,0 +1,7 @@
+export { default as DropitiLogoGradient } from './dropiti-logo-gradient.svg'
+export { default as DropitiLogoWhite } from './dropiti-logo-white.svg'
+export { default as GoogleLogo } from './google-logo.svg'
+export { default as SSOAppleLightRound } from './sso-apple-light-round.svg'
+export { default as SSOFacebookLightRound } from './sso-facebook-light-round.svg'
+export { default as SSOGoogleLightRound } from './sso-google-light-round.svg'
+export { default as SSOGoogleLightStandard } from './sso-google-light-standard.svg'

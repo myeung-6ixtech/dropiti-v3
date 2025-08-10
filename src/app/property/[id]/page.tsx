@@ -13,11 +13,23 @@ import {
   PhoneIcon,
   EnvelopeIcon,
   HeartIcon,
-  ShareIcon,
-  CheckCircleIcon
+  ShareIcon
 } from '@heroicons/react/24/outline';
+import {
+  Wifi,
+  AirConditioner,
+  Lightning,
+  Oven,
+  WashingMachine,
+  ParkingSign,
+  Gym,
+  SwimmingPool,
+  SecurityGuard,
+  Elevator
+} from '@/assets/icons';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
+import PropertyPricingCard from '@/components/common/PropertyPricingCard';
 import { Property } from '@/types';
 
 // Mock property data - in real app, this would come from an API
@@ -152,6 +164,24 @@ export default function PropertyDetailPage() {
       currency: 'HKD',
       minimumFractionDigits: 0,
     }).format(amount);
+  };
+
+  const getAmenityIcon = (amenity: string) => {
+    const iconMap: { [key: string]: React.ComponentType<any> } = {
+      'WiFi': Wifi,
+      'Air Conditioning': AirConditioner,
+      'Heating': Lightning,
+      'Dishwasher': Oven,
+      'Washing Machine': WashingMachine,
+      'Dryer': WashingMachine,
+      'Parking': ParkingSign,
+      'Gym': Gym,
+      'Pool': SwimmingPool,
+      'Security System': SecurityGuard,
+      'Elevator': Elevator
+    };
+    
+    return iconMap[amenity] || null;
   };
 
   if (isLoading) {
@@ -293,12 +323,19 @@ export default function PropertyDetailPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
               <div className="grid grid-cols-2 gap-4">
-                {property.amenities.map((amenity) => (
-                  <div key={amenity} className="flex items-center space-x-3">
-                    <CheckCircleIcon className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span className="text-gray-700">{amenity}</span>
-                  </div>
-                ))}
+                {property.amenities.map((amenity) => {
+                  const AmenityIcon = getAmenityIcon(amenity);
+                  return (
+                    <div key={amenity} className="flex items-center space-x-3">
+                      {AmenityIcon ? (
+                        <AmenityIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                      ) : (
+                        <div className="h-5 w-5 bg-gray-300 rounded-full flex-shrink-0" />
+                      )}
+                      <span className="text-gray-700">{amenity}</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -338,130 +375,24 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
-            {/* Landlord Information */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Hosted by {property.landlord.name}</h2>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="relative">
-                    <Image
-                      src={property.landlord.avatar}
-                      alt={property.landlord.name}
-                      width={60}
-                      height={60}
-                      className="rounded-full object-cover"
-                    />
-                    {property.landlord.verified && (
-                      <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                        <CheckCircleIcon className="h-3 w-3 text-white" />
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{property.landlord.name}</h3>
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                        <span>{property.landlord.rating}</span>
-                      </div>
-                      <span>•</span>
-                      <span>{property.landlord.reviewCount} reviews</span>
-                      <span>•</span>
-                      <span>Responds within {property.landlord.responseTime}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <PhoneIcon className="h-5 w-5 text-gray-600" />
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                    <EnvelopeIcon className="h-5 w-5 text-gray-600" />
-                  </button>
-                </div>
-              </div>
-            </div>
+
           </div>
 
           {/* Right Column - Pricing and Actions */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              {/* Pricing Card */}
-              <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
-                <div className="flex items-baseline justify-between mb-4">
-                  <div>
-                    <span className="text-2xl font-bold text-gray-900">
-                      {formatCurrency(property.price)}
-                    </span>
-                    <span className="text-gray-600 ml-1">/month</span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500">Available</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {property.availableDate.toLocaleDateString('en-US', { 
-                        month: 'long', 
-                        year: 'numeric' 
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Additional Costs */}
-                <div className="space-y-2 py-4 border-t border-gray-200">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Security deposit</span>
-                    <span className="font-medium">{formatCurrency(property.deposit)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Utilities</span>
-                    <span className="font-medium">Included</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3 pt-4">
-                  <button
-                    onClick={handleCreateOffer}
-                    className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                  >
-                    Create Offer
-                  </button>
-                  <button
-                    onClick={handleChatWithLandlord}
-                    className="w-full bg-white text-blue-600 py-3 px-4 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                  >
-                    Chat with Landlord
-                  </button>
-                </div>
-
-                {/* Contact Info */}
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <p className="text-sm text-gray-500 text-center">
-                    No booking fees • Secure payment
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Info */}
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200 mt-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Quick facts</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Minimum lease:</span>
-                    <span className="font-medium">{property.minimumLease} months</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Furnished:</span>
-                    <span className="font-medium">{property.details.furnished}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Pets:</span>
-                    <span className="font-medium">{property.details.petsAllowed ? 'Allowed' : 'Not allowed'}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <PropertyPricingCard
+            price={property.price}
+            deposit={property.deposit}
+            availableDate={property.availableDate}
+            minimumLease={property.minimumLease}
+            landlord={property.landlord}
+            details={{
+              type: property.details.type,
+              furnished: property.details.furnished,
+              petsAllowed: property.details.petsAllowed
+            }}
+            onCreateOffer={handleCreateOffer}
+            onChatWithLandlord={handleChatWithLandlord}
+          />
         </div>
       </div>
 

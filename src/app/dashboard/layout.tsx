@@ -60,26 +60,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Applications', icon: ClockIcon, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
     { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
+    { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
     // { name: 'Recent Activity', icon: ChartBarIcon, href: '/dashboard/activity', current: pathname === '/dashboard/activity' },
   ];
 
   const landlordNavigation = [
     { name: 'Dashboard', icon: HomeIcon, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: 'Properties', icon: BuildingOfficeIcon, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
     { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
-    { name: 'Properties', icon: BuildingOfficeIcon, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
+    { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
     // { name: 'Analytics', icon: ChartBarIcon, href: '/dashboard/analytics', current: pathname === '/dashboard/analytics' },
   ];
 
   const currentNavigation = activeView === 'tenant' ? tenantNavigation : landlordNavigation;
-
-  const getPageTitle = () => {
-    const currentNav = currentNavigation.find(nav => nav.current);
-    if (currentNav) {
-      return currentNav.name;
-    }
-    return activeView === 'tenant' ? 'Tenant Dashboard' : 'Landlord Dashboard';
-  };
 
   return (
     <div className="dashboard-container">
@@ -96,24 +94,27 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <div className={`dashboard-sidebar ${
         isMobile && !sidebarOpen ? 'dashboard-sidebar-closed' : 'dashboard-sidebar-open'
-      }`}>
+      } ${!isMobile && !sidebarOpen ? 'collapsed' : ''}`}>
         <div className="dashboard-sidebar-content">
-          {/* Sidebar header */}
-          <div className="dashboard-sidebar-header">
-            <div className="dashboard-sidebar-brand">
-              <HomeIcon className="dashboard-sidebar-brand-icon" />
-              <span className="dashboard-sidebar-brand-text">dropiti</span>
-            </div>
+          {/* Sidebar toggle button - moved to top of sidebar */}
+          <div className="dashboard-sidebar-toggle">
             {isMobile && (
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="dashboard-sidebar-close"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <XMarkIcon className="h-5 w-5" />
+              </button>
+            )}
+            {!isMobile && (
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="dashboard-sidebar-toggle-button"
+              >
+                <Bars3Icon className="h-5 w-5" />
               </button>
             )}
           </div>
-
           {/* User info */}
           <div className="dashboard-user-section">
             <div className="flex items-center">
@@ -170,9 +171,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     ? 'dashboard-nav-item-active'
                     : 'dashboard-nav-item-inactive'
                 }`}
+                title={!sidebarOpen ? item.name : undefined}
               >
                 <item.icon className="h-5 w-5 mr-2" />
-                {item.name}
+                <span>{item.name}</span>
               </Link>
             ))}
           </nav>
@@ -180,14 +182,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Sidebar footer */}
           <div className="dashboard-sidebar-footer">
             <div className="dashboard-footer-links">
-              <a href="#" className="dashboard-footer-link">
-                <CogIcon className="h-5 w-5 mr-2" />
-                Settings
-              </a>
-              <a href="#" className="dashboard-footer-link">
-                <BellIcon className="h-5 w-5 mr-2" />
-                Notifications
-              </a>
+              <p className="text-xs text-gray-500 text-center">
+                © 2024 dropiti. All rights reserved.
+              </p>
             </div>
           </div>
         </div>
@@ -195,33 +192,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="dashboard-main">
-        {/* Top bar */}
-        <div className="dashboard-topbar">
-          <div className="dashboard-topbar-content">
-            <div className="dashboard-topbar-left">
-              {isMobile && (
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="dashboard-topbar-menu-button"
-                >
-                  <Bars3Icon className="h-6 w-6" />
-                </button>
-              )}
-              <div className={isMobile ? "ml-4" : ""}>
-                <h1 className="dashboard-topbar-title">
-                  {getPageTitle()}
-                </h1>
-              </div>
-            </div>
-            <div className="dashboard-topbar-right">
-              <span className="dashboard-topbar-welcome">
-                Welcome back, {user.name}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Page content */}
+        {/* Page content - removed topbar */}
         <main className="dashboard-content">
           {children}
         </main>

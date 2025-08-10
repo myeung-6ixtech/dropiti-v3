@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { 
-  HomeIcon, 
-  BuildingOfficeIcon,
-  UsersIcon,
-  UserIcon
-} from '@heroicons/react/24/outline';
+  EntireApartment,
+  PartialApartment,
+  SharedSpace,
+  PrivateRoom
+} from '@/assets/icons';
 
 interface Step2RentalSpaceProps {
   data?: {
@@ -20,28 +20,28 @@ const rentalSpaces = [
     id: 'entire-apartment',
     title: 'Entire Apartment',
     description: 'Rent the complete apartment to yourself',
-    icon: HomeIcon,
+    icon: EntireApartment,
     details: 'You\'ll have the whole place to yourself with a private bathroom and kitchen.'
   },
   {
     id: 'partial-apartment',
     title: 'Partial Apartment',
     description: 'Rent part of an apartment',
-    icon: BuildingOfficeIcon,
+    icon: PartialApartment,
     details: 'You\'ll have your own room and share common areas like the kitchen and bathroom.'
   },
   {
     id: 'shared-space',
     title: 'Shared Space',
     description: 'Rent a shared room or space',
-    icon: UsersIcon,
+    icon: SharedSpace,
     details: 'You\'ll be sharing a room or space with others in the same unit.'
   },
   {
     id: 'private-room',
     title: 'Private Room',
     description: 'Rent a private room',
-    icon: UserIcon,
+    icon: PrivateRoom,
     details: 'You\'ll have your own private room and share common areas with other tenants.'
   },
 ];
