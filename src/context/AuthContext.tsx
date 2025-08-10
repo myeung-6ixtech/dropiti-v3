@@ -1,5 +1,6 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { useSession, signOut, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 interface AuthContextType {
@@ -23,53 +24,36 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { data: session, status } = useSession();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
   const router = useRouter();
 
-  // Check authentication status on mount
   useEffect(() => {
-    checkAuthStatus();
-  }, []);
-
-  const checkAuthStatus = async () => {
-    try {
-      // Mock auth check - in real app, this would call your auth API
-      if (typeof window !== 'undefined') {
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-          const userData = JSON.parse(savedUser);
-          setIsAuthenticated(true);
-          setUser(userData);
-        } else {
-          setIsAuthenticated(false);
-          setUser(null);
-        }
-      }
-    } catch (error) {
-      console.error("Auth check failed:", error);
+    if (status === 'loading') return;
+    
+    if (session?.user) {
+      setIsAuthenticated(true);
+      setUser(session.user);
+    } else {
       setIsAuthenticated(false);
       setUser(null);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [session, status]);
 
   const login = async (email: string, password: string) => {
     try {
-      // Mock authentication - in real app, this would call your auth API
-      if (email === 'demo@example.com' && password === 'password') {
-        const userData = { email, role: "super_admin" };
-        setIsAuthenticated(true);
-        setUser(userData);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('user', JSON.stringify(userData));
-        }
-        return { success: true };
-      } else {
-        return { success: false, error: "Invalid email or password" };
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        return { success: false, error: result.error };
       }
+
+      return { success: true };
     } catch (error) {
       console.error("Login error:", error);
       return { success: false, error: "Network error" };
@@ -78,16 +62,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
-      // Mock logout - in real app, this would call your auth API
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('user');
-      }
+      await signOut({ redirect: false });
+      router.push("/auth/signin");
     } catch (error) {
       console.error("Logout error:", error);
-    } finally {
-      setIsAuthenticated(false);
-      setUser(null);
-      router.push("/auth/signin");
     }
   };
 
@@ -95,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        isLoading,
+        isLoading: status === 'loading',
         user,
         login,
         logout,
@@ -104,4 +82,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </AuthContext.Provider>
   );
-}; 
+};

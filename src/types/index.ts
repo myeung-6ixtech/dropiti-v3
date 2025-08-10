@@ -6,7 +6,8 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   price: number;
-  imageUrl: string;
+  imageUrl?: string; // Optional for backward compatibility
+  images?: string[]; // New field for API compatibility
   available: boolean;
   landlordId: string;
   createdAt: Date;

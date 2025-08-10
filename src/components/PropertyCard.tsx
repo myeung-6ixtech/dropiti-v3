@@ -25,12 +25,18 @@ export default function PropertyCard({ property, onViewDetails }: PropertyCardPr
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       {/* Property Image */}
       <div className="relative h-48 w-full">
-        <Image
-          src={property.imageUrl}
-          alt={property.title}
-          fill
-          className="object-cover"
-        />
+        {property.imageUrl && property.imageUrl.trim() !== '' ? (
+          <Image
+            src={property.imageUrl}
+            alt={property.title}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <HomeIcon className="h-16 w-16 text-gray-400" />
+          </div>
+        )}
         {!property.available && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-medium">
             Not Available

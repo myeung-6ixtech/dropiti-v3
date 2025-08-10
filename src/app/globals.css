@@ -262,6 +262,11 @@
     @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 text-gray-900 font-sans resize-y;
   }
 
+  /* Global Checkbox Styles */
+  .form-checkbox {
+    @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
+  }
+
   /*
    * DASHBOARD DESIGN SYSTEM
    * 
@@ -271,12 +276,12 @@
 
   /* Dashboard Layout */
   .dashboard-container {
-    @apply min-h-screen bg-gray-50 flex;
+    @apply h-screen bg-white flex overflow-hidden;
   }
 
   /* Sidebar */
   .dashboard-sidebar {
-    @apply w-64 bg-white shadow-xl flex-shrink-0 transition-all duration-300 ease-in-out;
+    @apply w-64 bg-white shadow-xl flex-shrink-0 transition-all duration-300 ease-in-out h-full;
   }
 
   .dashboard-sidebar.collapsed {
@@ -442,13 +447,11 @@
 
   /* Dashboard Main Content */
   .dashboard-main {
-    @apply flex-1 flex flex-col min-w-0;
+    @apply flex-1 flex flex-col min-w-0 overflow-hidden;
   }
 
-
-
   .dashboard-content {
-    @apply flex-1 py-8 px-4 sm:px-6 lg:px-8;
+    @apply flex-1 py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto;
   }
 
   /* Dashboard Mobile Backdrop */

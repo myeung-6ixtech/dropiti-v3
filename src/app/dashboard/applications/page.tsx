@@ -1,110 +1,320 @@
 'use client';
 
-import { useState } from 'react';
-import { ClockIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { 
+  ArrowLeftIcon,
+  CheckIcon,
+  XMarkIcon,
+  CurrencyDollarIcon,
+  CalendarIcon,
+  ClockIcon,
+  UserIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  EyeIcon
+} from '@heroicons/react/24/outline';
 
-export default function ApplicationsPage() {
-  const [applications] = useState([
-    {
-      id: 1,
-      propertyName: 'Modern 2BR Apartment in Central',
-      applicantName: 'John Smith',
-      status: 'Pending',
-      submittedDate: '2024-01-15',
-      amount: '$25,000/month'
-    },
-    {
-      id: 2,
-      propertyName: 'Luxury Condo in Causeway Bay',
-      applicantName: 'Sarah Johnson',
-      status: 'Approved',
-      submittedDate: '2024-01-12',
-      amount: '$35,000/month'
-    },
-    {
-      id: 3,
-      propertyName: 'Studio Apartment in Wan Chai',
-      applicantName: 'Mike Chen',
-      status: 'Rejected',
-      submittedDate: '2024-01-10',
-      amount: '$18,000/month'
-    }
-  ]);
+interface Offer {
+  id: string;
+  propertyName: string;
+  propertyAddress: string;
+  propertyPrice: number;
+  offeredPrice: number;
+  leaseDuration: number;
+  paymentFrequency: 'full' | 'monthly';
+  paymentInterval?: number;
+  moveInDate: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'countered';
+  createdAt: string;
+  message?: string;
+  landlordName: string;
+  landlordEmail: string;
+  landlordPhone: string;
+  landlordAvatar?: string;
+}
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Approved':
-        return 'bg-green-100 text-green-800';
-      case 'Rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+export default function OutgoingOffersPage() {
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Mock data - replace with API call
+  useEffect(() => {
+    // Simulate API call
+    setTimeout(() => {
+      setOffers([
+        {
+          id: '1',
+          propertyName: 'Modern 2BR Apartment in Central',
+          propertyAddress: '123 Hennessy Road, Central, Hong Kong',
+          propertyPrice: 25000,
+          offeredPrice: 24000,
+          leaseDuration: 12,
+          paymentFrequency: 'monthly',
+          paymentInterval: 1,
+          moveInDate: '2024-03-01',
+          status: 'pending',
+          createdAt: '2024-02-15T10:30:00Z',
+          message: 'I really love this apartment and would be a great tenant. I can move in immediately and pay the security deposit upfront.',
+          landlordName: 'Sarah Johnson',
+          landlordEmail: 'sarah.johnson@email.com',
+          landlordPhone: '+852 9123 4567'
+        },
+        {
+          id: '2',
+          propertyName: 'Luxury Condo in Causeway Bay',
+          propertyAddress: '456 Lockhart Road, Causeway Bay, Hong Kong',
+          propertyPrice: 35000,
+          offeredPrice: 33500,
+          leaseDuration: 24,
+          paymentFrequency: 'monthly',
+          paymentInterval: 3,
+          moveInDate: '2024-03-15',
+          status: 'accepted',
+          createdAt: '2024-02-14T14:20:00Z',
+          message: 'Looking for a long-term rental. I have stable income and excellent rental history.',
+          landlordName: 'Michael Chen',
+          landlordEmail: 'michael.chen@email.com',
+          landlordPhone: '+852 9876 5432'
+        },
+        {
+          id: '3',
+          propertyName: 'Studio Apartment in Wan Chai',
+          propertyAddress: '789 Johnston Road, Wan Chai, Hong Kong',
+          propertyPrice: 18000,
+          offeredPrice: 18000,
+          leaseDuration: 12,
+          paymentFrequency: 'full',
+          moveInDate: '2024-03-01',
+          status: 'rejected',
+          createdAt: '2024-02-13T09:15:00Z',
+          message: 'I can pay the full year upfront. This would be perfect for my work situation.',
+          landlordName: 'Emma Wilson',
+          landlordEmail: 'emma.wilson@email.com',
+          landlordPhone: '+852 8765 4321'
+        }
+      ]);
+      setLoading(false);
+    }, 500);
+  }, []);
+
+  const handleWithdrawOffer = (offerId: string) => {
+    setOffers(prev => 
+      prev.map(offer => 
+        offer.id === offerId 
+          ? { ...offer, status: 'rejected' as const }
+          : offer
+      )
+    );
+    // Here you would typically make an API call to withdraw the offer
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Pending':
-        return <ClockIcon className="h-4 w-4" />;
-      case 'Approved':
-        return <CheckCircleIcon className="h-4 w-4" />;
-      case 'Rejected':
-        return <XCircleIcon className="h-4 w-4" />;
-      default:
-        return <ClockIcon className="h-4 w-4" />;
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-HK', {
+      style: 'currency',
+      currency: 'HKD',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const getStatusBadge = (status: Offer['status']) => {
+    const statusConfig = {
+      pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
+      accepted: { color: 'bg-green-100 text-green-800', text: 'Accepted' },
+      rejected: { color: 'bg-red-100 text-red-800', text: 'Rejected' },
+      countered: { color: 'bg-blue-100 text-blue-800', text: 'Countered' }
+    };
+
+    const config = statusConfig[status];
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.text}
+      </span>
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="max-w-6xl mx-auto">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
-          <p className="text-gray-600 mt-1">Manage rental applications</p>
+      <div className="mb-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Applications</h1>
+          <p className="text-gray-600">Track the status of your rental outgoing offers</p>
         </div>
       </div>
 
-      {/* Applications List */}
-      <div className="flex-1 overflow-auto p-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Applications</h2>
+      {/* Offers List */}
+      <div className="space-y-4">
+        {offers.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="text-gray-400 mb-4">
+              <CurrencyDollarIcon className="mx-auto h-12 w-12" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No offers yet</h3>
+            <p className="text-gray-500">Your rental offers will appear here.</p>
           </div>
-          <div className="divide-y divide-gray-200">
-            {applications.map((application) => (
-              <div key={application.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-full ${getStatusColor(application.status)}`}>
-                        {getStatusIcon(application.status)}
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">{application.propertyName}</h3>
-                        <p className="text-sm text-gray-600">Applicant: {application.applicantName}</p>
+        ) : (
+          offers.map((offer) => (
+            <div key={offer.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-6">
+                {/* Offer Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
+                      {offer.landlordAvatar ? (
+                        <img src={offer.landlordAvatar} alt={offer.landlordName} className="w-12 h-12 rounded-full" />
+                      ) : (
+                        <UserIcon className="h-6 w-6 text-gray-500" />
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{offer.landlordName}</h3>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500">
+                        <span className="flex items-center">
+                          <EnvelopeIcon className="h-4 w-4 mr-1" />
+                          {offer.landlordEmail}
+                        </span>
+                        <span className="flex items-center">
+                          <PhoneIcon className="h-4 w-4 mr-1" />
+                          {offer.landlordPhone}
+                        </span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">{application.amount}</p>
-                      <p className="text-xs text-gray-500">Submitted {application.submittedDate}</p>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
-                      {application.status}
-                    </div>
-                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                      <EyeIcon className="h-4 w-4" />
-                    </button>
+                  <div className="text-right">
+                    {getStatusBadge(offer.status)}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatDate(offer.createdAt)}
+                    </p>
                   </div>
                 </div>
+
+                {/* Property Info */}
+                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                  <h4 className="font-medium text-gray-900 mb-2">{offer.propertyName}</h4>
+                  <p className="text-sm text-gray-600 mb-2">{offer.propertyAddress}</p>
+                  <div className="flex items-center space-x-4 text-sm">
+                    <span className="text-gray-600">
+                      Listed: <span className="font-medium">{formatCurrency(offer.propertyPrice)}/month</span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* Offer Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                      <CurrencyDollarIcon className="h-4 w-4 mr-2" />
+                      Your Offer
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {formatCurrency(offer.offeredPrice)}/month
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {offer.offeredPrice < offer.propertyPrice ? 'Below asking' : 'At/Above asking'}
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      Lease Duration
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {offer.leaseDuration} months
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                      <CurrencyDollarIcon className="h-4 w-4 mr-2" />
+                      Payment Frequency
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {offer.paymentFrequency === 'full' ? 'Full Payment' : 'Monthly'}
+                    </div>
+                    {offer.paymentFrequency === 'monthly' && offer.paymentInterval && (
+                      <div className="text-xs text-gray-500">
+                        Every {offer.paymentInterval} month(s)
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                      <ClockIcon className="h-4 w-4 mr-2" />
+                      Move-in Date
+                    </div>
+                    <div className="font-semibold text-gray-900">
+                      {formatDate(offer.moveInDate)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Message */}
+                {offer.message && (
+                  <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <p className="text-sm text-gray-700">{offer.message}</p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                {offer.status === 'pending' && (
+                  <div className="flex items-center space-x-3 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => handleWithdrawOffer(offer.id)}
+                      className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      <XMarkIcon className="h-4 w-4 mr-2" />
+                      Withdraw Offer
+                    </button>
+                    <button className="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                      <EyeIcon className="h-4 w-4 mr-2" />
+                      View Property
+                    </button>
+                  </div>
+                )}
+
+                {/* Status-specific actions */}
+                {offer.status === 'accepted' && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <p className="text-sm text-green-600 font-medium">✓ Offer accepted! Contact the landlord to proceed.</p>
+                  </div>
+                )}
+
+                {offer.status === 'rejected' && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <p className="text-sm text-red-600 font-medium">✗ Offer was not accepted</p>
+                  </div>
+                )}
+
+                {offer.status === 'countered' && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <p className="text-sm text-blue-600 font-medium">↻ Landlord sent a counter offer</p>
+                    <button className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                      View Counter Offer
+                    </button>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

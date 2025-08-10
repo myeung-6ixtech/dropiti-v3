@@ -1,11 +1,63 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Update profile with display name
+      await updateProfile(user, {
+        displayName: name
+      });
+
+      // Redirect to sign in page
+      router.push("/auth/signin?message=Account created successfully! Please sign in.");
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      if (error.code === 'auth/email-already-in-use') {
+        setError("An account with this email already exists");
+      } else if (error.code === 'auth/weak-password') {
+        setError("Password is too weak");
+      } else {
+        setError("An error occurred during signup");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="auth-form-wrapper">
       <div className="auth-section-spacing">
@@ -20,66 +72,55 @@ export default function SignUpForm() {
             Create Account
           </h1>
           <p className="auth-subtitle">
-            Enter your details to create your account.
+            Sign up to start managing your properties.
           </p>
         </div>
         
-        <form className="auth-form">
-          <div className="auth-form-row">
-            {/* First Name */}
-            <div>
-              <label className="auth-label">
-                First name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="fname"
-                name="fname"
-                placeholder="Enter your first name"
-                className="auth-input"
-                required
-              />
-            </div>
-            {/* Last Name */}
-            <div>
-              <label className="auth-label">
-                Last name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="lname"
-                name="lname"
-                placeholder="Enter your last name"
-                className="auth-input"
-                required
-              />
-            </div>
+        {error && (
+          <div className="auth-error">
+            {error}
           </div>
-          
-          {/* Email */}
+        )}
+        
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div>
+            <label className="auth-label">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input 
+              type="text"
+              placeholder="Enter your full name" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="auth-input"
+              required
+            />
+          </div>
+
           <div>
             <label className="auth-label">
               Email address <span className="text-red-500">*</span>
             </label>
-            <input
+            <input 
               type="email"
-              id="email"
-              name="email"
-              placeholder="Enter your email"
+              placeholder="Enter your email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="auth-input"
               required
             />
           </div>
           
-          {/* Password */}
           <div>
             <label className="auth-label">
               Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <input
-                placeholder="Enter your password"
                 type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="auth-input-with-icon"
                 required
               />
@@ -92,28 +133,37 @@ export default function SignUpForm() {
               </button>
             </div>
           </div>
-          
-          {/* Checkbox */}
-          <div className="flex items-start gap-3">
-            <input
-              id="terms"
-              type="checkbox"
-              checked={isChecked}
-              onChange={(e) => setIsChecked(e.target.checked)}
-              className="auth-checkbox mt-0.5"
-            />
-            <label htmlFor="terms" className="auth-text">
-              By creating an account, you agree to our{" "}
-              <span className="auth-link">Terms and Conditions</span>{" "}
-              and{" "}
-              <span className="auth-link">Privacy Policy</span>
+
+          <div>
+            <label className="auth-label">
+              Confirm Password <span className="text-red-500">*</span>
             </label>
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="auth-input-with-icon"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="auth-input-icon"
+              >
+                {showConfirmPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
           
-          {/* Button */}
           <div>
-            <button type="submit" className="auth-button">
-              Create account
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="auth-button"
+            >
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
           </div>
         </form>

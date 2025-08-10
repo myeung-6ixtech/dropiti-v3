@@ -15,27 +15,23 @@ export default function SignUpPage() {
         <div className="auth-content-wrapper">
           <div className="max-w-md">
             <h2 className="auth-heading">
-              Join dropiti
+              Join Dropiti
             </h2>
             <p className="auth-description">
-              Create your account and start your journey in real estate. Whether you're looking to rent or list properties, we've got you covered.
+              Create your account and start managing your properties with our comprehensive real estate platform.
             </p>
             <div className="auth-content-spacing">
               <div className="auth-feature-item">
                 <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Create your profile</span>
+                <span className="auth-feature-text">List your properties</span>
               </div>
               <div className="auth-feature-item">
                 <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Browse properties</span>
+                <span className="auth-feature-text">Connect with tenants</span>
               </div>
               <div className="auth-feature-item">
                 <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Connect with landlords</span>
-              </div>
-              <div className="auth-feature-item">
-                <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Manage your listings</span>
+                <span className="auth-feature-text">Manage applications</span>
               </div>
             </div>
           </div>

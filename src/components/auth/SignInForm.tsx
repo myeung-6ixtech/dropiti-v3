@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,8 +10,23 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   
   const router = useRouter();
+  const { login } = useAuth();
+
+  // Check for success message from URL params
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const message = urlParams.get('message');
+      if (message) {
+        setSuccessMessage(message);
+        // Clear the message from URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,12 +34,12 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      // Mock authentication
-      if (email === 'demo@example.com' && password === 'password') {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await login(email, password);
+      
+      if (result.success) {
         router.push("/dashboard");
       } else {
-        setError("Invalid email or password");
+        setError(result.error || "Invalid email or password");
       }
     } catch (error) {
       setError("An unexpected error occurred");
@@ -49,6 +65,12 @@ export default function SignInForm() {
             Enter your email and password to sign in to your account.
           </p>
         </div>
+        
+        {successMessage && (
+          <div className="auth-success">
+            {successMessage}
+          </div>
+        )}
         
         {error && (
           <div className="auth-error">

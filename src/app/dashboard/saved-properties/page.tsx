@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { HeartIcon, EyeIcon, ShareIcon } from '@heroicons/react/24/outline';
+import { formatPropertyLocation } from '@/lib/utils';
 
 export default function SavedPropertiesPage() {
   const [savedProperties] = useState([
@@ -59,7 +60,7 @@ export default function SavedPropertiesPage() {
                   <h3 className="font-semibold text-gray-900">{property.name}</h3>
                   <span className="text-lg font-semibold text-blue-600">{property.price}</span>
                 </div>
-                <p className="text-sm text-gray-600 mb-3">{property.address}</p>
+                <p className="text-sm text-gray-600 mb-3">{formatPropertyLocation(property.address)}</p>
                 <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">
                   <span>{property.bedrooms} bed</span>
                   <span>{property.bathrooms} bath</span>
