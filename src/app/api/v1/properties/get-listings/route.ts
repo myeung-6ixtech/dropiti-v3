@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
     type PropertyResponse = {
       real_estate_property_listing: Array<{
         id: string;
+        property_uuid: string; // Add property_uuid field
         title: string;
         description: string;
         address: unknown;
@@ -88,6 +89,7 @@ export async function GET(request: NextRequest) {
     // Transform the data to match your frontend expectations
     const transformedProperties = typedData.real_estate_property_listing.map((property) => ({
       id: property.id,
+      property_uuid: property.property_uuid, // Add property_uuid for UUID-based navigation
       title: property.title,
       description: property.description,
       location: formatPropertyLocation(property.address),

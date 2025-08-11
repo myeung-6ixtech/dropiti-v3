@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 import Step1PropertyType from '@/components/add-property/Step1PropertyType';
 import Step2RentalSpace from '@/components/add-property/Step2RentalSpace';
 import Step3Address from '@/components/add-property/Step3Address';
@@ -10,6 +11,7 @@ import Step5Amenities from '@/components/add-property/Step5Amenities';
 import Step6Photos from '@/components/add-property/Step6Photos';
 import Step7RentalDetails from '@/components/add-property/Step7RentalDetails';
 import Step8Summary from '@/components/add-property/Step8Summary';
+import { propertiesAPI } from '@/lib/api-client';
 import { PropertyData } from '@/types';
 
 const steps = [
@@ -34,9 +36,13 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
   const [currentStep, setCurrentStep] = useState(1);
   const [propertyData, setPropertyData] = useState<PropertyData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const router = useRouter();
 
   const updatePropertyData = (data: Partial<PropertyData>) => {
     setPropertyData(prev => ({ ...prev, ...data }));
+    // Clear any previous submit errors when data changes
+    if (submitError) setSubmitError(null);
   };
 
   const nextStep = () => {
@@ -53,21 +59,66 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setSubmitError(null);
+    
     try {
-      // Here you would submit the property data to your API
+      // Validate required data
+      if (!isFormComplete()) {
+        setSubmitError('Please complete all required fields before submitting.');
+        return;
+      }
+
+      // For now, use a mock ownerId - in a real app, this would come from auth context
+      const ownerId = 'mock-owner-id-123'; // TODO: Get from auth context
+      
       console.log('Submitting property data:', propertyData);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call the API to create the property
+      const response = await propertiesAPI.createProperty(propertyData, ownerId);
       
-      // Success - redirect to properties list or dashboard
-      alert('Property added successfully!');
+      if (response.success) {
+        console.log('Property created successfully:', response.data);
+        
+        // Show success message
+        alert('Property added successfully!');
+        
+        // Redirect to properties list or dashboard
+        router.push('/dashboard/properties');
+      } else {
+        throw new Error(response.error || 'Failed to create property');
+      }
+      
     } catch (error) {
       console.error('Error adding property:', error);
-      alert('Error adding property. Please try again.');
+      
+      // Handle different types of errors
+      if (error instanceof Error) {
+        setSubmitError(error.message);
+      } else if (typeof error === 'string') {
+        setSubmitError(error);
+      } else {
+        setSubmitError('An unexpected error occurred. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const isFormComplete = (): boolean => {
+    // Check if all required steps are complete
+    return (
+      !!propertyData.propertyType &&
+      !!propertyData.residentialType &&
+      !!propertyData.rentalSpace &&
+      !!propertyData.address?.addressLine1 &&
+      !!propertyData.address?.district &&
+      propertyData.unitDetails?.bedrooms !== undefined &&
+      propertyData.unitDetails?.bathrooms !== undefined &&
+      !!propertyData.amenities?.length &&
+      !!propertyData.photos?.length &&
+      !!propertyData.rentalDetails?.listingName &&
+      !!propertyData.rentalDetails?.rentalPrice
+    );
   };
 
   const renderStep = () => {
@@ -110,7 +161,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
       case 7:
         return !!(propertyData.rentalDetails?.listingName && propertyData.rentalDetails?.rentalPrice);
       case 8:
-        return true;
+        return isFormComplete();
       default:
         return false;
     }
@@ -155,6 +206,22 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
           </div>
         </div>
       </div>
+
+      {/* Error Display */}
+      {submitError && (
+        <div className="bg-red-50 border-l-4 border-red-400 p-4 mx-6 mt-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{submitError}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Step Content */}
       <div className="flex-1 min-h-0 overflow-auto">

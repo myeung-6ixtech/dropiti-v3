@@ -46,6 +46,12 @@ export default function PropertyPricingCard({
   onChatWithLandlord
 }: PropertyPricingCardProps) {
 
+  // Fallback image URL for when no landlord avatar is available
+  const fallbackAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80";
+
+  // Get the landlord avatar or fallback
+  const landlordAvatar = landlord.avatar || fallbackAvatar;
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-HK', {
@@ -118,11 +124,16 @@ export default function PropertyPricingCard({
           <div className="flex items-start space-x-4 mb-4">
             <div className="relative">
               <Image
-                src={landlord.avatar}
+                src={landlordAvatar}
                 alt={landlord.name}
                 width={64}
                 height={64}
                 className="rounded-full object-cover"
+                onError={(e) => {
+                  // Fallback to default avatar if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.src = fallbackAvatar;
+                }}
               />
               {landlord.verified && (
                 <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">

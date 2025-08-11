@@ -6,18 +6,19 @@ import { MapPinIcon, HomeIcon, CurrencyDollarIcon } from '@heroicons/react/24/ou
 import Image from 'next/image';
 
 interface PropertyCardProps {
-  property: Property;
-  onViewDetails?: (id: string) => void;
+  property: Property & { property_uuid?: string };
+  onViewDetails?: (uuid: string) => void;
 }
 
 export default function PropertyCard({ property, onViewDetails }: PropertyCardProps) {
   const router = useRouter();
 
   const handleViewDetails = () => {
+    const propertyUuid = property.property_uuid || property.id;
     if (onViewDetails) {
-      onViewDetails(property.id);
+      onViewDetails(propertyUuid);
     } else {
-      router.push(`/property/${property.id}`);
+      router.push(`/property/${propertyUuid}`);
     }
   };
 

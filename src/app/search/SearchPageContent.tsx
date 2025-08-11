@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { propertiesAPI } from '@/lib/api-client';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import Footer from '@/components/common/Footer';
@@ -10,6 +10,7 @@ import { Property } from '@/types';
 
 export default function SearchPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
@@ -169,7 +170,7 @@ export default function SearchPageContent() {
                     property={property}
                     onViewDetails={(id) => {
                       // Handle navigation to property detail page
-                      console.log('Navigate to property:', id);
+                      router.push(`/property/${id}`);
                     }}
                   />
                 ))}

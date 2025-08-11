@@ -1,0 +1,8 @@
+{
+  "name": "@dropiti/styles",
+  "version": "1.0.0",
+  "description": "Dropiti Design System - Centralized styling and design tokens",
+  "private": true,
+  "main": "index.css",
+  "types": "design-system.ts"
+}
