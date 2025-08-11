@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { propertiesAPI } from '@/lib/api-client';
+import { propertiesAPI, offersAPI } from '@/lib/api-client';
+import { useAuth } from '@/context/AuthContext';
 import { 
   MapPinIcon, 
   HomeIcon, 
@@ -83,6 +84,7 @@ export default function PropertyDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
+  const { user: authUser } = useAuth(); // Get user from context
 
   // Function to fetch landlord details using owner_id
   const fetchLandlordDetails = async (ownerId: string) => {
@@ -193,16 +195,53 @@ export default function PropertyDetailPage() {
     }
   };
 
-  const handleOfferSubmit = (offerData: {
+  const handleOfferSubmit = async (offerData: {
     rentalPrice: number;
     leaseDuration: number;
     paymentFrequency: string;
     moveInDate: string;
   }) => {
-    // Handle the offer submission here
-    console.log('Offer submitted:', offerData);
-    // You can add API call here to submit the offer
-    alert(`Offer submitted successfully!\nRental Price: ${offerData.rentalPrice}\nLease Duration: ${offerData.leaseDuration} months\nPayment Frequency: ${offerData.paymentFrequency}\nMove-in Date: ${offerData.moveInDate}`);
+    try {
+      // Check if user is authenticated
+      if (!authUser?.id) {
+        alert('You must be logged in to create an offer');
+        return;
+      }
+
+      // Check if we have property and landlord data
+      if (!propertyData?.property?.property_uuid || !propertyData?.landlord?.firebase_uid) {
+        alert('Unable to create offer: Missing property or landlord information');
+        return;
+      }
+
+      console.log('Creating offer with data:', offerData);
+      console.log('Property ID:', propertyData.property.property_uuid);
+      console.log('Landlord Firebase UID:', propertyData.landlord.firebase_uid);
+
+      // Call the create-offer API
+      const response = await offersAPI.createOffer({
+        propertyId: propertyData.property.property_uuid,
+        initiatorFirebaseUid: authUser.id,
+        recipientFirebaseUid: propertyData.landlord.firebase_uid,
+        proposingRentPrice: offerData.rentalPrice,
+        numLeasingMonths: offerData.leaseDuration,
+        paymentFrequency: offerData.paymentFrequency,
+        moveInDate: offerData.moveInDate,
+        currency: 'HKD', // Default to HKD
+      });
+
+      if (response.success) {
+        alert(`Offer submitted successfully!\nOffer ID: ${response.data.offer_key}\nRental Price: ${offerData.rentalPrice} HKD\nLease Duration: ${offerData.leaseDuration} months\nPayment Frequency: ${offerData.paymentFrequency}\nMove-in Date: ${offerData.moveInDate}`);
+        
+        // Close the modal
+        setIsCreateOfferModalOpen(false);
+      } else {
+        alert(`Failed to submit offer: ${response.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error creating offer:', error);
+      alert(`Error creating offer: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   };
 
   const getAmenityIcon = (amenity: string) => {
@@ -546,8 +585,9 @@ export default function PropertyDetailPage() {
       <CreateOfferModal
         isOpen={isCreateOfferModalOpen}
         onClose={() => setIsCreateOfferModalOpen(false)}
-        propertyId={property.id}
+        propertyId={property.property_uuid}
         currentPrice={property.price}
+        recipientFirebaseUid={landlord?.firebase_uid}
         onOfferSubmit={handleOfferSubmit}
       />
     </div>
