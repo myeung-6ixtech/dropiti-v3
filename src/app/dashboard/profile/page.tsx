@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
+import Image from 'next/image';
+import { getSafeProfileImage } from '@/lib/utils';
 import { 
   UserIcon,
   GlobeAltIcon,
@@ -10,13 +12,14 @@ import {
   BriefcaseIcon,
   HeartIcon,
   MapPinIcon,
-  EyeIcon
+  EyeIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages, UpdateUserInput } from '@/types';
 
 interface UserProfile {
-  name: string;
+  displayName: string;
   avatar: string;
   email: string;
   location?: string;
@@ -30,6 +33,7 @@ interface UserProfile {
   education?: string;
   occupation?: string;
   maritalStatus?: string;
+  phoneNumber?: string;
   stats: {
     responseRate: number;
     avgResponseTime: string;
@@ -41,7 +45,7 @@ interface UserProfile {
 export default function ProfilePage() {
   const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
-    name: 'Sarah Johnson',
+    displayName: 'Sarah Johnson',
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     email: 'sarah.johnson@email.com',
     location: 'Central, Hong Kong',
@@ -55,6 +59,7 @@ export default function ProfilePage() {
     education: 'Bachelors',
     occupation: 'Business Owner',
     maritalStatus: 'Single',
+    phoneNumber: '123-456-7890',
     stats: {
       responseRate: 98,
       avgResponseTime: '1h',
@@ -84,8 +89,14 @@ export default function ProfilePage() {
           
           if (response.success && response.data) {
             const userData = response.data;
+            
+            // Debug: Log the languages field to see what we're getting
+            console.log('API languages field:', userData.languages);
+            console.log('API languages type:', typeof userData.languages);
+            console.log('API languages isArray:', Array.isArray(userData.languages));
+            
             const newProfile: UserProfile = {
-              name: userData.display_name || 'Unknown User',
+              displayName: userData.display_name || 'Unknown User',
               avatar: userData.photo_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
               email: userData.email || '',
               location: userData.location || '',
@@ -94,11 +105,26 @@ export default function ProfilePage() {
               rating: userData.rating || 0,
               reviewCount: userData.review_count || 0,
               about: userData.about || '',
-              languages: userData.languages || [],
+              languages: (() => {
+                // Handle languages field - it might be a JSON string, array, or null
+                if (!userData.languages) return [];
+                if (Array.isArray(userData.languages)) return userData.languages;
+                if (typeof userData.languages === 'string') {
+                  try {
+                    const parsed = JSON.parse(userData.languages);
+                    return Array.isArray(parsed) ? parsed : [];
+                  } catch {
+                    // If parsing fails, treat as comma-separated string
+                    return userData.languages.split(',').map((lang: string) => lang.trim()).filter((lang: string) => lang);
+                  }
+                }
+                return [];
+              })(),
               responseTime: userData.response_time || 'Unknown',
               education: userData.education || '',
               occupation: userData.occupation || '',
               maritalStatus: userData.marital_status || '',
+              phoneNumber: userData.phone_number || '',
               stats: {
                 responseRate: userData.response_rate || 0,
                 avgResponseTime: userData.avg_response_time || 'Unknown',
@@ -149,24 +175,35 @@ export default function ProfilePage() {
       return;
     }
 
+    // Validate required fields
+    if (!tempProfile.displayName.trim()) {
+      setSaveMessage({
+        type: 'error',
+        message: 'Display Name is required'
+      });
+      return;
+    }
+
+    if (!tempProfile.about?.trim()) {
+      setSaveMessage({
+        type: 'error',
+        message: 'About section is required'
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       setSaveMessage(null);
 
-      // First get the current user to get the user ID
-      // For now, we'll use the auth user ID directly since we don't have firebase_uid
-      // In a real implementation, you'd need to link NextAuth with your user database
-      const userResponse = await usersAPI.getUserByFirebaseUid(authUser.id);
+      console.log('Saving profile for Firebase UID:', authUser.id);
+
+      // Since the real_estate_user table uses firebase_uid as the primary key,
+      // we can update directly using the firebase_uid from the auth context
       
-      if (!userResponse.success || !userResponse.data) {
-        throw new Error('Failed to get user data');
-      }
-
-      const userId = userResponse.data.id;
-
       // Prepare updates for the API
       const updates: UpdateUserInput = {
-        display_name: tempProfile.name,
+        display_name: tempProfile.displayName,
         photo_url: tempProfile.avatar,
         location: tempProfile.location,
         about: tempProfile.about,
@@ -180,11 +217,15 @@ export default function ProfilePage() {
         response_rate: tempProfile.stats.responseRate,
         avg_response_time: tempProfile.stats.avgResponseTime,
         total_properties: tempProfile.stats.totalProperties,
-        total_guests: tempProfile.stats.totalGuests
+        total_guests: tempProfile.stats.totalGuests,
+        phone_number: tempProfile.phoneNumber
       };
 
-      // Call the update API
-      const updateResponse = await usersAPI.updateUser(userId, updates);
+      console.log('Updating profile with data:', updates);
+      console.log('Languages field type:', typeof updates.languages, 'Value:', updates.languages);
+
+      // Call the update API using the firebase_uid directly
+      const updateResponse = await usersAPI.updateUser(authUser.id, updates);
 
       if (updateResponse.success) {
         setProfile(tempProfile);
@@ -216,6 +257,21 @@ export default function ProfilePage() {
     setSaveMessage(null);
   };
 
+  // Map UserProfile to DropitiPassport2 format
+  const mapToPassportFormat = (profile: UserProfile) => ({
+    displayName: profile.displayName,
+    avatar: profile.avatar,
+    email: profile.email,
+    location: profile.location,
+    joinDate: profile.joinDate,
+    verified: profile.verified,
+    rating: profile.rating,
+    reviewCount: profile.reviewCount,
+    about: profile.about,
+    languages: profile.languages,
+    stats: profile.stats
+  });
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
@@ -228,7 +284,9 @@ export default function ProfilePage() {
         <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span className="text-blue-800">Loading profile data...</span>
+            <span className="text-blue-800">
+              {isEditing ? 'Saving profile changes...' : 'Loading profile data...'}
+            </span>
           </div>
         </div>
       )}
@@ -252,6 +310,31 @@ export default function ProfilePage() {
         </div>
       )}
 
+      {/* Profile Status Banner */}
+      <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className={`w-3 h-3 rounded-full ${profile.verified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-900">
+                Profile Status: {profile.verified ? 'Verified' : 'Unverified'}
+              </h3>
+              <p className="text-xs text-gray-500">
+                {profile.verified 
+                  ? 'Your profile is verified and visible to all users' 
+                  : 'Complete your profile to increase visibility and trust'
+                }
+              </p>
+            </div>
+          </div>
+          {!profile.verified && (
+            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+              Learn More
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Dropiti Passport Display - Above the form */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -265,7 +348,7 @@ export default function ProfilePage() {
           This is how your Dropiti Passport will appear to others. The information you fill out below will be reflected here in real-time.
         </p>
         <div className="bg-gray-50 rounded-lg p-4">
-          <DropitiPassport2 user={tempProfile} />
+          <DropitiPassport2 user={mapToPassportFormat(tempProfile)} />
         </div>
       </div>
 
@@ -316,6 +399,57 @@ export default function ProfilePage() {
         </div>
 
         <div className="space-y-6">
+          {/* Display Name Field */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="flex items-center">
+                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                Display Name
+              </span>
+            </label>
+            <input
+              type="text"
+              value={tempProfile.displayName}
+              onChange={(e) => handleInputChange('displayName', e.target.value)}
+              disabled={!isEditing}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              placeholder="Enter your display name"
+            />
+          </div>
+
+          {/* Profile Photo */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="flex items-center">
+                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                Profile Photo
+              </span>
+            </label>
+            <div className="flex items-center space-x-4">
+              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
+                <Image
+                  src={getSafeProfileImage(tempProfile.avatar, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80')}
+                  alt="Profile"
+                  width={80}
+                  height={80}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {isEditing && (
+                <div>
+                  <input
+                    type="text"
+                    value={tempProfile.avatar || ''}
+                    onChange={(e) => handleInputChange('avatar', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Enter image URL"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter a valid image URL for your profile photo</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* About Yourself */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -329,10 +463,16 @@ export default function ProfilePage() {
               onChange={(e) => handleInputChange('about', e.target.value)}
               disabled={!isEditing}
               rows={4}
+              maxLength={500}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
               placeholder="Share a bit about yourself, your interests, and what makes you unique..."
             />
-            <p className="text-xs text-gray-500 mt-1">This will be displayed on your public profile</p>
+            <div className="flex justify-between items-center mt-1">
+              <p className="text-xs text-gray-500">This will be displayed on your public profile</p>
+              <p className="text-xs text-gray-500">
+                {tempProfile.about?.length || 0}/500 characters
+              </p>
+            </div>
           </div>
 
           {/* Languages */}
@@ -429,6 +569,48 @@ export default function ProfilePage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Phone Number */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="flex items-center">
+                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                Phone Number
+              </span>
+            </label>
+            <input
+              type="text"
+              value={tempProfile.phoneNumber || ''}
+              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+              disabled={!isEditing}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              placeholder="Enter your phone number"
+            />
+          </div>
+
+          {/* Response Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <span className="flex items-center">
+                <ClockIcon className="h-4 w-4 mr-2 text-blue-600" />
+                Typical Response Time
+              </span>
+            </label>
+            <select
+              value={tempProfile.responseTime || ''}
+              onChange={(e) => handleInputChange('responseTime', e.target.value)}
+              disabled={!isEditing}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+            >
+              <option value="">Select response time</option>
+              <option value="Within 1 hour">Within 1 hour</option>
+              <option value="Within 2 hours">Within 2 hours</option>
+              <option value="Within 4 hours">Within 4 hours</option>
+              <option value="Within 24 hours">Within 24 hours</option>
+              <option value="Within 48 hours">Within 48 hours</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">How quickly do you typically respond to messages?</p>
           </div>
 
           {/* Location */}

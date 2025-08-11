@@ -4,6 +4,7 @@ import { executeQuery } from '@/app/api/graphql/serverClient';
 const GET_USER_BY_FIREBASE_UID_QUERY = `
   query GetUserByFirebaseUid($firebase_uid: String!) {
     real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
+      uuid
       firebase_uid
       display_name
       email
@@ -51,6 +52,7 @@ const TEST_QUERY = `
 const GET_USER_BY_ID_QUERY = `
   query GetUserById($firebase_uid: String!) {
     real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
+      uuid
       firebase_uid
       display_name
       email
@@ -136,6 +138,7 @@ export async function GET(request: NextRequest) {
     // Type assertion for the response data
     const typedData = data as {
       real_estate_user?: Array<{
+        uuid: string;
         firebase_uid: string;
         display_name: string;
         email: string;

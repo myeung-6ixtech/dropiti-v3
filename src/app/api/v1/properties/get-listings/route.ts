@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const maxPrice = searchParams.get('maxPrice');
   const bedrooms = searchParams.get('bedrooms');
   const type = searchParams.get('type');
+  const landlordFirebaseUid = searchParams.get('landlord_firebase_uid'); // Add landlord filter
   
   try {
 
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
       maxPrice?: number;
       bedrooms?: number;
       type?: string;
+      landlordFirebaseUid?: string; // Add landlord filter to filters
     } = {};
     
     if (location) {
@@ -41,6 +43,10 @@ export async function GET(request: NextRequest) {
     
     if (type) {
       filters.type = type;
+    }
+
+    if (landlordFirebaseUid) {
+      filters.landlordFirebaseUid = landlordFirebaseUid; // Add landlord filter
     }
 
     // Use PropertyService instead of direct GraphQL query
@@ -122,8 +128,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Get properties error:', error);
-    
+    console.error('Get properties error:', error); 
           // For development, return mock data if Hasura is not configured
       if (!process.env.HASURA_ENDPOINT) {
         console.log('Hasura not configured, returning mock data');

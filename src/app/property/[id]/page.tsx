@@ -31,6 +31,7 @@ import {
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import PropertyPricingCard from '@/components/common/PropertyPricingCard';
+import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
 
 interface PropertyData {
   id: string;
@@ -56,6 +57,7 @@ interface PropertyData {
 
 interface LandlordData {
   id: string;
+  uuid: string; // Add uuid for navigation
   firebase_uid: string;
   name: string;
   email: string;
@@ -82,6 +84,39 @@ export default function PropertyDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
 
+  // Function to fetch landlord details using owner_id
+  const fetchLandlordDetails = async (ownerId: string) => {
+    try {
+      console.log('Fetching landlord details for owner_id:', ownerId);
+      const landlordResponse = await usersAPI.getUserByFirebaseUid(ownerId);
+      
+      if (landlordResponse.success && landlordResponse.data) {
+        console.log('Landlord details fetched successfully:', landlordResponse.data);
+        return {
+          id: landlordResponse.data.id,
+          uuid: landlordResponse.data.uuid, // Add uuid for navigation
+          firebase_uid: landlordResponse.data.firebase_uid,
+          name: landlordResponse.data.display_name || 'Unknown Landlord',
+          email: landlordResponse.data.email || '',
+          avatar: landlordResponse.data.photo_url || '',
+          verified: landlordResponse.data.verified || false,
+          rating: landlordResponse.data.rating || 0,
+          review_count: landlordResponse.data.review_count || 0,
+          response_time: landlordResponse.data.response_time || 'Unknown',
+          response_rate: landlordResponse.data.response_rate || 98,
+          total_properties: landlordResponse.data.total_properties || 1,
+          total_guests: landlordResponse.data.total_guests || 0,
+        };
+      } else {
+        console.log('Failed to fetch landlord details:', landlordResponse.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching landlord details:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const loadProperty = async () => {
       if (params.id) {
@@ -92,9 +127,46 @@ export default function PropertyDetailPage() {
           const response = await propertiesAPI.getPropertyByUuid(params.id as string);
           
           if (response.success && response.data) {
+            console.log('=== PROPERTY DATA DEBUG ===');
+            console.log('Full API response:', response);
             console.log('Property data received:', response.data);
-            console.log('Amenities:', response.data.property.amenities);
-            setPropertyData(response.data);
+            console.log('Property object keys:', Object.keys(response.data.property));
+            console.log('Property object:', response.data.property);
+            
+            // Check for landlord_firebase_uid specifically
+            console.log('=== LANDLORD FIREBASE UID CHECK ===');
+            console.log('Property owner_id:', response.data.property.owner_id);
+            console.log('Property has owner_id:', !!response.data.property.owner_id);
+            console.log('Property owner_id type:', typeof response.data.property.owner_id);
+            
+            // Fetch landlord details if we have an owner_id
+            let landlordData = null;
+            if (response.data.property.owner_id) {
+              console.log('=== FETCHING LANDLORD DETAILS ===');
+              landlordData = await fetchLandlordDetails(response.data.property.owner_id);
+              console.log('Landlord data fetched:', landlordData);
+            }
+            
+            // Combine property data with landlord data
+            const combinedData = {
+              property: response.data.property,
+              landlord: landlordData
+            };
+            
+            console.log('=== LANDLORD DATA CHECK ===');
+            console.log('Combined data:', combinedData);
+            console.log('Landlord data:', combinedData.landlord);
+            console.log('Landlord data type:', typeof combinedData.landlord);
+            console.log('Landlord is null:', combinedData.landlord === null);
+            
+            if (combinedData.landlord) {
+              console.log('Landlord object keys:', Object.keys(combinedData.landlord));
+              console.log('Landlord firebase_uid:', combinedData.landlord.firebase_uid);
+            }
+            
+            console.log('=== END DEBUG ===');
+            
+            setPropertyData(combinedData);
           } else {
             setError(response.error || 'Failed to load property');
           }
@@ -434,28 +506,36 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Right Column - Pricing and Actions */}
-          <PropertyPricingCard
-            price={property.price}
-            deposit={0} // Assuming no deposit for now, as it's not in the mock data
-            availableDate={property.available_date || null}
-            minimumLease={property.minimum_lease || 12}
-            landlord={{
-              id: landlord?.id || '',
-              name: landlord?.name || 'Unknown Landlord',
-              avatar: landlord?.avatar || '',
-              rating: landlord?.rating || 0,
-              reviewCount: landlord?.review_count || 0,
-              responseTime: landlord?.response_time || 'Unknown',
-              verified: landlord?.verified || false,
-            }}
-            details={{
-              type: (property.details?.type as string) || 'Unknown',
-              furnished: (property.details?.furnished as string) || 'Unknown',
-              petsAllowed: (property.details?.petsAllowed as boolean) || false
-            }}
-            onCreateOffer={handleCreateOffer}
-            onChatWithLandlord={handleChatWithLandlord}
-          />
+          {(() => {
+            console.log('Rendering PropertyPricingCard with landlord:', landlord);
+            return (
+              <PropertyPricingCard
+                price={property.price}
+                deposit={0} // Assuming no deposit for now, as it's not in the mock data
+                availableDate={property.available_date || null}
+                minimumLease={property.minimum_lease || 12}
+                landlord={{
+                  id: landlord?.id || '',
+                  uuid: landlord?.uuid || '', // Add uuid for navigation
+                  name: landlord?.name || 'Unknown Landlord',
+                  avatar: landlord?.avatar || '',
+                  rating: landlord?.rating || 0,
+                  reviewCount: landlord?.review_count || 0,
+                  responseTime: landlord?.response_time || 'Unknown',
+                  verified: landlord?.verified || false,
+                  responseRate: landlord?.response_rate || 98,
+                  totalProperties: landlord?.total_properties || 5,
+                }}
+                details={{
+                  type: (property.details?.type as string) || 'Unknown',
+                  furnished: (property.details?.furnished as string) || 'Unknown',
+                  petsAllowed: (property.details?.petsAllowed as boolean) || false
+                }}
+                onCreateOffer={handleCreateOffer}
+                onChatWithLandlord={handleChatWithLandlord}
+              />
+            );
+          })()}
         </div>
       </div>
 

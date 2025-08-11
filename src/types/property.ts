@@ -18,6 +18,7 @@ export interface PropertyData {
     district?: string;
     state?: string;
     country?: string;
+    showSpecificLocation?: boolean;
   };
   
   // Step 4
@@ -43,6 +44,11 @@ export interface PropertyData {
     rentalPrice?: number;
     availableDate?: Date | string | null;
   };
+}
+
+// Property data for API submission (with photo URLs instead of File objects)
+export interface PropertyDataForAPI extends Omit<PropertyData, 'photos'> {
+  photos?: string[]; // S3 URLs instead of File objects
 }
 
 // Step Component Props Interfaces
@@ -89,6 +95,7 @@ export interface Step8SummaryProps extends StepComponentProps {
 // Property Types for API and Database
 export interface Property {
   id: string;
+  property_uuid?: string; // Add property_uuid for UUID-based navigation
   title: string;
   description: string;
   location: string;

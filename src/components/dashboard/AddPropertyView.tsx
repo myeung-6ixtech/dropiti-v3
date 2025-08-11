@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 import Step1PropertyType from '@/components/add-property/Step1PropertyType';
 import Step2RentalSpace from '@/components/add-property/Step2RentalSpace';
 import Step3Address from '@/components/add-property/Step3Address';
@@ -12,7 +13,8 @@ import Step6Photos from '@/components/add-property/Step6Photos';
 import Step7RentalDetails from '@/components/add-property/Step7RentalDetails';
 import Step8Summary from '@/components/add-property/Step8Summary';
 import { propertiesAPI } from '@/lib/api-client';
-import { PropertyData } from '@/types';
+import { uploadService } from '@/lib/upload-client';
+import { PropertyData, PropertyDataForAPI } from '@/types';
 
 const steps = [
   { id: 1, title: 'Property Type', description: 'Select your property type' },
@@ -30,6 +32,7 @@ interface AddPropertyViewProps {
 }
 
 export default function AddPropertyView({ userType = 'landlord' }: AddPropertyViewProps) {
+  const { user: authUser, isAuthenticated } = useAuth();
   // TODO: userType is currently unused but required by the interface
   // This will be used in future features for tenant vs landlord specific flows
   console.log('Current user type:', userType); // Temporary usage to satisfy linter
@@ -62,19 +65,52 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
     setSubmitError(null);
     
     try {
+      // Check if user is authenticated
+      if (!isAuthenticated || !authUser?.id) {
+        setSubmitError('You must be logged in to create a property listing.');
+        return;
+      }
+
       // Validate required data
       if (!isFormComplete()) {
         setSubmitError('Please complete all required fields before submitting.');
         return;
       }
 
-      // For now, use a mock ownerId - in a real app, this would come from auth context
-      const ownerId = 'mock-owner-id-123'; // TODO: Get from auth context
+      // Upload photos to S3 if they exist
+      let photoUrls: string[] = [];
+      if (propertyData.photos && propertyData.photos.length > 0) {
+        try {
+          console.log('Uploading photos to S3...');
+          const uploadResponse = await uploadService.uploadPropertyPhotos(propertyData.photos);
+          
+          if (uploadResponse.success && uploadResponse.data?.uploadedFiles) {
+            photoUrls = uploadResponse.data.uploadedFiles.map(file => file.url);
+            console.log('Photos uploaded successfully:', photoUrls);
+          } else {
+            throw new Error(uploadResponse.error || 'Failed to upload photos');
+          }
+        } catch (uploadError) {
+          console.error('Error uploading photos:', uploadError);
+          setSubmitError('Failed to upload photos. Please try again.');
+          return;
+        }
+      }
+
+      // Use the actual authenticated user's ID
+      const ownerId = authUser.id;
       
-      console.log('Submitting property data:', propertyData);
+      // Prepare property data with photo URLs
+      const propertyDataWithPhotos: PropertyDataForAPI = {
+        ...propertyData,
+        photos: photoUrls, // Replace File objects with S3 URLs
+      };
+      
+      console.log('Submitting property data:', propertyDataWithPhotos);
+      console.log('Using owner ID:', ownerId);
       
       // Call the API to create the property
-      const response = await propertiesAPI.createProperty(propertyData, ownerId);
+      const response = await propertiesAPI.createProperty(propertyDataWithPhotos, ownerId);
       
       if (response.success) {
         console.log('Property created successfully:', response.data);

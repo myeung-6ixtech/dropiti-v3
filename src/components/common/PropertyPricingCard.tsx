@@ -12,12 +12,15 @@ import {
 
 interface Landlord {
   id: string;
+  uuid: string; // Add uuid for navigation to user profile
   name: string;
   avatar: string;
   rating: number;
   reviewCount: number;
   responseTime: string;
   verified: boolean;
+  responseRate?: number; // Added for dynamic data
+  totalProperties?: number; // Added for dynamic data
 }
 
 interface PropertyPricingCardProps {
@@ -144,7 +147,7 @@ export default function PropertyPricingCard({
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
                 <Link 
-                  href={`/user/${landlord.id}`}
+                  href={`/user/${landlord.uuid}`}
                   className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
                 >
                   {landlord.name}
@@ -189,15 +192,15 @@ export default function PropertyPricingCard({
           <div className="pt-4 border-t border-gray-200">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-lg font-semibold text-gray-900">98%</div>
+                <div className="text-lg font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
                 <div className="text-xs text-gray-500">Response rate</div>
               </div>
               <div>
-                <div className="text-lg font-semibold text-gray-900">1h</div>
+                <div className="text-lg font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
                 <div className="text-xs text-gray-500">Avg. response</div>
               </div>
               <div>
-                <div className="text-lg font-semibold text-gray-900">5</div>
+                <div className="text-lg font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
                 <div className="text-xs text-gray-500">Properties</div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MapPinIcon } from '@heroicons/react/24/outline';
+import { MapPinIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 interface Step3AddressProps {
   data?: {
@@ -16,18 +16,22 @@ interface Step3AddressProps {
       state?: string;
       country?: string;
     };
+    showSpecificLocation?: boolean;
   };
-  onUpdate: (data: { address?: {
-    unit?: string;
-    floor?: string;
-    block?: string;
-    buildingName?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    district?: string;
-    state?: string;
-    country?: string;
-  } }) => void;
+  onUpdate: (data: { 
+    address?: {
+      unit?: string;
+      floor?: string;
+      block?: string;
+      buildingName?: string;
+      addressLine1?: string;
+      addressLine2?: string;
+      district?: string;
+      state?: string;
+      country?: string;
+    };
+    showSpecificLocation?: boolean;
+  }) => void;
 }
 
 export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
@@ -42,11 +46,18 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
     state: '',
     country: '',
   });
+  
+  const [showSpecificLocation, setShowSpecificLocation] = useState(data?.showSpecificLocation ?? false);
 
   const handleInputChange = (field: string, value: string) => {
     const updatedAddress = { ...address, [field]: value };
     setAddress(updatedAddress);
-    onUpdate({ address: updatedAddress });
+    onUpdate({ address: updatedAddress, showSpecificLocation });
+  };
+
+  const handleToggleSpecificLocation = (value: boolean) => {
+    setShowSpecificLocation(value);
+    onUpdate({ address, showSpecificLocation: value });
   };
 
   const districts = [
@@ -231,7 +242,43 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
             </div>
           </div>
         </div>
+
+        {/* Show Specific Location Toggle */}
+        <div className="mt-8 pt-6 border-t border-gray-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              {showSpecificLocation ? (
+                <EyeIcon className="h-5 w-5 text-blue-600" />
+              ) : (
+                <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+              )}
+              <div>
+                <h4 className="font-medium text-gray-900">Show Specific Location</h4>
+                <p className="text-sm text-gray-600">
+                  {showSpecificLocation 
+                    ? 'Tenants will see the exact address details' 
+                    : 'Tenants will only see the general area/district'
+                  }
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleToggleSpecificLocation(!showSpecificLocation)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                showSpecificLocation ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  showSpecificLocation ? 'translate-x-6' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
       </div>
+      
       {/* Address Preview */}
       {(address.addressLine1 || address.buildingName) && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
@@ -240,6 +287,15 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
             {address.unit && <div>Unit {address.unit}, Floor {address.floor}, Block {address.block} {address.buildingName}</div>}
             {address.addressLine2 && <div>{address.addressLine2}</div>}
             {address.district && <div>District: {address.district}, State: {address.state}, Country: {address.country}</div>}
+          </div>
+          <div className="mt-2 pt-2 border-t border-gray-200">
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              showSpecificLocation 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              {showSpecificLocation ? 'Specific location will be shown' : 'Only general area will be shown'}
+            </span>
           </div>
         </div>
       )}

@@ -16,6 +16,9 @@ import {
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import Image from 'next/image';
+import { getSafeProfileImage } from '@/lib/utils';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -24,16 +27,19 @@ interface DashboardLayoutProps {
 type ViewType = 'tenant' | 'landlord';
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [activeView, setActiveView] = useState<ViewType>('tenant');
+  const { user: authUser, isAuthenticated, isLoading } = useAuth();
+  const [activeView, setActiveView] = useState<ViewType>('landlord');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   
-  const [user] = useState({
-    name: 'John Doe',
-    email: 'demo@example.com',
-    role: 'tenant' as 'tenant' | 'landlord',
-  });
+  // Use actual user data from auth context
+  const user = {
+    name: authUser?.name || 'User',
+    email: authUser?.email || 'user@example.com',
+    role: activeView as 'tenant' | 'landlord',
+    avatar: authUser?.avatar
+  };
 
   // Check if we're on mobile
   useEffect(() => {
@@ -52,6 +58,37 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const handleViewChange = (newView: ViewType) => {
     setActiveView(newView);
   };
+
+  // Show loading state while auth is loading
+  if (isLoading) {
+    return (
+      <div className="dashboard-container">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <div className="dashboard-container">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+            <p className="text-gray-600 mb-4">Please sign in to access the dashboard.</p>
+            <Link
+              href="/auth/signin"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const tenantNavigation = [
     { name: 'Dashboard', icon: HomeIcon, href: '/dashboard', current: pathname === '/dashboard' },
@@ -118,7 +155,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <div className="dashboard-user-avatar">
-                  <UserIcon className="h-6 w-6 text-white" />
+                  {user.avatar ? (
+                    <Image
+                      src={getSafeProfileImage(user.avatar, '/images/default-avatar.png')}
+                      alt={user.name}
+                      width={24}
+                      height={24}
+                      className="h-6 w-6 rounded-full object-cover"
+                    />
+                  ) : (
+                    <UserIcon className="h-6 w-6 text-white" />
+                  )}
                 </div>
               </div>
               <div className="dashboard-user-info">

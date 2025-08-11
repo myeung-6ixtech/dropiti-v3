@@ -1,6 +1,5 @@
 import axios from 'axios';
-import type { PropertyData, CreateUserInput, User } from '@/types';
-import { propertyPhotoService } from './file-upload';
+import { PropertyDataForAPI, CreateUserInput, User } from '@/types';
 
 // Base API configuration
 const apiClient = axios.create({
@@ -38,7 +37,7 @@ apiClient.interceptors.response.use(
 );
 
 // Helper function to transform PropertyData to API format
-const transformPropertyData = async (propertyData: PropertyData, ownerId: string) => {
+const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: string) => {
   // Build location string from address components
   const addressParts = [];
   if (propertyData.address?.buildingName) addressParts.push(propertyData.address.buildingName);
@@ -68,17 +67,11 @@ const transformPropertyData = async (propertyData: PropertyData, ownerId: string
   // Handle photo uploads
   let imageUrl = '';
   if (propertyData.photos && propertyData.photos.length > 0) {
-    try {
-      // Upload photos and get URLs
-      const photoUrls = await propertyPhotoService.uploadPropertyPhotos(propertyData.photos);
-      imageUrl = photoUrls[0] || ''; // Use first photo as main image
-      
-      // Store all photo URLs in details for future use
-      details.photoUrls = photoUrls;
-    } catch (error) {
-      console.error('Failed to upload photos:', error);
-      // Continue without photos for now
-    }
+    // Photos are already uploaded to S3, use the first one as main image
+    imageUrl = propertyData.photos[0] || '';
+    
+    // Store all photo URLs in details for future use
+    details.photoUrls = propertyData.photos;
   }
 
   return {
@@ -111,6 +104,7 @@ export const propertiesAPI = {
     maxPrice?: number;
     bedrooms?: number;
     type?: string;
+    landlord_firebase_uid?: string; // Add landlord filter parameter
   }) => {
     const response = await apiClient.get('/properties/get-listings', { params });
     return response.data;
@@ -133,7 +127,7 @@ export const propertiesAPI = {
   },
 
   // Create a new property
-  createProperty: async (propertyData: PropertyData, ownerId: string) => {
+  createProperty: async (propertyData: PropertyDataForAPI, ownerId: string) => {
     const transformedData = await transformPropertyData(propertyData, ownerId);
     const response = await apiClient.post('/properties/create-property', transformedData);
     return response.data;
@@ -201,6 +195,26 @@ export const usersAPI = {
       return response.data;
     } catch (error) {
       console.error('Get user by ID error:', error);
+      throw error;
+    }
+  },
+
+  // Get user by UUID
+  getUserByUuid: async (userUuid: string) => {
+    try {
+      console.log('API Client: Fetching user by UUID:', userUuid);
+      const response = await apiClient.get('/users/get-user-by-uuid', { 
+        params: { uuid: userUuid } 
+      });
+      console.log('API Client: Response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Get user by UUID error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
       throw error;
     }
   },

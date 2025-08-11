@@ -90,7 +90,18 @@ export async function PUT(request: NextRequest) {
     const filteredUpdates: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.includes(key)) {
-        filteredUpdates[key] = value;
+        // Special handling for array fields that need to be serialized as JSON strings
+        if (key === 'languages' && Array.isArray(value)) {
+          filteredUpdates[key] = JSON.stringify(value);
+        } else if (key === 'preferences' && typeof value === 'object') {
+          filteredUpdates[key] = JSON.stringify(value);
+        } else if (key === 'notification_settings' && typeof value === 'object') {
+          filteredUpdates[key] = JSON.stringify(value);
+        } else if (key === 'privacy_settings' && typeof value === 'object') {
+          filteredUpdates[key] = JSON.stringify(value);
+        } else {
+          filteredUpdates[key] = value;
+        }
       }
     }
 
@@ -103,6 +114,9 @@ export async function PUT(request: NextRequest) {
 
     // Add updated_at timestamp
     filteredUpdates.updated_at = new Date().toISOString();
+
+    console.log('API Route: Filtered updates before GraphQL:', filteredUpdates);
+    console.log('API Route: Languages field type:', typeof filteredUpdates.languages, 'Value:', filteredUpdates.languages);
 
     const data = await executeMutation(UPDATE_USER_MUTATION, { 
       firebase_uid: id, 

@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { HomeIcon, MagnifyingGlassIcon, UserIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
+import { getSafeProfileImage } from '@/lib/utils';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -151,7 +152,7 @@ export default function Navigation() {
                   {user?.avatar && (
                     <div className="w-8 h-8 rounded-full overflow-hidden">
                       <Image 
-                        src={user.avatar} 
+                        src={getSafeProfileImage(user.avatar, '/images/default-avatar.png')} 
                         alt="User avatar" 
                         width={32}
                         height={32}
