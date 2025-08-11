@@ -232,21 +232,14 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           </div>
         </div>
       </div>
-
       {/* Address Preview */}
       {(address.addressLine1 || address.buildingName) && (
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <h4 className="font-medium text-gray-900 mb-2">Address Preview</h4>
           <div className="text-sm text-gray-600 space-y-1">
-            {address.unit && <div>Unit {address.unit}</div>}
-            {address.floor && <div>Floor {address.floor}</div>}
-            {address.block && <div>{address.block}</div>}
-            {address.buildingName && <div>{address.buildingName}</div>}
-            {address.addressLine1 && <div>{address.addressLine1}</div>}
+            {address.unit && <div>Unit {address.unit}, Floor {address.floor}, Block {address.block} {address.buildingName}</div>}
             {address.addressLine2 && <div>{address.addressLine2}</div>}
-            {address.district && <div>{address.district}</div>}
-            {address.state && <div>{address.state}</div>}
-            {address.country && <div>{address.country}</div>}
+            {address.district && <div>District: {address.district}, State: {address.state}, Country: {address.country}</div>}
           </div>
         </div>
       )}

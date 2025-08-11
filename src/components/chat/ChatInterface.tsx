@@ -98,7 +98,7 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
       setIsTyping(false);
       const reply: Message = {
         id: (Date.now() + 1).toString(),
-        content: generateReply(newMessage),
+        content: generateReply(),
         sender: 'other',
         timestamp: new Date(),
         senderName: selectedContact.name,

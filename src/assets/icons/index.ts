@@ -1,4 +1,3 @@
-export { About } from './About'
 export { AirConditioner } from './AirConditioner'
 export { ArrowLeft } from './ArrowLeft'
 export { Balcony } from './Balcony'

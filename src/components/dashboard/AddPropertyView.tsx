@@ -10,52 +10,7 @@ import Step5Amenities from '@/components/add-property/Step5Amenities';
 import Step6Photos from '@/components/add-property/Step6Photos';
 import Step7RentalDetails from '@/components/add-property/Step7RentalDetails';
 import Step8Summary from '@/components/add-property/Step8Summary';
-
-interface PropertyData {
-  // Step 1
-  propertyType?: 'residential' | 'commercial';
-  residentialType?: 'serviced-apartment' | 'village-house' | 'apartment' | 'condo';
-  
-  // Step 2
-  rentalSpace?: 'entire-apartment' | 'partial-apartment' | 'shared-space' | 'private-room';
-  
-  // Step 3
-  address?: {
-    unit?: string;
-    floor?: string;
-    block?: string;
-    buildingName?: string;
-    addressLine1?: string;
-    addressLine2?: string;
-    district?: string;
-    state?: string;
-    country?: string;
-  };
-  
-  // Step 4
-  unitDetails?: {
-    grossArea?: number;
-    netArea?: number;
-    bedrooms?: number;
-    bathrooms?: number;
-    furnished?: 'fully' | 'partially' | 'non-furnished';
-    petsAllowed?: boolean;
-  };
-  
-  // Step 5
-  amenities?: string[];
-  
-  // Step 6
-  photos?: File[];
-  
-  // Step 7
-  rentalDetails?: {
-    listingName?: string;
-    listingDescription?: string;
-    rentalPrice?: number;
-    availableDate?: Date | string | null;
-  };
-}
+import { PropertyData } from '@/types';
 
 const steps = [
   { id: 1, title: 'Property Type', description: 'Select your property type' },

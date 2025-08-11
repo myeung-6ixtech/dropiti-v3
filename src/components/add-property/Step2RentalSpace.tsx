@@ -8,12 +8,7 @@ import {
   PrivateRoom
 } from '@/assets/icons';
 
-interface Step2RentalSpaceProps {
-  data?: {
-    rentalSpace?: 'entire-apartment' | 'partial-apartment' | 'shared-space' | 'private-room';
-  };
-  onUpdate: (data: { rentalSpace?: string }) => void;
-}
+import { Step2RentalSpaceProps } from '@/types';
 
 const rentalSpaces = [
   {
@@ -51,7 +46,9 @@ export default function Step2RentalSpace({ data, onUpdate }: Step2RentalSpacePro
 
   const handleRentalSpaceSelect = (spaceId: string) => {
     setSelectedRentalSpace(spaceId);
-    onUpdate({ rentalSpace: spaceId });
+    onUpdate({ 
+      rentalSpace: spaceId as 'entire-apartment' | 'partial-apartment' | 'shared-space' | 'private-room' 
+    });
   };
 
   return (

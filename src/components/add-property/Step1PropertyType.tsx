@@ -7,13 +7,7 @@ import {
   CubeIcon
 } from '@heroicons/react/24/outline';
 
-interface Step1PropertyTypeProps {
-  data?: {
-    propertyType?: 'residential' | 'commercial';
-    residentialType?: 'serviced-apartment' | 'village-house' | 'apartment' | 'condo';
-  };
-  onUpdate: (data: { propertyType?: string; residentialType?: string }) => void;
-}
+import { Step1PropertyTypeProps } from '@/types';
 
 const propertyTypes = [
   {
@@ -67,12 +61,17 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
     
     setSelectedPropertyType(typeId);
     setSelectedResidentialType(''); // Reset residential type when changing property type
-    onUpdate({ propertyType: typeId, residentialType: undefined });
+    onUpdate({ 
+      propertyType: typeId as 'residential' | 'commercial', 
+      residentialType: undefined 
+    });
   };
 
   const handleResidentialTypeSelect = (typeId: string) => {
     setSelectedResidentialType(typeId);
-    onUpdate({ residentialType: typeId });
+    onUpdate({ 
+      residentialType: typeId as 'serviced-apartment' | 'village-house' | 'apartment' | 'condo' 
+    });
   };
 
   return (

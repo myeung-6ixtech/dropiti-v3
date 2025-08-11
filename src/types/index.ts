@@ -1,4 +1,5 @@
-export interface Property {
+// Legacy Property interface - keeping for backward compatibility
+export interface LegacyProperty {
   id: string;
   title: string;
   description: string;
@@ -10,6 +11,15 @@ export interface Property {
   images?: string[]; // New field for API compatibility
   available: boolean;
   landlordId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface Customer {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +41,9 @@ export interface SearchFilters {
 }
 
 export interface PropertyCardProps {
-  property: Property;
+  property: LegacyProperty;
   onViewDetails?: (id: string) => void;
 }
+
+// Export new centralized property types
+export * from './property';
