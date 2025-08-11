@@ -28,17 +28,11 @@ export default function UserInfoCard() {
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Name
               </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {user?.role === "super_admin" ? "Super Admin" : "User"}
-              </p>
             </div>
 
             <div>
               <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
                 Role
-              </p>
-              <p className="text-sm font-medium text-gray-800 dark:text-white/90">
-                {user?.role === "super_admin" ? "Super Admin" : user?.role}
               </p>
             </div>
 
@@ -150,7 +144,6 @@ export default function UserInfoCard() {
                 <div className="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Name</Label>
-                    <Input type="text" defaultValue={user?.role === "super_admin" ? "Super Admin" : "User"} disabled />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">
@@ -160,7 +153,6 @@ export default function UserInfoCard() {
 
                   <div className="col-span-2 lg:col-span-1">
                     <Label>Role</Label>
-                    <Input type="text" defaultValue={user?.role === "super_admin" ? "Super Admin" : user?.role} disabled />
                   </div>
 
                   <div className="col-span-2 lg:col-span-1">

@@ -23,7 +23,7 @@ interface Landlord {
 interface PropertyPricingCardProps {
   price: number;
   deposit: number;
-  availableDate: Date;
+  availableDate: string | null;
   minimumLease: number;
   landlord: Landlord;
   details: {
@@ -55,8 +55,9 @@ export default function PropertyPricingCard({
     }).format(amount);
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', { 
+  const formatDate = (date: string | null) => {
+    if (!date) return 'Contact for availability';
+    return new Date(date).toLocaleDateString('en-US', { 
       month: 'long', 
       year: 'numeric' 
     });

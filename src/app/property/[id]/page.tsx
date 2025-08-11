@@ -58,7 +58,7 @@ const mockProperty: Property & {
   };
   description: string;
   rules: string[];
-  availableDate: Date;
+  availableDate: string | null;
   minimumLease: number;
   deposit: number;
   utilities: string[];
@@ -71,10 +71,10 @@ const mockProperty: Property & {
   bathrooms: 2,
   price: 2500,
   imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-  available: true,
-  landlordId: 'landlord1',
-  createdAt: new Date(),
-  updatedAt: new Date(),
+
+  ownerId: 'landlord1',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
   images: [
     'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
     'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
@@ -117,7 +117,7 @@ const mockProperty: Property & {
     'Pet deposit required',
     'Maximum 2 occupants',
   ],
-  availableDate: new Date('2024-02-01'),
+  availableDate: new Date('2024-02-01').toISOString(),
   minimumLease: 12,
   deposit: 2500,
   utilities: ['Electricity', 'Water', 'Internet', 'Trash'],

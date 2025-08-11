@@ -27,8 +27,9 @@ export interface Customer {
 export interface User {
   id: string;
   email: string;
-  name: string;
-  role: 'tenant' | 'landlord';
+  first_name: string;
+  last_name: string;
+  role: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,3 +48,30 @@ export interface PropertyCardProps {
 
 // Export new centralized property types
 export * from './property';
+
+// E-commerce types
+export interface Product {
+  id: number;
+  name: string;
+  variants: string;
+  category: string;
+  price: string;
+  status: string;
+  image: string;
+}
+
+// Table types
+export interface Order {
+  id: number;
+  user: {
+    image: string;
+    name: string;
+    role: string;
+  };
+  projectName: string;
+  team: {
+    images: string[];
+  };
+  status: string;
+  budget: string;
+}

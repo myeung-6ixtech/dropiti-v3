@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { HeartIcon, ClockIcon, MapPinIcon, CurrencyDollarIcon, HomeIcon } from '@heroicons/react/24/outline';
-import { Property } from '@/types';
+import { LegacyProperty } from '@/types';
 
 // Mock data for tenant view
-const mockSavedProperties: Property[] = [
+const mockSavedProperties: LegacyProperty[] = [
   {
     id: '1',
     title: 'Modern Downtown Apartment',
