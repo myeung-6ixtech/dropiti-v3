@@ -163,38 +163,77 @@ export const propertiesAPI = {
 export const usersAPI = {
   // Create a new user
   createUser: async (userData: CreateUserInput) => {
-    const response = await apiClient.post('/users/create-user', userData);
-    return response.data;
+    try {
+      const response = await apiClient.post('/users/create-user', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Create user error:', error);
+      throw error;
+    }
   },
 
   // Get user by Firebase UID
   getUserByFirebaseUid: async (firebaseUid: string) => {
-    const response = await apiClient.get('/users/get-user-by-id', { 
-      params: { firebase_uid: firebaseUid } 
-    });
-    return response.data;
+    try {
+      console.log('API Client: Fetching user by Firebase UID:', firebaseUid);
+      const response = await apiClient.get('/users/get-user-by-id', { 
+        params: { firebase_uid: firebaseUid } 
+      });
+      console.log('API Client: Response received:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Get user by Firebase UID error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
   },
 
   // Get user by ID
   getUserById: async (userId: string) => {
-    const response = await apiClient.get('/users/get-user-by-id', { 
-      params: { id: userId } 
-    });
-    return response.data;
+    try {
+      const response = await apiClient.get('/users/get-user-by-id', { 
+        params: { id: userId } 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Get user by ID error:', error);
+      throw error;
+    }
   },
 
   // Update user profile
   updateUser: async (userId: string, updates: Partial<User>) => {
-    const response = await apiClient.put('/users/update-user', { id: userId, updates });
-    return response.data;
+    try {
+      console.log('API Client: Updating user:', userId, 'with updates:', updates);
+      const response = await apiClient.put('/users/update-user', { id: userId, updates });
+      console.log('API Client: Update response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Update user error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
   },
 
   // Delete user (soft delete)
   deleteUser: async (userId: string) => {
-    const response = await apiClient.delete('/users/delete-user', { 
-      params: { id: userId } 
-    });
-    return response.data;
+    try {
+      const response = await apiClient.delete('/users/delete-user', { 
+        params: { id: userId } 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw error;
+    }
   },
 };
 

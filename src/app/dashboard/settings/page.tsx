@@ -56,13 +56,18 @@ export default function SettingsPage() {
   // Load user settings from API when component mounts
   useEffect(() => {
     const loadUserSettings = async () => {
+      // The authUser.id is actually the Firebase UID from NextAuth
       if (authUser?.id) {
         try {
           setIsLoading(true);
+          console.log('Loading user settings for Firebase UID:', authUser.id);
+          
           const response = await usersAPI.getUserByFirebaseUid(authUser.id);
           
           if (response.success && response.data) {
             const userData = response.data;
+            console.log('User data received:', userData);
+            
             const newSettings: UserSettings = {
               firstName: userData.first_name || 'John',
               lastName: userData.last_name || 'Doe',
@@ -81,6 +86,12 @@ export default function SettingsPage() {
             };
             setSettings(newSettings);
             setTempSettings(newSettings);
+          } else {
+            console.error('Failed to load user settings:', response.error);
+            setSaveMessage({
+              type: 'error',
+              message: response.error || 'Failed to load settings data'
+            });
           }
         } catch (error) {
           console.error('Failed to load user settings:', error);
@@ -91,6 +102,8 @@ export default function SettingsPage() {
         } finally {
           setIsLoading(false);
         }
+      } else {
+        console.log('No auth user ID available');
       }
     };
 
@@ -141,15 +154,11 @@ export default function SettingsPage() {
       setIsLoading(true);
       setSaveMessage(null);
 
-      // First get the current user to get the user ID
-      const userResponse = await usersAPI.getUserByFirebaseUid(authUser.id);
+      console.log('Saving settings for Firebase UID:', authUser.id);
+
+      // Since the real_estate_user table uses firebase_uid as the primary key,
+      // we don't need to fetch the user first - we can update directly using the firebase_uid
       
-      if (!userResponse.success || !userResponse.data) {
-        throw new Error('Failed to get user data');
-      }
-
-      const userId = userResponse.data.id;
-
       // Prepare updates for the API
       const updates = {
         first_name: tempSettings.firstName,
@@ -167,8 +176,10 @@ export default function SettingsPage() {
         },
       };
 
-      // Call the update API
-      const updateResponse = await usersAPI.updateUser(userId, updates);
+      console.log('Updating user with data:', updates);
+
+      // Call the update API using the firebase_uid directly
+      const updateResponse = await usersAPI.updateUser(authUser.id, updates);
 
       if (updateResponse.success) {
         setSettings(tempSettings);
@@ -473,7 +484,7 @@ export default function SettingsPage() {
                   <option>UTC</option>
                   <option>America/New_York</option>
                 </select>
-              </div>
+                </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Currency</label>
                 <select 

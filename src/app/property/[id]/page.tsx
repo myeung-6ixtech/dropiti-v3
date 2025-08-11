@@ -22,7 +22,11 @@ import {
   Gym,
   SwimmingPool,
   SecurityGuard,
-  Elevator
+  Elevator,
+  TV,
+  Balcony,
+  Home,
+  Clean
 } from '@/assets/icons';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
@@ -88,6 +92,8 @@ export default function PropertyDetailPage() {
           const response = await propertiesAPI.getPropertyByUuid(params.id as string);
           
           if (response.success && response.data) {
+            console.log('Property data received:', response.data);
+            console.log('Amenities:', response.data.property.amenities);
             setPropertyData(response.data);
           } else {
             setError(response.error || 'Failed to load property');
@@ -129,20 +135,52 @@ export default function PropertyDetailPage() {
 
   const getAmenityIcon = (amenity: string) => {
     const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-      'WiFi': Wifi,
-      'Air Conditioning': AirConditioner,
-      'Heating': Lightning,
-      'Dishwasher': Oven,
-      'Washing Machine': WashingMachine,
-      'Dryer': WashingMachine,
-      'Parking': ParkingSign,
-      'Gym': Gym,
-      'Pool': SwimmingPool,
-      'Security System': SecurityGuard,
-      'Elevator': Elevator
+      'wifi': Wifi,
+      'air-conditioning': AirConditioner,
+      'heating': Lightning,
+      'tv': TV,
+      'dishwasher': Oven,
+      'washer': WashingMachine,
+      'dryer': WashingMachine,
+      'parking': ParkingSign,
+      'gym': Gym,
+      'pool': SwimmingPool,
+      'security': SecurityGuard,
+      'elevator': Elevator,
+      'balcony': Balcony,
+      'workspace': Home,
+      'phone': Home,
+      'furnished': Home,
+      'utilities-included': Lightning,
+      'cleaning': Clean
     };
     
-    return iconMap[amenity] || null;
+    return iconMap[amenity] || Home; // Use Home icon as default fallback
+  };
+
+  const getAmenityDisplayName = (amenityId: string) => {
+    const amenityMap: { [key: string]: string } = {
+      'wifi': 'WiFi',
+      'air-conditioning': 'Air Conditioning',
+      'heating': 'Heating',
+      'tv': 'TV',
+      'dishwasher': 'Dishwasher',
+      'washer': 'Washing Machine',
+      'dryer': 'Dryer',
+      'parking': 'Parking',
+      'gym': 'Gym',
+      'pool': 'Swimming Pool',
+      'security': 'Security System',
+      'elevator': 'Elevator',
+      'balcony': 'Balcony',
+      'workspace': 'Workspace',
+      'phone': 'Phone',
+      'furnished': 'Furnished',
+      'utilities-included': 'Utilities Included',
+      'cleaning': 'Cleaning Service'
+    };
+    
+    return amenityMap[amenityId] || amenityId;
   };
 
   if (isLoading) {
@@ -352,17 +390,14 @@ export default function PropertyDetailPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
               <div className="grid grid-cols-2 gap-4">
-                {Array.isArray(property.amenities) ? (
-                  property.amenities.map((amenity) => {
-                    const AmenityIcon = getAmenityIcon(amenity);
+                {Array.isArray(property.amenities) && property.amenities.length > 0 ? (
+                  property.amenities.map((amenityId) => {
+                    const AmenityIcon = getAmenityIcon(amenityId);
+                    const displayName = getAmenityDisplayName(amenityId);
                     return (
-                      <div key={amenity} className="flex items-center space-x-3">
-                        {AmenityIcon ? (
-                          <AmenityIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                        ) : (
-                          <div className="h-5 w-5 bg-gray-300 rounded-full flex-shrink-0" />
-                        )}
-                        <span className="text-gray-700">{amenity}</span>
+                      <div key={amenityId} className="flex items-center space-x-3">
+                        <AmenityIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                        <span className="text-gray-700">{displayName}</span>
                       </div>
                     );
                   })

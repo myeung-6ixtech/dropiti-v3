@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = async () => {
     try {
       await signOut({ redirect: false });
-      router.push("/auth/signin");
+      router.push("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
