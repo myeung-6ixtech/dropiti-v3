@@ -41,7 +41,7 @@ export default function SignInForm() {
       } else {
         setError(result.error || "Invalid email or password");
       }
-    } catch (error) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
@@ -146,7 +146,7 @@ export default function SignInForm() {
 
         <div className="auth-section-spacing text-center">
           <p className="auth-text-center">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link href="/auth/signup" className="auth-link">
               Sign up
             </Link>

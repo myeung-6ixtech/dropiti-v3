@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { BuildingOfficeIcon, CurrencyDollarIcon, UsersIcon, ChartBarIcon, PlusIcon } from '@heroicons/react/24/outline';
 import { Property } from '@/types';
 
@@ -189,11 +190,19 @@ export default function LandlordView() {
               {mockProperties.map((property) => (
                 <div key={property.id} className="bg-white rounded-lg shadow overflow-hidden">
                   <div className="relative h-48">
-                    <img
-                      src={property.imageUrl}
-                      alt={property.title}
-                      className="w-full h-full object-cover"
-                    />
+                    {property.imageUrl ? (
+                      <Image
+                        src={property.imageUrl}
+                        alt={property.title}
+                        width={400}
+                        height={192}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <BuildingOfficeIcon className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
                     <div className="absolute top-2 right-2">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         property.available 

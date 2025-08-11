@@ -1,13 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { 
   StarIcon, 
   CheckCircleIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   CalendarIcon,
   HomeIcon
 } from '@heroicons/react/24/outline';
@@ -47,7 +45,7 @@ export default function PropertyPricingCard({
   onCreateOffer,
   onChatWithLandlord
 }: PropertyPricingCardProps) {
-  const [showContactInfo, setShowContactInfo] = useState(false);
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-HK', {
@@ -174,26 +172,6 @@ export default function PropertyPricingCard({
               <span>Message</span>
             </button> */}
           </div>
-
-          {/* Contact Information (Expandable) */}
-          {showContactInfo && (
-            <div className="pt-4 border-t border-gray-200 space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <PhoneIcon className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Phone</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">+852 1234 5678</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <EnvelopeIcon className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Email</span>
-                </div>
-                <span className="text-sm font-medium text-gray-900">sarah.j@email.com</span>
-              </div>
-            </div>
-          )}
 
           {/* Host Stats */}
           <div className="pt-4 border-t border-gray-200">

@@ -6,11 +6,8 @@ import Image from 'next/image';
 import { 
   MapPinIcon, 
   HomeIcon, 
-  CurrencyDollarIcon, 
   CalendarIcon,
-  StarIcon,
   ArrowLeftIcon,
-  CheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import {
@@ -121,7 +118,7 @@ export default function EditPropertyPage() {
   };
 
   const getAmenityIcon = (amenity: string) => {
-    const iconMap: { [key: string]: React.ComponentType<any> } = {
+    const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
       'WiFi': Wifi,
       'Air Conditioning': AirConditioner,
       'Heating': Lightning,

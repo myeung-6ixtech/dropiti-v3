@@ -44,12 +44,16 @@ export default function SignUpForm() {
 
       // Redirect to sign in page
       router.push("/auth/signin?message=Account created successfully! Please sign in.");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Signup error:", error);
-      if (error.code === 'auth/email-already-in-use') {
-        setError("An account with this email already exists");
-      } else if (error.code === 'auth/weak-password') {
-        setError("Password is too weak");
+      if (error && typeof error === 'object' && 'code' in error) {
+        if (error.code === 'auth/email-already-in-use') {
+          setError("An account with this email already exists");
+        } else if (error.code === 'auth/weak-password') {
+          setError("Password is too weak");
+        } else {
+          setError("An error occurred during signup");
+        }
       } else {
         setError("An error occurred during signup");
       }

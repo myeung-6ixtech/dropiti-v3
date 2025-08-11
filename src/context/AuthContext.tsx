@@ -31,7 +31,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { data: session, status } = useSession();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<{
+    id: string;
+    email: string;
+    name?: string;
+    avatar?: string;
+  } | null>(null);
   const router = useRouter();
 
   useEffect(() => {

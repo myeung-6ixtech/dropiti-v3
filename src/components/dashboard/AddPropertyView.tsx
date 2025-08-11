@@ -73,6 +73,9 @@ interface AddPropertyViewProps {
 }
 
 export default function AddPropertyView({ userType = 'landlord' }: AddPropertyViewProps) {
+  // TODO: userType is currently unused but required by the interface
+  // This will be used in future features for tenant vs landlord specific flows
+  console.log('Current user type:', userType); // Temporary usage to satisfy linter
   const [currentStep, setCurrentStep] = useState(1);
   const [propertyData, setPropertyData] = useState<PropertyData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);

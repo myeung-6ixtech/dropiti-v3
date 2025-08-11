@@ -1,15 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import { 
   HomeIcon,
   StarIcon,
-  MapPinIcon,
-  CalendarIcon,
-  ClockIcon,
-  ChatBubbleLeftRightIcon,
-  HeartIcon
 } from '@heroicons/react/24/outline';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
@@ -54,13 +50,15 @@ interface User {
   }>;
 }
 
-export default function UserProfilePage({ params }: { params: { id: string } }) {
+export default function UserProfilePage() {
+  const params = useParams();
+  const id = params.id as string;
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+
 
   // Mock user data
   const user: User = {
-    id: params.id,
+    id: id,
     name: 'Sarah Johnson',
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
     email: 'sarah.johnson@email.com',
@@ -149,8 +147,7 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
     });
   };
 
-  const handleCreateOffer = (propertyId: string) => {
-    setSelectedPropertyId(propertyId);
+  const handleCreateOffer = () => {
     setIsOfferModalOpen(true);
   };
 
@@ -196,7 +193,7 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
                     ${property.price.toLocaleString()}/month
                   </span>
                   <button
-                    onClick={() => handleCreateOffer(property.id)}
+                    onClick={() => handleCreateOffer()}
                     className="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     Create Offer
@@ -257,7 +254,7 @@ export default function UserProfilePage({ params }: { params: { id: string } }) 
       <CreateOfferModal
         isOpen={isOfferModalOpen}
         onClose={() => setIsOfferModalOpen(false)}
-        propertyId={Array.isArray(params.id) ? params.id[0] : params.id}
+        propertyId={id}
       />
     </div>
   );

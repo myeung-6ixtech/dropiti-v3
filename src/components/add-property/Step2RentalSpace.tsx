@@ -35,14 +35,14 @@ const rentalSpaces = [
     title: 'Shared Space',
     description: 'Rent a shared room or space',
     icon: SharedSpace,
-    details: 'You\'ll be sharing a room or space with others in the same unit.'
+    details: 'You&apos;ll be sharing a room or space with others in the same unit.'
   },
   {
     id: 'private-room',
     title: 'Private Room',
     description: 'Rent a private room',
     icon: PrivateRoom,
-    details: 'You\'ll have your own private room and share common areas with other tenants.'
+    details: 'You&apos;ll have your own private room and share common areas with other tenants.'
   },
 ];
 
@@ -119,8 +119,8 @@ export default function Step2RentalSpace({ data, onUpdate }: Step2RentalSpacePro
             <div className="mt-2 text-sm text-gray-600">
               <ul className="list-disc list-inside space-y-1">
                 <li><strong>Entire Apartment:</strong> Perfect for families or groups who want complete privacy</li>
-                <li><strong>Partial Apartment:</strong> Good for individuals who want their own space but don't mind sharing common areas</li>
-                <li><strong>Shared Space:</strong> Ideal for budget-conscious tenants who don't mind sharing living spaces</li>
+                <li><strong>Partial Apartment:</strong> Good for individuals who want their own space but don&apos;t mind sharing common areas</li>
+                <li><strong>Shared Space:</strong> Ideal for budget-conscious tenants who don&apos;t mind sharing living spaces</li>
                 <li><strong>Private Room:</strong> Best for individuals who want their own room but can share common areas</li>
               </ul>
             </div>

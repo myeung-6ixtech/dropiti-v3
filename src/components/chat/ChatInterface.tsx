@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { PaperAirplaneIcon, PaperClipIcon, PhoneIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import ChatMessage from './ChatMessage';
 import ChatSidebar from './ChatSidebar';
@@ -108,7 +109,7 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
     }, 2000 + Math.random() * 2000);
   };
 
-  const generateReply = (message: string): string => {
+  const generateReply = (): string => {
     const replies = [
       "Thanks for your message! I'll get back to you soon.",
       "That's a great question. Let me check on that for you.",
@@ -154,9 +155,11 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
                   <div className="flex-shrink-0 relative">
                     <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                       {selectedContact.avatar ? (
-                        <img
+                        <Image
                           src={selectedContact.avatar}
                           alt={selectedContact.name}
+                          width={32}
+                          height={32}
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (

@@ -57,9 +57,30 @@ export async function POST(request: NextRequest) {
 
     const data = await executeMutation(CREATE_PROPERTY_MUTATION, { property });
 
+    // Type assertion for the response data
+    const typedData = data as {
+      insert_properties_one: {
+        id: string;
+        title: string;
+        description: string;
+        location: string;
+        price: number;
+        bedrooms: number;
+        bathrooms: number;
+        imageUrl: string;
+        details: Record<string, unknown>;
+        rules: string[];
+        amenities: string[];
+        minimumLease: number;
+        availableDate: string | null;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+
     return NextResponse.json({
       success: true,
-      data: data.insert_properties_one,
+      data: typedData.insert_properties_one,
       message: 'Property created successfully',
     });
   } catch (error) {

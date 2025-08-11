@@ -126,7 +126,7 @@ const mockProperty: Property & {
 export default function PropertyDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [property, setProperty] = useState(mockProperty);
+  const [property] = useState(mockProperty);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
@@ -148,8 +148,10 @@ export default function PropertyDetailPage() {
   };
 
   const handleOfferSubmit = (offerData: {
-    amount: number;
-    message: string;
+    rentalPrice: number;
+    leaseDuration: number;
+    paymentFrequency: string;
+    moveInDate: string;
   }) => {
     // Handle the offer submission here
     console.log('Offer submitted:', offerData);
@@ -157,16 +159,16 @@ export default function PropertyDetailPage() {
     alert(`Offer submitted successfully!\nRental Price: ${offerData.rentalPrice}\nLease Duration: ${offerData.leaseDuration} months\nPayment Frequency: ${offerData.paymentFrequency}\nMove-in Date: ${offerData.moveInDate}`);
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-HK', {
-      style: 'currency',
-      currency: 'HKD',
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
+//   const yarn = (amount: number) => {
+//     return new Intl.NumberFormat('en-HK', {
+//       style: 'currency',
+//       currency: 'HKD',
+//       minimumFractionDigits: 0,
+//     }).format(amount);
+//   };
 
   const getAmenityIcon = (amenity: string) => {
-    const iconMap: { [key: string]: React.ComponentType<any> } = {
+    const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
       'WiFi': Wifi,
       'Air Conditioning': AirConditioner,
       'Heating': Lightning,

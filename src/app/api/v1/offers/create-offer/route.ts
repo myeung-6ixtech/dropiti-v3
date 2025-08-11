@@ -58,9 +58,31 @@ export async function POST(request: NextRequest) {
 
     const data = await executeMutation(CREATE_OFFER_MUTATION, { offer });
 
+    // Type assertion for the response data
+    const typedData = data as {
+      insert_offers_one: {
+        id: string;
+        amount: number;
+        message: string;
+        status: string;
+        createdAt: string;
+        property: {
+          id: string;
+          title: string;
+          location: string;
+          price: number;
+        };
+        user: {
+          id: string;
+          name: string;
+          email: string;
+        };
+      };
+    };
+
     return NextResponse.json({
       success: true,
-      data: data.insert_offers_one,
+      data: typedData.insert_offers_one,
       message: 'Offer created successfully',
     });
   } catch (error) {

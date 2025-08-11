@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { 
   CurrencyDollarIcon,
-  CalendarIcon,
-  DocumentTextIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 interface Step7RentalDetailsProps {
@@ -131,7 +130,7 @@ export default function Step7RentalDetails({ data, onUpdate }: Step7RentalDetail
                       } else {
                         handleInputChange('availableDate', null);
                       }
-                    } catch (error) {
+                    } catch {
                       console.error('Invalid date:', dateValue);
                       handleInputChange('availableDate', null);
                     }

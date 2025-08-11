@@ -55,6 +55,6 @@ export function formatAddress(address: unknown): string {
  * Safely formats a property location for display
  * This is an alias for formatAddress for consistency
  */
-export function formatPropertyLocation(location: any): string {
+export function formatPropertyLocation(location: unknown): string {
   return formatAddress(location);
 }

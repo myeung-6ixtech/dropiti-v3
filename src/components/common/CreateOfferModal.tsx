@@ -28,7 +28,6 @@ interface OfferData {
 export default function CreateOfferModal({ 
   isOpen, 
   onClose, 
-  propertyId, 
   currentPrice = 0,
   onOfferSubmit 
 }: CreateOfferModalProps) {

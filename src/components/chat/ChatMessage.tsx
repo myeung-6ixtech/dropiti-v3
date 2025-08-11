@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 interface Message {
   id: string;
@@ -62,9 +63,11 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
         <div className="flex-shrink-0">
           <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center">
             {message.avatar ? (
-              <img
+              <Image
                 src={message.avatar}
                 alt={message.senderName}
+                width={24}
+                height={24}
                 className="h-6 w-6 rounded-full object-cover"
               />
             ) : (

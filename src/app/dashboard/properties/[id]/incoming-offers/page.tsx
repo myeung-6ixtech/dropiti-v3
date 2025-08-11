@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { 
   ArrowLeftIcon,
   CheckIcon,
@@ -239,7 +240,7 @@ export default function IncomingOffersPage() {
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
                       {offer.tenantAvatar ? (
-                        <img src={offer.tenantAvatar} alt={offer.tenantName} className="w-12 h-12 rounded-full" />
+                        <Image src={offer.tenantAvatar} alt={offer.tenantName} width={48} height={48} className="w-12 h-12 rounded-full" />
                       ) : (
                         <UserIcon className="h-6 w-6 text-gray-500" />
                       )}

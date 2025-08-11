@@ -129,13 +129,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
     }
   }, [typingIndicator]);
 
-  const handleSendMessage = (message: string) => {
-    // Here you would implement actual real-time messaging
-    console.log('Sending message:', message);
-    
-    // Simulate typing indicator
-    setTypingIndicator(true);
-  };
+
 
   const filteredContacts = mockContacts.filter(contact =>
     contact.name.toLowerCase().includes(searchQuery.toLowerCase())

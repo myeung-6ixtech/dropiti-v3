@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 
 interface ChatContact {
   id: string;
@@ -64,9 +65,11 @@ export default function ChatSidebar({ contacts, selectedContact, onContactSelect
                   <div className="flex-shrink-0 relative">
                     <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
                       {contact.avatar ? (
-                        <img
+                        <Image
                           src={contact.avatar}
                           alt={contact.name}
+                          width={32}
+                          height={32}
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (

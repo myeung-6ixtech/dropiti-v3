@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { 
   CheckCircleIcon,
   HomeIcon,
@@ -204,9 +205,11 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {data.photos.slice(0, 4).map((photo: File, index: number) => (
                 <div key={index} className="aspect-video bg-gray-100 rounded overflow-hidden">
-                  <img
+                  <Image
                     src={URL.createObjectURL(photo)}
                     alt={`Photo ${index + 1}`}
+                    width={200}
+                    height={113}
                     className="w-full h-full object-cover"
                   />
                 </div>

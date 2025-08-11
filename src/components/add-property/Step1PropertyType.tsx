@@ -174,7 +174,7 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
             </h3>
             <div className="mt-2 text-sm text-blue-700">
               <p>
-                Choose the property type that best describes your listing. This helps potential tenants understand what type of space they're looking at.
+                Choose the property type that best describes your listing. This helps potential tenants understand what type of space they&apos;re looking at.
               </p>
             </div>
           </div>

@@ -78,14 +78,46 @@ export async function GET(request: NextRequest) {
       offset 
     });
 
+    // Type assertion for the response data
+    const typedData = data as {
+      offers: Array<{
+        id: string;
+        amount: number;
+        message: string;
+        status: string;
+        createdAt: string;
+        updatedAt: string;
+        userId: string;
+        property: {
+          id: string;
+          title: string;
+          location: string;
+          imageUrl: string;
+          price: number;
+          ownerId: string;
+        };
+        user: {
+          id: string;
+          name: string;
+          email: string;
+          avatar: string;
+        };
+      }>;
+      offers_aggregate: {
+        aggregate: {
+          count: number;
+        };
+      };
+    };
+
     // Filter offers based on type
-    let filteredOffers = data.offers;
+    let filteredOffers = typedData.offers;
     if (type === 'incoming') {
-      filteredOffers = data.offers.filter((offer: { property: { ownerId: string }; userId: string }) => 
+      filteredOffers = typedData.offers.filter((offer: { property: { ownerId: string }; userId: string }) => 
         offer.property.ownerId === userId
       );
     } else if (type === 'outgoing') {
-      filteredOffers = data.offers.filter((offer: { property: { ownerId: string }; userId: string }) => 
+      filteredOffers = typedData.offers.filter((offer: { property: { ownerId: string }; userId: string }) => 
         offer.userId === userId
       );
     }
@@ -94,10 +126,10 @@ export async function GET(request: NextRequest) {
       success: true,
       data: filteredOffers,
       pagination: {
-        total: data.offers_aggregate.aggregate.count,
+        total: typedData.offers_aggregate.aggregate.count,
         limit,
         offset,
-        hasMore: offset + limit < data.offers_aggregate.aggregate.count,
+        hasMore: offset + limit < typedData.offers_aggregate.aggregate.count,
       },
     });
   } catch (error) {

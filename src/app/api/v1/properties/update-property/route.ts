@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest) {
       amenities?: string[];
       minimumLease?: number;
       availableDate?: string | null;
-      updatedAt: string;
+      updatedAt?: string;
     } = {};
     
     if (updates.title) preparedUpdates.title = updates.title;
@@ -81,9 +81,29 @@ export async function PUT(request: NextRequest) {
       updates: preparedUpdates 
     });
 
+    // Type assertion for the response data
+    const typedData = data as {
+      update_properties_by_pk: {
+        id: string;
+        title: string;
+        description: string;
+        location: string;
+        price: number;
+        bedrooms: number;
+        bathrooms: number;
+        imageUrl: string;
+        details: Record<string, unknown>;
+        rules: string[];
+        amenities: string[];
+        minimumLease: number;
+        availableDate: string | null;
+        updatedAt: string;
+      };
+    };
+
     return NextResponse.json({
       success: true,
-      data: data.update_properties_by_pk,
+      data: typedData.update_properties_by_pk,
       message: 'Property updated successfully',
     });
   } catch (error) {

@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { 
   HomeIcon, 
   ArrowsPointingOutIcon,
-  WifiIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
 
@@ -58,7 +57,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
           Tell us about your unit
         </h3>
         <p className="text-gray-600 mb-6">
-          Provide detailed information about your property's size, rooms, and amenities.
+          Provide detailed information about your property&apos;s size, rooms, and amenities.
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

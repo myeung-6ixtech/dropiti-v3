@@ -48,7 +48,39 @@ export async function GET(request: NextRequest) {
 
     const data = await executeQuery(GET_PROPERTY_QUERY, { id });
 
-    if (!data.properties_by_pk) {
+    // Type assertion for the response data
+    const typedData = data as {
+      properties_by_pk: {
+        id: string;
+        title: string;
+        description: string;
+        location: string;
+        price: number;
+        bedrooms: number;
+        bathrooms: number;
+        imageUrl: string;
+        details: {
+          type: string;
+          furnished: string;
+          petsAllowed: boolean;
+          parking: boolean;
+        };
+        rules: string[];
+        amenities: string[];
+        minimumLease: number;
+        availableDate: string | null;
+        createdAt: string;
+        updatedAt: string;
+        owner: {
+          id: string;
+          name: string;
+          email: string;
+          avatar: string;
+        };
+      } | null;
+    };
+
+    if (!typedData.properties_by_pk) {
       return NextResponse.json(
         { error: 'Property not found' },
         { status: 404 }
@@ -57,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: data.properties_by_pk,
+      data: typedData.properties_by_pk,
     });
   } catch (error) {
     console.error('Get property error:', error);

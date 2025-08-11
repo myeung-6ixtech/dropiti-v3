@@ -179,7 +179,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
           What amenities does your property offer?
         </h3>
         <p className="text-gray-600 mb-6">
-          Select all the amenities that are available in your property. This helps tenants understand what's included.
+          Select all the amenities that are available in your property. This helps tenants understand what&apos;s included.
         </p>
 
         {/* Category Filter */}
@@ -279,7 +279,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
             </h3>
             <div className="mt-2 text-sm text-gray-600">
               <p>
-                Select all amenities that are available in your property. This information helps tenants make informed decisions and sets clear expectations about what's included.
+                Select all amenities that are available in your property. This information helps tenants make informed decisions and sets clear expectations about what&apos;s included.
               </p>
             </div>
           </div>

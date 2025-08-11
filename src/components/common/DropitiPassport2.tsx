@@ -112,7 +112,7 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
           {/* Languages */}
           <div className="flex items-center space-x-2 mb-4">
             <span className="text-sm text-gray-600">Languages:</span>
-            {user.languages?.map((language, index) => (
+            {user.languages?.map((language) => (
               <span key={language} className="bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs">
                 {language}
               </span>

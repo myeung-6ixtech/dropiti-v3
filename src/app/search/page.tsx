@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { propertiesAPI } from '@/lib/api-client';
 import { useSearchParams } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
@@ -19,12 +19,7 @@ export default function SearchPage() {
     maxPrice: searchParams.get('maxPrice') || '',
   });
 
- // Fetch properties from API
-  useEffect(() => {
-    fetchProperties();
-  }, []);
-
-const fetchProperties = async () => {
+const fetchProperties = useCallback(async () => {
   try {
     setLoading(true);
     const response = await propertiesAPI.getListings({
@@ -47,13 +42,14 @@ const fetchProperties = async () => {
   } finally {
     setLoading(false);
   }
-};
+}, [filters]);
 
-  useEffect(() => {
-    filterProperties();
-  }, [filters, properties]);
+// Fetch properties from API
+useEffect(() => {
+  fetchProperties();
+}, [fetchProperties]);
 
-  const filterProperties = () => {
+  const filterProperties = useCallback(() => {
     let filtered = [...properties];
 
     // Filter by location
@@ -78,7 +74,11 @@ const fetchProperties = async () => {
     }
 
     setFilteredProperties(filtered);
-  };
+  }, [filters, properties]);
+
+  useEffect(() => {
+    filterProperties();
+  }, [filters, properties, filterProperties]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({

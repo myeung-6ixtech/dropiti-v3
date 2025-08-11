@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { 
   PhotoIcon, 
   ArrowUpTrayIcon,
@@ -56,13 +57,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
     onUpdate({ photos: updatedPhotos });
   };
 
-  const reorderPhotos = (fromIndex: number, toIndex: number) => {
-    const updatedPhotos = [...photos];
-    const [movedPhoto] = updatedPhotos.splice(fromIndex, 1);
-    updatedPhotos.splice(toIndex, 0, movedPhoto);
-    setPhotos(updatedPhotos);
-    onUpdate({ photos: updatedPhotos });
-  };
+
 
   return (
     <div className="space-y-8">
@@ -140,9 +135,11 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
               {photos.map((photo, index) => (
                 <div key={index} className="relative group">
                   <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
-                    <img
+                    <Image
                       src={URL.createObjectURL(photo)}
                       alt={`Photo ${index + 1}`}
+                      width={400}
+                      height={225}
                       className="w-full h-full object-cover"
                     />
                   </div>

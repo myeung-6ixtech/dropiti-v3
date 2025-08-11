@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { HeartIcon, ClockIcon, MapPinIcon, CurrencyDollarIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { Property } from '@/types';
 
@@ -109,11 +110,19 @@ export default function TenantView() {
               {mockSavedProperties.map((property) => (
                 <div key={property.id} className="bg-white rounded-lg shadow overflow-hidden">
                   <div className="relative h-48">
-                    <img
-                      src={property.imageUrl}
-                      alt={property.title}
-                      className="w-full h-full object-cover"
-                    />
+                    {property.imageUrl ? (
+                      <Image
+                        src={property.imageUrl}
+                        alt={property.title}
+                        width={400}
+                        height={192}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <HomeIcon className="h-12 w-12 text-gray-400" />
+                      </div>
+                    )}
                     <button className="absolute top-2 right-2 p-1 bg-white rounded-full shadow hover:bg-gray-50">
                       <HeartIcon className="h-5 w-5 text-red-500" />
                     </button>

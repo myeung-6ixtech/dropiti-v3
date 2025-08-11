@@ -6,7 +6,6 @@ import {
   BellIcon, 
   ShieldCheckIcon, 
   CreditCardIcon,
-  GlobeAltIcon,
   CogIcon
 } from '@heroicons/react/24/outline';
 

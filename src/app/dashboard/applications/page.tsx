@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
-  ArrowLeftIcon,
-  CheckIcon,
   XMarkIcon,
   CurrencyDollarIcon,
   CalendarIcon,
@@ -177,7 +176,7 @@ export default function OutgoingOffersPage() {
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
                       {offer.landlordAvatar ? (
-                        <img src={offer.landlordAvatar} alt={offer.landlordName} className="w-12 h-12 rounded-full" />
+                        <Image src={offer.landlordAvatar} alt={offer.landlordName} width={48} height={48} className="w-12 h-12 rounded-full" />
                       ) : (
                         <UserIcon className="h-6 w-6 text-gray-500" />
                       )}
