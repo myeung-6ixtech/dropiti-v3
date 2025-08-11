@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { usersAPI } from '@/lib/api-client';
 import { 
   UserIcon, 
   BellIcon, 
@@ -9,8 +11,203 @@ import {
   CogIcon
 } from '@heroicons/react/24/outline';
 
+interface UserSettings {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  notifications: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+  };
+  preferences: {
+    language: string;
+    timezone: string;
+    currency: string;
+  };
+}
+
 export default function SettingsPage() {
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('profile');
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  
+  const [settings, setSettings] = useState<UserSettings>({
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'demo@example.com',
+    phone: '+852 1234 5678',
+    notifications: {
+      email: true,
+      push: true,
+      sms: false,
+    },
+    preferences: {
+      language: 'English',
+      timezone: 'Asia/Hong_Kong (UTC+8)',
+      currency: 'HKD (Hong Kong Dollar)',
+    },
+  });
+
+  const [tempSettings, setTempSettings] = useState<UserSettings>(settings);
+
+  // Load user settings from API when component mounts
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      // The authUser.id is actually the Firebase UID from NextAuth
+      if (authUser?.id) {
+        try {
+          setIsLoading(true);
+          console.log('Loading user settings for Firebase UID:', authUser.id);
+          
+          const response = await usersAPI.getUserByFirebaseUid(authUser.id);
+          
+          if (response.success && response.data) {
+            const userData = response.data;
+            console.log('User data received:', userData);
+            
+            const newSettings: UserSettings = {
+              firstName: userData.first_name || 'John',
+              lastName: userData.last_name || 'Doe',
+              email: userData.email || 'demo@example.com',
+              phone: userData.phone_number || '+852 1234 5678',
+              notifications: {
+                email: userData.notification_settings?.email ?? true,
+                push: userData.notification_settings?.push ?? true,
+                sms: userData.notification_settings?.sms ?? false,
+              },
+              preferences: {
+                language: userData.preferences?.language || 'English',
+                timezone: userData.preferences?.timezone || 'Asia/Hong_Kong (UTC+8)',
+                currency: userData.preferences?.currency || 'HKD (Hong Kong Dollar)',
+              },
+            };
+            setSettings(newSettings);
+            setTempSettings(newSettings);
+          } else {
+            console.error('Failed to load user settings:', response.error);
+            setSaveMessage({
+              type: 'error',
+              message: response.error || 'Failed to load settings data'
+            });
+          }
+        } catch (error) {
+          console.error('Failed to load user settings:', error);
+          setSaveMessage({
+            type: 'error',
+            message: 'Failed to load settings data'
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        console.log('No auth user ID available');
+      }
+    };
+
+    loadUserSettings();
+  }, [authUser?.id]);
+
+  useEffect(() => {
+    setTempSettings(settings);
+  }, [settings]);
+
+  const handleInputChange = (field: keyof UserSettings, value: string | boolean | object) => {
+    setTempSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleNotificationChange = (type: keyof typeof tempSettings.notifications, value: boolean) => {
+    setTempSettings(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [type]: value
+      }
+    }));
+  };
+
+  const handlePreferenceChange = (type: keyof typeof tempSettings.preferences, value: string) => {
+    setTempSettings(prev => ({
+      ...prev,
+      preferences: {
+        ...prev.preferences,
+        [type]: value
+      }
+    }));
+  };
+
+  const handleSave = async () => {
+    if (!authUser?.id) {
+      setSaveMessage({
+        type: 'error',
+        message: 'You must be logged in to save changes'
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setSaveMessage(null);
+
+      console.log('Saving settings for Firebase UID:', authUser.id);
+
+      // Since the real_estate_user table uses firebase_uid as the primary key,
+      // we don't need to fetch the user first - we can update directly using the firebase_uid
+      
+      // Prepare updates for the API
+      const updates = {
+        first_name: tempSettings.firstName,
+        last_name: tempSettings.lastName,
+        phone_number: tempSettings.phone,
+        notification_settings: {
+          email: tempSettings.notifications.email,
+          push: tempSettings.notifications.push,
+          sms: tempSettings.notifications.sms,
+        },
+        preferences: {
+          language: tempSettings.preferences.language,
+          timezone: tempSettings.preferences.timezone,
+          currency: tempSettings.preferences.currency,
+        },
+      };
+
+      console.log('Updating user with data:', updates);
+
+      // Call the update API using the firebase_uid directly
+      const updateResponse = await usersAPI.updateUser(authUser.id, updates);
+
+      if (updateResponse.success) {
+        setSettings(tempSettings);
+        setSaveMessage({
+          type: 'success',
+          message: 'Settings updated successfully!'
+        });
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSaveMessage(null), 3000);
+      } else {
+        throw new Error(updateResponse.error || 'Failed to update settings');
+      }
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      setSaveMessage({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to save settings'
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setTempSettings(settings);
+    setSaveMessage(null);
+  };
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: UserIcon },
@@ -34,7 +231,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700">First Name</label>
                 <input
                   type="text"
-                  defaultValue="John"
+                  value={tempSettings.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
@@ -42,7 +240,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700">Last Name</label>
                 <input
                   type="text"
-                  defaultValue="Doe"
+                  value={tempSettings.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
@@ -50,7 +249,8 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input
                   type="email"
-                  defaultValue="demo@example.com"
+                  value={tempSettings.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
@@ -58,14 +258,41 @@ export default function SettingsPage() {
                 <label className="block text-sm font-medium text-gray-700">Phone</label>
                 <input
                   type="tel"
-                  defaultValue="+852 1234 5678"
+                  value={tempSettings.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                 />
               </div>
             </div>
-            <div className="flex justify-end">
-              <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Save Changes
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCancel}
+                disabled={isLoading}
+                className={`px-4 py-2 rounded-md transition-colors font-medium ${
+                  isLoading 
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading}
+                className={`px-4 py-2 text-white rounded-md transition-colors font-medium ${
+                  isLoading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
               </button>
             </div>
           </div>
@@ -84,7 +311,12 @@ export default function SettingsPage() {
                   <p className="text-sm text-gray-500">Receive notifications via email</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
+                  <input 
+                    type="checkbox" 
+                    checked={tempSettings.notifications.email}
+                    onChange={(e) => handleNotificationChange('email', e.target.checked)}
+                    className="sr-only peer" 
+                  />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -94,7 +326,12 @@ export default function SettingsPage() {
                   <p className="text-sm text-gray-500">Receive push notifications in your browser</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
+                  <input 
+                    type="checkbox" 
+                    checked={tempSettings.notifications.push}
+                    onChange={(e) => handleNotificationChange('push', e.target.checked)}
+                    className="sr-only peer" 
+                  />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
@@ -104,10 +341,46 @@ export default function SettingsPage() {
                   <p className="text-sm text-gray-500">Receive notifications via SMS</p>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
+                  <input 
+                    type="checkbox" 
+                    checked={tempSettings.notifications.sms}
+                    onChange={(e) => handleNotificationChange('sms', e.target.checked)}
+                    className="sr-only peer" 
+                  />
                   <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                 </label>
               </div>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCancel}
+                disabled={isLoading}
+                className={`px-4 py-2 rounded-md transition-colors font-medium ${
+                  isLoading 
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading}
+                className={`px-4 py-2 text-white rounded-md transition-colors font-medium ${
+                  isLoading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
             </div>
           </div>
         );
@@ -190,7 +463,11 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Language</label>
-                <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                <select 
+                  value={tempSettings.preferences.language}
+                  onChange={(e) => handlePreferenceChange('language', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                >
                   <option>English</option>
                   <option>繁體中文</option>
                   <option>简体中文</option>
@@ -198,20 +475,59 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Time Zone</label>
-                <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                <select 
+                  value={tempSettings.preferences.timezone}
+                  onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                >
                   <option>Asia/Hong_Kong (UTC+8)</option>
                   <option>UTC</option>
                   <option>America/New_York</option>
                 </select>
-              </div>
+                </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Currency</label>
-                <select className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                <select 
+                  value={tempSettings.preferences.currency}
+                  onChange={(e) => handlePreferenceChange('currency', e.target.value)}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                >
                   <option>HKD (Hong Kong Dollar)</option>
                   <option>USD (US Dollar)</option>
                   <option>EUR (Euro)</option>
                 </select>
               </div>
+            </div>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCancel}
+                disabled={isLoading}
+                className={`px-4 py-2 rounded-md transition-colors font-medium ${
+                  isLoading 
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
+                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={isLoading}
+                className={`px-4 py-2 text-white rounded-md transition-colors font-medium ${
+                  isLoading 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Saving...
+                  </div>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
             </div>
           </div>
         );
@@ -226,6 +542,35 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600">Manage your account settings and preferences.</p>
       </div>
+
+      {/* Loading State */}
+      {isLoading && (
+        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+            <span className="text-blue-800">Loading settings data...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Save Message */}
+      {saveMessage && (
+        <div className={`mb-6 border rounded-lg p-4 ${
+          saveMessage.type === 'success' 
+            ? 'bg-green-50 border-green-200 text-green-800' 
+            : 'bg-red-50 border-red-200 text-red-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span>{saveMessage.message}</span>
+            <button
+              onClick={() => setSaveMessage(null)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white shadow rounded-lg">
         {/* Tab Navigation */}

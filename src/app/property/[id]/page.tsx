@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { propertiesAPI } from '@/lib/api-client';
 import { 
   MapPinIcon, 
   HomeIcon, 
@@ -21,121 +22,164 @@ import {
   Gym,
   SwimmingPool,
   SecurityGuard,
-  Elevator
+  Elevator,
+  TV,
+  Balcony,
+  Home,
+  Clean
 } from '@/assets/icons';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import PropertyPricingCard from '@/components/common/PropertyPricingCard';
-import { Property } from '@/types';
+import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
 
-// Mock property data - in real app, this would come from an API
-const mockProperty: Property & {
-  images: string[];
-  amenities: string[];
-  landlord: {
-    id: string;
-    name: string;
-    avatar: string;
-    rating: number;
-    reviewCount: number;
-    responseTime: string;
-    verified: boolean;
-  };
-  details: {
-    type: string;
-    furnished: string;
-    petsAllowed: boolean;
-    parking: boolean;
-    laundry: boolean;
-    heating: boolean;
-    cooling: boolean;
-    wifi: boolean;
-    security: boolean;
-    elevator: boolean;
-    balcony: boolean;
-    gym: boolean;
-    pool: boolean;
-  };
+interface PropertyData {
+  id: string;
+  property_uuid: string;
+  title: string;
   description: string;
-  rules: string[];
-  availableDate: string | null;
-  minimumLease: number;
-  deposit: number;
-  utilities: string[];
-} = {
-  id: '1',
-  title: 'Modern 2BR Apartment in Central',
-  description: 'Beautiful 2-bedroom apartment in the heart of downtown with stunning city views. This newly renovated unit features an open-concept living area, modern appliances, and premium finishes throughout. Perfect for young professionals or small families looking for a convenient and comfortable living space.',
-  location: 'Downtown, City Center',
-  bedrooms: 2,
-  bathrooms: 2,
-  price: 2500,
-  imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+  location: string;
+  price: number;
+  bedrooms: number;
+  bathrooms: number;
+  image_url?: string;
+  display_image?: string;
+  uploaded_images?: string[];
+  available: boolean;
+  created_at: string;
+  updated_at: string;
+  details?: Record<string, unknown>;
+  amenities?: string[] | Record<string, unknown>; // Handle both array and JSONB
+  minimum_lease?: number;
+  available_date?: string;
+  owner_id?: string;
+}
 
-  ownerId: 'landlord1',
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  images: [
-    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80',
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-  ],
-  amenities: [
-    'WiFi', 'Air Conditioning', 'Heating', 'Dishwasher', 'Washing Machine', 
-    'Dryer', 'Parking', 'Gym', 'Pool', 'Security System', 'Elevator'
-  ],
-  landlord: {
-    id: 'landlord1',
-    name: 'Sarah Johnson',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
-    rating: 4.8,
-    reviewCount: 127,
-    responseTime: '1 hour',
-    verified: true,
-  },
-  details: {
-    type: 'Apartment',
-    furnished: 'Fully Furnished',
-    petsAllowed: true,
-    parking: true,
-    laundry: true,
-    heating: true,
-    cooling: true,
-    wifi: true,
-    security: true,
-    elevator: true,
-    balcony: true,
-    gym: true,
-    pool: true,
-  },
-  rules: [
-    'No smoking',
-    'No parties or events',
-    'Quiet hours after 10 PM',
-    'Pet deposit required',
-    'Maximum 2 occupants',
-  ],
-  availableDate: new Date('2024-02-01').toISOString(),
-  minimumLease: 12,
-  deposit: 2500,
-  utilities: ['Electricity', 'Water', 'Internet', 'Trash'],
-};
+interface LandlordData {
+  id: string;
+  uuid: string; // Add uuid for navigation
+  firebase_uid: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  verified: boolean;
+  rating: number;
+  review_count: number;
+  response_time: string;
+  response_rate: number;
+  total_properties: number;
+  total_guests: number;
+}
+
+interface PropertyWithLandlord {
+  property: PropertyData;
+  landlord: LandlordData | null;
+}
 
 export default function PropertyDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const [property] = useState(mockProperty);
-  const [selectedImage, setSelectedImage] = useState(0);
+  const [propertyData, setPropertyData] = useState<PropertyWithLandlord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
 
+  // Function to fetch landlord details using owner_id
+  const fetchLandlordDetails = async (ownerId: string) => {
+    try {
+      console.log('Fetching landlord details for owner_id:', ownerId);
+      const landlordResponse = await usersAPI.getUserByFirebaseUid(ownerId);
+      
+      if (landlordResponse.success && landlordResponse.data) {
+        console.log('Landlord details fetched successfully:', landlordResponse.data);
+        return {
+          id: landlordResponse.data.id,
+          uuid: landlordResponse.data.uuid, // Add uuid for navigation
+          firebase_uid: landlordResponse.data.firebase_uid,
+          name: landlordResponse.data.display_name || 'Unknown Landlord',
+          email: landlordResponse.data.email || '',
+          avatar: landlordResponse.data.photo_url || '',
+          verified: landlordResponse.data.verified || false,
+          rating: landlordResponse.data.rating || 0,
+          review_count: landlordResponse.data.review_count || 0,
+          response_time: landlordResponse.data.response_time || 'Unknown',
+          response_rate: landlordResponse.data.response_rate || 98,
+          total_properties: landlordResponse.data.total_properties || 1,
+          total_guests: landlordResponse.data.total_guests || 0,
+        };
+      } else {
+        console.log('Failed to fetch landlord details:', landlordResponse.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching landlord details:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    const loadProperty = async () => {
+      if (params.id) {
+        try {
+          setIsLoading(true);
+          setError(null);
+          
+          const response = await propertiesAPI.getPropertyByUuid(params.id as string);
+          
+          if (response.success && response.data) {
+            console.log('=== PROPERTY DATA DEBUG ===');
+            console.log('Full API response:', response);
+            console.log('Property data received:', response.data);
+            console.log('Property object keys:', Object.keys(response.data.property));
+            console.log('Property object:', response.data.property);
+            
+            // Check for landlord_firebase_uid specifically
+            console.log('=== LANDLORD FIREBASE UID CHECK ===');
+            console.log('Property owner_id:', response.data.property.owner_id);
+            console.log('Property has owner_id:', !!response.data.property.owner_id);
+            console.log('Property owner_id type:', typeof response.data.property.owner_id);
+            
+            // Fetch landlord details if we have an owner_id
+            let landlordData = null;
+            if (response.data.property.owner_id) {
+              console.log('=== FETCHING LANDLORD DETAILS ===');
+              landlordData = await fetchLandlordDetails(response.data.property.owner_id);
+              console.log('Landlord data fetched:', landlordData);
+            }
+            
+            // Combine property data with landlord data
+            const combinedData = {
+              property: response.data.property,
+              landlord: landlordData
+            };
+            
+            console.log('=== LANDLORD DATA CHECK ===');
+            console.log('Combined data:', combinedData);
+            console.log('Landlord data:', combinedData.landlord);
+            console.log('Landlord data type:', typeof combinedData.landlord);
+            console.log('Landlord is null:', combinedData.landlord === null);
+            
+            if (combinedData.landlord) {
+              console.log('Landlord object keys:', Object.keys(combinedData.landlord));
+              console.log('Landlord firebase_uid:', combinedData.landlord.firebase_uid);
+            }
+            
+            console.log('=== END DEBUG ===');
+            
+            setPropertyData(combinedData);
+          } else {
+            setError(response.error || 'Failed to load property');
+          }
+        } catch (error) {
+          console.error('Failed to load property:', error);
+          setError('Failed to load property data');
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadProperty();
   }, [params.id]);
 
   const handleCreateOffer = () => {
@@ -143,8 +187,10 @@ export default function PropertyDetailPage() {
   };
 
   const handleChatWithLandlord = () => {
-    // Navigate to chat page
-    router.push(`/dashboard/chat?landlord=${property.landlord.id}`);
+    if (propertyData?.landlord) {
+      // Navigate to chat page with landlord firebase_uid
+      router.push(`/dashboard/chat?landlord=${propertyData.landlord.firebase_uid}`);
+    }
   };
 
   const handleOfferSubmit = (offerData: {
@@ -159,30 +205,54 @@ export default function PropertyDetailPage() {
     alert(`Offer submitted successfully!\nRental Price: ${offerData.rentalPrice}\nLease Duration: ${offerData.leaseDuration} months\nPayment Frequency: ${offerData.paymentFrequency}\nMove-in Date: ${offerData.moveInDate}`);
   };
 
-//   const yarn = (amount: number) => {
-//     return new Intl.NumberFormat('en-HK', {
-//       style: 'currency',
-//       currency: 'HKD',
-//       minimumFractionDigits: 0,
-//     }).format(amount);
-//   };
-
   const getAmenityIcon = (amenity: string) => {
     const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-      'WiFi': Wifi,
-      'Air Conditioning': AirConditioner,
-      'Heating': Lightning,
-      'Dishwasher': Oven,
-      'Washing Machine': WashingMachine,
-      'Dryer': WashingMachine,
-      'Parking': ParkingSign,
-      'Gym': Gym,
-      'Pool': SwimmingPool,
-      'Security System': SecurityGuard,
-      'Elevator': Elevator
+      'wifi': Wifi,
+      'air-conditioning': AirConditioner,
+      'heating': Lightning,
+      'tv': TV,
+      'dishwasher': Oven,
+      'washer': WashingMachine,
+      'dryer': WashingMachine,
+      'parking': ParkingSign,
+      'gym': Gym,
+      'pool': SwimmingPool,
+      'security': SecurityGuard,
+      'elevator': Elevator,
+      'balcony': Balcony,
+      'workspace': Home,
+      'phone': Home,
+      'furnished': Home,
+      'utilities-included': Lightning,
+      'cleaning': Clean
     };
     
-    return iconMap[amenity] || null;
+    return iconMap[amenity] || Home; // Use Home icon as default fallback
+  };
+
+  const getAmenityDisplayName = (amenityId: string) => {
+    const amenityMap: { [key: string]: string } = {
+      'wifi': 'WiFi',
+      'air-conditioning': 'Air Conditioning',
+      'heating': 'Heating',
+      'tv': 'TV',
+      'dishwasher': 'Dishwasher',
+      'washer': 'Washing Machine',
+      'dryer': 'Dryer',
+      'parking': 'Parking',
+      'gym': 'Gym',
+      'pool': 'Swimming Pool',
+      'security': 'Security System',
+      'elevator': 'Elevator',
+      'balcony': 'Balcony',
+      'workspace': 'Workspace',
+      'phone': 'Phone',
+      'furnished': 'Furnished',
+      'utilities-included': 'Utilities Included',
+      'cleaning': 'Cleaning Service'
+    };
+    
+    return amenityMap[amenityId] || amenityId;
   };
 
   if (isLoading) {
@@ -204,6 +274,33 @@ export default function PropertyDetailPage() {
       </div>
     );
   }
+
+  if (error || !propertyData) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
+            <p className="text-gray-600 mb-6">{error || 'The property you are looking for could not be found.'}</p>
+            <button
+              onClick={() => router.back()}
+              className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const { property, landlord } = propertyData;
+
+  // Fallback image URL for when no images are available
+  const fallbackImage = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
+
+  // Get the main display image or fallback
+  const mainImage = property.image_url || property.display_image || fallbackImage;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -243,31 +340,72 @@ export default function PropertyDetailPage() {
             <div className="space-y-4">
               <div className="relative h-96 w-full rounded-xl overflow-hidden">
                 <Image
-                  src={property.images[selectedImage]}
+                  src={mainImage}
                   alt={property.title}
                   fill
                   className="object-cover"
                 />
               </div>
               <div className="grid grid-cols-4 gap-2">
-                {property.images.map((image, index) => (
-                  <button
+                {/* Assuming property.images is an array of URLs */}
+                {/* This part of the mock data was removed, so we'll use a placeholder or remove if not available */}
+                {/* For now, we'll just show a placeholder grid */}
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <div
                     key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative h-20 w-full rounded-lg overflow-hidden ${
-                      selectedImage === index ? 'ring-2 ring-blue-500' : ''
-                    }`}
+                    className="relative h-20 w-full rounded-lg overflow-hidden bg-gray-200"
                   >
-                    <Image
-                      src={image}
-                      alt={`Property image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg
+                        className="w-6 h-6 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
+
+            {/* Additional Images */}
+            {property.uploaded_images && Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0 ? (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">More photos</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {property.uploaded_images.map((image, index) => (
+                    <div key={index} className="relative h-32 w-full rounded-lg overflow-hidden">
+                      <Image
+                        src={image}
+                        alt={`${property.title} - Image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">More photos</h2>
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-sm">No additional photos available</p>
+                </div>
+              </div>
+            )}
 
             {/* Property Title and Basic Info */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -307,7 +445,7 @@ export default function PropertyDetailPage() {
                 <div className="text-center">
                   <div className="flex items-center justify-center space-x-1">
                     <CalendarIcon className="h-4 w-4 text-gray-400" />
-                    <span className="font-semibold">{property.minimumLease}</span>
+                    <span className="font-semibold">{property.minimum_lease}</span>
                   </div>
                   <p className="text-sm text-gray-500">Min. Lease (months)</p>
                 </div>
@@ -324,19 +462,20 @@ export default function PropertyDetailPage() {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
               <div className="grid grid-cols-2 gap-4">
-                {property.amenities.map((amenity) => {
-                  const AmenityIcon = getAmenityIcon(amenity);
-                  return (
-                    <div key={amenity} className="flex items-center space-x-3">
-                      {AmenityIcon ? (
+                {Array.isArray(property.amenities) && property.amenities.length > 0 ? (
+                  property.amenities.map((amenityId) => {
+                    const AmenityIcon = getAmenityIcon(amenityId);
+                    const displayName = getAmenityDisplayName(amenityId);
+                    return (
+                      <div key={amenityId} className="flex items-center space-x-3">
                         <AmenityIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
-                      ) : (
-                        <div className="h-5 w-5 bg-gray-300 rounded-full flex-shrink-0" />
-                      )}
-                      <span className="text-gray-700">{amenity}</span>
-                    </div>
-                  );
-                })}
+                        <span className="text-gray-700">{displayName}</span>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-gray-500 text-sm">No amenities listed.</p>
+                )}
               </div>
             </div>
 
@@ -346,33 +485,20 @@ export default function PropertyDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-gray-500 text-sm">Property type</span>
-                  <p className="font-medium">{property.details.type}</p>
+                  <p className="font-medium">{String(property.details?.type || 'Unknown')}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Furnished</span>
-                  <p className="font-medium">{property.details.furnished}</p>
+                  <p className="font-medium">{String(property.details?.furnished || 'Unknown')}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Pets allowed</span>
-                  <p className="font-medium">{property.details.petsAllowed ? 'Yes' : 'No'}</p>
+                  <p className="font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Parking</span>
-                  <p className="font-medium">{property.details.parking ? 'Available' : 'Not available'}</p>
+                  <p className="font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
                 </div>
-              </div>
-            </div>
-
-            {/* House Rules */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">House rules</h2>
-              <div className="space-y-2">
-                {property.rules.map((rule) => (
-                  <div key={rule} className="flex items-center space-x-2">
-                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                    <span className="text-gray-700">{rule}</span>
-                  </div>
-                ))}
               </div>
             </div>
 
@@ -380,20 +506,36 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Right Column - Pricing and Actions */}
-          <PropertyPricingCard
-            price={property.price}
-            deposit={property.deposit}
-            availableDate={property.availableDate}
-            minimumLease={property.minimumLease}
-            landlord={property.landlord}
-            details={{
-              type: property.details.type,
-              furnished: property.details.furnished,
-              petsAllowed: property.details.petsAllowed
-            }}
-            onCreateOffer={handleCreateOffer}
-            onChatWithLandlord={handleChatWithLandlord}
-          />
+          {(() => {
+            console.log('Rendering PropertyPricingCard with landlord:', landlord);
+            return (
+              <PropertyPricingCard
+                price={property.price}
+                deposit={0} // Assuming no deposit for now, as it's not in the mock data
+                availableDate={property.available_date || null}
+                minimumLease={property.minimum_lease || 12}
+                landlord={{
+                  id: landlord?.id || '',
+                  uuid: landlord?.uuid || '', // Add uuid for navigation
+                  name: landlord?.name || 'Unknown Landlord',
+                  avatar: landlord?.avatar || '',
+                  rating: landlord?.rating || 0,
+                  reviewCount: landlord?.review_count || 0,
+                  responseTime: landlord?.response_time || 'Unknown',
+                  verified: landlord?.verified || false,
+                  responseRate: landlord?.response_rate || 98,
+                  totalProperties: landlord?.total_properties || 5,
+                }}
+                details={{
+                  type: (property.details?.type as string) || 'Unknown',
+                  furnished: (property.details?.furnished as string) || 'Unknown',
+                  petsAllowed: (property.details?.petsAllowed as boolean) || false
+                }}
+                onCreateOffer={handleCreateOffer}
+                onChatWithLandlord={handleChatWithLandlord}
+              />
+            );
+          })()}
         </div>
       </div>
 
@@ -404,7 +546,7 @@ export default function PropertyDetailPage() {
       <CreateOfferModal
         isOpen={isCreateOfferModalOpen}
         onClose={() => setIsCreateOfferModalOpen(false)}
-        propertyId={Array.isArray(params.id) ? params.id[0] : params.id}
+        propertyId={property.id}
         currentPrice={property.price}
         onOfferSubmit={handleOfferSubmit}
       />

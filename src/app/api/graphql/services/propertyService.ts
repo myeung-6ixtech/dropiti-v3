@@ -11,6 +11,7 @@ export interface PropertyFilters {
   furnished?: string;
   petsAllowed?: boolean;
   parking?: boolean;
+  landlordFirebaseUid?: string; // Add landlord filter
 }
 
 // Hasura filter interface for GraphQL queries
@@ -22,6 +23,7 @@ interface HasuraFilters {
   furnished?: { _eq: string };
   pets_allowed?: { _eq: boolean };
   is_public?: { _eq: boolean };
+  landlord_firebase_uid?: { _eq: string }; // Add landlord filter
 }
 
 // Re-export types for backward compatibility
@@ -218,6 +220,10 @@ export class PropertyService {
 
     if (filters.petsAllowed !== undefined) {
       hasuraFilters.pets_allowed = { _eq: filters.petsAllowed };
+    }
+
+    if (filters.landlordFirebaseUid) {
+      hasuraFilters.landlord_firebase_uid = { _eq: filters.landlordFirebaseUid };
     }
 
     // Only show public properties by default

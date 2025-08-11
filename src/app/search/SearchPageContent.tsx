@@ -2,22 +2,28 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { propertiesAPI } from '@/lib/api-client';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import Footer from '@/components/common/Footer';
 import { Property } from '@/types';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
+// The API returns data in the Property interface format (already transformed)
+// So we can use the Property interface directly
 export default function SearchPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // Add filter panel state
   const [filters, setFilters] = useState({
     location: searchParams.get('location') || '',
     bedrooms: searchParams.get('bedrooms') || '',
     maxPrice: searchParams.get('maxPrice') || '',
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchProperties = useCallback(async () => {
     try {
@@ -102,7 +108,7 @@ export default function SearchPageContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -123,9 +129,9 @@ export default function SearchPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Find Your Perfect Home
           </h1>
@@ -134,21 +140,27 @@ export default function SearchPageContent() {
           </p>
         </div>
 
-        {/* Filters and Results */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Filters Sidebar */}
-          <div className="lg:col-span-1">
-            <ModernFilter
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onClearFilters={clearFilters}
-              onApplyFilters={applyFilters}
-            />
+        {/* Search and Filters */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1 max-w-md">
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search properties..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
+        </div>
 
-          {/* Results */}
-          <div className="lg:col-span-3">
-            {/* Results Header */}
+        {/* Filters and Results */}
+        <div className="w-full">
+          {/* Results - Full width since filter is now an overlay */}
+          <div className="w-full">
+            {/* Results Header with Filter Button */}
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
@@ -158,21 +170,45 @@ export default function SearchPageContent() {
                   Showing results for your search criteria
                 </p>
               </div>
+              
+              {/* Filter Button moved to top right */}
+              <button 
+                onClick={() => setIsFilterOpen(true)}
+                className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                </svg>
+                Filter
+              </button>
             </div>
 
             {/* Properties Grid */}
             {filteredProperties.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredProperties.map((property) => (
-                  <PropertyCard
-                    key={property.id}
-                    property={property}
-                    onViewDetails={(id) => {
-                      // Handle navigation to property detail page
-                      console.log('Navigate to property:', id);
-                    }}
-                  />
-                ))}
+                {filteredProperties.map((property) => {    
+                  // The API already transforms the data, so we can use it directly
+                  // Just ensure we have the property_uuid for navigation
+                  const propertyForCard = {
+                    ...property,
+                    // Ensure property_uuid is available for navigation
+                    property_uuid: property.property_uuid || property.id,
+                  };
+                  
+                  // Debug: Log the final property data
+                  console.log('Final propertyForCard:', propertyForCard);
+                  
+                  return (
+                    <PropertyCard
+                      key={property.id}
+                      property={propertyForCard}
+                      onViewDetails={(uuid) => {
+                        // Handle navigation to property detail page using property_uuid
+                        router.push(`/property/${uuid}`);
+                      }}
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
@@ -190,6 +226,16 @@ export default function SearchPageContent() {
           </div>
         </div>
       </div>
+
+      {/* ModernFilter Overlay - Doesn't affect main layout */}
+      <ModernFilter
+        filters={filters}
+        onFilterChange={handleFilterChange}
+        onClearFilters={clearFilters}
+        onApplyFilters={applyFilters}
+        isOpen={isFilterOpen}
+        onToggle={() => setIsFilterOpen(false)}
+      />
 
       {/* Footer */}
       <Footer />

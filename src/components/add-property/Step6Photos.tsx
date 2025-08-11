@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { 
   PhotoIcon, 
@@ -20,7 +20,14 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = (files: FileList) => {
+  // Initialize photos from data if available
+  useState(() => {
+    if (data?.photos) {
+      setPhotos(data.photos);
+    }
+  });
+
+  const handleFileSelect = useCallback((files: FileList) => {
     const newPhotos = Array.from(files).filter(file => 
       file.type.startsWith('image/') && !photos.find(p => p.name === file.name)
     );
@@ -30,7 +37,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
       setPhotos(updatedPhotos);
       onUpdate({ photos: updatedPhotos });
     }
-  };
+  }, [photos, onUpdate]);
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -57,8 +64,6 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
     onUpdate({ photos: updatedPhotos });
   };
 
-
-
   return (
     <div className="space-y-8">
       <div>
@@ -66,7 +71,8 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
           Upload photos of your property
         </h3>
         <p className="text-gray-600 mb-6">
-          High-quality photos help tenants visualize your property. Upload at least 5 photos for the best results.
+          High-quality photos help tenants visualize your property. Upload at least 5 photos for the best results. 
+          Photos will be automatically uploaded to S3 when you create the listing.
         </p>
 
         {/* Upload Area */}
@@ -133,7 +139,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {photos.map((photo, index) => (
-                <div key={index} className="relative group">
+                <div key={`${photo.name}-${index}`} className="relative group">
                   <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden">
                     <Image
                       src={URL.createObjectURL(photo)}
@@ -144,7 +150,14 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
                     />
                   </div>
                   
-                  {/* Overlay */}
+                  {/* Status Overlay */}
+                  <div className="absolute top-2 left-2 flex items-center space-x-2 bg-white bg-opacity-90 rounded-full px-2 py-1">
+                    <span className="text-xs font-medium text-gray-700">
+                      Ready to Upload
+                    </span>
+                  </div>
+                  
+                  {/* Action Overlay */}
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg">
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
@@ -175,6 +188,20 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
                 </div>
               ))}
             </div>
+
+            {/* Upload Summary */}
+            {photos.length > 0 && (
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-blue-700">
+                    {photos.length} photos ready for upload
+                  </span>
+                  <span className="text-blue-600 font-medium">
+                    Photos will be uploaded automatically when you create the listing
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -187,6 +214,8 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
             <li>• Make sure photos are well-lit and clean</li>
             <li>• Avoid blurry or dark images</li>
             <li>• Maximum 20 photos allowed</li>
+            <li>• Photos will be stored securely in S3 with organized folder structure</li>
+            <li>• Upload happens automatically when you submit the listing</li>
           </ul>
         </div>
       </div>

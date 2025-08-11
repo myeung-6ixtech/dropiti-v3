@@ -12,12 +12,15 @@ import {
 
 interface Landlord {
   id: string;
+  uuid: string; // Add uuid for navigation to user profile
   name: string;
   avatar: string;
   rating: number;
   reviewCount: number;
   responseTime: string;
   verified: boolean;
+  responseRate?: number; // Added for dynamic data
+  totalProperties?: number; // Added for dynamic data
 }
 
 interface PropertyPricingCardProps {
@@ -45,6 +48,12 @@ export default function PropertyPricingCard({
   onCreateOffer,
   onChatWithLandlord
 }: PropertyPricingCardProps) {
+
+  // Fallback image URL for when no landlord avatar is available
+  const fallbackAvatar = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=150&q=80";
+
+  // Get the landlord avatar or fallback
+  const landlordAvatar = landlord.avatar || fallbackAvatar;
 
 
   const formatCurrency = (amount: number) => {
@@ -118,11 +127,16 @@ export default function PropertyPricingCard({
           <div className="flex items-start space-x-4 mb-4">
             <div className="relative">
               <Image
-                src={landlord.avatar}
+                src={landlordAvatar}
                 alt={landlord.name}
                 width={64}
                 height={64}
                 className="rounded-full object-cover"
+                onError={(e) => {
+                  // Fallback to default avatar if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.src = fallbackAvatar;
+                }}
               />
               {landlord.verified && (
                 <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
@@ -133,7 +147,7 @@ export default function PropertyPricingCard({
             <div className="flex-1 min-w-0">
               <div className="flex items-center space-x-2 mb-1">
                 <Link 
-                  href={`/user/${landlord.id}`}
+                  href={`/user/${landlord.uuid}`}
                   className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
                 >
                   {landlord.name}
@@ -178,15 +192,15 @@ export default function PropertyPricingCard({
           <div className="pt-4 border-t border-gray-200">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-lg font-semibold text-gray-900">98%</div>
+                <div className="text-lg font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
                 <div className="text-xs text-gray-500">Response rate</div>
               </div>
               <div>
-                <div className="text-lg font-semibold text-gray-900">1h</div>
+                <div className="text-lg font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
                 <div className="text-xs text-gray-500">Avg. response</div>
               </div>
               <div>
-                <div className="text-lg font-semibold text-gray-900">5</div>
+                <div className="text-lg font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
                 <div className="text-xs text-gray-500">Properties</div>
               </div>
             </div>

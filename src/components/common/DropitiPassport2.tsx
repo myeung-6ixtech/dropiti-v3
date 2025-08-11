@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { getSafeProfileImage } from '@/lib/utils';
 import { 
   StarIcon, 
   CheckCircleIcon,
@@ -12,7 +13,7 @@ import {
 
 interface DropitiPassport2Props {
   user: {
-    name: string;
+    displayName: string;
     avatar: string;
     email: string;
     location?: string;
@@ -46,8 +47,8 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
         <div className="relative">
           <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden ring-4 ring-gray-100">
             <Image
-              src={user.avatar}
-              alt={user.name}
+              src={getSafeProfileImage(user.avatar, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80')}
+              alt={user.displayName}
               width={128}
               height={128}
               className="w-full h-full object-cover"
@@ -63,7 +64,7 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
         {/* Profile Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-3 mb-4">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{user.name}</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{user.displayName}</h1>
             {user.verified && (
               <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
                 Verified
@@ -112,11 +113,35 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
           {/* Languages */}
           <div className="flex items-center space-x-2 mb-4">
             <span className="text-sm text-gray-600">Languages:</span>
-            {user.languages?.map((language) => (
-              <span key={language} className="bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs">
-                {language}
-              </span>
-            ))}
+            {(() => {
+              // Handle languages field - it might be a JSON string, array, or null
+              let languagesArray: string[] = [];
+              
+              if (user.languages) {
+                if (Array.isArray(user.languages)) {
+                  languagesArray = user.languages;
+                } else if (typeof user.languages === 'string') {
+                  try {
+                    const parsed = JSON.parse(user.languages);
+                    languagesArray = Array.isArray(parsed) ? parsed : [];
+                  } catch {
+                    // If parsing fails, treat as comma-separated string
+                    const languagesString = user.languages as string;
+                    languagesArray = languagesString.split(',').map((lang: string) => lang.trim()).filter((lang: string) => lang);
+                  }
+                }
+              }
+              
+              return languagesArray.length > 0 ? (
+                languagesArray.map((language) => (
+                  <span key={language} className="bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs">
+                    {language}
+                  </span>
+                ))
+              ) : (
+                <span className="text-gray-400 text-xs">Not specified</span>
+              );
+            })()}
           </div>
 
           {/* About */}

@@ -58,3 +58,93 @@ export function formatAddress(address: unknown): string {
 export function formatPropertyLocation(location: unknown): string {
   return formatAddress(location);
 }
+
+/**
+ * Safely get profile image URL with fallback
+ * @param imageUrl - The original image URL
+ * @param fallbackUrl - Fallback image URL if the original is invalid
+ * @returns Safe image URL or fallback
+ */
+export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: string): string => {
+  if (!imageUrl) {
+    return fallbackUrl || '/images/default-avatar.png';
+  }
+
+  // Check if the URL is valid
+  try {
+    const url = new URL(imageUrl);
+    
+    // Allow common profile image hostnames
+    const allowedHostnames = [
+      'lh3.googleusercontent.com',
+      'lh4.googleusercontent.com',
+      'lh5.googleusercontent.com',
+      'lh6.googleusercontent.com',
+      'graph.facebook.com',
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'picsum.photos',
+      'placehold.co'
+    ];
+
+    if (allowedHostnames.includes(url.hostname)) {
+      return imageUrl;
+    }
+
+    // If it's a relative URL or localhost, allow it
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.protocol === 'data:') {
+      return imageUrl;
+    }
+
+    // If it's a relative path, allow it
+    if (!url.hostname) {
+      return imageUrl;
+    }
+
+    // For other external URLs, return fallback
+    console.warn(`Profile image hostname not allowed: ${url.hostname}`);
+    return fallbackUrl || '/images/default-avatar.png';
+  } catch {
+    // If URL parsing fails, it might be a relative path
+    if (imageUrl.startsWith('/') || imageUrl.startsWith('./')) {
+      return imageUrl;
+    }
+    
+    console.warn(`Invalid profile image URL: ${imageUrl}`);
+    return fallbackUrl || '/images/default-avatar.png';
+  }
+};
+
+/**
+ * Check if an image URL is safe to use with Next.js Image component
+ * @param imageUrl - The image URL to check
+ * @returns boolean indicating if the URL is safe
+ */
+export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
+  if (!imageUrl) return false;
+
+  try {
+    const url = new URL(imageUrl);
+    
+    const allowedHostnames = [
+      'lh3.googleusercontent.com',
+      'lh4.googleusercontent.com',
+      'lh5.googleusercontent.com',
+      'lh6.googleusercontent.com',
+      'graph.facebook.com',
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'picsum.photos',
+      'placehold.co'
+    ];
+
+    return allowedHostnames.includes(url.hostname) || 
+           url.hostname === 'localhost' || 
+           url.hostname === '127.0.0.1' || 
+           url.protocol === 'data:' ||
+           !url.hostname; // Relative paths
+  } catch {
+    // If URL parsing fails, it might be a relative path
+    return imageUrl.startsWith('/') || imageUrl.startsWith('./');
+  }
+};

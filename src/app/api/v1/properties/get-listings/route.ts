@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   const maxPrice = searchParams.get('maxPrice');
   const bedrooms = searchParams.get('bedrooms');
   const type = searchParams.get('type');
+  const landlordFirebaseUid = searchParams.get('landlord_firebase_uid'); // Add landlord filter
   
   try {
 
@@ -21,6 +22,7 @@ export async function GET(request: NextRequest) {
       maxPrice?: number;
       bedrooms?: number;
       type?: string;
+      landlordFirebaseUid?: string; // Add landlord filter to filters
     } = {};
     
     if (location) {
@@ -43,6 +45,10 @@ export async function GET(request: NextRequest) {
       filters.type = type;
     }
 
+    if (landlordFirebaseUid) {
+      filters.landlordFirebaseUid = landlordFirebaseUid; // Add landlord filter
+    }
+
     // Use PropertyService instead of direct GraphQL query
     const data = await PropertyService.getProperties(limit, offset, Object.keys(filters).length > 0 ? filters : undefined);
     
@@ -50,6 +56,7 @@ export async function GET(request: NextRequest) {
     type PropertyResponse = {
       real_estate_property_listing: Array<{
         id: string;
+        property_uuid: string; // Add property_uuid field
         title: string;
         description: string;
         address: unknown;
@@ -88,6 +95,7 @@ export async function GET(request: NextRequest) {
     // Transform the data to match your frontend expectations
     const transformedProperties = typedData.real_estate_property_listing.map((property) => ({
       id: property.id,
+      property_uuid: property.property_uuid, // Add property_uuid for UUID-based navigation
       title: property.title,
       description: property.description,
       location: formatPropertyLocation(property.address),
@@ -120,8 +128,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Get properties error:', error);
-    
+    console.error('Get properties error:', error); 
           // For development, return mock data if Hasura is not configured
       if (!process.env.HASURA_ENDPOINT) {
         console.log('Hasura not configured, returning mock data');
