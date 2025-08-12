@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { HeartIcon, EyeIcon, ShareIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { formatPropertyLocation } from '@/lib/utils';
 
 export default function SavedPropertiesPage() {
@@ -68,13 +68,13 @@ export default function SavedPropertiesPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <button className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <button className="btn-outline-sm">
                       <EyeIcon className="h-4 w-4 mr-1" />
-                      View Details
+                      View
                     </button>
-                    <button className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                      <ShareIcon className="h-4 w-4 mr-1" />
-                      Share
+                    <button className="btn-outline-sm">
+                      <HeartIcon className="h-4 w-4 mr-1" />
+                      Remove
                     </button>
                   </div>
                   <span className="text-xs text-gray-500">Saved {property.savedDate}</span>

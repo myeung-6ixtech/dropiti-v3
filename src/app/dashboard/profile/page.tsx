@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
-import Image from 'next/image';
-import { getSafeProfileImage } from '@/lib/utils';
 import { 
   UserIcon,
   GlobeAltIcon,
@@ -16,6 +14,7 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
+import ProfilePhotoUpload from '@/components/common/ProfilePhotoUpload';
 import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages, UpdateUserInput } from '@/types';
 
 interface UserProfile {
@@ -95,6 +94,10 @@ export default function ProfilePage() {
             console.log('API languages type:', typeof userData.languages);
             console.log('API languages isArray:', Array.isArray(userData.languages));
             
+            // Debug: Log the photo URL
+            console.log('API photo_url field:', userData.photo_url);
+            console.log('API photo_url type:', typeof userData.photo_url);
+            
             const newProfile: UserProfile = {
               displayName: userData.display_name || 'Unknown User',
               avatar: userData.photo_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
@@ -132,6 +135,10 @@ export default function ProfilePage() {
                 totalGuests: userData.total_guests || 0
               }
             };
+            
+            // Debug: Log the final profile avatar
+            console.log('Final profile avatar:', newProfile.avatar);
+            
             setProfile(newProfile);
             setTempProfile(newProfile);
           }
@@ -401,7 +408,7 @@ export default function ProfilePage() {
         <div className="space-y-6">
           {/* Display Name Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
                 Display Name
@@ -412,47 +419,30 @@ export default function ProfilePage() {
               value={tempProfile.displayName}
               onChange={(e) => handleInputChange('displayName', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-input disabled:bg-gray-50 disabled:text-gray-500"
               placeholder="Enter your display name"
             />
           </div>
 
           {/* Profile Photo */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
                 Profile Photo
               </span>
             </label>
-            <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-200">
-                <Image
-                  src={getSafeProfileImage(tempProfile.avatar, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80')}
-                  alt="Profile"
-                  width={80}
-                  height={80}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              {isEditing && (
-                <div>
-                  <input
-                    type="text"
-                    value={tempProfile.avatar || ''}
-                    onChange={(e) => handleInputChange('avatar', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter image URL"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Enter a valid image URL for your profile photo</p>
-                </div>
-              )}
-            </div>
+            <ProfilePhotoUpload
+              currentPhotoUrl={tempProfile.avatar}
+              onPhotoChange={(newPhotoUrl) => handleInputChange('avatar', newPhotoUrl)}
+              isEditing={isEditing}
+              disabled={isLoading}
+            />
           </div>
 
           {/* About Yourself */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
                 Tell me About Yourself?
@@ -464,7 +454,7 @@ export default function ProfilePage() {
               disabled={!isEditing}
               rows={4}
               maxLength={500}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-textarea disabled:bg-gray-50 disabled:text-gray-500"
               placeholder="Share a bit about yourself, your interests, and what makes you unique..."
             />
             <div className="flex justify-between items-center mt-1">
@@ -477,7 +467,7 @@ export default function ProfilePage() {
 
           {/* Languages */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <GlobeAltIcon className="h-4 w-4 mr-2 text-blue-600" />
                 Languages you speak?
@@ -506,7 +496,7 @@ export default function ProfilePage() {
 
           {/* Education */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <AcademicCapIcon className="h-4 w-4 mr-2 text-green-600" />
                 What is your education level?
@@ -516,7 +506,7 @@ export default function ProfilePage() {
               value={tempProfile.education || ''}
               onChange={(e) => handleInputChange('education', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
             >
               <option value="">Select education level</option>
               {educationOptions.map((option) => (
@@ -529,7 +519,7 @@ export default function ProfilePage() {
 
           {/* Occupation */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <BriefcaseIcon className="h-4 w-4 mr-2 text-purple-600" />
                 What is your occupation?
@@ -539,7 +529,7 @@ export default function ProfilePage() {
               value={tempProfile.occupation || ''}
               onChange={(e) => handleInputChange('occupation', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
             >
               <option value="">Select occupation</option>
               {occupationOptions.map((option) => (
@@ -552,15 +542,17 @@ export default function ProfilePage() {
 
           {/* Marital Status */}
           <div>
-            <label className="flex items-center">
-              <HeartIcon className="h-4 w-4 mr-2 text-pink-600" />
-              What is your marital status?
+            <label className="form-label">
+              <span className="flex items-center">
+                <HeartIcon className="h-4 w-4 mr-2 text-pink-600" />
+                What is your marital status?
+              </span>
             </label>
             <select
               value={tempProfile.maritalStatus || ''}
               onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
             >
               <option value="">Select marital status</option>
               {maritalStatusOptions.map((option) => (
@@ -573,7 +565,7 @@ export default function ProfilePage() {
 
           {/* Phone Number */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
                 Phone Number
@@ -584,14 +576,14 @@ export default function ProfilePage() {
               value={tempProfile.phoneNumber || ''}
               onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-input disabled:bg-gray-50 disabled:text-gray-500"
               placeholder="Enter your phone number"
             />
           </div>
 
           {/* Response Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <ClockIcon className="h-4 w-4 mr-2 text-blue-600" />
                 Typical Response Time
@@ -601,7 +593,7 @@ export default function ProfilePage() {
               value={tempProfile.responseTime || ''}
               onChange={(e) => handleInputChange('responseTime', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
             >
               <option value="">Select response time</option>
               <option value="Within 1 hour">Within 1 hour</option>
@@ -615,7 +607,7 @@ export default function ProfilePage() {
 
           {/* Location */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="form-label">
               <span className="flex items-center">
                 <MapPinIcon className="h-4 w-4 mr-2 text-red-600" />
                 Location
@@ -626,7 +618,7 @@ export default function ProfilePage() {
               value={tempProfile.location || ''}
               onChange={(e) => handleInputChange('location', e.target.value)}
               disabled={!isEditing}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="form-input disabled:bg-gray-50 disabled:text-gray-500"
               placeholder="Enter your city and country"
             />
           </div>

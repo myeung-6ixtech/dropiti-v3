@@ -87,7 +87,7 @@ export default function SignUpForm() {
         )}
         
         <form onSubmit={handleSubmit} className="auth-form">
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Full Name <span className="text-red-500">*</span>
             </label>
@@ -101,7 +101,7 @@ export default function SignUpForm() {
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Email address <span className="text-red-500">*</span>
             </label>
@@ -115,7 +115,7 @@ export default function SignUpForm() {
             />
           </div>
           
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Password <span className="text-red-500">*</span>
             </label>
@@ -138,7 +138,7 @@ export default function SignUpForm() {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Confirm Password <span className="text-red-500">*</span>
             </label>

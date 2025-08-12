@@ -7,7 +7,7 @@ import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import Footer from '@/components/common/Footer';
 import { Property } from '@/types';
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, MapPinIcon, HomeIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 
 // The API returns data in the Property interface format (already transformed)
 // So we can use the Property interface directly
@@ -25,6 +25,17 @@ export default function SearchPageContent() {
   });
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Update URL when filters change
+  const updateURL = useCallback((newFilters: typeof filters) => {
+    const params = new URLSearchParams();
+    if (newFilters.location) params.append('location', newFilters.location);
+    if (newFilters.bedrooms) params.append('bedrooms', newFilters.bedrooms);
+    if (newFilters.maxPrice) params.append('maxPrice', newFilters.maxPrice);
+    
+    const newURL = `/search?${params.toString()}`;
+    router.replace(newURL, { scroll: false });
+  }, [router]);
+
   const fetchProperties = useCallback(async () => {
     try {
       setLoading(true);
@@ -38,7 +49,7 @@ export default function SearchPageContent() {
       });
       
       if (response.success) {
-        console.log(response.data);
+        console.log('API Response:', response.data);
         setProperties(response.data);
         setFilteredProperties(response.data);
       }
@@ -87,27 +98,41 @@ export default function SearchPageContent() {
   }, [filters, properties, filterProperties]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       [key]: value
-    }));
+    };
+    setFilters(newFilters);
+    updateURL(newFilters);
   };
 
   const clearFilters = () => {
-    setFilters({
+    const newFilters = {
       location: '',
       bedrooms: '',
       maxPrice: '',
-    });
+    };
+    setFilters(newFilters);
+    updateURL(newFilters);
   };
 
   const applyFilters = () => {
     filterProperties();
   };
 
+  // Get search summary for display
+  const getSearchSummary = () => {
+    const criteria = [];
+    if (filters.location) criteria.push(filters.location);
+    if (filters.bedrooms) criteria.push(`${filters.bedrooms}+ bedrooms`);
+    if (filters.maxPrice) criteria.push(`Under ${parseInt(filters.maxPrice).toLocaleString()} HKD`);
+    
+    return criteria.length > 0 ? criteria.join(' • ') : 'All properties';
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-white-50">
+      <div className="min-h-screen bg-gray-50">
         <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
@@ -140,8 +165,48 @@ export default function SearchPageContent() {
           </p>
         </div>
 
+        {/* Search Summary - Show current search criteria */}
+        {(filters.location || filters.bedrooms || filters.maxPrice) && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 text-blue-700">
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                  <span className="font-medium">Search Results for:</span>
+                </div>
+                <div className="flex items-center space-x-4 text-sm text-blue-600">
+                  {filters.location && (
+                    <div className="flex items-center space-x-1">
+                      <MapPinIcon className="h-4 w-4" />
+                      <span>{filters.location}</span>
+                    </div>
+                  )}
+                  {filters.bedrooms && (
+                    <div className="flex items-center space-x-1">
+                      <HomeIcon className="h-4 w-4" />
+                      <span>{filters.bedrooms}+ bedrooms</span>
+                    </div>
+                  )}
+                  {filters.maxPrice && (
+                    <div className="flex items-center space-x-1">
+                      <CurrencyDollarIcon className="h-4 w-4" />
+                      <span>Under {parseInt(filters.maxPrice).toLocaleString()} HKD</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={clearFilters}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
+              >
+                Clear all
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Search and Filters */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 mb-8">
+        <div className="bg-white border border-gray-200 rounded-lg px-6 py-4 mb-8">
           <div className="flex items-center space-x-4">
             <div className="relative flex-1 max-w-md">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -150,7 +215,7 @@ export default function SearchPageContent() {
                 placeholder="Search properties..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="form-input pl-10"
               />
             </div>
           </div>
@@ -167,14 +232,14 @@ export default function SearchPageContent() {
                   {filteredProperties.length} Properties Found
                 </h2>
                 <p className="text-gray-600">
-                  Showing results for your search criteria
+                  {getSearchSummary()}
                 </p>
               </div>
               
               {/* Filter Button moved to top right */}
               <button 
                 onClick={() => setIsFilterOpen(true)}
-                className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="btn-outline-md"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
@@ -194,9 +259,6 @@ export default function SearchPageContent() {
                     // Ensure property_uuid is available for navigation
                     property_uuid: property.property_uuid || property.id,
                   };
-                  
-                  // Debug: Log the final property data
-                  console.log('Final propertyForCard:', propertyForCard);
                   
                   return (
                     <PropertyCard
@@ -221,6 +283,12 @@ export default function SearchPageContent() {
                 <p className="text-gray-600">
                   Try adjusting your filters or search criteria
                 </p>
+                <button
+                  onClick={clearFilters}
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Clear all filters
+                </button>
               </div>
             )}
           </div>

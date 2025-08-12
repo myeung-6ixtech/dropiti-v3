@@ -23,6 +23,14 @@ export default function HomePage() {
     router.push(`/search?${params.toString()}`);
   };
 
+  const getSearchSummary = () => {
+    const parts: string[] = [];
+    if (searchData.location) parts.push(`${searchData.location} property`);
+    if (searchData.bedrooms) parts.push(`${searchData.bedrooms} bedroom`);
+    if (searchData.maxPrice) parts.push(`max price HKD ${searchData.maxPrice}`);
+    return parts.join(' ');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
@@ -85,7 +93,7 @@ export default function HomePage() {
                           type="number"
                           value={searchData.maxPrice}
                           onChange={(e) => setSearchData({ ...searchData, maxPrice: e.target.value })}
-                          placeholder="Max Price"
+                          placeholder="Max Price (HKD)"
                           className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl"
                         />
                       </div>
@@ -94,10 +102,19 @@ export default function HomePage() {
                       <button
                         type="submit"
                         className="flex-shrink-0 w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        disabled={!searchData.location && !searchData.bedrooms && !searchData.maxPrice}
                       >
                         <MagnifyingGlassIcon className="h-6 w-6 text-white" />
                       </button>
                     </div>
+                    
+                    {/* Search Hint */}
+                    <p className="mt-3 text-sm text-gray-500 text-center lg:text-left">
+                      {searchData.location || searchData.bedrooms || searchData.maxPrice 
+                        ? `Searching for: ${getSearchSummary()}`
+                        : 'Enter your preferences above to start searching'
+                      }
+                    </p>
                   </form>
                 </div>
               </div>

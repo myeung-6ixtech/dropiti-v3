@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
+import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import Link from 'next/link';
 import { Property } from '@/types';
 
 export default function PropertiesPage() {
@@ -99,10 +100,10 @@ export default function PropertiesPage() {
               placeholder="Search properties..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="form-input pl-10"
             />
           </div>
-          <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          <button className="btn-outline-md">
             <FunnelIcon className="h-4 w-4 mr-2" />
             Filter
           </button>
@@ -111,12 +112,7 @@ export default function PropertiesPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading your properties...</p>
-          </div>
-        </div>
+        <CenteredLoadingSpinner />
       )}
 
       {/* Error State */}

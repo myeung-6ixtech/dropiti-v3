@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
-// Type definitions for GraphQL response
+// Type definitions for GraphQL responses
 interface GraphQLOffer {
   id: string;
   offer_key: string;
@@ -18,13 +18,46 @@ interface GraphQLOffer {
   created_at: string;
 }
 
-interface GraphQLResponse {
+interface GraphQLUser {
+  uuid: string;
+  display_name: string;
+  email: string;
+  phone_number: string;
+  photo_url: string;
+}
+
+interface GraphQLProperty {
+  title: string;
+  location: string;
+  rental_price: number;
+  rental_price_currency: string;
+  property_type: string;
+  bedrooms: number;
+  bathrooms: number;
+  image_url: string;
+}
+
+interface GraphQLOffersResponse {
   real_estate_offer: GraphQLOffer[];
 }
 
+interface GraphQLUserResponse {
+  real_estate_user_by_pk: GraphQLUser;
+}
+
+interface GraphQLPropertyResponse {
+  real_estate_property_listing_by_pk: GraphQLProperty;
+}
+
 const GET_OFFERS_BY_RECIPIENT_QUERY = `
-  query GetOffersByRecipient($recipientFirebaseUid: String!) {
-    real_estate_offer(where: {recipient_firebase_uid: {_eq: $recipientFirebaseUid}}, order_by: {created_at: desc}) {
+  query GetOffersByRecipient($recipientFirebaseUid: String!, $propertyUuid: String) {
+    real_estate_offer(
+      where: {
+        recipient_firebase_uid: {_eq: $recipientFirebaseUid}
+        property_uuid: {_eq: $propertyUuid}
+      }, 
+      order_by: {created_at: desc}
+    ) {
       id
       offer_key
       property_uuid
@@ -38,6 +71,58 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
       offer_status
       is_active
       created_at
+    }
+  }
+`;
+
+const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
+  query GetOffersByRecipient($recipientFirebaseUid: String!) {
+    real_estate_offer(
+      where: {
+        recipient_firebase_uid: {_eq: $recipientFirebaseUid}
+      }, 
+      order_by: {created_at: desc}
+    ) {
+      id
+      offer_key
+      property_uuid
+      initiator_firebase_uid
+      recipient_firebase_uid
+      proposing_rent_price
+      proposing_rent_price_currency
+      num_leasing_months
+      payment_frequency
+      move_in_date
+      offer_status
+      is_active
+      created_at
+    }
+  }
+`;
+
+const GET_USER_BY_FIREBASE_UID_QUERY = `
+  query GetUserByFirebaseUid($firebaseUid: String!) {
+    real_estate_user_by_pk(firebase_uid: $firebaseUid) {
+      uuid
+      display_name
+      email
+      phone_number
+      photo_url
+    }
+  }
+`;
+
+const GET_PROPERTY_BY_UUID_QUERY = `
+  query GetPropertyByUuid($propertyUuid: String!) {
+    real_estate_property_listing_by_pk(property_uuid: $propertyUuid) {
+      title
+      location
+      rental_price
+      rental_price_currency
+      property_type
+      bedrooms
+      bathrooms
+      image_url
     }
   }
 `;
@@ -68,35 +153,99 @@ export async function GET(request: NextRequest) {
       variables.propertyUuid = propertyUuid;
     }
 
-    const data = await executeQuery(GET_OFFERS_BY_RECIPIENT_QUERY, variables) as GraphQLResponse;
+    // Choose the appropriate query based on whether propertyUuid is provided
+    const query = propertyUuid ? GET_OFFERS_BY_RECIPIENT_QUERY : GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY;
+    
+    // First, fetch the offers
+    const offersData = await executeQuery(query, variables) as GraphQLOffersResponse;
 
-    console.log('Get Offers API: GraphQL response:', data);
+    console.log('Get Offers API: Offers response:', offersData);
 
-    // Check if data exists and has the expected structure
-    if (!data || !data.real_estate_offer) {
-      console.error('Invalid data structure received:', data);
+    // Check if offers data exists and has the expected structure
+    if (!offersData || !offersData.real_estate_offer) {
+      console.error('Invalid offers data structure received:', offersData);
       return NextResponse.json(
-        { error: 'Invalid data structure received from GraphQL' },
+        { error: 'Invalid offers data structure received from GraphQL' },
         { status: 500 }
       );
     }
 
+    // Collect unique user IDs and property UUIDs to fetch additional data
+    const uniqueUserIds = [...new Set(offersData.real_estate_offer.map(offer => offer.initiator_firebase_uid))];
+    const uniquePropertyUuids = [...new Set(offersData.real_estate_offer.map(offer => offer.property_uuid))];
+
+    console.log('Get Offers API: Unique user IDs:', uniqueUserIds);
+    console.log('Get Offers API: Unique property UUIDs:', uniquePropertyUuids);
+
+    // Fetch user details for all unique initiators
+    const userDetails: Record<string, GraphQLUser> = {};
+    for (const userId of uniqueUserIds) {
+      try {
+        const userData = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { firebaseUid: userId }) as GraphQLUserResponse;
+        if (userData?.real_estate_user_by_pk) {
+          userDetails[userId] = userData.real_estate_user_by_pk;
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch user details for ${userId}:`, error);
+      }
+    }
+
+    // Fetch property details for all unique properties
+    const propertyDetails: Record<string, GraphQLProperty> = {};
+    for (const propUuid of uniquePropertyUuids) {
+      try {
+        const propertyData = await executeQuery(GET_PROPERTY_BY_UUID_QUERY, { propertyUuid: propUuid }) as GraphQLPropertyResponse;
+        if (propertyData?.real_estate_property_listing_by_pk) {
+          propertyDetails[propUuid] = propertyData.real_estate_property_listing_by_pk;
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch property details for ${propUuid}:`, error);
+      }
+    }
+
+    console.log('Get Offers API: User details fetched:', Object.keys(userDetails).length);
+    console.log('Get Offers API: Property details fetched:', Object.keys(propertyDetails).length);
+
     // Transform the data to match frontend expectations
-    const transformedOffers = data.real_estate_offer.map((offer: GraphQLOffer) => ({
-      id: offer.id,
-      offerKey: offer.offer_key,
-      propertyUuid: offer.property_uuid,
-      initiatorFirebaseUid: offer.initiator_firebase_uid,
-      recipientFirebaseUid: offer.recipient_firebase_uid,
-      proposingRentPrice: offer.proposing_rent_price,
-      proposingRentPriceCurrency: offer.proposing_rent_price_currency,
-      numLeasingMonths: offer.num_leasing_months,
-      paymentFrequency: offer.payment_frequency,
-      moveInDate: offer.move_in_date,
-      offerStatus: offer.offer_status,
-      isActive: offer.is_active,
-      createdAt: offer.created_at,
-    }));
+    const transformedOffers = offersData.real_estate_offer.map((offer: GraphQLOffer) => {
+      const initiator = userDetails[offer.initiator_firebase_uid];
+      const property = propertyDetails[offer.property_uuid];
+
+      return {
+        id: offer.id,
+        offerKey: offer.offer_key,
+        propertyUuid: offer.property_uuid,
+        initiatorFirebaseUid: offer.initiator_firebase_uid,
+        recipientFirebaseUid: offer.recipient_firebase_uid,
+        proposingRentPrice: offer.proposing_rent_price,
+        proposingRentPriceCurrency: offer.proposing_rent_price_currency,
+        numLeasingMonths: offer.num_leasing_months,
+        paymentFrequency: offer.payment_frequency,
+        moveInDate: offer.move_in_date,
+        offerStatus: offer.offer_status,
+        isActive: offer.is_active,
+        createdAt: offer.created_at,
+        // Include initiator (tenant) details
+        initiator: initiator ? {
+          uuid: initiator.uuid,
+          displayName: initiator.display_name,
+          email: initiator.email,
+          phoneNumber: initiator.phone_number,
+          photoUrl: initiator.photo_url,
+        } : null,
+        // Include property details
+        property: property ? {
+          title: property.title,
+          location: property.location,
+          rentalPrice: property.rental_price,
+          rentalPriceCurrency: property.rental_price_currency,
+          propertyType: property.property_type,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          imageUrl: property.image_url,
+        } : null,
+      };
+    });
 
     return NextResponse.json({
       success: true,

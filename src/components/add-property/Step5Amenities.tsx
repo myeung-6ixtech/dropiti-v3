@@ -2,20 +2,22 @@
 
 import { useState } from 'react';
 import { 
-  WifiIcon,
-  TvIcon,
-  TruckIcon,
-  ShieldCheckIcon,
-  KeyIcon,
-  CogIcon,
-  HomeIcon,
-  ComputerDesktopIcon,
-  PhoneIcon,
-  HeartIcon,
-  FireIcon,
-  SunIcon,
-  SparklesIcon
-} from '@heroicons/react/24/outline';
+  Wifi,
+  AirConditioner,
+  TV,
+  WashingMachine,
+  CarPark,
+  Gym,
+  SwimmingPool,
+  SecurityGuard,
+  Elevator,
+  Balcony,
+  Table,
+  Chat,
+  Home,
+  Lightning,
+  Clean
+} from '@/assets/icons';
 
 interface Step5AmenitiesProps {
   data?: {
@@ -28,109 +30,109 @@ const amenities = [
   {
     id: 'wifi',
     name: 'WiFi',
-    icon: WifiIcon,
+    icon: Wifi,
     category: 'Internet & Technology'
   },
   {
     id: 'air-conditioning',
     name: 'Air Conditioning',
-    icon: HeartIcon,
+    icon: AirConditioner,
     category: 'Climate Control'
   },
   {
     id: 'heating',
     name: 'Heating',
-    icon: FireIcon,
+    icon: Lightning,
     category: 'Climate Control'
   },
   {
     id: 'tv',
     name: 'TV',
-    icon: TvIcon,
+    icon: TV,
     category: 'Entertainment'
   },
   {
     id: 'dishwasher',
     name: 'Dishwasher',
-    icon: CogIcon,
+    icon: Clean,
     category: 'Kitchen'
   },
   {
     id: 'washer',
     name: 'Washing Machine',
-    icon: CogIcon,
+    icon: WashingMachine,
     category: 'Laundry'
   },
   {
     id: 'dryer',
     name: 'Dryer',
-    icon: CogIcon,
+    icon: WashingMachine,
     category: 'Laundry'
   },
   {
     id: 'parking',
     name: 'Parking',
-    icon: TruckIcon,
+    icon: CarPark,
     category: 'Transportation'
   },
   {
     id: 'gym',
     name: 'Gym',
-    icon: HeartIcon,
+    icon: Gym,
     category: 'Fitness'
   },
   {
     id: 'pool',
     name: 'Swimming Pool',
-    icon: HeartIcon,
+    icon: SwimmingPool,
     category: 'Recreation'
   },
   {
     id: 'security',
     name: 'Security System',
-    icon: ShieldCheckIcon,
+    icon: SecurityGuard,
     category: 'Safety'
   },
   {
     id: 'elevator',
     name: 'Elevator',
-    icon: KeyIcon,
+    icon: Elevator,
     category: 'Accessibility'
   },
   {
     id: 'balcony',
     name: 'Balcony',
-    icon: HomeIcon,
+    icon: Balcony,
     category: 'Outdoor'
   },
   {
     id: 'workspace',
     name: 'Workspace',
-    icon: ComputerDesktopIcon,
+    icon: Table,
     category: 'Work'
   },
   {
     id: 'phone',
     name: 'Phone',
-    icon: PhoneIcon,
+    icon: Chat,
     category: 'Communication'
   },
   {
     id: 'furnished',
     name: 'Furnished',
-    icon: HomeIcon,
+    icon: Home,
     category: 'Furnishing'
   },
   {
     id: 'utilities-included',
     name: 'Utilities Included',
-    icon: SunIcon,
+    icon: Lightning,
     category: 'Utilities'
   },
   {
     id: 'cleaning',
     name: 'Cleaning Service',
-    icon: SparklesIcon,
+    icon: Clean,
     category: 'Services'
   }
 ];
@@ -222,6 +224,13 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-600'
                 }`}>
+                  <amenity.icon 
+                    className={`w-6 h-6 ${
+                      selectedAmenities.includes(amenity.id)
+                        ? 'text-white'
+                        : 'text-gray-600'
+                    }`}
+                  />
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900 text-sm">{amenity.name}</h4>

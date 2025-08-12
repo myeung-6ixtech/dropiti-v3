@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { PropertyDataForAPI, CreateUserInput, User } from '@/types';
+import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
 
 // Base API configuration
 const apiClient = axios.create({
@@ -285,6 +286,26 @@ export const offersAPI = {
     }
   },
 
+  // Get offers by initiator (user who created the offers)
+  getOffersByInitiator: async (params: {
+    initiatorFirebaseUid: string;
+  }) => {
+    try {
+      console.log('API Client: Fetching offers by initiator:', params);
+      const response = await apiClient.get('/offers/get-offers-by-initiator', { params });
+      console.log('API Client: Offers by initiator response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Get offers by initiator error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
   // Create a new offer
   createOffer: async (offerData: {
     propertyId: string; // This maps to property_uuid in the database
@@ -327,6 +348,127 @@ export const searchAPI = {
     }) => {
     const response = await apiClient.post('/search/properties', searchParams);
     return response.data;
+  },
+};
+
+// Reviews API
+export const reviewsAPI = {
+  // Create a new review
+  createReview: async (reviewData: CreateReviewInput) => {
+    try {
+      console.log('API Client: Creating review:', reviewData);
+      const response = await apiClient.post('/reviews/create-review', reviewData);
+      console.log('API Client: Review creation response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Create review error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
+  // Get reviews by user (either as reviewer or reviewed)
+  getReviewsByUser: async (params: {
+    userFirebaseUid: string;
+    reviewType?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    try {
+      console.log('API Client: Fetching reviews for user:', params);
+      const response = await apiClient.get('/reviews/get-reviews-by-user', { params });
+      console.log('API Client: Reviews response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Get reviews by user error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
+  // Get reviews by property
+  getReviewsByProperty: async (params: {
+    propertyUuid: string;
+    reviewType?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    try {
+      console.log('API Client: Fetching reviews for property:', params);
+      const response = await apiClient.get('/reviews/get-reviews-by-property', { params });
+      console.log('API Client: Property reviews response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Get reviews by property error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
+  // Update a review
+  updateReview: async (reviewUuid: string, updateData: UpdateReviewInput) => {
+    try {
+      console.log('API Client: Updating review:', { reviewUuid, updateData });
+      const response = await apiClient.put(`/reviews/update-review?reviewUuid=${reviewUuid}`, updateData);
+      console.log('API Client: Review update response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Update review error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
+  // Delete a review
+  deleteReview: async (reviewUuid: string) => {
+    try {
+      console.log('API Client: Deleting review:', reviewUuid);
+      const response = await apiClient.delete(`/reviews/delete-review?reviewUuid=${reviewUuid}`);
+      console.log('API Client: Review deletion response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Delete review error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
+  // Mark a review as helpful
+  markReviewHelpful: async (reviewUuid: string) => {
+    try {
+      console.log('API Client: Marking review as helpful:', reviewUuid);
+      const response = await apiClient.post(`/reviews/mark-helpful?reviewUuid=${reviewUuid}`);
+      console.log('API Client: Mark helpful response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Mark review helpful error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
   },
 };
 
