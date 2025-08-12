@@ -264,15 +264,52 @@ export const offersAPI = {
     return response.data;
   },
 
+  // Get offers by recipient (landlord) Firebase UID
+  getOffersByRecipient: async (params: {
+    recipientFirebaseUid: string;
+    propertyUuid?: string; // Optional: filter by specific property
+  }) => {
+    try {
+      console.log('API Client: Fetching offers for recipient:', params);
+      const response = await apiClient.get('/offers/get-offers-by-id', { params });
+      console.log('API Client: Offers response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Get offers by recipient error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
+  },
+
   // Create a new offer
   createOffer: async (offerData: {
-    propertyId: string;
-    userId: string;
-    amount: number;
-    message: string;
+    propertyId: string; // This maps to property_uuid in the database
+    initiatorFirebaseUid: string;
+    recipientFirebaseUid: string;
+    proposingRentPrice: number;
+    numLeasingMonths: number;
+    paymentFrequency: string;
+    moveInDate: string;
+    currency?: string;
   }) => {
-    const response = await apiClient.post('/offers/create-offer', offerData);
-    return response.data;
+    try {
+      console.log('API Client: Creating offer:', offerData);
+      const response = await apiClient.post('/offers/create-offer', offerData);
+      console.log('API Client: Offer creation response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('API Client: Create offer error:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error('Error response:', axiosError.response.data);
+        console.error('Error status:', axiosError.response.status);
+      }
+      throw error;
+    }
   },
 };
 

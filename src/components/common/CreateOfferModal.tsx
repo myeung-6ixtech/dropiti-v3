@@ -5,7 +5,6 @@ import { Modal } from '@/components/ui/modal';
 import { 
   CurrencyDollarIcon, 
   CalendarIcon, 
-  ClockIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
@@ -14,15 +13,17 @@ interface CreateOfferModalProps {
   onClose: () => void;
   propertyId?: string;
   currentPrice?: number;
+  recipientFirebaseUid?: string; // Add recipient (landlord) Firebase UID
   onOfferSubmit?: (offerData: OfferData) => void;
 }
 
 interface OfferData {
   rentalPrice: number;
   leaseDuration: number;
-  paymentFrequency: 'full' | 'monthly';
-  paymentInterval?: number;
+  paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
   moveInDate: string;
+  currency?: string;
+  message?: string;
 }
 
 export default function CreateOfferModal({ 
@@ -35,7 +36,6 @@ export default function CreateOfferModal({
     rentalPrice: currentPrice,
     leaseDuration: 12,
     paymentFrequency: 'monthly',
-    paymentInterval: 1,
     moveInDate: new Date().toISOString().split('T')[0],
   });
 
@@ -72,10 +72,6 @@ export default function CreateOfferModal({
       newErrors.moveInDate = 'Please select a move-in date';
     }
 
-    if (offerData.paymentFrequency === 'monthly' && (!offerData.paymentInterval || offerData.paymentInterval <= 0)) {
-      newErrors.paymentInterval = 'Please enter a valid payment interval';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -93,7 +89,6 @@ export default function CreateOfferModal({
         rentalPrice: currentPrice,
         leaseDuration: 12,
         paymentFrequency: 'monthly',
-        paymentInterval: 1,
         moveInDate: new Date().toISOString().split('T')[0],
       });
       setErrors({});
@@ -202,19 +197,6 @@ export default function CreateOfferModal({
                 <div className="grid grid-cols-2 gap-2 mt-1">
                   <button
                     type="button"
-                    onClick={() => handleInputChange('paymentFrequency', 'full')}
-                    className={`p-2 border-2 rounded-md text-left transition-all duration-200 text-xs ${
-                      offerData.paymentFrequency === 'full'
-                        ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
-                        : 'border-gray-200 bg-white hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="font-medium text-gray-900">Full Payment</div>
-                    <div className="text-xs text-gray-500">Pay upfront</div>
-                  </button>
-                  
-                  <button
-                    type="button"
                     onClick={() => handleInputChange('paymentFrequency', 'monthly')}
                     className={`p-2 border-2 rounded-md text-left transition-all duration-200 text-xs ${
                       offerData.paymentFrequency === 'monthly'
@@ -225,36 +207,34 @@ export default function CreateOfferModal({
                     <div className="font-medium text-gray-900">Monthly</div>
                     <div className="text-xs text-gray-500">Installments</div>
                   </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('paymentFrequency', 'quarterly')}
+                    className={`p-2 border-2 rounded-md text-left transition-all duration-200 text-xs ${
+                      offerData.paymentFrequency === 'quarterly'
+                        ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="font-medium text-gray-900">Quarterly</div>
+                    <div className="text-xs text-gray-500">Installments</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleInputChange('paymentFrequency', 'yearly')}
+                    className={`p-2 border-2 rounded-md text-left transition-all duration-200 text-xs ${
+                      offerData.paymentFrequency === 'yearly'
+                        ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="font-medium text-gray-900">Yearly</div>
+                    <div className="text-xs text-gray-500">Installments</div>
+                  </button>
                 </div>
               </div>
-
-              {/* Payment Interval (only for monthly payments) */}
-              {offerData.paymentFrequency === 'monthly' && (
-                <div>
-                  <label className="form-label flex items-center text-sm font-medium text-gray-700">
-                    <ClockIcon className="h-4 w-4 mr-2 text-gray-500" />
-                    Payment Interval
-                  </label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <input
-                      type="number"
-                      min="1"
-                      max="12"
-                      value={offerData.paymentInterval || ''}
-                      onChange={(e) => handleInputChange('paymentInterval', parseInt(e.target.value) || 1)}
-                      placeholder="1"
-                      className={`form-input flex-1 text-sm ${errors.paymentInterval ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
-                    />
-                    <span className="text-sm text-gray-600">months</span>
-                  </div>
-                  {errors.paymentInterval && (
-                    <p className="mt-1 text-xs text-red-600">{errors.paymentInterval}</p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500">
-                    Pay every {offerData.paymentInterval || 1} month{offerData.paymentInterval !== 1 ? 's' : ''}
-                  </p>
-                </div>
-              )}
 
               {/* Summary */}
               <div className="bg-gray-50 rounded-md p-3">
@@ -271,8 +251,7 @@ export default function CreateOfferModal({
                   <div className="flex justify-between">
                     <span>Payment:</span>
                     <span className="font-medium capitalize">
-                      {offerData.paymentFrequency === 'full' ? 'Full Payment' : 
-                       `Monthly (every ${offerData.paymentInterval} month${offerData.paymentInterval !== 1 ? 's' : ''})`}
+                      {offerData.paymentFrequency}
                     </span>
                   </div>
                   <div className="flex justify-between">

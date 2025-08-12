@@ -96,9 +96,12 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
             className="object-cover"
           />
         ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <HomeIcon className="h-16 w-16 text-gray-400" />
-          </div>
+          <Image
+            src="/images/placeholder.png"
+            alt="Property placeholder"
+            fill
+            className="object-cover"
+          />
         )}
       </div>
 
@@ -159,7 +162,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
               View Details
             </button>
             <Link
-              href={`/dashboard/properties/edit/${propertyUuid}`}
+              href={`/dashboard/properties/${propertyUuid}/incoming-offers`}
               className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
               title="View Incoming Offers"
             >
