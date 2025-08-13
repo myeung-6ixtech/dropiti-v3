@@ -25,14 +25,24 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      if (!authUser?.id) return;
+      // Use id from the user object, which contains the Firebase UID
+      const firebaseUid = authUser?.id;
+      
+      if (!firebaseUid) {
+        console.warn('Dashboard: No Firebase UID available for fetching reviews');
+        setReviews([]);
+        setLoading(false);
+        return;
+      }
       
       try {
         setLoading(true);
         setError(null);
         
+        console.log('Dashboard: Fetching reviews for Firebase UID:', firebaseUid);
+        
         const response = await reviewsAPI.getReviewsByUser({
-          userFirebaseUid: authUser.id,
+          userFirebaseUid: firebaseUid,
           limit: 5 // Show only 5 recent reviews on dashboard
         });
         
@@ -43,7 +53,8 @@ export default function DashboardPage() {
         }
       } catch (err) {
         setError('Failed to fetch reviews.');
-        console.error('Error fetching reviews:', err);
+        console.error('Dashboard: Error fetching reviews:', err);
+        setReviews([]); // Set empty array on error
       } finally {
         setLoading(false);
       }

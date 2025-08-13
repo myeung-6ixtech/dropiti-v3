@@ -13,6 +13,17 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get('type');
   const landlordFirebaseUid = searchParams.get('landlord_firebase_uid'); // Add landlord filter
   
+  console.log('Get Listings API: Received request with search params:', {
+    limit,
+    offset,
+    location,
+    minPrice,
+    maxPrice,
+    bedrooms,
+    type,
+    landlordFirebaseUid
+  });
+  
   try {
 
     // Build filters object using PropertyService filter interface
@@ -27,104 +38,124 @@ export async function GET(request: NextRequest) {
     
     if (location) {
       filters.location = location; // PropertyService will handle the _ilike mapping
+      console.log('Get Listings API: Added location filter:', location);
     }
     
     if (minPrice) {
       filters.minPrice = parseFloat(minPrice);
+      console.log('Get Listings API: Added minPrice filter:', filters.minPrice);
     }
     
     if (maxPrice) {
       filters.maxPrice = parseFloat(maxPrice);
+      console.log('Get Listings API: Added maxPrice filter:', filters.maxPrice);
     }
     
     if (bedrooms) {
       filters.bedrooms = parseInt(bedrooms);
+      console.log('Get Listings API: Added bedrooms filter:', filters.bedrooms);
     }
     
     if (type) {
       filters.type = type;
+      console.log('Get Listings API: Added type filter:', filters.type);
     }
 
     if (landlordFirebaseUid) {
       filters.landlordFirebaseUid = landlordFirebaseUid; // Add landlord filter
+      console.log('Get Listings API: Added landlord filter:', filters.landlordFirebaseUid);
     }
 
-    // Use PropertyService instead of direct GraphQL query
-    const data = await PropertyService.getProperties(limit, offset, Object.keys(filters).length > 0 ? filters : undefined);
+    console.log('Get Listings API: Built filters object:', filters);
+    console.log('Get Listings API: Calling PropertyService.getProperties with:', { limit, offset, filters });
+
+    // Get properties from PropertyService
+    const data = await PropertyService.getProperties(limit, offset, filters);
     
-    // Type the GraphQL response
-    type PropertyResponse = {
-      real_estate_property_listing: Array<{
-        id: string;
-        property_uuid: string; // Add property_uuid field
-        title: string;
-        description: string;
-        address: unknown;
-        rental_price: number | null;
-        num_bedroom: number | null;
-        num_bathroom: number | null;
-        display_image: string | null;
-        uploaded_images: string[] | null;
-        property_type: string;
-        furnished: string | null;
-        pets_allowed: boolean | null;
-        amenities: string[] | null;
-        availability_date: string | null;
-        created_at: string;
-      }>;
-      real_estate_property_listing_aggregate: {
-        aggregate: {
-          count: number;
-        };
-      };
-    };
-    
-    const typedData = data as PropertyResponse;
+    console.log('Get Listings API: PropertyService returned data:', data);
+    console.log('Get Listings API: Data structure check - has properties:', !!data?.properties);
+    console.log('Get Listings API: Data structure check - properties length:', data?.properties?.length || 0);
     
     // Check if data exists and has the expected structure
-    if (!typedData || !typedData.real_estate_property_listing) {
-      console.error('Invalid data structure received:', typedData);
+    if (!data || !data.properties) {
+      console.error('Invalid data structure received from PropertyService:', data);
       return NextResponse.json(
-        { error: 'Invalid data structure received from GraphQL' },
+        { error: 'Invalid data structure received from PropertyService' },
         { status: 500 }
       );
     }
     
-    console.log('Total properties:', typedData.real_estate_property_listing_aggregate?.aggregate?.count);
+    console.log('Total properties:', data.total);
     
     // Transform the data to match your frontend expectations
-    const transformedProperties = typedData.real_estate_property_listing.map((property) => ({
-      id: property.id,
-      property_uuid: property.property_uuid, // Add property_uuid for UUID-based navigation
-      title: property.title,
-      description: property.description,
-      location: formatPropertyLocation(property.address),
-      price: property.rental_price || 0,
-      bedrooms: property.num_bedroom || 0,
-      bathrooms: property.num_bathroom || 0,
-      imageUrl: property.display_image || property.uploaded_images?.[0] || '',
-      details: {
-        type: property.property_type,
-        furnished: property.furnished,
-        petsAllowed: property.pets_allowed,
-        parking: false, // You might want to add this field to your Hasura schema
-      },
-      rules: [], // You might want to add this field to your Hasura schema
-      amenities: property.amenities || [],
-      minimumLease: 12, // Default value, you might want to add this field
-      availableDate: property.availability_date,
-      createdAt: property.created_at,
-      updatedAt: property.created_at, // Using created_at as fallback
-    }));
+    const transformedProperties = data.properties.map((property) => {
+      // Type assertion for the property object
+      const typedProperty = property as { 
+        id: string; 
+        property_uuid?: string; 
+        title: string; 
+        description: string; 
+        address: unknown; 
+        rental_price?: number | null; 
+        num_bedroom?: number | null; 
+        num_bathroom?: number | null; 
+        display_image?: string | null; 
+        uploaded_images?: string[] | null; 
+        property_type?: string; 
+        furnished?: string | null; 
+        pets_allowed?: boolean | null; 
+        amenities?: string[] | null; 
+        availability_date?: string | null; 
+        created_at?: string; 
+      };
+      
+      // Handle both string and JSON address formats
+      let location: string;
+      
+      if (typeof typedProperty.address === 'string') {
+        // Handle old string format (backward compatibility)
+        location = typedProperty.address;
+      } else if (typedProperty.address && typeof typedProperty.address === 'object') {
+        // Handle new JSON format
+        location = formatPropertyLocation(typedProperty.address);
+      } else {
+        // Fallback
+        location = 'Location not specified';
+      }
+      
+      return {
+        id: typedProperty.id,
+        property_uuid: typedProperty.property_uuid || '', // Add property_uuid for UUID-based navigation
+        title: typedProperty.title,
+        description: typedProperty.description,
+        location: location,
+        price: typedProperty.rental_price || 0,
+        bedrooms: typedProperty.num_bedroom || 0,
+        bathrooms: typedProperty.num_bathroom || 0,
+        imageUrl: typedProperty.display_image || typedProperty.uploaded_images?.[0] || '',
+        details: {
+          type: typedProperty.property_type || 'residential',
+          furnished: typedProperty.furnished || 'non-furnished',
+          petsAllowed: typedProperty.pets_allowed || false,
+          parking: false, // You might want to add this field to your Hasura schema
+        },
+        rules: [], // You might want to add this field to your Hasura schema
+        amenities: typedProperty.amenities || [],
+        minimumLease: 12, // Default value, you might want to add this field
+        availableDate: typedProperty.availability_date,
+        createdAt: typedProperty.created_at || new Date().toISOString(),
+        updatedAt: typedProperty.created_at || new Date().toISOString(), // Using created_at as fallback
+      };
+    });
     
     return NextResponse.json({
       success: true,
       data: transformedProperties,
       pagination: {
-        total: typedData.real_estate_property_listing_aggregate?.aggregate?.count || 0,
+        total: data.total || 0,
         limit,
         offset,
-        hasMore: offset + limit < (typedData.real_estate_property_listing_aggregate?.aggregate?.count || 0),
+        hasMore: offset + limit < (data.total || 0),
       },
     });
   } catch (error) {

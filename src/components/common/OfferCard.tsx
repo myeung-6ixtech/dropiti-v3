@@ -319,7 +319,7 @@ export default function OfferCard({
             paymentFrequency: offer.paymentFrequency as 'monthly' | 'quarterly' | 'yearly',
             moveInDate: offer.moveInDate
           }}
-          onOfferSubmit={(offerData) => {
+          onOfferSubmit={() => {
             onCounterOffer(offer.id);
             setIsCounterOfferModalOpen(false);
           }}

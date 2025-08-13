@@ -78,19 +78,27 @@ export default function SearchPageContent() {
         apiParams.bedrooms = parseInt(filters.bedrooms);
       }
 
-      console.log('Fetching properties with API params:', apiParams);
+      console.log('Search page: Fetching properties with API params:', apiParams);
+      console.log('Search page: Current filters state:', filters);
       
       const response = await propertiesAPI.getListings(apiParams);
       
-      if (response.success) {
-        console.log('API Response:', response.data);
-        setFilteredProperties(response.data);
+      console.log('Search page: API Response received:', response);
+      console.log('Search page: Response success:', response.success);
+      console.log('Search page: Response data type:', typeof response.data);
+      console.log('Search page: Response data length:', Array.isArray(response.data) ? response.data.length : 'Not an array');
+      
+      if (response.success && response.data) {
+        console.log('Search page: Setting filtered properties:', response.data);
+        setFilteredProperties(Array.isArray(response.data) ? response.data : [response.data]);
       } else {
-        console.error('API returned error:', response.error);
+        console.error('Search page: API returned error:', response.error);
+        console.log('Search page: Setting empty array due to API error');
         setFilteredProperties([]);
       }
     } catch (error) {
-      console.error('Failed to fetch properties:', error);
+      console.error('Search page: Failed to fetch properties:', error);
+      console.log('Search page: Setting empty array due to fetch error');
       setFilteredProperties([]);
     }
   }, [filters]);

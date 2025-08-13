@@ -40,7 +40,25 @@ apiClient.interceptors.response.use(
 
 // Helper function to transform PropertyData to API format
 const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: string) => {
-  // Build location string from address components
+  // Preserve the full address structure as a JSON object for better searchability
+  // Don't convert to string - keep as structured object
+  const addressObject = propertyData.address ? {
+    unit: propertyData.address.unit,
+    floor: propertyData.address.floor,
+    block: propertyData.address.block,
+    buildingName: propertyData.address.buildingName,
+    addressLine1: propertyData.address.addressLine1,
+    addressLine2: propertyData.address.addressLine2,
+    district: propertyData.address.district,
+    state: propertyData.address.state,
+    country: propertyData.address.country,
+    // Add additional fields that might be useful for search
+    street: propertyData.address.addressLine1, // Map addressLine1 to street for search
+    city: propertyData.address.district, // Map district to city for search
+    apartmentEstate: propertyData.address.buildingName, // Map buildingName to apartmentEstate
+  } : {};
+
+  // Build a human-readable location string for display purposes
   const addressParts = [];
   if (propertyData.address?.buildingName) addressParts.push(propertyData.address.buildingName);
   if (propertyData.address?.addressLine1) addressParts.push(propertyData.address.addressLine1);
@@ -77,9 +95,10 @@ const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: 
   }
 
   return {
-    title: propertyData.rentalDetails?.listingName || 'New Property Listing',
+    title: propertyData.rentalDetails?.listingName || 'Property Listing',
     description: propertyData.rentalDetails?.listingDescription || 'Property description',
-    location,
+    location, // Human-readable string for display
+    address: addressObject, // Structured JSON object for search
     price: propertyData.rentalDetails?.rentalPrice || 0,
     bedrooms: propertyData.unitDetails?.bedrooms || 0,
     bathrooms: propertyData.unitDetails?.bathrooms || 0,
