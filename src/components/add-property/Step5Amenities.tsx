@@ -176,7 +176,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="space-y-5">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           What amenities does your property offer?
         </h3>
@@ -185,7 +185,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
         </p>
 
         {/* Category Filter */}
-        <div className="mb-6">
+        <div className="space-y-3">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Filter by category
           </label>

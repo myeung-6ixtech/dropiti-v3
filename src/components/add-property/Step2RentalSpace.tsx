@@ -53,7 +53,7 @@ export default function Step2RentalSpace({ data, onUpdate }: Step2RentalSpacePro
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="space-y-5">
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           What type of rental space are you offering?
         </h3>

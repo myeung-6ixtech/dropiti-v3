@@ -22,13 +22,7 @@ interface HasuraFilters {
   furnished?: { _eq: string };
   pets_allowed?: { _eq: boolean };
   is_public?: { _eq: boolean };
-  landlord_firebase_uid?: { _eq: string }; // Add landlord filter
-  _or?: Array<{ 
-    title?: { _ilike: string }; 
-    description?: { _ilike: string };
-    // Address field is JSONB - only use _contains with nested _ilike
-    address?: { _contains: Record<string, unknown> };
-  }>; // Added for flexible location search
+  landlord_firebase_uid?: { _eq: string };
 }
 
 // Re-export types for backward compatibility
@@ -263,83 +257,10 @@ export class PropertyService {
   private static buildFilters(filters: PropertyFilters) {
     const hasuraFilters: HasuraFilters = {};
 
-    if (filters.location) {
-      // Enhanced search strategy: search in text fields AND address fields (both string and JSON)
-      // This provides a wider range of search results and handles both old and new address formats
-      const searchTerm = filters.location.trim().toLowerCase();
-      
-      console.log('PropertyService: Processing search term:', searchTerm);
-      
-      // Search in text fields (title and description)
-      const textSearchFilters = [
-        { title: { _ilike: `%${searchTerm}%` } },
-        { description: { _ilike: `%${searchTerm}%` } }
-      ];
+    // Only show public properties by default
+    hasuraFilters.is_public = { _eq: true };
 
-      // Search in address fields - handle both string and JSON formats
-      const addressSearchFilters = [
-        // Search in address JSON fields for various address components (for new properties)
-        // Note: We can't use _ilike directly on JSONB fields, only _contains with nested _ilike
-        { address: { _contains: { district: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { state: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { city: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { country: { _ilike: `%${searchTerm}%` } } } },
-        // Search in building/street level fields
-        { address: { _contains: { buildingName: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { addressLine1: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { addressLine2: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { street: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { apartmentEstate: { _ilike: `%${searchTerm}%` } } } },
-        // Search in unit/floor level fields
-        { address: { _contains: { unit: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { floor: { _ilike: `%${searchTerm}%` } } } },
-        { address: { _contains: { block: { _ilike: `%${searchTerm}%` } } } }
-      ];
-
-      // Always add individual word searches for better coverage, even for single terms
-      // Split search term into words and search each word individually across all fields
-      const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 1); // Reduced minimum length to 1
-      
-      console.log('PropertyService: Search words extracted:', searchWords);
-      
-      // Add searches for individual words to catch partial matches
-      searchWords.forEach(word => {
-        console.log('PropertyService: Adding search filters for word:', word);
-        
-        textSearchFilters.push(
-          { title: { _ilike: `%${word}%` } },
-          { description: { _ilike: `%${word}%` } }
-        );
-        
-        // Add address field searches for individual words (JSON only - no _ilike on JSONB)
-        // Include ALL address fields for comprehensive search coverage
-        addressSearchFilters.push(
-          { address: { _contains: { district: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { state: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { country: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { street: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { apartmentEstate: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { buildingName: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { block: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { floor: { _ilike: `%${word}%` } } } },
-          { address: { _contains: { unit: { _ilike: `%${word}%` } } } }
-        );
-      });
-
-      // Combine all search filters for maximum coverage
-      hasuraFilters._or = [...textSearchFilters, ...addressSearchFilters];
-      
-      console.log('PropertyService: Built comprehensive location search filters for term:', searchTerm);
-      console.log('PropertyService: Search includes text fields (title, description) and address JSON fields');
-      console.log('PropertyService: Address search uses _contains with nested _ilike for JSONB compatibility');
-      console.log('PropertyService: Added partial word matching for better coverage');
-      console.log('PropertyService: Search strategy optimized for JSONB address fields');
-      console.log('PropertyService: Searching ALL address fields: district, state, country, street, apartmentEstate, buildingName, block, floor, unit');
-      console.log('PropertyService: Total search filters created:', hasuraFilters._or?.length || 0);
-      console.log('PropertyService: Text filters count:', textSearchFilters.length);
-      console.log('PropertyService: Address filters count:', addressSearchFilters.length);
-    }
-
+    // Add other filters if they exist
     if (filters.minPrice || filters.maxPrice) {
       hasuraFilters.rental_price = {};
       if (filters.minPrice) hasuraFilters.rental_price._gte = filters.minPrice;
@@ -366,10 +287,7 @@ export class PropertyService {
       hasuraFilters.landlord_firebase_uid = { _eq: filters.landlordFirebaseUid };
     }
 
-    // Only show public properties by default
-    hasuraFilters.is_public = { _eq: true };
-
-    console.log('PropertyService: Final built filters:', JSON.stringify(hasuraFilters, null, 2));
+    console.log('PropertyService: Built filters:', JSON.stringify(hasuraFilters, null, 2));
     
     return hasuraFilters;
   }

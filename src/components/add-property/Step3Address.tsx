@@ -107,12 +107,12 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Building Details */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900">Building Details</h4>
+          <div className="space-y-5">
+            <h4 className="font-medium text-gray-900 text-base">Building Details</h4>
             
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Unit Number
               </label>
@@ -125,7 +125,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Floor
               </label>
@@ -138,7 +138,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Block
               </label>
@@ -151,7 +151,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Building Name / Estate
               </label>
@@ -166,10 +166,10 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           </div>
 
           {/* Street Address */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900">Street Address</h4>
+          <div className="space-y-5">
+            <h4 className="font-medium text-gray-900 text-base">Street Address</h4>
             
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Address Line 1 *
               </label>
@@ -183,7 +183,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Address Line 2
               </label>
@@ -196,7 +196,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 District *
               </label>
@@ -215,7 +215,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               </select>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 State/Region
               </label>
@@ -228,7 +228,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Country
               </label>

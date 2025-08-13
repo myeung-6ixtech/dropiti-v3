@@ -60,15 +60,15 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
           Provide detailed information about your property&apos;s size, rooms, and amenities.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Area Details */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900 flex items-center">
+          <div className="space-y-5">
+            <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
               <ArrowsPointingOutIcon className="h-5 w-5 mr-2 text-gray-400" />
               Area Details
             </h4>
             
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Gross Area (sq ft)
               </label>
@@ -82,7 +82,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
               <p className="text-xs text-gray-500 mt-1">Total area including walls and common areas</p>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Net Area (sq ft)
               </label>
@@ -98,13 +98,13 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
           </div>
 
           {/* Room Details */}
-          <div className="space-y-4">
-            <h4 className="font-medium text-gray-900 flex items-center">
+          <div className="space-y-5">
+            <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
               {/* <BedDoubleIcon className="h-5 w-5 mr-2 text-gray-400" /> */}
               Room Details
             </h4>
             
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Number of Bedrooms
               </label>
@@ -119,7 +119,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <label className="form-label">
                 Number of Bathrooms
               </label>
@@ -138,8 +138,8 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
         </div>
 
         {/* Furnishing Status */}
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 flex items-center">
+        <div className="space-y-5 mt-8">
+          <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
             <HomeIcon className="h-5 w-5 mr-2 text-gray-400" />
             Furnishing Status
           </h4>
@@ -187,8 +187,8 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
         </div>
 
         {/* Pets Policy */}
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 flex items-center">
+        <div className="space-y-5 mt-8">
+          <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
             <HeartIcon className="h-5 w-5 mr-2 text-gray-400" />
             Pets Policy
           </h4>
