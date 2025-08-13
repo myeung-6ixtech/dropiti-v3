@@ -55,50 +55,49 @@ export default function SearchPageContent() {
 
   const fetchProperties = useCallback(async () => {
     try {
-      // Build API parameters from URL search params and filters
-      const apiParams: {
-        limit: number;
-        offset: number;
-        location?: string;
-        maxPrice?: number;
-        bedrooms?: number;
-      } = {
-        limit: 50,
+      // Simple approach: fetch all listings and filter client-side
+      const apiParams = {
+        limit: 100, // Fetch more properties for better filtering
         offset: 0,
       };
 
-      // Add filters to API call if they exist
-      if (filters.location) {
-        apiParams.location = filters.location;
-      }
-      if (filters.maxPrice) {
-        apiParams.maxPrice = parseInt(filters.maxPrice);
-      }
-      if (filters.bedrooms) {
-        apiParams.bedrooms = parseInt(filters.bedrooms);
-      }
-
-      console.log('Search page: Fetching properties with API params:', apiParams);
-      console.log('Search page: Current filters state:', filters);
+      console.log('Search page: Fetching all properties for client-side filtering');
       
       const response = await propertiesAPI.getListings(apiParams);
       
-      console.log('Search page: API Response received:', response);
-      console.log('Search page: Response success:', response.success);
-      console.log('Search page: Response data type:', typeof response.data);
-      console.log('Search page: Response data length:', Array.isArray(response.data) ? response.data.length : 'Not an array');
-      
       if (response.success && response.data) {
-        console.log('Search page: Setting filtered properties:', response.data);
-        setFilteredProperties(Array.isArray(response.data) ? response.data : [response.data]);
+        let allProperties = Array.isArray(response.data) ? response.data : [response.data];
+        
+        // Simple client-side filtering: check if location contains the search term
+        if (filters.location && filters.location.trim()) {
+          const searchTerm = filters.location.toLowerCase().trim();
+          console.log('Search page: Filtering properties for location:', searchTerm);
+          
+          allProperties = allProperties.filter((property: { location?: string; title?: string }) => {
+            const location = (property.location || '').toLowerCase();
+            const matches = location.includes(searchTerm);
+            
+            if (!matches) {
+              console.log('Search page: Filtered out property:', {
+                title: property.title,
+                location: property.location,
+                reason: 'Location does not contain search term'
+              });
+            }
+            
+            return matches;
+          });
+          
+          console.log('Search page: After filtering, properties count:', allProperties.length);
+        }
+        
+        setFilteredProperties(allProperties);
       } else {
         console.error('Search page: API returned error:', response.error);
-        console.log('Search page: Setting empty array due to API error');
         setFilteredProperties([]);
       }
     } catch (error) {
       console.error('Search page: Failed to fetch properties:', error);
-      console.log('Search page: Setting empty array due to fetch error');
       setFilteredProperties([]);
     }
   }, [filters]);

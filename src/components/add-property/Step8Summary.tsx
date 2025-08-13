@@ -177,7 +177,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
 
         {/* Amenities */}
         {data?.amenities && data.amenities.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <div className="flex items-center space-x-3 mb-3">
               <WifiIcon className="h-5 w-5 text-blue-600" />
               <h4 className="font-medium text-gray-900">Amenities ({data.amenities.length})</h4>
@@ -197,7 +197,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
 
         {/* Photos */}
         {data?.photos && data.photos.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <div className="flex items-center space-x-3 mb-3">
               <PhotoIcon className="h-5 w-5 text-blue-600" />
               <h4 className="font-medium text-gray-900">Photos ({data.photos.length})</h4>
@@ -225,7 +225,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
 
         {/* Description Preview */}
         {data?.rentalDetails?.listingDescription && (
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <h4 className="font-medium text-gray-900 mb-3">Description</h4>
             <p className="text-gray-600 text-sm leading-relaxed">
               {data.rentalDetails.listingDescription}

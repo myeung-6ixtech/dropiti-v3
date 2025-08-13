@@ -77,7 +77,7 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
   return (
     <div className="space-y-8">
       {/* Property Type Selection */}
-      <div>
+      <div className="space-y-5">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
           What type of property are you listing?
         </h3>
@@ -125,7 +125,7 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
 
       {/* Residential Type Selection */}
       {selectedPropertyType === 'residential' && (
-        <div>
+        <div className="space-y-5">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             What type of residential property?
           </h3>

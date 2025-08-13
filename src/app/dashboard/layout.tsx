@@ -141,14 +141,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="dashboard-sidebar-content">
           {/* Sidebar toggle button - moved to top of sidebar */}
           <div className="dashboard-sidebar-toggle">
-            {isMobile && (
-              <button
-                onClick={() => setSidebarOpen(false)}
-                className="dashboard-sidebar-close"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            )}
+            {/* Only show toggle button on desktop */}
             {!isMobile && (
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -160,32 +153,45 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
           {/* User info */}
           <div className="dashboard-user-section">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="dashboard-user-avatar">
-                  {user.avatar ? (
-                    <Image
-                      src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')}
-                      alt={user.name}
-                      width={40}
-                      height={40}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <Image
-                      src="/src/assets/img/Portrait_Placeholder.png"
-                      alt="Default avatar"
-                      width={40}
-                      height={40}
-                      className="h-10 w-10 rounded-full object-cover"
-                    />
-                  )}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="dashboard-user-avatar">
+                    {user.avatar ? (
+                      <Image
+                        src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')}
+                        alt={user.name}
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Image
+                        src="/src/assets/img/Portrait_Placeholder.png"
+                        alt="Default avatar"
+                        width={40}
+                        height={40}
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    )}
+                  </div>
+                </div>
+                <div className="dashboard-user-info">
+                  <p className="dashboard-user-name">{user.name}</p>
+                  <p className="dashboard-user-email">{user.email}</p>
                 </div>
               </div>
-              <div className="dashboard-user-info">
-                <p className="dashboard-user-name">{user.name}</p>
-                <p className="dashboard-user-email">{user.email}</p>
-              </div>
+              
+              {/* Mobile close button */}
+              {isMobile && (
+                <button
+                  onClick={() => setSidebarOpen(false)}
+                  className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Close menu"
+                >
+                  <XMarkIcon className="h-5 w-5 text-gray-600" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -251,7 +257,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="dashboard-main">
-        {/* Page content - removed topbar */}
+        {/* Mobile menu button - always visible on mobile */}
+        {isMobile && (
+          <div className="lg:hidden fixed top-4 left-4 z-50">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="bg-white border border-gray-200 rounded-lg p-2 shadow-lg hover:bg-gray-50 transition-colors"
+              aria-label="Open menu"
+            >
+              <Bars3Icon className="h-6 w-6 text-gray-600" />
+            </button>
+          </div>
+        )}
+
+        {/* Page content */}
         <main className="dashboard-content">
           {children}
         </main>
