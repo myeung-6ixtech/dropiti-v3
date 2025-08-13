@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { PropertyDataForAPI, CreateUserInput, User } from '@/types';
 import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
+import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
 
 // Base API configuration
 const apiClient = axios.create({
@@ -254,81 +255,116 @@ export const usersAPI = {
 
 // Offers API
 export const offersAPI = {
-  // Get offers (incoming or outgoing)
-  getOffers: async (params: {
-    userId: string;
-    type: 'incoming' | 'outgoing';
-    limit?: number;
-    offset?: number;
-  }) => {
-    const response = await apiClient.get('/offers/get-offers', { params });
-    return response.data;
-  },
-
-  // Get offers by recipient (landlord) Firebase UID
-  getOffersByRecipient: async (params: {
-    recipientFirebaseUid: string;
-    propertyUuid?: string; // Optional: filter by specific property
-  }) => {
-    try {
-      console.log('API Client: Fetching offers for recipient:', params);
-      const response = await apiClient.get('/offers/get-offers-by-id', { params });
-      console.log('API Client: Offers response:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('API Client: Get offers by recipient error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
-      throw error;
-    }
-  },
-
-  // Get offers by initiator (user who created the offers)
-  getOffersByInitiator: async (params: {
-    initiatorFirebaseUid: string;
-  }) => {
-    try {
-      console.log('API Client: Fetching offers by initiator:', params);
-      const response = await apiClient.get('/offers/get-offers-by-initiator', { params });
-      console.log('API Client: Offers by initiator response:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('API Client: Get offers by initiator error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
-      throw error;
-    }
-  },
-
   // Create a new offer
-  createOffer: async (offerData: {
-    propertyId: string; // This maps to property_uuid in the database
-    initiatorFirebaseUid: string;
-    recipientFirebaseUid: string;
-    proposingRentPrice: number;
-    numLeasingMonths: number;
-    paymentFrequency: string;
-    moveInDate: string;
-    currency?: string;
-  }) => {
+  createOffer: async (offerData: CreateOfferInput) => {
     try {
-      console.log('API Client: Creating offer:', offerData);
       const response = await apiClient.post('/offers/create-offer', offerData);
-      console.log('API Client: Offer creation response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('API Client: Create offer error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
+      console.error('Error creating offer:', error);
+      throw error;
+    }
+  },
+
+  // Get offers by recipient (landlord)
+  getOffersByRecipient: async (recipientFirebaseUid: string) => {
+    try {
+      const response = await apiClient.get(`/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching offers by recipient:', error);
+      throw error;
+    }
+  },
+
+  // Get offers by initiator (tenant)
+  getOffersByInitiator: async (initiatorFirebaseUid: string) => {
+    try {
+      const response = await apiClient.get(`/offers/get-offers-by-initiator?initiatorFirebaseUid=${initiatorFirebaseUid}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching offers by initiator:', error);
+      throw error;
+    }
+  },
+
+  // Accept an offer
+  acceptOffer: async (offerId: string, currentUserId: string) => {
+    try {
+      const response = await apiClient.post('/offers/accept-offer', {
+        offerId,
+        currentUserId
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error accepting offer:', error);
+      throw error;
+    }
+  },
+
+  // Reject an offer
+  rejectOffer: async (offerId: string, currentUserId: string, reason?: string) => {
+    try {
+      const response = await apiClient.post('/offers/reject-offer', {
+        offerId,
+        currentUserId,
+        reason
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error rejecting offer:', error);
+      throw error;
+    }
+  },
+
+  // Counter an offer
+  counterOffer: async (offerId: string, currentUserId: string, counterData: CounterOfferInput) => {
+    try {
+      const response = await apiClient.post('/offers/counter-offer', {
+        offerId,
+        currentUserId,
+        counterData
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error countering offer:', error);
+      throw error;
+    }
+  },
+
+  // Withdraw an offer
+  withdrawOffer: async (offerId: string, currentUserId: string, reason?: string) => {
+    try {
+      const response = await apiClient.post('/offers/withdraw-offer', {
+        offerId,
+        currentUserId,
+        reason
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error withdrawing offer:', error);
+      throw error;
+    }
+  },
+
+  // Get offer action history
+  getOfferActions: async (offerId: string) => {
+    try {
+      const response = await apiClient.get(`/offers/get-offer-actions?offerId=${offerId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching offer actions:', error);
+      throw error;
+    }
+  },
+
+  // Get negotiation state
+  getNegotiationState: async (offerId: string, currentUserId: string) => {
+    try {
+      const response = await apiClient.get(`/offers/get-negotiation-state?offerId=${offerId}&currentUserId=${currentUserId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching negotiation state:', error);
       throw error;
     }
   },

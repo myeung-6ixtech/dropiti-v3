@@ -2,7 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
-import { MapPinIcon, HomeIcon, CurrencyDollarIcon, PencilIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { 
+  MapPinIcon, 
+  HomeIcon,
+  EyeIcon,
+  PencilIcon
+} from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -31,7 +36,6 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
   // Handle both Property interface and API response data
   const propertyUuid = property?.property_uuid || '';
   const title = property?.title || 'No Title';
-  const description = property?.description || 'No Description';
   const location = property?.location || property?.address || 'No Location';
   const price = property?.price || property?.rental_price || 0;
   const imageUrl = property?.imageUrl || property?.display_image || '';
@@ -110,11 +114,6 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
           {title}
         </h3>
-        
-        <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-          {description}
-        </p>
-
         {/* Property Features */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-gray-600">
@@ -144,7 +143,6 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
         {/* Price */}
         <div className="flex items-center justify-between">
           <div className="flex items-center">
-            <CurrencyDollarIcon className="h-5 w-5 text-green-600 mr-1" />
             <span className="text-xl font-bold text-gray-900">
               {price.toLocaleString()}
             </span>
@@ -166,7 +164,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
               className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
               title="View Incoming Offers"
             >
-              <ChatBubbleLeftRightIcon className="h-4 w-4 mr-1" />
+              <EyeIcon className="h-4 w-4 mr-1" />
               Offers
             </Link>
           </div>

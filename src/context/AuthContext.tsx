@@ -90,6 +90,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   } | null>(null);
   const router = useRouter();
 
+  // Helper function to safely parse languages field
+  const parseLanguages = (languages: unknown): string[] => {
+    if (Array.isArray(languages)) {
+      return languages;
+    }
+    
+    if (typeof languages === 'string') {
+      try {
+        const parsed = JSON.parse(languages);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn('Failed to parse languages JSON:', error);
+        return [];
+      }
+    }
+    
+    return [];
+  };
+
   // Fetch user profile data from database when session changes
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -120,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               education: userData.education,
               occupation: userData.occupation,
               maritalStatus: userData.marital_status,
-              languages: userData.languages,
+              languages: parseLanguages(userData.languages),
               responseTime: userData.response_time,
               verified: userData.verified,
               rating: userData.rating,

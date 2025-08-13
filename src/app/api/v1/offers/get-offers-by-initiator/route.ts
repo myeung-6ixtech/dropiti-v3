@@ -36,9 +36,10 @@ interface GraphQLProperty {
   rental_price: number;
   rental_price_currency: string;
   property_type: string;
-  bedrooms: number;
-  bathrooms: number;
-  photos: string[];
+  num_bedroom: number;
+  num_bathroom: number;
+  display_image: string;
+  uploaded_images: string[];
 }
 
 interface GraphQLOffersResponse {
@@ -78,7 +79,7 @@ const GET_OFFERS_BY_INITIATOR_QUERY = `
 // GraphQL query to get user details by Firebase UID
 const GET_USER_BY_FIREBASE_UID_QUERY = `
   query GetUserByFirebaseUid($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }, limit: 1) {
       uuid
       firebase_uid
       display_name
@@ -100,9 +101,10 @@ const GET_PROPERTY_BY_UUID_QUERY = `
       rental_price
       rental_price_currency
       property_type
-      bedrooms
-      bathrooms
-      photos
+      num_bedroom
+      num_bathroom
+      display_image
+      uploaded_images
     }
   }
 `;
@@ -201,9 +203,9 @@ export async function GET(request: NextRequest) {
           rentalPrice: property.rental_price,
           rentalPriceCurrency: property.rental_price_currency,
           propertyType: property.property_type,
-          bedrooms: property.bedrooms,
-          bathrooms: property.bathrooms,
-          imageUrl: property.photos?.[0] || null,
+          bedrooms: property.num_bedroom,
+          bathrooms: property.num_bathroom,
+          imageUrl: property.display_image || null,
         } : null,
       };
     });

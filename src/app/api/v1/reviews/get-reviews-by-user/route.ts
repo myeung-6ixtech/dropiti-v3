@@ -35,9 +35,10 @@ interface GraphQLProperty {
   rental_price: number;
   rental_price_currency: string;
   property_type: string;
-  bedrooms: number;
-  bathrooms: number;
-  photos: string[];
+  num_bedroom: number;
+  num_bathroom: number;
+  display_image: string;
+  uploaded_images: string[];
 }
 
 interface GraphQLOffersResponse {
@@ -109,9 +110,10 @@ const GET_PROPERTY_BY_UUID_QUERY = `
       rental_price
       rental_price_currency
       property_type
-      bedrooms
-      bathrooms
-      photos
+      num_bedroom
+      num_bathroom
+      display_image
+      uploaded_images
     }
   }
 `;
@@ -249,9 +251,9 @@ export async function GET(request: NextRequest) {
           rentalPrice: property.rental_price,
           rentalPriceCurrency: property.rental_price_currency,
           propertyType: property.property_type,
-          bedrooms: property.bedrooms,
-          bathrooms: property.bathrooms,
-          photos: property.photos,
+          bedrooms: property.num_bedroom,
+          bathrooms: property.num_bathroom,
+          photos: property.uploaded_images,
         } : null,
       };
     });

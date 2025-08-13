@@ -7,8 +7,6 @@ import { propertiesAPI, offersAPI } from '@/lib/api-client';
 import { useAuth } from '@/context/AuthContext';
 import { 
   MapPinIcon, 
-  HomeIcon, 
-  CalendarIcon,
   StarIcon,
   HeartIcon,
   ShareIcon
@@ -27,7 +25,10 @@ import {
   TV,
   Balcony,
   Home,
-  Clean
+  Clean,
+  Bed,
+  Bathtub,
+  Clock
 } from '@/assets/icons';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
@@ -296,7 +297,7 @@ export default function PropertyDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-96 bg-gray-200 rounded-lg mb-8"></div>
@@ -316,7 +317,7 @@ export default function PropertyDetailPage() {
 
   if (error || !propertyData) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Not Found</h1>
@@ -342,7 +343,7 @@ export default function PropertyDetailPage() {
   const mainImage = property.image_url || property.display_image || fallbackImage;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -385,43 +386,15 @@ export default function PropertyDetailPage() {
                   className="object-cover"
                 />
               </div>
-              <div className="grid grid-cols-4 gap-2">
-                {/* Assuming property.images is an array of URLs */}
-                {/* This part of the mock data was removed, so we'll use a placeholder or remove if not available */}
-                {/* For now, we'll just show a placeholder grid */}
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="relative h-20 w-full rounded-lg overflow-hidden bg-gray-200"
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <svg
-                        className="w-6 h-6 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Additional Images */}
-            {property.uploaded_images && Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0 ? (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">More photos</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {property.uploaded_images.map((image, index) => (
-                    <div key={index} className="relative h-32 w-full rounded-lg overflow-hidden">
+              
+              {/* Image Thumbnails Gallery */}
+              {property.uploaded_images && Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0 ? (
+                <div className="grid grid-cols-4 gap-2">
+                  {property.uploaded_images.slice(0, 4).map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    >
                       <Image
                         src={image}
                         alt={`${property.title} - Image ${index + 1}`}
@@ -431,20 +404,34 @@ export default function PropertyDetailPage() {
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">More photos</h2>
-                <div className="text-center py-8">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                  <p className="text-gray-500 text-sm">No additional photos available</p>
+              ) : (
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="relative h-20 w-full rounded-lg overflow-hidden bg-gray-200"
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <svg
+                          className="w-6 h-6 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Property Title and Basic Info */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -469,21 +456,21 @@ export default function PropertyDetailPage() {
               <div className="grid grid-cols-3 gap-4 py-4 border-t border-gray-200">
                 <div className="text-center">
                   <div className="flex items-center justify-center space-x-1">
-                    <HomeIcon className="h-4 w-4 text-gray-400" />
+                    <Bed className="h-4 w-4 text-gray-400" />
                     <span className="font-semibold">{property.bedrooms}</span>
                   </div>
                   <p className="text-sm text-gray-500">Bedrooms</p>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center space-x-1">
-                    <div className="h-4 w-4 text-gray-400">🛁</div>
+                    <Bathtub className="h-4 w-4 text-gray-400" />
                     <span className="font-semibold">{property.bathrooms}</span>
                   </div>
                   <p className="text-sm text-gray-500">Bathrooms</p>
                 </div>
                 <div className="text-center">
                   <div className="flex items-center justify-center space-x-1">
-                    <CalendarIcon className="h-4 w-4 text-gray-400" />
+                    <Clock className="h-4 w-4 text-gray-400" />
                     <span className="font-semibold">{property.minimum_lease}</span>
                   </div>
                   <p className="text-sm text-gray-500">Min. Lease (months)</p>
@@ -507,7 +494,7 @@ export default function PropertyDetailPage() {
                     const displayName = getAmenityDisplayName(amenityId);
                     return (
                       <div key={amenityId} className="flex items-center space-x-3">
-                        <AmenityIcon className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                        <AmenityIcon className="h-6 w-6 text-blue-600 flex-shrink-0" />
                         <span className="text-gray-700">{displayName}</span>
                       </div>
                     );

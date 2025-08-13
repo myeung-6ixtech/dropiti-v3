@@ -4,12 +4,6 @@ import Image from 'next/image';
 import { 
   StarIcon, 
   CheckCircleIcon,
-  MapPinIcon,
-  CalendarIcon,
-  AcademicCapIcon,
-  BriefcaseIcon,
-  HeartIcon,
-  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassportProps {
@@ -42,67 +36,6 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       year: 'numeric',
       month: 'long'
     });
-  };
-
-  const getEducationIcon = (education: string) => {
-    switch (education) {
-      case 'Highschool':
-        return '🎓';
-      case 'Bachelors':
-        return '🎓';
-      case 'Post-Graduate':
-        return '🎓';
-      case 'Diploma':
-        return '📜';
-      case 'PhD':
-        return '🎓';
-      default:
-        return '🎓';
-    }
-  };
-
-  const getOccupationIcon = (occupation: string) => {
-    switch (occupation) {
-      case 'Student':
-        return '👨‍🎓';
-      case 'Engineer':
-        return '⚙️';
-      case 'Doctor':
-        return '👨‍⚕️';
-      case 'Teacher':
-        return '👨‍🏫';
-      case 'Business Owner':
-        return '💼';
-      case 'Designer':
-        return '🎨';
-      case 'Developer':
-        return '💻';
-      case 'Manager':
-        return '👔';
-      case 'Consultant':
-        return '📊';
-      case 'Other':
-        return '💼';
-      default:
-        return '💼';
-    }
-  };
-
-  const getMaritalStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Single':
-        return '💚';
-      case 'Married':
-        return '💍';
-      case 'In a Relationship':
-        return '💕';
-      case 'Widowed':
-        return '🕊️';
-      case 'Rather not Say':
-        return '🤐';
-      default:
-        return '💚';
-    }
   };
 
   return (
@@ -153,15 +86,15 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
         <div className="flex items-center justify-between text-xs mb-4 p-3 bg-gray-50 rounded-xl">
           <div className="text-center">
             <div className="font-semibold text-gray-900">{user.stats.totalProperties}</div>
-            <div className="text-gray-500">properties</div>
+            <div className="text-gray-500">Properties</div>
           </div>
           <div className="text-center">
             <div className="font-semibold text-gray-900">{user.stats.totalGuests}</div>
-            <div className="text-gray-500">tenants</div>
+            <div className="text-gray-500">Tenants</div>
           </div>
           <div className="text-center">
             <div className="font-semibold text-gray-900">{user.stats.responseRate}%</div>
-            <div className="text-gray-500">response</div>
+            <div className="text-gray-500">Response Rate</div>
           </div>
         </div>
       )}
@@ -170,7 +103,6 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       {user.about && (
         <div className="mb-4">
           <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
-            <span className="mr-2 text-blue-500">💬</span>
             About
           </h4>
           <p className="text-xs text-gray-700 leading-relaxed line-clamp-3">{user.about}</p>
@@ -178,10 +110,9 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       )}
 
       {/* Languages Section */}
-      {user.languages && user.languages.length > 0 && (
+      {user.languages && Array.isArray(user.languages) && user.languages.length > 0 && (
         <div className="mb-4">
           <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
-            <GlobeAltIcon className="h-3 w-3 mr-2 text-blue-500" />
             Languages
           </h4>
           <div className="flex flex-wrap gap-1.5">
@@ -201,11 +132,9 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       {user.education && (
         <div className="mb-4">
           <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
-            <AcademicCapIcon className="h-3 w-3 mr-2 text-green-500" />
             Education
           </h4>
           <div className="flex items-center space-x-2">
-            <span className="text-lg">{getEducationIcon(user.education)}</span>
             <span className="text-xs text-gray-700">{user.education}</span>
           </div>
         </div>
@@ -215,11 +144,9 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       {user.occupation && (
         <div className="mb-4">
           <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
-            <BriefcaseIcon className="h-3 w-3 mr-2 text-purple-500" />
             Occupation
           </h4>
           <div className="flex items-center space-x-2">
-            <span className="text-lg">{getOccupationIcon(user.occupation)}</span>
             <span className="text-xs text-gray-700">{user.occupation}</span>
           </div>
         </div>
@@ -229,11 +156,9 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       {user.maritalStatus && (
         <div className="mb-4">
           <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
-            <HeartIcon className="h-3 w-3 mr-2 text-pink-500" />
             Marital Status
           </h4>
           <div className="flex items-center space-x-2">
-            <span className="text-lg">{getMaritalStatusIcon(user.maritalStatus)}</span>
             <span className="text-xs text-gray-700">{user.maritalStatus}</span>
           </div>
         </div>
@@ -244,12 +169,10 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
         <div className="space-y-2">
           {user.location && (
             <div className="flex items-center space-x-2">
-              <MapPinIcon className="h-3 w-3 text-red-500" />
               <span className="text-xs text-gray-700">{user.location}</span>
             </div>
           )}
           <div className="flex items-center space-x-2">
-            <CalendarIcon className="h-3 w-3 text-blue-500" />
             <span className="text-xs text-gray-700">Member since {formatJoinDate(user.joinDate)}</span>
           </div>
         </div>

@@ -57,6 +57,25 @@ export default function DashboardPage() {
     );
   }
 
+  // Helper function to safely parse languages
+  const parseLanguages = (languages: unknown): string[] => {
+    if (Array.isArray(languages)) {
+      return languages;
+    }
+    
+    if (typeof languages === 'string') {
+      try {
+        const parsed = JSON.parse(languages);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.warn('Failed to parse languages JSON:', error);
+        return [];
+      }
+    }
+    
+    return [];
+  };
+
   // Use real user data from auth context for DropitiPassport
   const userData = {
     name: authUser.displayName || authUser.name || 'User',
@@ -68,7 +87,7 @@ export default function DashboardPage() {
     rating: authUser.rating || 0,
     reviewCount: authUser.reviewCount || 0,
     about: authUser.about || 'Professional landlord with over 5 years of experience in property management.',
-    languages: authUser.languages || ['English'],
+    languages: parseLanguages(authUser.languages),
     education: authUser.education || 'Not specified',
     occupation: authUser.occupation || 'Not specified',
     maritalStatus: authUser.maritalStatus || 'Not specified',

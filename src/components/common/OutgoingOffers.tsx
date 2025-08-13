@@ -77,9 +77,7 @@ export default function OutgoingOffers({
         
         console.log('Fetching offers by initiator:', initiatorFirebaseUid);
         
-        const response = await offersAPI.getOffersByInitiator({
-          initiatorFirebaseUid
-        });
+        const response = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
 
         if (response.success && response.data) {
           setOffers(response.data);

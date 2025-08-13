@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import CreateOfferModal from '@/components/common/CreateOfferModal';
 
 interface Offer {
   id: string;
@@ -66,6 +67,8 @@ export default function IncomingOffers({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCounterOfferModalOpen, setIsCounterOfferModalOpen] = useState(false);
+  const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<Offer | null>(null);
 
   // Fetch offers for the recipient (landlord)
   useEffect(() => {
@@ -76,14 +79,13 @@ export default function IncomingOffers({
         
         console.log('Fetching offers for recipient:', recipientFirebaseUid);
         
-        const response = await offersAPI.getOffersByRecipient({
-          recipientFirebaseUid,
-          propertyUuid
-        });
+        const response = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
 
         if (response.success && response.data) {
           setOffers(response.data);
           console.log('Offers fetched successfully:', response.data);
+          console.log('First offer initiator details:', response.data[0]?.initiator);
+          console.log('First offer property details:', response.data[0]?.property);
         } else {
           throw new Error(response.error || 'Failed to fetch offers');
         }
@@ -125,15 +127,56 @@ export default function IncomingOffers({
   };
 
   const handleCounterOffer = (offerId: string) => {
-    setOffers(prev => 
-      prev.map(offer => 
-        offer.id === offerId 
-          ? { ...offer, offerStatus: 'countered' }
-          : offer
-      )
-    );
-    // TODO: Open counter offer modal
-    console.log('Countering offer:', offerId);
+    const offer = offers.find(o => o.id === offerId);
+    if (offer) {
+      setSelectedOfferForCounter(offer);
+      setIsCounterOfferModalOpen(true);
+    }
+  };
+
+  const handleCounterOfferSubmit = async (offerData: {
+    rentalPrice: number;
+    leaseDuration: number;
+    paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
+    moveInDate: string;
+  }) => {
+    if (!selectedOfferForCounter) return;
+    
+    try {
+      // Call the counter offer API
+      const response = await offersAPI.counterOffer(
+        selectedOfferForCounter.id,
+        recipientFirebaseUid, // Current user (landlord) is countering
+        {
+          rentPrice: offerData.rentalPrice,
+          numLeasingMonths: offerData.leaseDuration,
+          paymentFrequency: offerData.paymentFrequency,
+          moveInDate: offerData.moveInDate
+        }
+      );
+
+      if (response.success) {
+        // Update the local state to reflect the counter offer
+        setOffers(prev => 
+          prev.map(offer => 
+            offer.id === selectedOfferForCounter.id 
+              ? { ...offer, offerStatus: 'countered' }
+              : offer
+          )
+        );
+        
+        // Close the modal
+        setIsCounterOfferModalOpen(false);
+        setSelectedOfferForCounter(null);
+        
+        // Show success message (you can add a toast notification here)
+        console.log('Counter offer submitted successfully');
+      } else {
+        console.error('Failed to submit counter offer:', response.error);
+      }
+    } catch (error) {
+      console.error('Error submitting counter offer:', error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -320,6 +363,28 @@ export default function IncomingOffers({
           </div>
         ))}
       </div>
+
+      {/* Counter Offer Modal */}
+      {selectedOfferForCounter && (
+        <CreateOfferModal
+          isOpen={isCounterOfferModalOpen}
+          onClose={() => {
+            setIsCounterOfferModalOpen(false);
+            setSelectedOfferForCounter(null);
+          }}
+          propertyId={selectedOfferForCounter.propertyUuid}
+          currentPrice={selectedOfferForCounter.proposingRentPrice}
+          mode="counter"
+          offerId={selectedOfferForCounter.id}
+          existingOffer={{
+            rentalPrice: selectedOfferForCounter.proposingRentPrice,
+            leaseDuration: selectedOfferForCounter.numLeasingMonths,
+            paymentFrequency: selectedOfferForCounter.paymentFrequency as 'monthly' | 'quarterly' | 'yearly',
+            moveInDate: selectedOfferForCounter.moveInDate
+          }}
+          onOfferSubmit={handleCounterOfferSubmit}
+        />
+      )}
     </div>
   );
 }
