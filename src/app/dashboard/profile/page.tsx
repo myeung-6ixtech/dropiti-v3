@@ -16,6 +16,7 @@ import {
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 import ProfilePhotoUpload from '@/components/common/ProfilePhotoUpload';
 import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages, UpdateUserInput } from '@/types';
+import { User } from '@/types'; // Added import for User type
 
 interface UserProfile {
   displayName: string;
@@ -35,7 +36,6 @@ interface UserProfile {
   phoneNumber?: string;
   stats: {
     responseRate: number;
-    avgResponseTime: string;
     totalProperties: number;
     totalGuests: number;
   };
@@ -61,7 +61,6 @@ export default function ProfilePage() {
     phoneNumber: '123-456-7890',
     stats: {
       responseRate: 98,
-      avgResponseTime: '1h',
       totalProperties: 5,
       totalGuests: 47
     }
@@ -103,7 +102,7 @@ export default function ProfilePage() {
               avatar: userData.photo_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
               email: userData.email || '',
               location: userData.location || '',
-              joinDate: userData.user_since ? new Date(userData.user_since).toLocaleDateString() : '',
+              joinDate: userData.created_at ? new Date(userData.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
               verified: userData.verified || false,
               rating: userData.rating || 0,
               reviewCount: userData.review_count || 0,
@@ -123,16 +122,15 @@ export default function ProfilePage() {
                 }
                 return [];
               })(),
-              responseTime: userData.response_time || 'Unknown',
+              responseTime: 'Within 24 hours', // Default value since response_time field is removed
               education: userData.education || '',
               occupation: userData.occupation || '',
               maritalStatus: userData.marital_status || '',
               phoneNumber: userData.phone_number || '',
               stats: {
                 responseRate: userData.response_rate || 0,
-                avgResponseTime: userData.avg_response_time || 'Unknown',
-                totalProperties: userData.total_properties || 0,
-                totalGuests: userData.total_guests || 0
+                totalProperties: 0, // Will be calculated from related tables
+                totalGuests: 0 // Will be calculated from related tables
               }
             };
             
@@ -208,25 +206,26 @@ export default function ProfilePage() {
       // Since the real_estate_user table uses firebase_uid as the primary key,
       // we can update directly using the firebase_uid from the auth context
       
-      // Prepare updates for the API
-      const updates: UpdateUserInput = {
+      // Prepare updates for the API - using the exact field names from User type
+      const updates: Partial<User> = {
         display_name: tempProfile.displayName,
         photo_url: tempProfile.avatar,
         location: tempProfile.location,
         about: tempProfile.about,
         languages: tempProfile.languages,
-        education: tempProfile.education,
-        occupation: tempProfile.occupation,
-        marital_status: tempProfile.maritalStatus,
-        response_time: tempProfile.responseTime,
-        rating: tempProfile.rating,
-        review_count: tempProfile.reviewCount,
-        response_rate: tempProfile.stats.responseRate,
-        avg_response_time: tempProfile.stats.avgResponseTime,
-        total_properties: tempProfile.stats.totalProperties,
-        total_guests: tempProfile.stats.totalGuests,
         phone_number: tempProfile.phoneNumber
       };
+
+      // Only add fields that exist in the simplified user structure
+      if (tempProfile.education) {
+        updates.education = tempProfile.education;
+      }
+      if (tempProfile.occupation) {
+        updates.occupation = tempProfile.occupation;
+      }
+      if (tempProfile.maritalStatus) {
+        updates.marital_status = tempProfile.maritalStatus;
+      }
 
       console.log('Updating profile with data:', updates);
       console.log('Languages field type:', typeof updates.languages, 'Value:', updates.languages);
@@ -276,7 +275,12 @@ export default function ProfilePage() {
     reviewCount: profile.reviewCount,
     about: profile.about,
     languages: profile.languages,
-    stats: profile.stats
+    stats: {
+      responseRate: profile.stats.responseRate,
+      avgResponseTime: '1h', // Default value since this field is removed from database
+      totalProperties: profile.stats.totalProperties,
+      totalGuests: profile.stats.totalGuests
+    }
   });
 
   return (
