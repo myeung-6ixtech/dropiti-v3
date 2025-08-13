@@ -16,6 +16,7 @@ import {
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
+import CounterOfferModal from '@/components/common/CounterOfferModal';
 
 interface Offer {
   id: string;
@@ -58,6 +59,7 @@ interface Offer {
   currentPaymentFrequency?: string;
   negotiationRound?: number;
   lastActionBy?: 'initiator' | 'recipient';
+  lastActionType?: string; // Add this field to track the type of last action
 }
 
 interface IncomingOffersProps {
@@ -78,6 +80,9 @@ export default function IncomingOffers({
   const [error, setError] = useState<string | null>(null);
   const [isCounterOfferModalOpen, setIsCounterOfferModalOpen] = useState(false);
   const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<Offer | null>(null);
+  const [isCounterOfferViewModalOpen, setIsCounterOfferViewModalOpen] = useState(false);
+  const [selectedOfferForView, setSelectedOfferForView] = useState<Offer | null>(null);
+  const [respondingToCounter, setRespondingToCounter] = useState(false);
 
   // Fetch offers for the recipient (landlord)
   useEffect(() => {
@@ -185,6 +190,68 @@ export default function IncomingOffers({
       }
     } catch (error) {
       console.error('Error submitting counter offer:', error);
+    }
+  };
+
+  // Handle viewing counter offer details
+  const handleViewCounterOffer = (offer: Offer) => {
+    setSelectedOfferForView(offer);
+    setIsCounterOfferViewModalOpen(true);
+  };
+
+  // Handle accepting counter offer
+  const handleAcceptCounterOffer = async (offerId: string) => {
+    try {
+      setRespondingToCounter(true);
+      
+      // Call the accept offer API
+      const response = await offersAPI.acceptOffer(offerId, recipientFirebaseUid);
+      
+      if (response.success) {
+        // Close modal and refresh offers
+        setIsCounterOfferViewModalOpen(false);
+        setSelectedOfferForView(null);
+        
+        // Refresh the offers list
+        const refreshResponse = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
+        if (refreshResponse.success && refreshResponse.data) {
+          setOffers(refreshResponse.data);
+        }
+      } else {
+        console.error('Failed to accept counter offer:', response.error);
+      }
+    } catch (error) {
+      console.error('Error accepting counter offer:', error);
+    } finally {
+      setRespondingToCounter(false);
+    }
+  };
+
+  // Handle rejecting counter offer
+  const handleRejectCounterOffer = async (offerId: string) => {
+    try {
+      setRespondingToCounter(true);
+      
+      // Call the reject offer API
+      const response = await offersAPI.rejectOffer(offerId, recipientFirebaseUid);
+      
+      if (response.success) {
+        // Close modal and refresh offers
+        setIsCounterOfferViewModalOpen(false);
+        setSelectedOfferForView(null);
+        
+        // Refresh the offers list
+        const refreshResponse = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
+        if (refreshResponse.success && refreshResponse.data) {
+          setOffers(refreshResponse.data);
+        }
+      } else {
+        console.error('Failed to reject counter offer:', response.error);
+      }
+    } catch (error) {
+      console.error('Error rejecting counter offer:', error);
+    } finally {
+      setRespondingToCounter(false);
     }
   };
 
@@ -385,27 +452,77 @@ export default function IncomingOffers({
 
             {/* Action Buttons */}
             {offer.offerStatus === 'pending' && (
-              <div className="flex space-x-3 pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => handleAcceptOffer(offer.id)}
-                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
-                >
-                  <CheckIcon className="h-4 w-4 mr-2" />
-                  Accept
-                </button>
-                <button
-                  onClick={() => handleRejectOffer(offer.id)}
-                  className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
-                >
-                  <XMarkIcon className="h-4 w-4 mr-2" />
-                  Reject
-                </button>
-                <button
-                  onClick={() => handleCounterOffer(offer.id)}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  Counter
-                </button>
+              <div className="pt-4 border-t border-gray-200">
+                {offer.lastActionType === 'RECIPIENT_COUNTERED' ? (
+                  // Show pending message when recipient has countered
+                  <div className="text-center">
+                    <p className="text-gray-600 font-medium">Pending Counter Offer</p>
+                    <p className="text-sm text-gray-500 mt-1">Waiting for tenant's response</p>
+                  </div>
+                ) : (
+                  // Show Accept/Reject/Counter buttons for pending offers
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => handleAcceptOffer(offer.id)}
+                      className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+                    >
+                      <CheckIcon className="h-4 w-4 mr-2" />
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleRejectOffer(offer.id)}
+                      className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+                    >
+                      <XMarkIcon className="h-4 w-4 mr-2" />
+                      Reject
+                    </button>
+                    <button
+                      onClick={() => handleCounterOffer(offer.id)}
+                      className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                      Counter
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Buttons for Countered Offers - Only Accept/Reject */}
+            {offer.offerStatus === 'countered' && (
+              <div className="pt-4 border-t border-gray-200">
+                {offer.lastActionType === 'RECIPIENT_COUNTERED' ? (
+                  // Show pending message when recipient has countered
+                  <div className="text-center">
+                    <p className="text-gray-600 font-medium">Pending Counter Offer</p>
+                    <p className="text-sm text-gray-500 mt-1">Waiting for tenant's response</p>
+                  </div>
+                ) : (
+                  // Show Accept/Reject buttons and View Counter Offer button for other countered offers
+                  <div className="space-y-3">
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => handleAcceptOffer(offer.id)}
+                        className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+                      >
+                        <CheckIcon className="h-4 w-4 mr-2" />
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleRejectOffer(offer.id)}
+                        className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+                      >
+                        <XMarkIcon className="h-4 w-4 mr-2" />
+                        Reject
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => handleViewCounterOffer(offer)}
+                      className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors flex items-center justify-center"
+                    >
+                      View Counter Offer Details
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -431,6 +548,25 @@ export default function IncomingOffers({
             moveInDate: selectedOfferForCounter.moveInDate
           }}
           onOfferSubmit={handleCounterOfferSubmit}
+        />
+      )}
+
+      {/* Counter Offer View Modal */}
+      {selectedOfferForView && (
+        <CounterOfferModal
+          isOpen={isCounterOfferViewModalOpen}
+          onClose={() => {
+            setIsCounterOfferViewModalOpen(false);
+            setSelectedOfferForView(null);
+          }}
+          offer={selectedOfferForView}
+          loading={false}
+          responding={respondingToCounter}
+          finalCounterSubmitted={false}
+          onAccept={handleAcceptCounterOffer}
+          onFinalCounter={() => {}} // Not applicable for incoming offers
+          onReject={handleRejectCounterOffer}
+          isIncomingOffer={true}
         />
       )}
     </div>

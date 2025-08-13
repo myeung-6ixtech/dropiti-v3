@@ -96,14 +96,7 @@ export default function IncomingOffersPage() {
   }
 
   if (!authUser?.id) {
-    return (
-      <div className="text-center py-12">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-medium text-yellow-800 mb-2">Authentication Required</h3>
-          <p className="text-yellow-600 mb-4">Please sign in to view incoming offers.</p>
-        </div>
-      </div>
-    );
+    return <CenteredLoadingSpinner size="lg" />;
   }
 
   return (

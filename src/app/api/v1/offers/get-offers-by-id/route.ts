@@ -16,6 +16,18 @@ interface GraphQLOffer {
   offer_status: string;
   is_active: boolean;
   created_at: string;
+  updated_at: string;
+  // Counter offer fields
+  current_rent_price?: number;
+  current_rent_price_currency?: string;
+  current_num_leasing_months?: number;
+  current_payment_frequency?: string;
+  current_move_in_date?: string;
+  // Negotiation fields
+  negotiation_round?: number;
+  last_action_by?: 'initiator' | 'recipient';
+  last_action_type?: string;
+  last_action_at?: string;
 }
 
 interface GraphQLUser {
@@ -72,6 +84,18 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
       offer_status
       is_active
       created_at
+      updated_at
+      # Counter offer fields
+      current_rent_price
+      current_rent_price_currency
+      current_num_leasing_months
+      current_payment_frequency
+      current_move_in_date
+      # Negotiation fields
+      negotiation_round
+      last_action_by
+      last_action_type
+      last_action_at
     }
   }
 `;
@@ -97,6 +121,18 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
       offer_status
       is_active
       created_at
+      updated_at
+      # Counter offer fields
+      current_rent_price
+      current_rent_price_currency
+      current_num_leasing_months
+      current_payment_frequency
+      current_move_in_date
+      # Negotiation fields
+      negotiation_round
+      last_action_by
+      last_action_type
+      last_action_at
     }
   }
 `;
@@ -233,6 +269,18 @@ export async function GET(request: NextRequest) {
         offerStatus: offer.offer_status,
         isActive: offer.is_active,
         createdAt: offer.created_at,
+        updatedAt: offer.updated_at,
+        // Counter offer fields
+        currentRentPrice: offer.current_rent_price,
+        currentRentPriceCurrency: offer.current_rent_price_currency,
+        currentNumLeasingMonths: offer.current_num_leasing_months,
+        currentPaymentFrequency: offer.current_payment_frequency,
+        currentMoveInDate: offer.current_move_in_date,
+        // Negotiation fields
+        negotiationRound: offer.negotiation_round,
+        lastActionBy: offer.last_action_by,
+        lastActionType: offer.last_action_type,
+        lastActionAt: offer.last_action_at,
         // Include initiator (tenant) details
         initiator: initiator ? {
           uuid: initiator.uuid,

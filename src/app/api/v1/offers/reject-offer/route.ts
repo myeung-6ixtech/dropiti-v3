@@ -179,6 +179,9 @@ export async function POST(request: NextRequest) {
     const updates = {
       offer_status: newStatus,
       is_active: false, // Deactivate the offer since it's rejected
+      last_action_by: isInitiator ? 'initiator' : 'recipient',
+      last_action_at: new Date().toISOString(),
+      last_action_type: actionType,
       updated_at: new Date().toISOString()
     };
 
