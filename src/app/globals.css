@@ -359,7 +359,7 @@
   }
 
   .dashboard-user-avatar {
-    @apply h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center;
+    @apply h-10 w-10 rounded-full flex items-center justify-center;
   }
 
   .dashboard-user-info {

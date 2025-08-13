@@ -47,7 +47,7 @@ interface GraphQLUserResponse {
 }
 
 interface GraphQLPropertyResponse {
-  real_estate_property_listing_by_pk: GraphQLProperty;
+  real_estate_property_listing: GraphQLProperty[];
 }
 
 const GET_OFFERS_BY_RECIPIENT_QUERY = `
@@ -115,7 +115,7 @@ const GET_USER_BY_FIREBASE_UID_QUERY = `
 
 const GET_PROPERTY_BY_UUID_QUERY = `
   query GetPropertyByUuid($propertyUuid: String!) {
-    real_estate_property_listing_by_pk(property_uuid: $propertyUuid) {
+    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }, limit: 1) {
       title
       location
       rental_price
@@ -196,12 +196,18 @@ export async function GET(request: NextRequest) {
     const propertyDetails: Record<string, GraphQLProperty> = {};
     for (const propUuid of uniquePropertyUuids) {
       try {
+        console.log('Fetching property details for UUID:', propUuid);
         const propertyData = await executeQuery(GET_PROPERTY_BY_UUID_QUERY, { propertyUuid: propUuid }) as GraphQLPropertyResponse;
-        if (propertyData?.real_estate_property_listing_by_pk) {
-          propertyDetails[propUuid] = propertyData.real_estate_property_listing_by_pk;
+        console.log('Property data received:', propertyData);
+        
+        if (propertyData?.real_estate_property_listing && propertyData.real_estate_property_listing.length > 0) {
+          propertyDetails[propUuid] = propertyData.real_estate_property_listing[0]; // Access the first property if multiple exist
+          console.log('Property details stored for UUID:', propUuid);
+        } else {
+          console.warn('No property data found for UUID:', propUuid);
         }
       } catch (error) {
-        console.warn(`Failed to fetch property details for ${propUuid}:`, error);
+        console.error(`Failed to fetch property details for ${propUuid}:`, error);
       }
     }
 

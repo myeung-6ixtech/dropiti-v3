@@ -183,16 +183,20 @@ export default function Navigation() {
                   <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-200">
                     {user?.avatar ? (
                       <Image 
-                        src={getSafeProfileImage(user.avatar, '/images/default-avatar.png')} 
+                        src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')} 
                         alt="User avatar" 
                         width={32}
                         height={32}
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                        <UserIcon className="h-5 w-5 text-gray-600" />
-                      </div>
+                      <Image
+                        src="/src/assets/img/Portrait_Placeholder.png"
+                        alt="Default avatar"
+                        width={32}
+                        height={32}
+                        className="w-full h-full object-cover"
+                      />
                     )}
                   </div>
                   <ChevronDownIcon className={`h-4 w-4 text-gray-600 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />

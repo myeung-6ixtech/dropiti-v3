@@ -12,31 +12,45 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
-
-// Mock review data
-const mockReviews = [
-  {
-    id: 1,
-    reviewerName: 'Sarah Chen',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
-    rating: 5,
-    comment: 'Excellent landlord! Very responsive and the property was exactly as described. Highly recommend!',
-    date: '2024-02-15',
-    propertyName: 'Modern 2BR in Central'
-  },
-  {
-    id: 2,
-    reviewerName: 'Michael Wong',
-    reviewerAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
-    rating: 5,
-    comment: 'Great experience renting from this landlord. Quick responses and fair pricing. Will definitely rent again!',
-    date: '2024-02-10',
-    propertyName: 'Luxury Condo in Causeway Bay'
-  }
-];
+import { reviewsAPI } from '@/lib/api-client';
+import { useState, useEffect } from 'react';
+import { Review } from '@/types/review';
+import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export default function DashboardPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!authUser?.id) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await reviewsAPI.getReviewsByUser({
+          userFirebaseUid: authUser.id,
+          limit: 5 // Show only 5 recent reviews on dashboard
+        });
+        
+        if (response.success && response.data) {
+          setReviews(Array.isArray(response.data) ? response.data : [response.data]);
+        } else {
+          setReviews([]);
+        }
+      } catch (err) {
+        setError('Failed to fetch reviews.');
+        console.error('Error fetching reviews:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, [authUser?.id]);
 
   if (isLoading) {
     return (
@@ -117,6 +131,21 @@ export default function DashboardPage() {
       />
     ));
   };
+
+  if (loading && reviews.length === 0) {
+    return <CenteredLoadingSpinner />;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+          <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -209,37 +238,47 @@ export default function DashboardPage() {
             </div>
             
             <div className="space-y-4">
-              {mockReviews.map((review) => (
-                <div key={review.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
-                  <div className="flex items-start space-x-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                      <Image
-                        src={review.reviewerAvatar}
-                        alt={review.reviewerName}
-                        width={40}
-                        height={40}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h4 className="font-medium text-gray-900">{review.reviewerName}</h4>
-                          <p className="text-sm text-gray-500">{review.propertyName}</p>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          {renderStars(review.rating)}
-                        </div>
+              {reviews.length > 0 ? (
+                reviews.map((review) => (
+                  <div key={review.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
+                    <div className="flex items-start space-x-3">
+                      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                        <Image
+                          src={getSafeProfileImage(review.reviewer?.photoUrl, '/src/assets/img/Portrait_Placeholder.png')}
+                          alt={review.reviewer?.displayName || 'Reviewer'}
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                      <p className="text-sm text-gray-700 mb-2">{review.comment}</p>
-                      <div className="flex items-center text-xs text-gray-500">
-                        <CalendarIcon className="h-3 w-3 mr-1" />
-                        {formatDate(review.date)}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-2">
+                          <div>
+                            <h4 className="font-medium text-gray-900">{review.reviewer?.displayName || 'Unknown Reviewer'}</h4>
+                            <p className="text-sm text-gray-500">{review.property?.title || 'Property not specified'}</p>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            {renderStars(review.rating)}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-700 mb-2">{review.comment || 'No comment provided'}</p>
+                        <div className="flex items-center text-xs text-gray-500">
+                          <CalendarIcon className="h-3 w-3 mr-1" />
+                          {formatDate(review.createdAt)}
+                        </div>
                       </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-500">
+                    <StarIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p className="text-sm">No reviews yet</p>
+                    <p className="text-xs text-gray-400">Reviews will appear here once you receive them</p>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

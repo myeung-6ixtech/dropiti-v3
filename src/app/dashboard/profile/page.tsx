@@ -15,8 +15,8 @@ import {
 } from '@heroicons/react/24/outline';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 import ProfilePhotoUpload from '@/components/common/ProfilePhotoUpload';
-import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages, UpdateUserInput } from '@/types';
-import { User } from '@/types'; // Added import for User type
+import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages } from '@/types';
+import { User } from '@/types/user'; // Import specifically from user types to avoid conflicts
 
 interface UserProfile {
   displayName: string;
@@ -45,7 +45,7 @@ export default function ProfilePage() {
   const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({
     displayName: 'Sarah Johnson',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
+    avatar: '/src/assets/img/Portrait_Placeholder.png',
     email: 'sarah.johnson@email.com',
     location: 'Central, Hong Kong',
     joinDate: '2020-03-15',
@@ -99,7 +99,7 @@ export default function ProfilePage() {
             
             const newProfile: UserProfile = {
               displayName: userData.display_name || 'Unknown User',
-              avatar: userData.photo_url || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80',
+              avatar: userData.photo_url || '/src/assets/img/Portrait_Placeholder.png',
               email: userData.email || '',
               location: userData.location || '',
               joinDate: userData.created_at ? new Date(userData.created_at).toLocaleDateString() : new Date().toLocaleDateString(),

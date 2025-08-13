@@ -15,12 +15,21 @@ export default function HomePage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Only proceed if at least one search criteria is provided
+    if (!searchData.location && !searchData.bedrooms && !searchData.maxPrice) {
+      return;
+    }
+    
     const params = new URLSearchParams();
-    if (searchData.location) params.append('location', searchData.location);
+    if (searchData.location) params.append('location', searchData.location.trim());
     if (searchData.bedrooms) params.append('bedrooms', searchData.bedrooms);
     if (searchData.maxPrice) params.append('maxPrice', searchData.maxPrice);
     
-    router.push(`/search?${params.toString()}`);
+    const searchUrl = `/search?${params.toString()}`;
+    console.log('Homepage search: Navigating to:', searchUrl, 'with params:', Object.fromEntries(params));
+    
+    router.push(searchUrl);
   };
 
   const getSearchSummary = () => {

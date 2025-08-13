@@ -24,6 +24,7 @@ interface HasuraFilters {
   pets_allowed?: { _eq: boolean };
   is_public?: { _eq: boolean };
   landlord_firebase_uid?: { _eq: string }; // Add landlord filter
+  _or?: Array<{ address?: { _ilike: string }; title?: { _ilike: string }; description?: { _ilike: string } }>; // Added for flexible location search
 }
 
 // Re-export types for backward compatibility
@@ -196,8 +197,13 @@ export class PropertyService {
     const hasuraFilters: HasuraFilters = {};
 
     if (filters.location) {
-      // Map location to address field - you might need to adjust this based on your address structure
-      hasuraFilters.address = { _ilike: `%${filters.location}%` };
+      // More flexible location search - search in multiple address fields
+      // You might need to adjust this based on your actual address structure
+      hasuraFilters._or = [
+        { address: { _ilike: `%${filters.location}%` } },
+        { title: { _ilike: `%${filters.location}%` } },
+        { description: { _ilike: `%${filters.location}%` } }
+      ];
     }
 
     if (filters.minPrice || filters.maxPrice) {

@@ -10,7 +10,8 @@ import {
   ClockIcon,
   UserIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -49,6 +50,14 @@ interface Offer {
     bathrooms: number;
     imageUrl: string;
   } | null;
+  // New fields for counter offer details
+  currentRentPrice?: number;
+  currentRentPriceCurrency?: string;
+  currentNumLeasingMonths?: number;
+  currentMoveInDate?: string;
+  currentPaymentFrequency?: string;
+  negotiationRound?: number;
+  lastActionBy?: 'initiator' | 'recipient';
 }
 
 interface IncomingOffersProps {
@@ -334,6 +343,45 @@ export default function IncomingOffers({
                 </div>
               </div>
             </div>
+
+            {/* Counter Offer Details - Show when offer has been countered */}
+            {offer.offerStatus === 'countered' && offer.currentRentPrice && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                  <ArrowPathIcon className="h-4 w-4 mr-2" />
+                  Counter Offer Details
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-blue-700">
+                      <CurrencyDollarIcon className="h-4 w-4 mr-2 text-blue-500" />
+                      <span>
+                        Counter: {formatCurrency(offer.currentRentPrice, offer.currentRentPriceCurrency || 'HKD')}/month
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm text-blue-700">
+                      <CalendarIcon className="h-4 w-4 mr-2 text-blue-500" />
+                      <span>{offer.currentNumLeasingMonths || offer.numLeasingMonths} month{(offer.currentNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''} lease</span>
+                    </div>
+                    <div className="flex items-center text-sm text-blue-700">
+                      <ClockIcon className="h-4 w-4 mr-2 text-blue-500" />
+                      <span>Move-in: {formatDate(offer.currentMoveInDate || offer.moveInDate)}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm text-blue-700">
+                      <span className="font-medium">Payment Frequency:</span> {offer.currentPaymentFrequency || offer.paymentFrequency}
+                    </div>
+                    <div className="text-sm text-blue-700">
+                      <span className="font-medium">Negotiation Round:</span> {offer.negotiationRound || 1}
+                    </div>
+                    <div className="text-sm text-blue-700">
+                      <span className="font-medium">Last Action:</span> {offer.lastActionBy === 'recipient' ? 'Landlord' : 'Tenant'} countered
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             {offer.offerStatus === 'pending' && (

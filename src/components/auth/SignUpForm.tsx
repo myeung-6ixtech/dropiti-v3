@@ -46,24 +46,20 @@ export default function SignUpForm() {
 
       // Step 3: Create user in Hasura database
       try {
-        const createUserResponse = await usersAPI.createUser({
-          firebase_uid: user.uid,
+        const user = {
+          firebase_uid: userCredential.user.uid,
           display_name: name,
           email: email,
-          auth_provider: 'firebase',
+          auth_provider: 'firebase' as const,
           phone_number: undefined,
-          first_name: name.split(' ')[0] || undefined,
-          last_name: name.split(' ').slice(1).join(' ') || undefined,
           location: undefined,
           about: undefined,
           education: undefined,
           occupation: undefined,
           marital_status: undefined,
-          languages: undefined,
-          preferences: undefined,
-          notification_settings: undefined,
-          privacy_settings: undefined
-        });
+          languages: []
+        };
+        const createUserResponse = await usersAPI.createUser(user);
 
         if (createUserResponse.success) {
           console.log('User created successfully in database:', createUserResponse.data);

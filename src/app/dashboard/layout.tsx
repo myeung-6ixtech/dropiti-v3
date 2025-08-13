@@ -165,14 +165,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="dashboard-user-avatar">
                   {user.avatar ? (
                     <Image
-                      src={getSafeProfileImage(user.avatar, '/images/default-avatar.png')}
+                      src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')}
                       alt={user.name}
-                      width={24}
-                      height={24}
-                      className="h-6 w-6 rounded-full object-cover"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <UserIcon className="h-6 w-6 text-white" />
+                    <Image
+                      src="/src/assets/img/Portrait_Placeholder.png"
+                      alt="Default avatar"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
                   )}
                 </div>
               </div>
