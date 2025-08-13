@@ -79,7 +79,7 @@ export default function SignInForm() {
         )}
         
         <form onSubmit={handleSubmit} className="auth-form">
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Email address <span className="text-red-500">*</span>
             </label>
@@ -93,7 +93,7 @@ export default function SignInForm() {
             />
           </div>
           
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Password <span className="text-red-500">*</span>
             </label>

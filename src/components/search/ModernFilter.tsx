@@ -72,7 +72,7 @@ export default function ModernFilter({
           <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-140px)]">
             {/* Location Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="form-label">
                 <div className="flex items-center space-x-2">
                   <MapPinIcon className="h-5 w-5 text-blue-500" />
                   <span>Location</span>
@@ -83,13 +83,13 @@ export default function ModernFilter({
                 value={filters.location}
                 onChange={(e) => onFilterChange('location', e.target.value)}
                 placeholder="Enter city, neighborhood..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors placeholder-gray-400"
+                className="form-input"
               />
             </div>
 
             {/* Bedrooms Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="form-label">
                 <div className="flex items-center space-x-2">
                   <HomeIcon className="h-5 w-5 text-blue-500" />
                   <span>Minimum Bedrooms</span>
@@ -98,59 +98,58 @@ export default function ModernFilter({
               <select
                 value={filters.bedrooms}
                 onChange={(e) => onFilterChange('bedrooms', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="form-select"
               >
-                <option value="">Any</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
-                <option value="5">5+</option>
+                <option value="">Any Bedrooms</option>
+                <option value="1">1 Bedroom</option>
+                <option value="2">2 Bedrooms</option>
+                <option value="3">3 Bedrooms</option>
+                <option value="4">4 Bedrooms</option>
+                <option value="5">5+ Bedrooms</option>
               </select>
             </div>
 
             {/* Max Price Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
+              <label className="form-label">
                 <div className="flex items-center space-x-2">
                   <CurrencyDollarIcon className="h-5 w-5 text-blue-500" />
-                  <span>Maximum Price</span>
+                  <span>Maximum Price (HKD)</span>
                 </div>
               </label>
               <select
                 value={filters.maxPrice}
                 onChange={(e) => onFilterChange('maxPrice', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="form-select"
               >
-                <option value="">Any</option>
-                <option value="5000">$5,000</option>
-                <option value="10000">$10,000</option>
-                <option value="15000">$15,000</option>
-                <option value="20000">$20,000</option>
-                <option value="25000">$25,000</option>
-                <option value="30000">$30,000</option>
-                <option value="40000">$40,000</option>
-                <option value="50000">$50,000</option>
+                <option value="">Any Price</option>
+                <option value="10000">Under 10,000 HKD</option>
+                <option value="15000">Under 15,000 HKD</option>
+                <option value="20000">Under 20,000 HKD</option>
+                <option value="25000">Under 25,000 HKD</option>
+                <option value="30000">Under 30,000 HKD</option>
+                <option value="40000">Under 40,000 HKD</option>
+                <option value="50000">Under 50,000 HKD</option>
               </select>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200 bg-white">
-            <div className="flex space-x-3">
-              <button
-                onClick={handleClear}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-              >
-                Clear All
-              </button>
-              <button
-                onClick={handleApply}
-                className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
-              >
-                Apply Filters
-              </button>
-            </div>
+          <div className="flex space-x-3 pt-6 border-t border-gray-200">
+            <button
+              onClick={handleClear}
+              className="btn-outline flex-1"
+              type="button"
+            >
+              Clear All
+            </button>
+            <button
+              onClick={handleApply}
+              className="btn-primary flex-1"
+              type="button"
+            >
+              Apply Filters
+            </button>
           </div>
         </div>
       </div>

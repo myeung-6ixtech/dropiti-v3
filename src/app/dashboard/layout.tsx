@@ -19,6 +19,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
+import { FullScreenLoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -41,6 +42,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     avatar: authUser?.avatar
   };
 
+  // Debug: Log user data for profile image debugging
+  useEffect(() => {
+    if (authUser) {
+      console.log('Dashboard Layout: User data:', {
+        id: authUser.id,
+        name: authUser.name,
+        email: authUser.email,
+        avatar: authUser.avatar,
+        hasAvatar: !!authUser.avatar
+      });
+    }
+  }, [authUser]);
+
   // Check if we're on mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -61,13 +75,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   // Show loading state while auth is loading
   if (isLoading) {
-    return (
-      <div className="dashboard-container">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
+    return <FullScreenLoadingSpinner />;
   }
 
   // Redirect if not authenticated
@@ -157,14 +165,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <div className="dashboard-user-avatar">
                   {user.avatar ? (
                     <Image
-                      src={getSafeProfileImage(user.avatar, '/images/default-avatar.png')}
+                      src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')}
                       alt={user.name}
-                      width={24}
-                      height={24}
-                      className="h-6 w-6 rounded-full object-cover"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (
-                    <UserIcon className="h-6 w-6 text-white" />
+                    <Image
+                      src="/src/assets/img/Portrait_Placeholder.png"
+                      alt="Default avatar"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
                   )}
                 </div>
               </div>

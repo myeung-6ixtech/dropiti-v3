@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
       property_uuid: uuidv4(), // Generate a Version 4 UUID
       title: propertyData.title,
       description: propertyData.description,
-      address: propertyData.location, // Map location to address field
+      // Store address as a structured JSON object for better searchability
+      address: propertyData.address || propertyData.location, // Use address object if available, fallback to location
       rental_price: parseFloat(propertyData.price),
       rental_price_currency: 'HKD', // Set default currency to HKD
       num_bedroom: parseInt(propertyData.bedrooms),

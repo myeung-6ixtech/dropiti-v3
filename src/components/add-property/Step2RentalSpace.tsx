@@ -30,14 +30,14 @@ const rentalSpaces = [
     title: 'Shared Space',
     description: 'Rent a shared room or space',
     icon: SharedSpace,
-    details: 'You&apos;ll be sharing a room or space with others in the same unit.'
+    details: 'You\'ll be sharing a room or space with others in the same unit.'
   },
   {
     id: 'private-room',
     title: 'Private Room',
     description: 'Rent a private room',
     icon: PrivateRoom,
-    details: 'You&apos;ll have your own private room and share common areas with other tenants.'
+    details: 'You\'ll have your own private room and share common areas with other tenants.'
   },
 ];
 

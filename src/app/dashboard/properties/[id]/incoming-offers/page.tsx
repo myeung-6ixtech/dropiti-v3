@@ -6,14 +6,17 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import IncomingOffers from '@/components/common/IncomingOffers';
+import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 
 interface Property {
   id: string;
   property_uuid: string;
   title: string;
-  address: string;
-  rental_price: number;
+  location: string; // Changed from address to location
+  price: number; // Changed from rental_price to price
   property_type: string;
+  bedrooms: number; // Added bedrooms
+  bathrooms: number; // Added bathrooms
 }
 
 export default function IncomingOffersPage() {
@@ -43,9 +46,20 @@ export default function IncomingOffersPage() {
         
         const response = await propertiesAPI.getPropertyByUuid(propertyUuid);
         
-        if (response.success && response.data) {
-          setProperty(response.data);
-          console.log('Property details fetched:', response.data);
+        if (response.success && response.data?.property) {
+          // Extract property data from the nested response
+          const propertyData = response.data.property;
+          setProperty({
+            id: propertyData.id,
+            property_uuid: propertyData.property_uuid,
+            title: propertyData.title,
+            location: propertyData.location,
+            price: propertyData.price,
+            property_type: propertyData.details?.type || propertyData.type || 'Unknown',
+            bedrooms: propertyData.bedrooms,
+            bathrooms: propertyData.bathrooms,
+          });
+          console.log('Property details fetched:', propertyData);
         } else {
           throw new Error(response.error || 'Failed to fetch property details');
         }
@@ -61,11 +75,7 @@ export default function IncomingOffersPage() {
   }, [propertyUuid]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <CenteredLoadingSpinner />;
   }
 
   if (error || !property) {
@@ -112,9 +122,14 @@ export default function IncomingOffersPage() {
         
         <div className="border-b border-gray-200 pb-4">
           <h1 className="text-3xl font-bold text-gray-900">Incoming Offers</h1>
-          <p className="text-gray-600 mt-1">
-            {property.title} • {property.address}
-          </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-gray-600">
+              {property.title} • {property.location}
+            </p>
+            <p className="text-sm text-gray-500">
+              {property.bedrooms} bed{property.bedrooms !== 1 ? 's' : ''} • {property.bathrooms} bath{property.bathrooms !== 1 ? 's' : ''} • {property.property_type} • ${property.price.toLocaleString()}/month
+            </p>
+          </div>
         </div>
       </div>
 

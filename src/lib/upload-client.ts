@@ -106,12 +106,19 @@ export class UploadClient {
 
       return await response.json();
     } catch (error) {
-      console.error('Presigned URL client error:', error);
+      console.error('Presigned URL error:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to get presigned URL',
       };
     }
+  }
+
+  /**
+   * Upload a single profile photo
+   */
+  async uploadProfilePhoto(file: File): Promise<UploadResponse> {
+    return this.uploadFiles([file], 'images', 'direct');
   }
 
   /**

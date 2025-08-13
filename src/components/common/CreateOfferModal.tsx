@@ -15,6 +15,15 @@ interface CreateOfferModalProps {
   currentPrice?: number;
   recipientFirebaseUid?: string; // Add recipient (landlord) Firebase UID
   onOfferSubmit?: (offerData: OfferData) => void;
+  // New props for counter offer mode
+  mode?: 'create' | 'counter';
+  offerId?: string; // For counter offers
+  existingOffer?: {
+    rentalPrice: number;
+    leaseDuration: number;
+    paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
+    moveInDate: string;
+  };
 }
 
 interface OfferData {
@@ -30,13 +39,15 @@ export default function CreateOfferModal({
   isOpen, 
   onClose, 
   currentPrice = 0,
-  onOfferSubmit 
+  onOfferSubmit,
+  mode = 'create',
+  existingOffer
 }: CreateOfferModalProps) {
   const [offerData, setOfferData] = useState<OfferData>({
-    rentalPrice: currentPrice,
-    leaseDuration: 12,
-    paymentFrequency: 'monthly',
-    moveInDate: new Date().toISOString().split('T')[0],
+    rentalPrice: existingOffer?.rentalPrice || currentPrice,
+    leaseDuration: existingOffer?.leaseDuration || 12,
+    paymentFrequency: existingOffer?.paymentFrequency || 'monthly',
+    moveInDate: existingOffer?.moveInDate || new Date().toISOString().split('T')[0],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -108,7 +119,9 @@ export default function CreateOfferModal({
       <div className="bg-white rounded-lg shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Create Offer</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {mode === 'counter' ? 'Counter Offer' : 'Create Offer'}
+          </h2>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -282,7 +295,7 @@ export default function CreateOfferModal({
               type="submit"
               className="form-button flex-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 text-sm py-2"
             >
-              Submit Offer
+              {mode === 'counter' ? 'Submit Counter Offer' : 'Submit Offer'}
             </button>
           </div>
         </form>

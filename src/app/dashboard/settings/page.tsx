@@ -68,9 +68,10 @@ export default function SettingsPage() {
             const userData = response.data;
             console.log('User data received:', userData);
             
+            // Handle missing fields gracefully with fallbacks
             const newSettings: UserSettings = {
-              firstName: userData.first_name || 'John',
-              lastName: userData.last_name || 'Doe',
+              firstName: userData.first_name || userData.display_name?.split(' ')[0] || 'John',
+              lastName: userData.last_name || userData.display_name?.split(' ').slice(1).join(' ') || 'Doe',
               email: userData.email || 'demo@example.com',
               phone: userData.phone_number || '+852 1234 5678',
               notifications: {
@@ -160,21 +161,28 @@ export default function SettingsPage() {
       // we don't need to fetch the user first - we can update directly using the firebase_uid
       
       // Prepare updates for the API
-      const updates = {
-        first_name: tempSettings.firstName,
-        last_name: tempSettings.lastName,
+      const updates: Record<string, unknown> = {
+        // Only include fields that exist in the simplified user structure
+        display_name: `${tempSettings.firstName} ${tempSettings.lastName}`.trim(),
         phone_number: tempSettings.phone,
-        notification_settings: {
+      };
+
+      // Only add complex objects if they exist in the user data
+      if (tempSettings.notifications) {
+        updates.notification_settings = {
           email: tempSettings.notifications.email,
           push: tempSettings.notifications.push,
           sms: tempSettings.notifications.sms,
-        },
-        preferences: {
+        };
+      }
+
+      if (tempSettings.preferences) {
+        updates.preferences = {
           language: tempSettings.preferences.language,
           timezone: tempSettings.preferences.timezone,
           currency: tempSettings.preferences.currency,
-        },
-      };
+        };
+      }
 
       console.log('Updating user with data:', updates);
 

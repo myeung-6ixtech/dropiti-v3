@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { usersAPI } from '@/lib/api-client';
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -34,15 +35,44 @@ export default function SignUpForm() {
     setIsLoading(true);
 
     try {
+      // Step 1: Create Firebase Auth user
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Update profile with display name
+      // Step 2: Update Firebase profile with display name
       await updateProfile(user, {
         displayName: name
       });
 
-      // Redirect to sign in page
+      // Step 3: Create user in Hasura database
+      try {
+        const user = {
+          firebase_uid: userCredential.user.uid,
+          display_name: name,
+          email: email,
+          auth_provider: 'firebase' as const,
+          phone_number: undefined,
+          location: undefined,
+          about: undefined,
+          education: undefined,
+          occupation: undefined,
+          marital_status: undefined,
+          languages: []
+        };
+        const createUserResponse = await usersAPI.createUser(user);
+
+        if (createUserResponse.success) {
+          console.log('User created successfully in database:', createUserResponse.data);
+        } else {
+          console.warn('Failed to create user in database:', createUserResponse.error);
+          // Don't fail the signup if database creation fails, but log it
+        }
+      } catch (dbError) {
+        console.error('Error creating user in database:', dbError);
+        // Don't fail the signup if database creation fails, but log it
+      }
+
+      // Step 4: Redirect to sign in page
       router.push("/auth/signin?message=Account created successfully! Please sign in.");
     } catch (error: unknown) {
       console.error("Signup error:", error);
@@ -87,7 +117,7 @@ export default function SignUpForm() {
         )}
         
         <form onSubmit={handleSubmit} className="auth-form">
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Full Name <span className="text-red-500">*</span>
             </label>
@@ -101,7 +131,7 @@ export default function SignUpForm() {
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Email address <span className="text-red-500">*</span>
             </label>
@@ -115,7 +145,7 @@ export default function SignUpForm() {
             />
           </div>
           
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Password <span className="text-red-500">*</span>
             </label>
@@ -138,7 +168,7 @@ export default function SignUpForm() {
             </div>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <label className="auth-label">
               Confirm Password <span className="text-red-500">*</span>
             </label>

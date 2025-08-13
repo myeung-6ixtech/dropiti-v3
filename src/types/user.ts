@@ -7,30 +7,23 @@
 // ========================================
 
 export interface User {
-  id: string;
+  uuid: string;
   firebase_uid: string;
   display_name: string;
   email: string;
   photo_url?: string;
   auth_provider: 'firebase' | 'google' | 'facebook' | 'apple';
-  user_since: string;
   phone_number?: string;
-  first_name?: string;
-  last_name?: string;
   location?: string;
   about?: string;
   education?: string;
   occupation?: string;
   marital_status?: string;
-  languages?: string[];
-  response_time?: string;
+  languages: string[];
   verified: boolean;
   rating: number;
   review_count: number;
   response_rate: number;
-  avg_response_time?: string;
-  total_properties: number;
-  total_guests: number;
   preferences: UserPreferences;
   notification_settings: NotificationSettings;
   privacy_settings: PrivacySettings;
@@ -91,8 +84,6 @@ export interface CreateUserInput {
   photo_url?: string;
   auth_provider?: 'firebase' | 'google' | 'facebook' | 'apple';
   phone_number?: string;
-  first_name?: string;
-  last_name?: string;
   location?: string;
   about?: string;
   education?: string;
@@ -108,22 +99,16 @@ export interface UpdateUserInput {
   display_name?: string;
   photo_url?: string;
   phone_number?: string;
-  first_name?: string;
-  last_name?: string;
   location?: string;
   about?: string;
   education?: string;
   occupation?: string;
   marital_status?: string;
   languages?: string[];
-  response_time?: string;
   verified?: boolean;
   rating?: number;
   review_count?: number;
   response_rate?: number;
-  avg_response_time?: string;
-  total_properties?: number;
-  total_guests?: number;
   preferences?: Partial<UserPreferences>;
   notification_settings?: Partial<NotificationSettings>;
   privacy_settings?: Partial<PrivacySettings>;
@@ -150,7 +135,6 @@ export interface UserProfile {
   maritalStatus?: string;
   stats: {
     responseRate: number;
-    avgResponseTime: string;
     totalProperties: number;
     totalGuests: number;
   };
@@ -166,7 +150,6 @@ export interface UserStats {
   totalReviews: number;
   averageRating: number;
   responseRate: number;
-  averageResponseTime: string;
   totalBookings: number;
   totalRevenue?: number;
   memberSince: string;

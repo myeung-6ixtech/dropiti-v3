@@ -84,10 +84,41 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
       'images.unsplash.com',
       'via.placeholder.com',
       'picsum.photos',
-      'placehold.co'
+      'placehold.co',
+      // S3 and cloud storage hostnames
+      's3.amazonaws.com',
+      's3.us-east-1.amazonaws.com',
+      's3.us-west-1.amazonaws.com',
+      's3.us-west-2.amazonaws.com',
+      's3.eu-west-1.amazonaws.com',
+      's3.eu-central-1.amazonaws.com',
+      's3.ap-southeast-1.amazonaws.com',
+      's3.ap-northeast-1.amazonaws.com',
+      's3.ap-south-1.amazonaws.com',
+      // Generic S3 patterns
+      '*.amazonaws.com',
+      // Other cloud providers
+      'storage.googleapis.com',
+      'firebasestorage.googleapis.com',
+      'blob.core.windows.net',
+      'cdn.digitaloceanspaces.com',
+      'nyc3.digitaloceanspaces.com',
+      'fra1.digitaloceanspaces.com',
+      'sgp1.digitaloceanspaces.com'
     ];
 
+    // Check if the hostname is in the allowed list
     if (allowedHostnames.includes(url.hostname)) {
+      return imageUrl;
+    }
+
+    // Check for S3-like patterns (bucket-name.s3.region.amazonaws.com)
+    if (url.hostname.includes('.s3.') && url.hostname.includes('.amazonaws.com')) {
+      return imageUrl;
+    }
+
+    // Check for DigitalOcean Spaces patterns
+    if (url.hostname.includes('.digitaloceanspaces.com')) {
       return imageUrl;
     }
 
@@ -101,16 +132,17 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
       return imageUrl;
     }
 
-    // For other external URLs, return fallback
-    console.warn(`Profile image hostname not allowed: ${url.hostname}`);
+    // For other external URLs, log and return fallback
+    console.warn(`Profile image hostname not allowed: ${url.hostname}`, { imageUrl });
     return fallbackUrl || '/images/default-avatar.png';
-  } catch {
+  } catch (error) {
     // If URL parsing fails, it might be a relative path
     if (imageUrl.startsWith('/') || imageUrl.startsWith('./')) {
       return imageUrl;
     }
     
-    console.warn(`Invalid profile image URL: ${imageUrl}`);
+    // Log the error for debugging
+    console.warn(`Invalid profile image URL: ${imageUrl}`, { error });
     return fallbackUrl || '/images/default-avatar.png';
   }
 };
@@ -135,11 +167,43 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
       'images.unsplash.com',
       'via.placeholder.com',
       'picsum.photos',
-      'placehold.co'
+      'placehold.co',
+      // S3 and cloud storage hostnames
+      's3.amazonaws.com',
+      's3.us-east-1.amazonaws.com',
+      's3.us-west-1.amazonaws.com',
+      's3.us-west-2.amazonaws.com',
+      's3.eu-west-1.amazonaws.com',
+      's3.eu-central-1.amazonaws.com',
+      's3.ap-southeast-1.amazonaws.com',
+      's3.ap-northeast-1.amazonaws.com',
+      's3.ap-south-1.amazonaws.com',
+      // Other cloud providers
+      'storage.googleapis.com',
+      'firebasestorage.googleapis.com',
+      'blob.core.windows.net',
+      'cdn.digitaloceanspaces.com',
+      'nyc3.digitaloceanspaces.com',
+      'fra1.digitaloceanspaces.com',
+      'sgp1.digitaloceanspaces.com'
     ];
 
-    return allowedHostnames.includes(url.hostname) || 
-           url.hostname === 'localhost' || 
+    // Check if the hostname is in the allowed list
+    if (allowedHostnames.includes(url.hostname)) {
+      return true;
+    }
+
+    // Check for S3-like patterns (bucket-name.s3.region.amazonaws.com)
+    if (url.hostname.includes('.s3.') && url.hostname.includes('.amazonaws.com')) {
+      return true;
+    }
+
+    // Check for DigitalOcean Spaces patterns
+    if (url.hostname.includes('.digitaloceanspaces.com')) {
+      return true;
+    }
+
+    return url.hostname === 'localhost' || 
            url.hostname === '127.0.0.1' || 
            url.protocol === 'data:' ||
            !url.hostname; // Relative paths

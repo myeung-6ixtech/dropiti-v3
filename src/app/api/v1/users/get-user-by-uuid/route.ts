@@ -10,24 +10,17 @@ const GET_USER_BY_UUID_QUERY = `
       email
       photo_url
       auth_provider
-      user_since
       phone_number
-      first_name
-      last_name
       location
       about
       education
       occupation
       marital_status
       languages
-      response_time
       verified
       rating
       review_count
       response_rate
-      avg_response_time
-      total_properties
-      total_guests
       preferences
       notification_settings
       privacy_settings
@@ -67,24 +60,17 @@ export async function GET(request: NextRequest) {
         email: string;
         photo_url?: string;
         auth_provider: string;
-        user_since: string;
         phone_number?: string;
-        first_name?: string;
-        last_name?: string;
         location?: string;
         about?: string;
         education?: string;
         occupation?: string;
         marital_status?: string;
         languages?: string[];
-        response_time?: string;
         verified: boolean;
         rating: number;
         review_count: number;
         response_rate: number;
-        avg_response_time?: string;
-        total_properties: number;
-        total_guests: number;
         preferences: Record<string, unknown>;
         notification_settings: Record<string, unknown>;
         privacy_settings: Record<string, unknown>;

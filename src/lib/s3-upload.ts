@@ -460,3 +460,36 @@ export const genericUploadService = {
     };
   },
 };
+
+// Profile photo upload service
+export const profilePhotoService = {
+  async uploadProfilePhoto(file: File): Promise<S3UploadResponse> {
+    // Use fallback method for better reliability
+    return s3UploadService.uploadFileWithFallback(file, 'images');
+  },
+
+  validateProfilePhoto(file: File): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    
+    // Check file size (max 5MB for profile photos)
+    if (file.size > 5 * 1024 * 1024) {
+      errors.push('Profile photo must be less than 5MB');
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      errors.push('File must be an image');
+    }
+    
+    // Check for common image formats
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      errors.push('Only JPEG, PNG, and WebP images are supported');
+    }
+    
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  },
+};

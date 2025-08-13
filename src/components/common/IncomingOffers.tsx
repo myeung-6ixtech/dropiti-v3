@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { 
   CheckIcon,
   XMarkIcon,
@@ -9,9 +10,12 @@ import {
   ClockIcon,
   UserIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  ArrowPathIcon
 } from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
+import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import CreateOfferModal from '@/components/common/CreateOfferModal';
 
 interface Offer {
   id: string;
@@ -27,6 +31,33 @@ interface Offer {
   offerStatus: string;
   isActive: boolean;
   createdAt: string;
+  // New fields for initiator (tenant) details
+  initiator?: {
+    uuid: string;
+    displayName: string;
+    email: string;
+    phoneNumber: string;
+    photoUrl: string;
+  } | null;
+  // New fields for property details
+  property?: {
+    title: string;
+    location: string;
+    rentalPrice: number;
+    rentalPriceCurrency: string;
+    propertyType: string;
+    bedrooms: number;
+    bathrooms: number;
+    imageUrl: string;
+  } | null;
+  // New fields for counter offer details
+  currentRentPrice?: number;
+  currentRentPriceCurrency?: string;
+  currentNumLeasingMonths?: number;
+  currentMoveInDate?: string;
+  currentPaymentFrequency?: string;
+  negotiationRound?: number;
+  lastActionBy?: 'initiator' | 'recipient';
 }
 
 interface IncomingOffersProps {
@@ -45,6 +76,8 @@ export default function IncomingOffers({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCounterOfferModalOpen, setIsCounterOfferModalOpen] = useState(false);
+  const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<Offer | null>(null);
 
   // Fetch offers for the recipient (landlord)
   useEffect(() => {
@@ -55,14 +88,13 @@ export default function IncomingOffers({
         
         console.log('Fetching offers for recipient:', recipientFirebaseUid);
         
-        const response = await offersAPI.getOffersByRecipient({
-          recipientFirebaseUid,
-          propertyUuid
-        });
+        const response = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
 
         if (response.success && response.data) {
           setOffers(response.data);
           console.log('Offers fetched successfully:', response.data);
+          console.log('First offer initiator details:', response.data[0]?.initiator);
+          console.log('First offer property details:', response.data[0]?.property);
         } else {
           throw new Error(response.error || 'Failed to fetch offers');
         }
@@ -104,15 +136,56 @@ export default function IncomingOffers({
   };
 
   const handleCounterOffer = (offerId: string) => {
-    setOffers(prev => 
-      prev.map(offer => 
-        offer.id === offerId 
-          ? { ...offer, offerStatus: 'countered' }
-          : offer
-      )
-    );
-    // TODO: Open counter offer modal
-    console.log('Countering offer:', offerId);
+    const offer = offers.find(o => o.id === offerId);
+    if (offer) {
+      setSelectedOfferForCounter(offer);
+      setIsCounterOfferModalOpen(true);
+    }
+  };
+
+  const handleCounterOfferSubmit = async (offerData: {
+    rentalPrice: number;
+    leaseDuration: number;
+    paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
+    moveInDate: string;
+  }) => {
+    if (!selectedOfferForCounter) return;
+    
+    try {
+      // Call the counter offer API
+      const response = await offersAPI.counterOffer(
+        selectedOfferForCounter.id,
+        recipientFirebaseUid, // Current user (landlord) is countering
+        {
+          rentPrice: offerData.rentalPrice,
+          numLeasingMonths: offerData.leaseDuration,
+          paymentFrequency: offerData.paymentFrequency,
+          moveInDate: offerData.moveInDate
+        }
+      );
+
+      if (response.success) {
+        // Update the local state to reflect the counter offer
+        setOffers(prev => 
+          prev.map(offer => 
+            offer.id === selectedOfferForCounter.id 
+              ? { ...offer, offerStatus: 'countered' }
+              : offer
+          )
+        );
+        
+        // Close the modal
+        setIsCounterOfferModalOpen(false);
+        setSelectedOfferForCounter(null);
+        
+        // Show success message (you can add a toast notification here)
+        console.log('Counter offer submitted successfully');
+      } else {
+        console.error('Failed to submit counter offer:', response.error);
+      }
+    } catch (error) {
+      console.error('Error submitting counter offer:', error);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -148,11 +221,7 @@ export default function IncomingOffers({
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <CenteredLoadingSpinner />;
   }
 
   if (error) {
@@ -202,14 +271,22 @@ export default function IncomingOffers({
             {/* Offer Header */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                  {/* Assuming initiator info is not directly available in this simplified structure */}
-                  <UserIcon className="h-5 w-5 text-gray-400" />
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
+                  {offer.initiator?.photoUrl ? (
+                    <Image 
+                      src={offer.initiator.photoUrl} 
+                      alt={offer.initiator.displayName}
+                      width={20}
+                      height={20}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <UserIcon className="h-5 w-5 text-gray-400" />
+                  )}
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900">
-                    {/* Assuming initiator name is not directly available */}
-                    Unknown Tenant
+                    {offer.initiator?.displayName || 'Unknown Tenant'}
                   </h3>
                   <p className="text-sm text-gray-500">
                     {formatDate(offer.createdAt)}
@@ -220,12 +297,15 @@ export default function IncomingOffers({
             </div>
 
             {/* Property Info (if enabled) */}
-            {showPropertyInfo && (
+            {showPropertyInfo && offer.property && (
               <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                <h4 className="font-medium text-gray-900 mb-1">Property Title</h4>
-                <p className="text-sm text-gray-600">Property Address</p>
+                <h4 className="font-medium text-gray-900 mb-1">{offer.property.title}</h4>
+                <p className="text-sm text-gray-600">{offer.property.location}</p>
                 <p className="text-sm text-gray-600">
-                  Listed at {formatCurrency(0, 'HKD')}/month
+                  Listed at {formatCurrency(offer.property.rentalPrice, offer.property.rentalPriceCurrency)}/month
+                </p>
+                <p className="text-sm text-gray-500">
+                  {offer.property.bedrooms} bed{offer.property.bedrooms !== 1 ? 's' : ''} • {offer.property.bathrooms} bath{offer.property.bathrooms !== 1 ? 's' : ''} • {offer.property.propertyType}
                 </p>
               </div>
             )}
@@ -252,17 +332,56 @@ export default function IncomingOffers({
               <div className="space-y-2">
                 <div className="flex items-center text-sm text-gray-600">
                   <EnvelopeIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>No email</span>
+                  <span>{offer.initiator?.email || 'No email'}</span>
                 </div>
                 <div className="flex items-center text-sm text-gray-600">
                   <PhoneIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>No phone</span>
+                  <span>{offer.initiator?.phoneNumber || 'No phone'}</span>
                 </div>
                 <div className="text-sm text-gray-600">
                   <span className="font-medium">Payment:</span> {offer.paymentFrequency}
                 </div>
               </div>
             </div>
+
+            {/* Counter Offer Details - Show when offer has been countered */}
+            {offer.offerStatus === 'countered' && offer.currentRentPrice && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
+                <h4 className="font-medium text-blue-900 mb-2 flex items-center">
+                  <ArrowPathIcon className="h-4 w-4 mr-2" />
+                  Counter Offer Details
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-blue-700">
+                      <CurrencyDollarIcon className="h-4 w-4 mr-2 text-blue-500" />
+                      <span>
+                        Counter: {formatCurrency(offer.currentRentPrice, offer.currentRentPriceCurrency || 'HKD')}/month
+                      </span>
+                    </div>
+                    <div className="flex items-center text-sm text-blue-700">
+                      <CalendarIcon className="h-4 w-4 mr-2 text-blue-500" />
+                      <span>{offer.currentNumLeasingMonths || offer.numLeasingMonths} month{(offer.currentNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''} lease</span>
+                    </div>
+                    <div className="flex items-center text-sm text-blue-700">
+                      <ClockIcon className="h-4 w-4 mr-2 text-blue-500" />
+                      <span>Move-in: {formatDate(offer.currentMoveInDate || offer.moveInDate)}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm text-blue-700">
+                      <span className="font-medium">Payment Frequency:</span> {offer.currentPaymentFrequency || offer.paymentFrequency}
+                    </div>
+                    <div className="text-sm text-blue-700">
+                      <span className="font-medium">Negotiation Round:</span> {offer.negotiationRound || 1}
+                    </div>
+                    <div className="text-sm text-blue-700">
+                      <span className="font-medium">Last Action:</span> {offer.lastActionBy === 'recipient' ? 'Landlord' : 'Tenant'} countered
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             {offer.offerStatus === 'pending' && (
@@ -292,6 +411,28 @@ export default function IncomingOffers({
           </div>
         ))}
       </div>
+
+      {/* Counter Offer Modal */}
+      {selectedOfferForCounter && (
+        <CreateOfferModal
+          isOpen={isCounterOfferModalOpen}
+          onClose={() => {
+            setIsCounterOfferModalOpen(false);
+            setSelectedOfferForCounter(null);
+          }}
+          propertyId={selectedOfferForCounter.propertyUuid}
+          currentPrice={selectedOfferForCounter.proposingRentPrice}
+          mode="counter"
+          offerId={selectedOfferForCounter.id}
+          existingOffer={{
+            rentalPrice: selectedOfferForCounter.proposingRentPrice,
+            leaseDuration: selectedOfferForCounter.numLeasingMonths,
+            paymentFrequency: selectedOfferForCounter.paymentFrequency as 'monthly' | 'quarterly' | 'yearly',
+            moveInDate: selectedOfferForCounter.moveInDate
+          }}
+          onOfferSubmit={handleCounterOfferSubmit}
+        />
+      )}
     </div>
   );
 }
