@@ -241,7 +241,7 @@ export default function SettingsPage() {
                   type="text"
                   value={tempSettings.firstName}
                   onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                 />
               </div>
               <div>
@@ -250,7 +250,7 @@ export default function SettingsPage() {
                   type="text"
                   value={tempSettings.lastName}
                   onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                 />
               </div>
               <div>
@@ -259,7 +259,7 @@ export default function SettingsPage() {
                   type="email"
                   value={tempSettings.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                 />
               </div>
               <div>
@@ -268,7 +268,7 @@ export default function SettingsPage() {
                   type="tel"
                   value={tempSettings.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
                 />
               </div>
             </div>
@@ -425,7 +425,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="flex justify-end">
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                <button className="btn-primary">
                   Update Password
                 </button>
               </div>
@@ -553,10 +553,10 @@ export default function SettingsPage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="flex items-center">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span className="text-blue-800">Loading settings data...</span>
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-3"></div>
+            <span className="text-gray-800">Loading settings data...</span>
           </div>
         </div>
       )}

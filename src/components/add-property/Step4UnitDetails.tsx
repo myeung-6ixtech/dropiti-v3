@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { 
   HomeIcon, 
-  ArrowsPointingOutIcon,
-  HeartIcon
+  ArrowsPointingOutIcon
 } from '@heroicons/react/24/outline';
 
 interface Step4UnitDetailsProps {

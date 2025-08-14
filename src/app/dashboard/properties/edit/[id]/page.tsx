@@ -6,8 +6,7 @@ import Image from 'next/image';
 import { 
   MapPinIcon, 
   CalendarIcon,
-  ArrowLeftIcon,
-  XMarkIcon
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import {
   Wifi,
@@ -254,7 +253,7 @@ export default function EditPropertyPage() {
                   <button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                    className="btn-primary disabled:opacity-50"
                   >
                     {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>
@@ -262,7 +261,7 @@ export default function EditPropertyPage() {
               ) : (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="btn-primary"
                 >
                   Edit Listing
                 </button>
@@ -627,85 +626,6 @@ export default function EditPropertyPage() {
                   <span className="text-gray-500 text-sm">Parking</span>
                   <p className="font-medium">{property.details.parking ? 'Available' : 'Not available'}</p>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* House Rules */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900">House rules</h2>
-              {isEditing && (
-                <button
-                  onClick={() => startEditing('rules')}
-                  className="px-3 py-1 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-                >
-                  Edit
-                </button>
-              )}
-            </div>
-            {editSection === 'rules' && isEditing ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  {property.rules?.map((rule, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        value={rule}
-                        onChange={(e) => {
-                          const newRules = [...(property.rules || [])];
-                          newRules[index] = e.target.value;
-                          setProperty({...property, rules: newRules});
-                        }}
-                        className="form-input flex-1"
-                      />
-                      <button
-                        onClick={() => {
-                          const newRules = property.rules?.filter((_, i) => i !== index) || [];
-                          setProperty({...property, rules: newRules});
-                        }}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <XMarkIcon className="h-4 w-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    onClick={() => {
-                      const newRules = [...(property.rules || []), ''];
-                      setProperty({...property, rules: newRules});
-                    }}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                  >
-                    Add Rule
-                  </button>
-                  <div className="flex space-x-2 pt-4">
-                    <button
-                      onClick={() => stopEditing()}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={() => stopEditing()}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {(property.rules || []).map((rule) => (
-                  <div key={rule} className="flex items-center space-x-2">
-                    <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                    <span className="text-sm text-gray-600">{rule}</span>
-                  </div>
-                ))}
-                {(!property.rules || property.rules.length === 0) && (
-                  <p className="text-sm text-gray-500">No rules specified</p>
-                )}
               </div>
             )}
           </div>

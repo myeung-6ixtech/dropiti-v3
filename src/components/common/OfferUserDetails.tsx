@@ -1,24 +1,9 @@
 import { UserIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import { Offer } from '@/types/offer';
 
 interface OfferUserDetailsProps {
-  offer: {
-    createdAt: string;
-    initiator?: {
-      uuid: string;
-      displayName: string;
-      email: string;
-      phoneNumber: string;
-      photoUrl: string;
-    } | null;
-    recipient?: {
-      uuid: string;
-      displayName: string;
-      email: string;
-      phoneNumber: string;
-      photoUrl: string;
-    } | null;
-  };
+  offer: Pick<Offer, 'createdAt' | 'initiator' | 'recipient'>;
   isIncomingOffer: boolean;
   offerStatus: string;
 }

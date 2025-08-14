@@ -70,7 +70,6 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-gray-900 text-base">{user.name}</h3>
-            <p className="text-xs text-gray-600 mb-1">{user.email}</p>
             <div className="flex items-center space-x-1">
               <StarIcon className="h-3 w-3 text-yellow-400" />
               <span className="text-xs font-medium text-gray-900">{user.rating}</span>

@@ -25,7 +25,6 @@ interface Landlord {
 
 interface PropertyPricingCardProps {
   price: number;
-  deposit: number;
   availableDate: string | null;
   minimumLease: number;
   landlord: Landlord;
@@ -36,17 +35,23 @@ interface PropertyPricingCardProps {
   };
   onCreateOffer: () => void;
   onChatWithLandlord: () => void;
+  // New props for button state management
+  isOwner: boolean;
+  hasExistingOffer: boolean;
+  onEditListing?: () => void;
 }
 
 export default function PropertyPricingCard({
   price,
-  deposit,
   availableDate,
   minimumLease,
   landlord,
   details,
   onCreateOffer,
-  onChatWithLandlord
+  onChatWithLandlord,
+  isOwner,
+  hasExistingOffer,
+  onEditListing
 }: PropertyPricingCardProps) {
 
   // Fallback image URL for when no landlord avatar is available
@@ -95,23 +100,38 @@ export default function PropertyPricingCard({
           {/* Additional Costs */}
           <div className="space-y-2 py-4 border-t border-gray-200">
             <div className="flex justify-between">
-              <span className="text-gray-600">Security deposit</span>
-              <span className="font-medium">{formatCurrency(deposit)}</span>
-            </div>
-            <div className="flex justify-between">
               <span className="text-gray-600">Utilities</span>
-              <span className="font-medium">Included</span>
+              <span className="font-medium">Not Included</span>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="space-y-3 pt-4">
-            <button
-              onClick={onCreateOffer}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-            >
-              Create Offer
-            </button>
+            {isOwner ? (
+              // Owner sees Edit Your Listing button
+              <button
+                onClick={onEditListing}
+                className="w-full btn-secondary py-3 px-4 font-semibold"
+              >
+                Edit Your Listing
+              </button>
+            ) : hasExistingOffer ? (
+              // User has already made an offer
+              <button
+                disabled
+                className="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-semibold cursor-not-allowed opacity-75"
+              >
+                Offer Made
+              </button>
+            ) : (
+              // Regular user can create offer
+              <button
+                onClick={onCreateOffer}
+                className="w-full btn-primary py-3 px-4 font-semibold"
+              >
+                Create Offer
+              </button>
+            )}
           </div>
 
           {/* Contact Info */}
@@ -139,7 +159,7 @@ export default function PropertyPricingCard({
                 }}
               />
               {landlord.verified && (
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
+                <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
                   <CheckCircleIcon className="h-3 w-3 text-white" />
                 </div>
               )}
@@ -148,12 +168,12 @@ export default function PropertyPricingCard({
               <div className="flex items-center space-x-2 mb-1">
                 <Link 
                   href={`/user/${landlord.uuid}`}
-                  className="font-semibold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer"
+                  className="font-semibold text-gray-900 text-lg hover:text-black transition-colors cursor-pointer"
                 >
                   {landlord.name}
                 </Link>
                 {landlord.verified && (
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-medium">
+                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
                     Verified
                   </span>
                 )}
@@ -171,7 +191,7 @@ export default function PropertyPricingCard({
           <div className="flex flex-col space-y-2 mb-4">
             <button
               onClick={onChatWithLandlord}
-              className="w-full bg-white text-blue-600 py-3 px-4 rounded-lg font-semibold border border-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="w-full btn-secondary py-3 px-4 font-semibold"
             >
               Chat with Landlord
             </button>

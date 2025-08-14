@@ -7,22 +7,16 @@ import FinalCounterOfferModal2 from './FinalCounterOfferModal2';
 
 interface OutgoingOfferCardStatusProps {
   offer: Offer;
-  finalCounterSubmitted?: boolean;
   currentUserId: string;
   onOfferStatusChange?: () => void;
-  onCounterOffer?: (offerId: string) => void;
 }
 
 export default function OutgoingOfferCardStatus({
   offer,
-  finalCounterSubmitted = false,
   currentUserId,
-  onOfferStatusChange,
-  onCounterOffer
+  onOfferStatusChange
 }: OutgoingOfferCardStatusProps) {
   const [isFinalCounterModalOpen, setIsFinalCounterModalOpen] = useState(false);
-  const [isAccepting, setIsAccepting] = useState(false);
-  const [isRejecting, setIsRejecting] = useState(false);
   const [isSubmittingFinalCounter, setIsSubmittingFinalCounter] = useState(false);
 
   const formatCurrency = (amount: number, currency: string) => {
@@ -40,31 +34,7 @@ export default function OutgoingOfferCardStatus({
     });
   };
 
-  const handleAcceptOffer = async () => {
-    setIsAccepting(true);
-    try {
-      await offersAPI.acceptOffer(offer.id, currentUserId);
-      onOfferStatusChange?.();
-    } catch (error) {
-      console.error('Error accepting offer:', error);
-      alert('Failed to accept offer. Please try again.');
-    } finally {
-      setIsAccepting(false);
-    }
-  };
 
-  const handleRejectOffer = async () => {
-    setIsRejecting(true);
-    try {
-      await offersAPI.rejectOffer(offer.id, currentUserId);
-      onOfferStatusChange?.();
-    } catch (error) {
-      console.error('Error rejecting offer:', error);
-      alert('Failed to reject offer. Please try again.');
-    } finally {
-      setIsRejecting(false);
-    }
-  };
 
   const handleFinalCounterOffer = async (counterData: {
     rentalPrice: number;

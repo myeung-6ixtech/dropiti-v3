@@ -52,25 +52,11 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
     return property?.num_bathroom || property?.bathrooms || 0;
   };
 
-  // Format address for better display
-  const getFormattedAddress = () => {
-    if (!location || location === 'No Location') return '';
-    
-    // If it's already formatted with commas, return as is
-    if (location.includes(',')) {
-      return location;
-    }
-    
-    // For simple addresses, return as is
-    return location;
-  };
+
 
   // Extract District and Country for simplified display
   const getSimplifiedLocation = () => {
     if (!location || location === 'No Location') return '';
-    
-    console.log('PropertyCard: Processing location:', location);
-    
     // Try to parse the location to extract District and Country
     // Location format is typically: "District, State, Country" or similar
     if (location.includes(',')) {
@@ -79,7 +65,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
       
       // If we have at least 2 parts, show District and Country
       if (parts.length >= 2) {
-        const district = parts[0];
+        const district = parts[7];
         const country = parts[parts.length - 1]; // Last part is usually country
         
         // If district and country are different, show both
@@ -154,8 +140,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
         </h3>
         {/* Property Features */}
         <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
+          <div className="flex items-center text-sm text-gray-900">
             <span>{getSimplifiedLocation()}</span>
           </div>
           
@@ -194,7 +179,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
           <div className="flex space-x-2 mt-4">
             <button
               onClick={handleViewDetails}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="flex-1 btn-primary py-2 px-4 text-sm font-medium"
             >
               View Details
             </button>
@@ -211,7 +196,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
           /* Regular View Details Button */
           <button
             onClick={handleViewDetails}
-            className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="w-full mt-4 btn-primary py-2 px-4 text-sm font-medium"
           >
             View Details
           </button>

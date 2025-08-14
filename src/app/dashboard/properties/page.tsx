@@ -76,7 +76,7 @@ export default function PropertiesPage() {
             <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
             <p className="text-gray-600 mt-1">Manage your property listings</p>
           </div>
-          <Link href="/dashboard/add-property" className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <Link href="/dashboard/add-property" className="btn-primary flex items-center">
             <PlusIcon className="h-4 w-4 mr-2" />
             Add Property
           </Link>
@@ -138,7 +138,7 @@ export default function PropertiesPage() {
               {!searchTerm && (
                 <Link
                   href="/dashboard/add-property"
-                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="btn-primary inline-flex items-center"
                 >
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Add Your First Property

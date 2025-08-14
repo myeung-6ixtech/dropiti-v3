@@ -6,58 +6,13 @@ import IncomingOfferCardActions from './IncomingOfferCardActions';
 import IncomingOfferCardStatus from './IncomingOfferCardStatus';
 import OutgoingOfferCardStatus from './OutgoingOfferCardStatus';
 import OfferUserDetails from './OfferUserDetails';
+import { Offer } from '@/types/offer';
 
-interface Offer {
-  id: string;
-  offerKey: string;
-  propertyUuid: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
-  proposingRentPrice: number;
-  proposingRentPriceCurrency: string;
-  numLeasingMonths: number;
-  paymentFrequency: string;
-  moveInDate: string;
-  offerStatus: string;
-  isActive: boolean;
-  createdAt: string;
-  // Recipient (landlord) details
-  recipient?: {
-    uuid: string;
-    displayName: string;
-    email: string;
-    phoneNumber: string;
-    photoUrl: string;
-  } | null;
-  // Property details
-  property?: {
-    title: string;
-    location: string;
-    rentalPrice: number;
-    rentalPriceCurrency: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    imageUrl: string;
-  } | null;
-  // For counter offer details
-  currentRentPrice?: number;
-  currentRentPriceCurrency?: string;
-  currentNumLeasingMonths?: number;
-  currentPaymentFrequency?: string;
-  currentMoveInDate?: string;
-  // Negotiation fields
-  negotiationRound?: number;
-  lastActionBy?: 'initiator' | 'recipient';
-  lastActionType?: string;
-  lastActionAt?: string;
-}
+
 
 interface OfferCardProps {
   offer: Offer;
   showPropertyInfo?: boolean;
-  finalCounterSubmitted?: boolean;
-  onViewCounterOffer?: (offer: Offer) => void;
   onWithdrawOffer?: (offerId: string) => void;
   // New props for incoming offers
   isIncomingOffer?: boolean;
@@ -68,14 +23,11 @@ interface OfferCardProps {
   respondingToCounter?: boolean;
   currentUserId: string;
   onOfferStatusChange?: () => void;
-  onFinalCounterOffer?: (offer: Offer) => void;
 }
 
 export default function OfferCard({
   offer,
   showPropertyInfo = true,
-  finalCounterSubmitted = false,
-  onViewCounterOffer,
   onWithdrawOffer,
   // New props for incoming offers
   isIncomingOffer = false,
@@ -85,8 +37,7 @@ export default function OfferCard({
   onViewCounterOfferDetails,
   respondingToCounter = false,
   currentUserId,
-  onOfferStatusChange,
-  onFinalCounterOffer
+  onOfferStatusChange
 }: OfferCardProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
@@ -123,7 +74,7 @@ export default function OfferCard({
           offer={offer}
           onAcceptOffer={onAcceptOffer}
           onRejectOffer={onRejectOffer}
-          onViewCounterOffer={onViewCounterOfferDetails}
+          onViewCounterOffer={onViewCounterOfferDetails ? () => onViewCounterOfferDetails(offer) : undefined}
           respondingToCounter={respondingToCounter}
           currentUserId={currentUserId}
           onOfferStatusChange={onOfferStatusChange}
@@ -137,7 +88,6 @@ export default function OfferCard({
           onWithdrawOffer={onWithdrawOffer}
           currentUserId={currentUserId}
           onOfferStatusChange={onOfferStatusChange}
-          finalCounterSubmitted={finalCounterSubmitted}
         />
       )}
 
@@ -148,7 +98,6 @@ export default function OfferCard({
           onWithdrawOffer={onWithdrawOffer}
           currentUserId={currentUserId}
           onOfferStatusChange={onOfferStatusChange}
-          finalCounterSubmitted={finalCounterSubmitted}
         />
       )}
 
@@ -156,20 +105,12 @@ export default function OfferCard({
       {isIncomingOffer ? (
         <IncomingOfferCardStatus
           offer={offer}
-          finalCounterSubmitted={finalCounterSubmitted}
-          onViewCounterOffer={onViewCounterOffer}
         />
       ) : (
         <OutgoingOfferCardStatus
           offer={offer}
-          finalCounterSubmitted={finalCounterSubmitted}
-          onViewCounterOffer={onViewCounterOffer}
-          onFinalCounterOffer={onFinalCounterOffer}
-          onAcceptOffer={onAcceptOffer}
-          onRejectOffer={onRejectOffer}
           currentUserId={currentUserId}
           onOfferStatusChange={onOfferStatusChange}
-          onCounterOffer={onCounterOffer}
         />
       )}
     </div>

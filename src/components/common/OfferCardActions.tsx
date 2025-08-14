@@ -99,7 +99,7 @@ export default function OfferCardActions({
               {onCounterOffer && (
                 <button
                   onClick={() => onCounterOffer(offer.id)}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  className="flex-1 btn-primary py-2 px-4 text-sm font-medium"
                 >
                   Counter
                 </button>
@@ -198,7 +198,7 @@ export default function OfferCardActions({
               {onViewCounterOffer && (
                 <button
                   onClick={() => onViewCounterOffer(offer)}
-                  className="w-full bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors flex items-center justify-center"
+                  className="w-full btn-primary py-2 px-4 text-sm font-medium flex items-center justify-center"
                 >
                   View Counter Offer Details
                 </button>

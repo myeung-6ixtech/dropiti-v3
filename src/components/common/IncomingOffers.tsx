@@ -6,50 +6,9 @@ import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import CounterOfferModal from '@/components/common/CounterOfferModal';
 import OfferCard from '@/components/common/OfferCard';
+import { Offer } from '@/types/offer';
 
-interface Offer {
-  id: string;
-  offerKey: string;
-  propertyUuid: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
-  proposingRentPrice: number;
-  proposingRentPriceCurrency: string;
-  numLeasingMonths: number;
-  paymentFrequency: string;
-  moveInDate: string;
-  offerStatus: string;
-  isActive: boolean;
-  createdAt: string;
-  // New fields for initiator (tenant) details
-  initiator?: {
-    uuid: string;
-    displayName: string;
-    email: string;
-    phoneNumber: string;
-    photoUrl: string;
-  } | null;
-  // New fields for property details
-  property?: {
-    title: string;
-    location: string;
-    rentalPrice: number;
-    rentalPriceCurrency: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    imageUrl: string;
-  } | null;
-  // New fields for counter offer details
-  currentRentPrice?: number;
-  currentRentPriceCurrency?: string;
-  currentNumLeasingMonths?: number;
-  currentMoveInDate?: string;
-  currentPaymentFrequency?: string;
-  negotiationRound?: number;
-  lastActionBy?: 'initiator' | 'recipient';
-  lastActionType?: string; // Add this field to track the type of last action
-}
+
 
 interface IncomingOffersProps {
   recipientFirebaseUid: string;

@@ -292,10 +292,10 @@ export default function ProfilePage() {
 
       {/* Loading State */}
       {isLoading && (
-        <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
           <div className="flex items-center">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span className="text-blue-800">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-3"></div>
+            <span className="text-gray-800">
               {isEditing ? 'Saving profile changes...' : 'Loading profile data...'}
             </span>
           </div>
@@ -339,7 +339,7 @@ export default function ProfilePage() {
             </div>
           </div>
           {!profile.verified && (
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+            <button className="text-sm text-black hover:text-gray-700 font-medium">
               Learn More
             </button>
           )}
@@ -350,7 +350,7 @@ export default function ProfilePage() {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-            <EyeIcon className="h-5 w-5 mr-2 text-blue-600" />
+            <EyeIcon className="h-5 w-5 mr-2 text-black" />
             Your Dropiti Passport
           </h2>
           <span className="text-sm text-gray-500">Live Preview</span>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
           {!isEditing ? (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="btn-primary font-medium"
             >
               Edit Profile
             </button>
@@ -414,7 +414,7 @@ export default function ProfilePage() {
           <div>
             <label className="form-label">
               <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                <UserIcon className="h-4 w-4 mr-2 text-black" />
                 Display Name
               </span>
             </label>
@@ -432,7 +432,7 @@ export default function ProfilePage() {
           <div>
             <label className="form-label">
               <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                <UserIcon className="h-4 w-4 mr-2 text-black" />
                 Profile Photo
               </span>
             </label>
@@ -448,7 +448,7 @@ export default function ProfilePage() {
           <div>
             <label className="form-label">
               <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                <UserIcon className="h-4 w-4 mr-2 text-black" />
                 Tell me About Yourself?
               </span>
             </label>
@@ -473,7 +473,7 @@ export default function ProfilePage() {
           <div>
             <label className="form-label">
               <span className="flex items-center">
-                <GlobeAltIcon className="h-4 w-4 mr-2 text-blue-600" />
+                <GlobeAltIcon className="h-4 w-4 mr-2 text-black" />
                 Languages you speak?
               </span>
             </label>
@@ -485,7 +485,7 @@ export default function ProfilePage() {
                   disabled={!isEditing}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     tempProfile.languages.includes(language)
-                      ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                      ? 'bg-black text-white border border-black'
                       : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
                   } ${
                     !isEditing ? 'cursor-default' : 'cursor-pointer'
@@ -571,7 +571,7 @@ export default function ProfilePage() {
           <div>
             <label className="form-label">
               <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-blue-600" />
+                <UserIcon className="h-4 w-4 mr-2 text-black" />
                 Phone Number
               </span>
             </label>
@@ -589,7 +589,7 @@ export default function ProfilePage() {
           <div>
             <label className="form-label">
               <span className="flex items-center">
-                <ClockIcon className="h-4 w-4 mr-2 text-blue-600" />
+                <ClockIcon className="h-4 w-4 mr-2 text-black" />
                 Typical Response Time
               </span>
             </label>

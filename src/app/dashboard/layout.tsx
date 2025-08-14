@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   UserIcon, 
   BuildingOfficeIcon, 
-  HomeIcon, 
   CogIcon, 
   Bars3Icon,
   XMarkIcon,
-  HeartIcon,
   ClockIcon,
   UsersIcon,
   ChatBubbleLeftRightIcon,
@@ -16,7 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { ChartTreeMap, PropertyListings } from '@/assets/icons';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
@@ -33,7 +31,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [activeView, setActiveView] = useState<ViewType>('landlord');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [isViewChanging, setIsViewChanging] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   
   // Use actual user data from auth context
   const user = {
@@ -70,40 +70,44 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const handleViewChange = (newView: ViewType) => {
+  const handleViewChange = async (newView: ViewType) => {
+    if (isViewChanging) return; // Prevent multiple rapid clicks
+    
+    setIsViewChanging(true);
     setActiveView(newView);
+    
+    // Navigate back to dashboard when switching views
+    if (pathname !== '/dashboard') {
+      await router.push('/dashboard');
+    }
+    
+    // Add a small delay for smooth transition
+    setTimeout(() => {
+      setIsViewChanging(false);
+    }, 500);
   };
 
-  // Show loading state while auth is loading
-  if (isLoading) {
-    return <FullScreenLoadingSpinner />;
-  }
+  // Handle redirect when not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      // Add a small delay to show the loading spinner briefly
+      const timer = setTimeout(() => {
+        router.push('/auth/signin');
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, isAuthenticated, router]);
 
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    return (
-      <div className="dashboard-container">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
-            <p className="text-gray-600 mb-4">Please sign in to access the dashboard.</p>
-            <Link
-              href="/auth/signin"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
+  // Show loading spinner while checking authentication or redirecting
+  if (isLoading || !isAuthenticated) {
+    return <FullScreenLoadingSpinner />;
   }
 
   const tenantNavigation = [
     { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
     { name: 'Applications', icon: ClockIcon, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
-    { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
+    // { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
@@ -113,8 +117,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const landlordNavigation = [
     { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
     { name: 'Properties', icon: PropertyListings, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
-    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
     { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
+    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
@@ -201,32 +205,45 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <p className="dashboard-view-toggle-title">View Mode</p>
             <div className="dashboard-view-toggle-buttons">
               <button
-                onClick={() => handleViewChange('tenant')}
-                className={`dashboard-view-button ${
-                  activeView === 'tenant'
-                    ? 'dashboard-view-button-active'
-                    : 'dashboard-view-button-inactive'
-                }`}
+                onClick={() => handleViewChange(activeView === 'tenant' ? 'landlord' : 'tenant')}
+                disabled={isViewChanging}
+                className={`dashboard-view-toggle-button ${isViewChanging ? 'opacity-75 cursor-not-allowed' : ''}`}
+                title={`Switch to ${activeView === 'tenant' ? 'Landlord' : 'Tenant'} View`}
               >
-                <UserIcon className="h-5 w-5 mr-2" />
-                Tenant View
+                <div className="flex items-center justify-center">
+                  {isViewChanging ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
+                      <span>Switching...</span>
+                    </>
+                  ) : activeView === 'tenant' ? (
+                    <>
+                      <UserIcon className="h-5 w-5 mr-2" />
+                      <span>Tenant View</span>
+                    </>
+                  ) : (
+                    <>
+                      <BuildingOfficeIcon className="h-5 w-5 mr-2" />
+                      <span>Landlord View</span>
+                    </>
+                  )}
+                </div>
+                <div className="mt-1 text-xs text-gray-500">
+                  {isViewChanging 
+                    ? 'Switching view mode...' 
+                    : `Click to switch to ${activeView === 'tenant' ? 'Landlord' : 'Tenant'} View`
+                  }
+                </div>
+                <div className={`mt-2 w-2 h-2 rounded-full ${
+                  activeView === 'tenant' ? 'bg-blue-500' : 'bg-green-500'
+                }`} title={`Currently in ${activeView} mode`}></div>
               </button>
-              <button
-                onClick={() => handleViewChange('landlord')}
-                className={`dashboard-view-button ${
-                  activeView === 'landlord'
-                    ? 'dashboard-view-button-active'
-                    : 'dashboard-view-button-inactive'
-                }`}
-              >
-                <BuildingOfficeIcon className="h-5 w-5 mr-2" />
-                Landlord View
-              </button>
+
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="dashboard-navigation">
+          <nav className={`dashboard-navigation transition-opacity duration-200 ${isViewChanging ? 'opacity-75' : 'opacity-100'}`}>
             <p className="dashboard-navigation-title">Navigation</p>
             {currentNavigation.map((item) => (
               <Link

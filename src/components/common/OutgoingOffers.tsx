@@ -5,52 +5,9 @@ import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import Toast from '@/components/ui/Toast';
+import { Offer } from '@/types/offer';
 
-interface Offer {
-  id: string;
-  offerKey: string;
-  propertyUuid: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
-  proposingRentPrice: number;
-  proposingRentPriceCurrency: string;
-  numLeasingMonths: number;
-  paymentFrequency: string;
-  moveInDate: string;
-  offerStatus: string;
-  isActive: boolean;
-  createdAt: string;
-  // Recipient (landlord) details
-  recipient?: {
-    uuid: string;
-    displayName: string;
-    email: string;
-    phoneNumber: string;
-    photoUrl: string;
-  } | null;
-  // Property details
-  property?: {
-    title: string;
-    location: string;
-    rentalPrice: number;
-    rentalPriceCurrency: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    imageUrl: string;
-  } | null;
-  // For counter offer details
-  currentRentPrice?: number;
-  currentRentPriceCurrency?: string;
-  currentNumLeasingMonths?: number;
-  currentPaymentFrequency?: string;
-  currentMoveInDate?: string;
-  // Negotiation fields
-  negotiationRound?: number;
-  lastActionBy?: 'initiator' | 'recipient';
-  lastActionType?: string;
-  lastActionAt?: string;
-}
+
 
 interface OutgoingOffersProps {
   initiatorFirebaseUid: string;
@@ -66,7 +23,7 @@ export default function OutgoingOffers({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [finalCounterSubmitted] = useState<Set<string>>(new Set());
+
   const [toast, setToast] = useState({
     message: '',
     type: 'error' as 'error' | 'success' | 'info' | 'warning',
@@ -179,7 +136,7 @@ export default function OutgoingOffers({
             key={offer.id}
             offer={offer}
             showPropertyInfo={showPropertyInfo}
-            finalCounterSubmitted={finalCounterSubmitted.has(offer.id)}
+
             onWithdrawOffer={() => {
               // Handle withdrawing offer
               setOffers(prev => 
@@ -248,11 +205,7 @@ export default function OutgoingOffers({
                 showToast('Error rejecting offer', 'error');
               }
             }}
-            onFinalCounterOffer={(offer: Offer) => {
-              // Handle final counter offer - open modal or navigate to final counter offer form
-              console.log('Final counter offer requested for:', offer.id);
-              // TODO: Implement final counter offer modal/form
-            }}
+
           />
         ))}
       </div>

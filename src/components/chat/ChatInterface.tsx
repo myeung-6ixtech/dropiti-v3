@@ -263,7 +263,7 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim()}
-                  className="flex-shrink-0 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="flex-shrink-0 p-2 btn-primary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <PaperAirplaneIcon className="h-4 w-4" />
                 </button>

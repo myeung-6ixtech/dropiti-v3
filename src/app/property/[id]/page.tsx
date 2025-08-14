@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { propertiesAPI, offersAPI } from '@/lib/api-client';
@@ -87,7 +87,82 @@ export default function PropertyDetailPage() {
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [hasExistingOffer, setHasExistingOffer] = useState(false);
   const { user: authUser } = useAuth(); // Get user from context
+
+  // Function to check if the current user has existing offers for this property
+  const checkExistingOffer = useCallback(async (propertyUuid: string, userId: string) => {
+    if (!userId || !propertyUuid) return;
+    
+    try {
+      const response = await offersAPI.getOffersByInitiator(userId);
+      
+      if (response.success && response.data) {
+        // Check if any of the user's offers are for this property
+        const hasOffer = response.data.some((offer: { property_uuid: string }) => 
+          offer.property_uuid === propertyUuid
+        );
+        setHasExistingOffer(hasOffer);
+      }
+    } catch (error) {
+      console.error('Failed to check existing offers:', error);
+    }
+  }, []);
+
+  // Image navigation functions - defined at top level to avoid conditional hook calls
+  const nextImage = useCallback(() => {
+    if (propertyData?.property?.uploaded_images) {
+      const images = propertyData.property.uploaded_images;
+      if (Array.isArray(images)) {
+        setSelectedImageIndex((prev) => 
+          prev === images.length - 1 ? 0 : prev + 1
+        );
+      }
+    }
+  }, [propertyData?.property?.uploaded_images]);
+
+  const previousImage = useCallback(() => {
+    if (propertyData?.property?.uploaded_images) {
+      const images = propertyData.property.uploaded_images;
+      if (Array.isArray(images)) {
+        setSelectedImageIndex((prev) => 
+          prev === 0 ? images.length - 1 : prev - 1
+        );
+      }
+    }
+  }, [propertyData?.property?.uploaded_images]);
+
+  // Gallery functions - defined at top level to avoid conditional hook calls
+  const openGallery = useCallback((index: number) => {
+    setSelectedImageIndex(index);
+    setIsGalleryModalOpen(true);
+  }, []);
+
+  const closeGallery = useCallback(() => {
+    setIsGalleryModalOpen(false);
+  }, []);
+
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isGalleryModalOpen) return;
+      
+      switch (event.key) {
+        case 'Escape':
+          closeGallery();
+          break;
+        case 'ArrowLeft':
+          previousImage();
+          break;
+        case 'ArrowRight':
+          nextImage();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isGalleryModalOpen, closeGallery, nextImage, previousImage]);
 
   // Function to fetch landlord details using owner_id
   const fetchLandlordDetails = async (ownerId: string) => {
@@ -172,6 +247,11 @@ export default function PropertyDetailPage() {
             console.log('=== END DEBUG ===');
             
             setPropertyData(combinedData);
+            
+            // Check if the current user has existing offers for this property
+            if (authUser?.id) {
+              checkExistingOffer(response.data.property.property_uuid, authUser.id);
+            }
           } else {
             setError(response.error || 'Failed to load property');
           }
@@ -186,6 +266,13 @@ export default function PropertyDetailPage() {
 
     loadProperty();
   }, [params.id]);
+
+  // Check for existing offers when auth user changes
+  useEffect(() => {
+    if (authUser?.id && propertyData?.property?.property_uuid) {
+      checkExistingOffer(propertyData.property.property_uuid, authUser.id);
+    }
+  }, [authUser?.id, propertyData?.property?.property_uuid, checkExistingOffer]);
 
   const handleCreateOffer = () => {
     setIsCreateOfferModalOpen(true);
@@ -216,10 +303,6 @@ export default function PropertyDetailPage() {
         alert('Unable to create offer: Missing property or landlord information');
         return;
       }
-
-      console.log('Creating offer with data:', offerData);
-      console.log('Property ID:', propertyData.property.property_uuid);
-      console.log('Landlord Firebase UID:', propertyData.landlord.firebase_uid);
 
       // Call the create-offer API
       const response = await offersAPI.createOffer({
@@ -297,55 +380,11 @@ export default function PropertyDetailPage() {
     return amenityMap[amenityId] || amenityId;
   };
 
-  // Gallery functions
-  const openGallery = (index: number) => {
-    setSelectedImageIndex(index);
-    setIsGalleryModalOpen(true);
-  };
 
-  const closeGallery = () => {
-    setIsGalleryModalOpen(false);
-  };
 
-  const nextImage = () => {
-    const images = property?.uploaded_images;
-    if (images && Array.isArray(images)) {
-      setSelectedImageIndex((prev) => 
-        prev === images.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
 
-  const previousImage = () => {
-    const images = property?.uploaded_images;
-    if (images && Array.isArray(images)) {
-      setSelectedImageIndex((prev) => 
-        prev === 0 ? images.length - 1 : prev - 1
-      );
-    }
-  };
 
-  // Keyboard navigation for gallery
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (!isGalleryModalOpen) return;
-      
-      switch (event.key) {
-        case 'Escape':
-          closeGallery();
-          break;
-        case 'ArrowLeft':
-          previousImage();
-          break;
-        case 'ArrowRight':
-          nextImage();
-          break;
-      }
-    };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isGalleryModalOpen]);
 
   if (isLoading) {
     return (
@@ -388,11 +427,8 @@ export default function PropertyDetailPage() {
 
   const { property, landlord } = propertyData;
 
-  // Fallback image URL for when no images are available
-  const fallbackImage = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
-
   // Get the main display image or fallback
-  const mainImage = property.image_url || property.display_image || fallbackImage;
+  const mainImage = property.image_url || property.display_image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
   
   // Get all images for the gallery - prioritize uploaded_images, fallback to main image
   const allImages = (() => {
@@ -595,10 +631,11 @@ export default function PropertyDetailPage() {
           {/* Right Column - Pricing and Actions */}
           {(() => {
             console.log('Rendering PropertyPricingCard with landlord:', landlord);
+            const isOwner = authUser?.id === property.owner_id;
+            
             return (
               <PropertyPricingCard
                 price={property.price}
-                deposit={0} // Assuming no deposit for now, as it's not in the mock data
                 availableDate={property.available_date || null}
                 minimumLease={property.minimum_lease || 12}
                 landlord={{
@@ -620,6 +657,9 @@ export default function PropertyDetailPage() {
                 }}
                 onCreateOffer={handleCreateOffer}
                 onChatWithLandlord={handleChatWithLandlord}
+                isOwner={isOwner}
+                hasExistingOffer={hasExistingOffer}
+                onEditListing={() => router.push(`/dashboard/properties/edit/${property.property_uuid}`)}
               />
             );
           })()}

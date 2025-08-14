@@ -137,25 +137,7 @@ const amenities = [
   }
 ];
 
-const categories = [
-  'All',
-  'Internet & Technology',
-  'Climate Control',
-  'Entertainment',
-  'Kitchen',
-  'Laundry',
-  'Transportation',
-  'Fitness',
-  'Recreation',
-  'Safety',
-  'Accessibility',
-  'Outdoor',
-  'Work',
-  'Communication',
-  'Furnishing',
-  'Utilities',
-  'Services'
-];
+
 
 export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(data?.amenities || []);

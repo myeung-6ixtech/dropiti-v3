@@ -221,9 +221,9 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-6 h-6 rounded-full border text-xs font-medium ${
                   currentStep > step.id
-                    ? 'bg-blue-600 border-blue-600 text-white'
+                    ? 'bg-black border-black text-white'
                     : currentStep === step.id
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-black text-black'
                     : 'border-gray-300 text-gray-400'
                 }`}>
                   {currentStep > step.id ? (
@@ -234,7 +234,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`w-4 h-0.5 mx-1 ${
-                    currentStep > step.id ? 'bg-blue-600' : 'bg-gray-300'
+                    currentStep > step.id ? 'bg-black' : 'bg-gray-300'
                   }`} />
                 )}
               </div>

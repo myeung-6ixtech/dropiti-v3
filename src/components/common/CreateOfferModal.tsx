@@ -293,7 +293,7 @@ export default function CreateOfferModal({
             </button>
             <button
               type="submit"
-              className="form-button flex-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 text-sm py-2"
+              className="form-button flex-1 btn-primary text-sm py-2"
             >
               {mode === 'counter' ? 'Submit Counter Offer' : 'Submit Offer'}
             </button>

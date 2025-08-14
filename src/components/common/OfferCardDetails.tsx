@@ -1,37 +1,8 @@
 import { CurrencyDollarIcon, CalendarIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { Offer } from '@/types/offer';
 
 interface OfferCardDetailsProps {
-  offer: {
-    proposingRentPrice: number;
-    proposingRentPriceCurrency: string;
-    numLeasingMonths: number;
-    moveInDate: string;
-    paymentFrequency: string;
-    property?: {
-      title: string;
-      location: string;
-      rentalPrice: number;
-      rentalPriceCurrency: string;
-      propertyType: string;
-      bedrooms: number;
-      bathrooms: number;
-      imageUrl: string;
-    } | null;
-    initiator?: {
-      uuid: string;
-      displayName: string;
-      email: string;
-      phoneNumber: string;
-      photoUrl: string;
-    } | null;
-    recipient?: {
-      uuid: string;
-      displayName: string;
-      email: string;
-      phoneNumber: string;
-      photoUrl: string;
-    } | null;
-  };
+  offer: Pick<Offer, 'proposingRentPrice' | 'proposingRentPriceCurrency' | 'numLeasingMonths' | 'moveInDate' | 'paymentFrequency' | 'property' | 'initiator' | 'recipient'>;
   showPropertyInfo?: boolean;
   isIncomingOffer?: boolean;
 }

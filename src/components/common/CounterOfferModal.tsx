@@ -2,47 +2,9 @@
 
 import { Modal } from '@/components/ui/modal';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import { Offer } from '@/types/offer';
 
-interface Offer {
-  id: string;
-  offerKey: string;
-  propertyUuid: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
-  proposingRentPrice: number;
-  proposingRentPriceCurrency: string;
-  numLeasingMonths: number;
-  paymentFrequency: string;
-  moveInDate: string;
-  offerStatus: string;
-  isActive: boolean;
-  createdAt: string;
-  // Recipient (landlord) details
-  recipient?: {
-    uuid: string;
-    displayName: string;
-    email: string;
-    phoneNumber: string;
-    photoUrl: string;
-  } | null;
-  // Property details
-  property?: {
-    title: string;
-    location: string;
-    rentalPrice: number;
-    rentalPriceCurrency: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    imageUrl: string;
-  } | null;
-  // For counter offer details
-  currentRentPrice?: number;
-  currentRentPriceCurrency?: string;
-  currentNumLeasingMonths?: number;
-  currentPaymentFrequency?: string;
-  currentMoveInDate?: string;
-}
+
 
 interface CounterOfferModalProps {
   isOpen: boolean;
