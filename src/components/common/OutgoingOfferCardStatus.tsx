@@ -176,36 +176,17 @@ export default function OutgoingOfferCardStatus({
         );
       }
     } else if (offer.lastActionType === 'INITIATOR_COUNTERED') {
-      if (offer.negotiationRound === 1) {
-        if (finalCounterSubmitted) {
-          return (
-            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <p className="text-yellow-800 text-sm font-medium">
-                🔄 You sent a final counter offer to the landlord
-              </p>
-              <p className="text-yellow-700 text-xs mt-1">
-                Waiting for landlord's final decision...
-              </p>
-            </div>
-          );
-        } else {
-          return (
-            <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <p className="text-orange-800 text-sm font-medium">
-                ⚠️ This is your final chance to counter
-              </p>
-              <p className="text-orange-700 text-xs mt-1">
-                You can send one more counter offer or wait for landlord's response
-              </p>
-              <button
-                onClick={() => onCounterOffer?.(offer.id)}
-                className="mt-2 w-full bg-orange-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors"
-              >
-                Send Final Counter Offer
-              </button>
-            </div>
-          );
-        }
+      if (offer.negotiationRound === 2) {
+        return (
+          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-yellow-800 text-sm font-medium">
+              🔄 You sent a final counter offer to the landlord
+            </p>
+            <p className="text-yellow-700 text-xs mt-1">
+              Waiting for landlord's final decision...
+            </p>
+          </div>
+        );
       }
     }
   }

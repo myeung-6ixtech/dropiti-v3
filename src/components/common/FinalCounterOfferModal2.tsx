@@ -15,6 +15,12 @@ interface Offer {
   numLeasingMonths: number;
   paymentFrequency: string;
   moveInDate: string;
+  // Add current counter offer fields
+  currentRentPrice?: number;
+  currentRentPriceCurrency?: string;
+  currentNumLeasingMonths?: number;
+  currentPaymentFrequency?: string;
+  currentMoveInDate?: string;
 }
 
 interface FinalCounterOfferModal2Props {
@@ -39,10 +45,10 @@ export default function FinalCounterOfferModal2({
   loading = false
 }: FinalCounterOfferModal2Props) {
   const [offerData, setOfferData] = useState({
-    rentalPrice: offer?.proposingRentPrice || 0,
-    leaseDuration: offer?.numLeasingMonths || 12,
-    paymentFrequency: (offer?.paymentFrequency as 'monthly' | 'quarterly' | 'yearly') || 'monthly',
-    moveInDate: offer?.moveInDate || new Date().toISOString().split('T')[0],
+    rentalPrice: offer?.currentRentPrice || offer?.proposingRentPrice || 0,
+    leaseDuration: offer?.currentNumLeasingMonths || offer?.numLeasingMonths || 12,
+    paymentFrequency: (offer?.currentPaymentFrequency || offer?.paymentFrequency) as 'monthly' | 'quarterly' | 'yearly' || 'monthly',
+    moveInDate: offer?.currentMoveInDate || offer?.moveInDate || new Date().toISOString().split('T')[0],
     message: ''
   });
 
@@ -92,10 +98,10 @@ export default function FinalCounterOfferModal2({
         onClose();
         // Reset form
         setOfferData({
-          rentalPrice: offer?.proposingRentPrice || 0,
-          leaseDuration: offer?.numLeasingMonths || 12,
-          paymentFrequency: (offer?.paymentFrequency as 'monthly' | 'quarterly' | 'yearly') || 'monthly',
-          moveInDate: offer?.moveInDate || new Date().toISOString().split('T')[0],
+          rentalPrice: offer?.currentRentPrice || offer?.proposingRentPrice || 0,
+          leaseDuration: offer?.currentNumLeasingMonths || offer?.numLeasingMonths || 12,
+          paymentFrequency: (offer?.currentPaymentFrequency || offer?.paymentFrequency) as 'monthly' | 'quarterly' | 'yearly' || 'monthly',
+          moveInDate: offer?.currentMoveInDate || offer?.moveInDate || new Date().toISOString().split('T')[0],
           message: ''
         });
         setErrors({});
@@ -121,9 +127,14 @@ export default function FinalCounterOfferModal2({
       <div className="bg-white rounded-lg shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Final Counter Offer
-          </h2>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">
+              Final Counter Offer
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              Submit your final counter offer in response to the landlord's counter offer
+            </p>
+          </div>
           <button
             onClick={onClose}
             className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -158,11 +169,15 @@ export default function FinalCounterOfferModal2({
                 {errors.rentalPrice && (
                   <p className="mt-1 text-xs text-red-600">{errors.rentalPrice}</p>
                 )}
-                {offer?.proposingRentPrice > 0 && (
+                {offer?.currentRentPrice && offer.currentRentPrice > 0 ? (
                   <p className="mt-1 text-xs text-gray-500">
-                    Current offer price: {formatCurrency(offer.proposingRentPrice)}
+                    Landlord's counter offer: {formatCurrency(offer.currentRentPrice)}
                   </p>
-                )}
+                ) : offer?.proposingRentPrice && offer.proposingRentPrice > 0 ? (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Original offer price: {formatCurrency(offer.proposingRentPrice)}
+                  </p>
+                ) : null}
               </div>
 
               {/* Lease Duration */}
@@ -254,7 +269,42 @@ export default function FinalCounterOfferModal2({
               {/* Summary */}
               <div className="bg-gray-50 rounded-md p-3">
                 <h4 className="font-medium text-gray-900 mb-2 text-sm">Final Counter Offer Summary</h4>
+                
+                {/* Reference: Landlord's Current Counter Offer */}
+                {offer?.currentRentPrice && offer.currentRentPrice > 0 && (
+                  <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded text-xs">
+                    <p className="font-medium text-blue-800 mb-1">Responding to Landlord's Counter Offer:</p>
+                    <div className="space-y-1 text-blue-700">
+                      <div className="flex justify-between">
+                        <span>Rent:</span>
+                        <span className="font-medium">{formatCurrency(offer.currentRentPrice)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Lease:</span>
+                        <span className="font-medium">{offer.currentNumLeasingMonths} months</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Payment:</span>
+                        <span className="font-medium capitalize">{offer.currentPaymentFrequency}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Move-in:</span>
+                        <span className="font-medium">
+                          {offer.currentMoveInDate ? new Date(offer.currentMoveInDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                          }) : 'Not set'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="space-y-1 text-xs text-gray-600">
+                  <div className="flex justify-between">
+                    <span>Your New Offer:</span>
+                  </div>
                   <div className="flex justify-between">
                     <span>Rental Price:</span>
                     <span className="font-medium">{formatCurrency(offerData.rentalPrice || 0)}</span>

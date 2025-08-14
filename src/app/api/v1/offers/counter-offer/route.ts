@@ -175,15 +175,15 @@ export async function POST(request: NextRequest) {
     const isInitiator = offer.initiator_firebase_uid === currentUserId;
     const actionType = isInitiator ? 'INITIATOR_COUNTERED' : 'RECIPIENT_COUNTERED';
 
-    // For final counter offers, we need to update the proposing fields, not current fields
+    // For final counter offers, we need to update the current fields with the new counter offer data
     if (isInitiator && transformedOffer.negotiationRound >= 1) {
-      // This is a final counter offer - update proposing fields
+      // This is a final counter offer - update current fields with the new counter offer
       const updates = {
-        proposing_rent_price: counterData.rentPrice,
-        proposing_rent_price_currency: offer.proposing_rent_price_currency,
-        num_leasing_months: counterData.numLeasingMonths,
-        payment_frequency: counterData.paymentFrequency,
-        move_in_date: counterData.moveInDate,
+        current_rent_price: counterData.rentPrice,
+        current_rent_price_currency: offer.proposing_rent_price_currency,
+        current_num_leasing_months: counterData.numLeasingMonths,
+        current_payment_frequency: counterData.paymentFrequency,
+        current_move_in_date: counterData.moveInDate,
         offer_status: 'countered',
         negotiation_round: transformedOffer.negotiationRound + 1,
         last_action_by: 'initiator',
