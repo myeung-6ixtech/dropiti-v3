@@ -70,7 +70,7 @@ export default function IncomingOfferCardStatus({
         );
       }
     } else if (offer.lastActionType === 'INITIATOR_COUNTERED') {
-      if (offer.negotiationRound === 1) {
+      if (offer.negotiationRound === 2) {
         return (
           <div className="mt-4 space-y-3">
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
