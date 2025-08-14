@@ -1,64 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { 
-  CheckIcon,
-  XMarkIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  ClockIcon,
-  UserIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  ArrowPathIcon
-} from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
+import CounterOfferModal from '@/components/common/CounterOfferModal';
+import OfferCard from '@/components/common/OfferCard';
+import { Offer } from '@/types/offer';
 
-interface Offer {
-  id: string;
-  offerKey: string;
-  propertyUuid: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
-  proposingRentPrice: number;
-  proposingRentPriceCurrency: string;
-  numLeasingMonths: number;
-  paymentFrequency: string;
-  moveInDate: string;
-  offerStatus: string;
-  isActive: boolean;
-  createdAt: string;
-  // New fields for initiator (tenant) details
-  initiator?: {
-    uuid: string;
-    displayName: string;
-    email: string;
-    phoneNumber: string;
-    photoUrl: string;
-  } | null;
-  // New fields for property details
-  property?: {
-    title: string;
-    location: string;
-    rentalPrice: number;
-    rentalPriceCurrency: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    imageUrl: string;
-  } | null;
-  // New fields for counter offer details
-  currentRentPrice?: number;
-  currentRentPriceCurrency?: string;
-  currentNumLeasingMonths?: number;
-  currentMoveInDate?: string;
-  currentPaymentFrequency?: string;
-  negotiationRound?: number;
-  lastActionBy?: 'initiator' | 'recipient';
-}
+
 
 interface IncomingOffersProps {
   recipientFirebaseUid: string;
@@ -78,6 +28,9 @@ export default function IncomingOffers({
   const [error, setError] = useState<string | null>(null);
   const [isCounterOfferModalOpen, setIsCounterOfferModalOpen] = useState(false);
   const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<Offer | null>(null);
+  const [isCounterOfferViewModalOpen, setIsCounterOfferViewModalOpen] = useState(false);
+  const [selectedOfferForView, setSelectedOfferForView] = useState<Offer | null>(null);
+  const [respondingToCounter, setRespondingToCounter] = useState(false);
 
   // Fetch offers for the recipient (landlord)
   useEffect(() => {
@@ -86,15 +39,10 @@ export default function IncomingOffers({
         setLoading(true);
         setError(null);
         
-        console.log('Fetching offers for recipient:', recipientFirebaseUid);
-        
-        const response = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
+        const response = await offersAPI.getOffersByRecipient(recipientFirebaseUid, propertyUuid);
 
         if (response.success && response.data) {
           setOffers(response.data);
-          console.log('Offers fetched successfully:', response.data);
-          console.log('First offer initiator details:', response.data[0]?.initiator);
-          console.log('First offer property details:', response.data[0]?.property);
         } else {
           throw new Error(response.error || 'Failed to fetch offers');
         }
@@ -188,36 +136,66 @@ export default function IncomingOffers({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+  // Handle viewing counter offer details
+  const handleViewCounterOffer = (offer: Offer) => {
+    setSelectedOfferForView(offer);
+    setIsCounterOfferViewModalOpen(true);
   };
 
-  const formatCurrency = (amount: number, currency: string = 'HKD') => {
-    return new Intl.NumberFormat('en-HK', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0
-    }).format(amount);
+  // Handle accepting counter offer
+  const handleAcceptCounterOffer = async (offerId: string) => {
+    try {
+      setRespondingToCounter(true);
+      
+      // Call the accept offer API
+      const response = await offersAPI.acceptOffer(offerId, recipientFirebaseUid);
+      
+      if (response.success) {
+        // Close modal and refresh offers
+        setIsCounterOfferViewModalOpen(false);
+        setSelectedOfferForView(null);
+        
+        // Refresh the offers list
+        const refreshResponse = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
+        if (refreshResponse.success && refreshResponse.data) {
+          setOffers(refreshResponse.data);
+        }
+      } else {
+        console.error('Failed to accept counter offer:', response.error);
+      }
+    } catch (error) {
+      console.error('Error accepting counter offer:', error);
+    } finally {
+      setRespondingToCounter(false);
+    }
   };
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig: Record<string, { color: string; text: string }> = {
-      pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
-      accepted: { color: 'bg-green-100 text-green-800', text: 'Accepted' },
-      rejected: { color: 'bg-red-100 text-red-800', text: 'Rejected' },
-      countered: { color: 'bg-blue-100 text-blue-800', text: 'Countered' }
-    };
-
-    const config = statusConfig[status] || { color: 'bg-gray-100 text-gray-800', text: status };
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
-        {config.text}
-      </span>
-    );
+  // Handle rejecting counter offer
+  const handleRejectCounterOffer = async (offerId: string) => {
+    try {
+      setRespondingToCounter(true);
+      
+      // Call the reject offer API
+      const response = await offersAPI.rejectOffer(offerId, recipientFirebaseUid);
+      
+      if (response.success) {
+        // Close modal and refresh offers
+        setIsCounterOfferViewModalOpen(false);
+        setSelectedOfferForView(null);
+        
+        // Refresh the offers list
+        const refreshResponse = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
+        if (refreshResponse.success && refreshResponse.data) {
+          setOffers(refreshResponse.data);
+        }
+      } else {
+        console.error('Failed to reject counter offer:', response.error);
+      }
+    } catch (error) {
+      console.error('Error rejecting counter offer:', error);
+    } finally {
+      setRespondingToCounter(false);
+    }
   };
 
   if (loading) {
@@ -267,148 +245,32 @@ export default function IncomingOffers({
       {/* Offers List */}
       <div className="space-y-4">
         {offers.map((offer) => (
-          <div key={offer.id} className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-            {/* Offer Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                  {offer.initiator?.photoUrl ? (
-                    <Image 
-                      src={offer.initiator.photoUrl} 
-                      alt={offer.initiator.displayName}
-                      width={20}
-                      height={20}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <UserIcon className="h-5 w-5 text-gray-400" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">
-                    {offer.initiator?.displayName || 'Unknown Tenant'}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {formatDate(offer.createdAt)}
-                  </p>
-                </div>
-              </div>
-              {getStatusBadge(offer.offerStatus)}
-            </div>
-
-            {/* Property Info (if enabled) */}
-            {showPropertyInfo && offer.property && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-md">
-                <h4 className="font-medium text-gray-900 mb-1">{offer.property.title}</h4>
-                <p className="text-sm text-gray-600">{offer.property.location}</p>
-                <p className="text-sm text-gray-600">
-                  Listed at {formatCurrency(offer.property.rentalPrice, offer.property.rentalPriceCurrency)}/month
-                </p>
-                <p className="text-sm text-gray-500">
-                  {offer.property.bedrooms} bed{offer.property.bedrooms !== 1 ? 's' : ''} • {offer.property.bathrooms} bath{offer.property.bathrooms !== 1 ? 's' : ''} • {offer.property.propertyType}
-                </p>
-              </div>
-            )}
-
-            {/* Offer Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-gray-600">
-                  <CurrencyDollarIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>
-                    Offered: {formatCurrency(offer.proposingRentPrice, offer.proposingRentPriceCurrency)}/month
-                  </span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <CalendarIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{offer.numLeasingMonths} month{offer.numLeasingMonths !== 1 ? 's' : ''} lease</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <ClockIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>Move-in: {formatDate(offer.moveInDate)}</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-gray-600">
-                  <EnvelopeIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{offer.initiator?.email || 'No email'}</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600">
-                  <PhoneIcon className="h-4 w-4 mr-2 text-gray-400" />
-                  <span>{offer.initiator?.phoneNumber || 'No phone'}</span>
-                </div>
-                <div className="text-sm text-gray-600">
-                  <span className="font-medium">Payment:</span> {offer.paymentFrequency}
-                </div>
-              </div>
-            </div>
-
-            {/* Counter Offer Details - Show when offer has been countered */}
-            {offer.offerStatus === 'countered' && offer.currentRentPrice && (
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-md">
-                <h4 className="font-medium text-blue-900 mb-2 flex items-center">
-                  <ArrowPathIcon className="h-4 w-4 mr-2" />
-                  Counter Offer Details
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-blue-700">
-                      <CurrencyDollarIcon className="h-4 w-4 mr-2 text-blue-500" />
-                      <span>
-                        Counter: {formatCurrency(offer.currentRentPrice, offer.currentRentPriceCurrency || 'HKD')}/month
-                      </span>
-                    </div>
-                    <div className="flex items-center text-sm text-blue-700">
-                      <CalendarIcon className="h-4 w-4 mr-2 text-blue-500" />
-                      <span>{offer.currentNumLeasingMonths || offer.numLeasingMonths} month{(offer.currentNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''} lease</span>
-                    </div>
-                    <div className="flex items-center text-sm text-blue-700">
-                      <ClockIcon className="h-4 w-4 mr-2 text-blue-500" />
-                      <span>Move-in: {formatDate(offer.currentMoveInDate || offer.moveInDate)}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="text-sm text-blue-700">
-                      <span className="font-medium">Payment Frequency:</span> {offer.currentPaymentFrequency || offer.paymentFrequency}
-                    </div>
-                    <div className="text-sm text-blue-700">
-                      <span className="font-medium">Negotiation Round:</span> {offer.negotiationRound || 1}
-                    </div>
-                    <div className="text-sm text-blue-700">
-                      <span className="font-medium">Last Action:</span> {offer.lastActionBy === 'recipient' ? 'Landlord' : 'Tenant'} countered
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            {offer.offerStatus === 'pending' && (
-              <div className="flex space-x-3 pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => handleAcceptOffer(offer.id)}
-                  className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
-                >
-                  <CheckIcon className="h-4 w-4 mr-2" />
-                  Accept
-                </button>
-                <button
-                  onClick={() => handleRejectOffer(offer.id)}
-                  className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
-                >
-                  <XMarkIcon className="h-4 w-4 mr-2" />
-                  Reject
-                </button>
-                <button
-                  onClick={() => handleCounterOffer(offer.id)}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                >
-                  Counter
-                </button>
-              </div>
-            )}
-          </div>
+          <OfferCard
+            key={offer.id}
+            offer={offer}
+            showPropertyInfo={showPropertyInfo}
+            isIncomingOffer={true}
+            onAcceptOffer={handleAcceptOffer}
+            onRejectOffer={handleRejectOffer}
+            onCounterOffer={handleCounterOffer}
+            onViewCounterOfferDetails={handleViewCounterOffer}
+            respondingToCounter={respondingToCounter}
+            currentUserId={recipientFirebaseUid}
+            onOfferStatusChange={() => {
+              // Refresh the offers list when an offer status changes
+              if (recipientFirebaseUid) {
+                offersAPI.getOffersByRecipient(recipientFirebaseUid, propertyUuid)
+                  .then(response => {
+                    if (response.success && response.data) {
+                      setOffers(response.data);
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Error refreshing offers:', err);
+                  });
+              }
+            }}
+          />
         ))}
       </div>
 
@@ -431,6 +293,25 @@ export default function IncomingOffers({
             moveInDate: selectedOfferForCounter.moveInDate
           }}
           onOfferSubmit={handleCounterOfferSubmit}
+        />
+      )}
+
+      {/* Counter Offer View Modal */}
+      {selectedOfferForView && (
+        <CounterOfferModal
+          isOpen={isCounterOfferViewModalOpen}
+          onClose={() => {
+            setIsCounterOfferViewModalOpen(false);
+            setSelectedOfferForView(null);
+          }}
+          offer={selectedOfferForView}
+          loading={false}
+          responding={respondingToCounter}
+          finalCounterSubmitted={false}
+          onAccept={handleAcceptCounterOffer}
+          onFinalCounter={() => {}} // Not applicable for incoming offers
+          onReject={handleRejectCounterOffer}
+          isIncomingOffer={true}
         />
       )}
     </div>

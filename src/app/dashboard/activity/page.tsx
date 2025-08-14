@@ -48,7 +48,7 @@ export default function ActivityPage() {
   const getActivityColor = (type: string) => {
     switch (type) {
       case 'view':
-        return 'text-blue-600 bg-blue-100';
+        return 'text-black bg-gray-100';
       case 'save':
         return 'text-red-600 bg-red-100';
       case 'message':

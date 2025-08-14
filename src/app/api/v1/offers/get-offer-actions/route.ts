@@ -1,22 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeQuery } from '@/app/api/graphql/serverClient';
-
-const GET_OFFER_ACTIONS_QUERY = `
-  query GetOfferActions($offerId: Int!) {
-    real_estate_offer_action(
-      where: { offer_id: { _eq: $offerId } }
-      order_by: { created_at: asc }
-    ) {
-      id
-      action
-      offer_id
-      offer_key
-      property_uuid
-      created_at
-      action_data
-    }
-  }
-`;
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +14,8 @@ export async function GET(request: NextRequest) {
 
     console.log('Get Offer Actions API: Fetching actions for offer:', offerId);
 
+    // TODO: When real_estate_offer_action table is created, uncomment this section
+    /*
     const actionsData = await executeQuery(GET_OFFER_ACTIONS_QUERY, { 
       offerId: parseInt(offerId) 
     }) as {
@@ -63,12 +47,25 @@ export async function GET(request: NextRequest) {
       createdAt: action.created_at,
       actionData: action.action_data || {}
     }));
+    */
+
+    // For now, return empty actions since the table doesn't exist
+    const transformedActions: Array<{
+      id: string;
+      action: string;
+      offerId: string;
+      offerKey: string;
+      propertyUuid: string;
+      createdAt: string;
+      actionData: Record<string, unknown>;
+    }> = [];
+    console.log('Get Offer Actions API: Returning empty actions - table not yet implemented');
 
     return NextResponse.json({
       success: true,
       data: transformedActions,
       total: transformedActions.length,
-      message: `Successfully fetched ${transformedActions.length} actions for offer ${offerId}`
+      message: `Offer actions table not yet implemented. Returning empty actions for offer ${offerId}`
     });
 
   } catch (error) {

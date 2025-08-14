@@ -3,11 +3,10 @@
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { 
-  MapPinIcon, 
-  HomeIcon,
   EyeIcon,
   PencilIcon
 } from '@heroicons/react/24/outline';
+import { Bed, Bathtub } from '@/assets/icons';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -52,16 +51,40 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
     return property?.num_bathroom || property?.bathrooms || 0;
   };
 
-  // Format address for better display
-  const getFormattedAddress = () => {
+
+
+  // Extract District and Country for simplified display
+  const getSimplifiedLocation = () => {
     if (!location || location === 'No Location') return '';
-    
-    // If it's already formatted with commas, return as is
+    // Try to parse the location to extract District and Country
+    // Location format is typically: "District, State, Country" or similar
     if (location.includes(',')) {
-      return location;
+      const parts = location.split(',').map(part => part.trim());
+      console.log('PropertyCard: Location parts:', parts);
+      
+      // If we have at least 2 parts, show District and Country
+      if (parts.length >= 2) {
+        const district = parts[7];
+        const country = parts[parts.length - 1]; // Last part is usually country
+        
+        // If district and country are different, show both
+        if (district !== country) {
+          const result = `${district}, ${country}`;
+          console.log('PropertyCard: Simplified location (District, Country):', result);
+          return result;
+        }
+        // If they're the same, just show district
+        console.log('PropertyCard: Simplified location (District only):', district);
+        return district;
+      }
+      
+      // If we have only 1 part, return as is
+      console.log('PropertyCard: Simplified location (single part):', parts[0]);
+      return parts[0];
     }
     
-    // For simple addresses, return as is
+    // For simple addresses without commas, return as is
+    console.log('PropertyCard: Simplified location (no commas):', location);
     return location;
   };
 
@@ -116,18 +139,18 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
         </h3>
         {/* Property Features */}
         <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
-            <span>{isDashboard ? getFormattedAddress() : location}</span>
+          <div className="flex items-center text-sm text-gray-900">
+            <span>{getSimplifiedLocation()}</span>
           </div>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm text-gray-600">
-              <HomeIcon className="h-4 w-4 mr-2 text-gray-400" />
+              <Bed className="h-4 w-4 mr-2 text-gray-400" />
               <span>{getBedrooms()} bed{getBedrooms() !== 1 ? 's' : ''}</span>
             </div>
             
             <div className="flex items-center text-sm text-gray-600">
+              <Bathtub className="h-4 w-4 mr-2 text-gray-400" />
               <span>{getBathrooms()} bath{getBathrooms() !== 1 ? 's' : ''}</span>
             </div>
           </div>
@@ -155,7 +178,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
           <div className="flex space-x-2 mt-4">
             <button
               onClick={handleViewDetails}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="flex-1 btn-primary py-2 px-4 text-sm font-medium"
             >
               View Details
             </button>
@@ -172,7 +195,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
           /* Regular View Details Button */
           <button
             onClick={handleViewDetails}
-            className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            className="w-full mt-4 btn-primary py-2 px-4 text-sm font-medium"
           >
             View Details
           </button>

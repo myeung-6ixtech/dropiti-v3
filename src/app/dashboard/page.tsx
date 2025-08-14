@@ -66,20 +66,13 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black"></div>
       </div>
     );
   }
 
   if (!isAuthenticated || !authUser) {
-    return (
-      <div className="text-center py-12">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-medium text-yellow-800 mb-2">Authentication Required</h3>
-          <p className="text-yellow-600 mb-4">Please sign in to access your dashboard.</p>
-        </div>
-      </div>
-    );
+    return <CenteredLoadingSpinner size="lg" />;
   }
 
   // Helper function to safely parse languages
@@ -104,7 +97,7 @@ export default function DashboardPage() {
   // Use real user data from auth context for DropitiPassport
   const userData = {
     name: authUser.displayName || authUser.name || 'User',
-    avatar: getSafeProfileImage(authUser.photoUrl || authUser.avatar, '/images/default-avatar.png'),
+    avatar: getSafeProfileImage(authUser.photoUrl || authUser.avatar, '/src/assets/img/Portrait_Placeholder.png'),
     email: authUser.email || 'user@example.com',
     location: authUser.location || 'Hong Kong',
     joinDate: authUser.userSince || authUser.createdAt || '2024-01-01',
@@ -169,7 +162,7 @@ export default function DashboardPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold">Welcome back, {authUser.displayName || authUser.name || 'User'}! 👋</h1>
-              <p className="text-blue-100 text-lg">Here's what's happening with your properties today</p>
+              <p className="text-gray-100 text-lg">Here's what's happening with your properties today</p>
             </div>
           </div>
           
@@ -177,19 +170,19 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{userData.stats.totalProperties}</div>
-              <div className="text-blue-100 text-sm">Properties</div>
+              <div className="text-gray-100 text-sm">Properties</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{userData.stats.totalGuests}</div>
-              <div className="text-blue-100 text-sm">Tenants</div>
+              <div className="text-gray-100 text-sm">Tenants</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{userData.stats.responseRate}%</div>
-              <div className="text-blue-100 text-sm">Response Rate</div>
+              <div className="text-gray-100 text-sm">Response Rate</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{userData.rating}</div>
-              <div className="text-blue-100 text-sm">Rating</div>
+              <div className="text-gray-100 text-sm">Rating</div>
             </div>
           </div>
         </div>
@@ -210,9 +203,9 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Link
                 href="/dashboard/add-property"
-                className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors group"
+                className="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors group"
               >
-                <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
+                <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
                   <PlusIcon className="h-6 w-6 text-white" />
                 </div>
                 <div>
@@ -242,7 +235,7 @@ export default function DashboardPage() {
               <h2 className="text-xl font-bold text-gray-900">Your Reviews</h2>
               <Link
                 href="/dashboard/reviews"
-                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                className="text-black hover:text-gray-700 text-sm font-medium"
               >
                 View All →
               </Link>

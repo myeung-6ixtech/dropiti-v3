@@ -67,7 +67,7 @@ export function formatPropertyLocation(location: unknown): string {
  */
 export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: string): string => {
   if (!imageUrl) {
-    return fallbackUrl || '/images/default-avatar.png';
+    return fallbackUrl || '/src/assets/img/Portrait_Placeholder.png';
   }
 
   // Check if the URL is valid
@@ -134,7 +134,7 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
 
     // For other external URLs, log and return fallback
     console.warn(`Profile image hostname not allowed: ${url.hostname}`, { imageUrl });
-    return fallbackUrl || '/images/default-avatar.png';
+    return fallbackUrl || '/src/assets/img/Portrait_Placeholder.png';
   } catch (error) {
     // If URL parsing fails, it might be a relative path
     if (imageUrl.startsWith('/') || imageUrl.startsWith('./')) {
@@ -143,7 +143,7 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
     
     // Log the error for debugging
     console.warn(`Invalid profile image URL: ${imageUrl}`, { error });
-    return fallbackUrl || '/images/default-avatar.png';
+    return fallbackUrl || '/src/assets/img/Portrait_Placeholder.png';
   }
 };
 

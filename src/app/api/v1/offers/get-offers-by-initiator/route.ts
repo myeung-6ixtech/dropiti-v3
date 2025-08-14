@@ -8,15 +8,23 @@ interface GraphQLOffer {
   property_uuid: string;
   initiator_firebase_uid: string;
   recipient_firebase_uid: string;
-  proposing_rent_price: number;
-  proposing_rent_price_currency: string;
-  num_leasing_months: number;
-  payment_frequency: string;
-  move_in_date: string;
+  proposing_rent_price?: number;
+  proposing_rent_price_currency?: string;
+  num_leasing_months?: number;
+  payment_frequency?: string;
+  move_in_date?: string;
+  current_rent_price?: number;
+  current_rent_price_currency?: string;
+  current_num_leasing_months?: number;
+  current_payment_frequency?: string;
+  current_move_in_date?: string;
+  negotiation_round?: number;
+  last_action_by?: string;
+  last_action_at?: string;
+  last_action_type?: string;
   offer_status: string;
-  is_active: boolean;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 }
 
 interface GraphQLUser {
@@ -32,7 +40,20 @@ interface GraphQLProperty {
   id: string;
   property_uuid: string;
   title: string;
-  address: string;
+  address: {
+    unit?: string;
+    floor?: string;
+    block?: string;
+    buildingName?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    district?: string;
+    state?: string;
+    country?: string;
+    city?: string;
+    street?: string;
+    apartmentEstate?: string;
+  } | string;
   rental_price: number;
   rental_price_currency: string;
   property_type: string;
@@ -68,8 +89,16 @@ const GET_OFFERS_BY_INITIATOR_QUERY = `
       num_leasing_months
       payment_frequency
       move_in_date
+      current_rent_price
+      current_rent_price_currency
+      current_num_leasing_months
+      current_payment_frequency
+      current_move_in_date
+      negotiation_round
+      last_action_by
+      last_action_at
+      last_action_type
       offer_status
-      is_active
       created_at
       updated_at
     }
@@ -179,15 +208,26 @@ export async function GET(request: NextRequest) {
         propertyUuid: offer.property_uuid,
         initiatorFirebaseUid: offer.initiator_firebase_uid,
         recipientFirebaseUid: offer.recipient_firebase_uid,
-        proposingRentPrice: offer.proposing_rent_price,
-        proposingRentPriceCurrency: offer.proposing_rent_price_currency,
-        numLeasingMonths: offer.num_leasing_months,
-        paymentFrequency: offer.payment_frequency,
-        moveInDate: offer.move_in_date,
+        proposingRentPrice: offer.proposing_rent_price || 0,
+        proposingRentPriceCurrency: offer.proposing_rent_price_currency || 'HKD',
+        numLeasingMonths: offer.num_leasing_months || 12,
+        paymentFrequency: offer.payment_frequency || 'monthly',
+        moveInDate: offer.move_in_date || new Date().toISOString().split('T')[0],
         offerStatus: offer.offer_status,
-        isActive: offer.is_active,
+        isActive: true,
         createdAt: offer.created_at,
-        updatedAt: offer.updated_at,
+        updatedAt: offer.updated_at || offer.created_at,
+        // Counter offer fields
+        currentRentPrice: offer.current_rent_price,
+        currentRentPriceCurrency: offer.current_rent_price_currency,
+        currentNumLeasingMonths: offer.current_num_leasing_months,
+        currentPaymentFrequency: offer.current_payment_frequency,
+        currentMoveInDate: offer.current_move_in_date,
+        // Negotiation fields
+        negotiationRound: offer.negotiation_round,
+        lastActionBy: offer.last_action_by,
+        lastActionType: offer.last_action_type,
+        lastActionAt: offer.last_action_at,
         // Recipient (landlord) details
         recipient: recipient ? {
           uuid: recipient.uuid,
@@ -199,7 +239,16 @@ export async function GET(request: NextRequest) {
         // Property details
         property: property ? {
           title: property.title,
-          location: property.address,
+          location: typeof property.address === 'string' ? property.address : 
+            (property.address && typeof property.address === 'object' ? 
+              [
+                property.address.buildingName,
+                property.address.addressLine1,
+                property.address.addressLine2,
+                property.address.district,
+                property.address.state,
+                property.address.country
+              ].filter(Boolean).join(', ') : 'Address not available'),
           rentalPrice: property.rental_price,
           rentalPriceCurrency: property.rental_price_currency,
           propertyType: property.property_type,

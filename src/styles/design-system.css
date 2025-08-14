@@ -11,17 +11,17 @@
    ======================================== */
 
 :root {
-  /* Color Palette */
-  --color-primary-50: #eff6ff;
-  --color-primary-100: #dbeafe;
-  --color-primary-200: #bfdbfe;
-  --color-primary-300: #93c5fd;
-  --color-primary-400: #60a5fa;
-  --color-primary-500: #3b82f6;
-  --color-primary-600: #2563eb;
-  --color-primary-700: #1d4ed8;
-  --color-primary-800: #1e40af;
-  --color-primary-900: #1e3a8a;
+  /* Color Palette - Airbnb Style */
+  --color-primary-50: #fafafa;
+  --color-primary-100: #f5f5f5;
+  --color-primary-200: #e5e5e5;
+  --color-primary-300: #d4d4d4;
+  --color-primary-400: #a3a3a3;
+  --color-primary-500: #737373;
+  --color-primary-600: #525252;
+  --color-primary-700: #404040;
+  --color-primary-800: #262626;
+  --color-primary-900: #171717;
 
   --color-secondary-50: #f8fafc;
   --color-secondary-100: #f1f5f9;
@@ -583,8 +583,102 @@
   .shadow-theme-lg { box-shadow: var(--shadow-lg); }
   .shadow-theme-xl { box-shadow: var(--shadow-xl); }
 
+  /* ========================================
+     AIRBNB-STYLE BUTTON COMPONENTS
+     ======================================== */
+  
+  /* Primary Button - Black with white text */
+  .btn-primary {
+    @apply bg-black text-white font-medium px-4 py-2.5 rounded-lg 
+           hover:bg-gray-800 active:bg-gray-900 
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2
+           disabled:bg-gray-400 disabled:cursor-not-allowed disabled:opacity-75;
+  }
+
+  /* Secondary Button - White with black border and text */
+  .btn-secondary {
+    @apply bg-white text-black font-medium px-4 py-2.5 rounded-lg
+           border border-black hover:bg-gray-50 active:bg-gray-100
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2
+           disabled:bg-gray-100 disabled:text-gray-400 disabled:border-gray-300 disabled:cursor-not-allowed;
+  }
+
+  /* Tertiary Button - Transparent with black text */
+  .btn-tertiary {
+    @apply bg-transparent text-black font-medium px-4 py-2.5 rounded-lg
+           hover:bg-gray-100 active:bg-gray-200
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2
+           disabled:text-gray-400 disabled:cursor-not-allowed;
+  }
+
+  /* Danger Button - Red variant */
+  .btn-danger {
+    @apply bg-red-600 text-white font-medium px-4 py-2.5 rounded-lg
+           hover:bg-red-700 active:bg-red-800
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2
+           disabled:bg-red-400 disabled:cursor-not-allowed disabled:opacity-75;
+  }
+
+  /* Success Button - Green variant */
+  .btn-success {
+    @apply bg-green-600 text-white font-medium px-4 py-2.5 rounded-lg
+           hover:bg-green-700 active:bg-green-800
+           transition-all duration-200 ease-in-out
+           focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2
+           disabled:bg-green-400 disabled:cursor-not-allowed disabled:opacity-75;
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    @apply px-3 py-2 text-sm;
+  }
+
+  .btn-md {
+    @apply px-4 py-2.5 text-sm;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  .btn-xl {
+    @apply px-8 py-4 text-lg;
+  }
+
   /* Custom Transitions */
   .transition-theme-fast { transition: all var(--transition-fast); }
   .transition-theme-normal { transition: all var(--transition-normal); }
   .transition-theme-slow { transition: all var(--transition-slow); }
+
+  /* ========================================
+     AIRBNB-STYLE UTILITY CLASSES
+     ======================================== */
+  
+  /* Text Colors */
+  .text-airbnb-primary { @apply text-black; }
+  .text-airbnb-secondary { @apply text-gray-600; }
+  .text-airbnb-muted { @apply text-gray-400; }
+  
+  /* Background Colors */
+  .bg-airbnb-primary { @apply bg-black; }
+  .bg-airbnb-secondary { @apply bg-white; }
+  .bg-airbnb-muted { @apply bg-gray-50; }
+  
+  /* Border Colors */
+  .border-airbnb-primary { @apply border-black; }
+  .border-airbnb-secondary { @apply border-gray-200; }
+  .border-airbnb-muted { @apply border-gray-100; }
+  
+  /* Hover States */
+  .hover\:bg-airbnb-primary:hover { @apply hover:bg-gray-800; }
+  .hover\:bg-airbnb-secondary:hover { @apply hover:bg-gray-50; }
+  .hover\:text-airbnb-primary:hover { @apply hover:text-gray-800; }
+  
+  /* Focus States */
+  .focus\:ring-airbnb:focus { @apply focus:ring-2 focus:ring-black focus:ring-offset-2; }
+  .focus\:border-airbnb:focus { @apply focus:border-black; }
 }

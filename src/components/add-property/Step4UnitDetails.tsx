@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { 
   HomeIcon, 
-  ArrowsPointingOutIcon,
-  HeartIcon
+  ArrowsPointingOutIcon
 } from '@heroicons/react/24/outline';
 
 interface Step4UnitDetailsProps {
@@ -60,7 +59,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
           Provide detailed information about your property&apos;s size, rooms, and amenities.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Area Details */}
           <div className="space-y-5">
             <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
@@ -100,7 +99,6 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
           {/* Room Details */}
           <div className="space-y-5">
             <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
-              {/* <BedDoubleIcon className="h-5 w-5 mr-2 text-gray-400" /> */}
               Room Details
             </h4>
             
@@ -133,6 +131,41 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                 placeholder="e.g., 1.5"
                 className="form-input"
               />
+            </div>
+          </div>
+
+          {/* Additional Details */}
+          <div className="space-y-5">
+            <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
+              Additional Details
+            </h4>
+            
+            <div className="space-y-2">
+              <label className="form-label">
+                Pets Allowed
+              </label>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => handleInputChange('petsAllowed', true)}
+                  className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 ${
+                    unitDetails.petsAllowed === true
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Yes
+                </button>
+                <button
+                  onClick={() => handleInputChange('petsAllowed', false)}
+                  className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 ${
+                    unitDetails.petsAllowed === false
+                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  No
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -183,49 +216,6 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                 )}
               </button>
             ))}
-          </div>
-        </div>
-
-        {/* Pets Policy */}
-        <div className="space-y-5 mt-8">
-          <h4 className="font-medium text-gray-900 text-base flex items-center mt-6">
-            <HeartIcon className="h-5 w-5 mr-2 text-gray-400" />
-            Pets Policy
-          </h4>
-          <p className="text-gray-600 text-sm">
-            Are pets allowed in your property?
-          </p>
-          
-          <div className="flex space-x-4">
-            <button
-              onClick={() => handleInputChange('petsAllowed', true)}
-              className={`flex-1 py-3 px-4 border-2 rounded-lg text-center transition-all duration-200 ${
-                unitDetails.petsAllowed === true
-                  ? 'border-blue-600 bg-blue-50 text-blue-900 ring-2 ring-blue-600 ring-opacity-20'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <HeartIcon className="h-5 w-5" />
-                <span className="font-medium">Pets Allowed</span>
-              </div>
-            </button>
-            
-            <button
-              onClick={() => handleInputChange('petsAllowed', false)}
-              className={`flex-1 py-3 px-4 border-2 rounded-lg text-center transition-all duration-200 ${
-                unitDetails.petsAllowed === false
-                  ? 'border-blue-600 bg-blue-50 text-blue-900 ring-2 ring-blue-600 ring-opacity-20'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636" />
-                </svg>
-                <span className="font-medium">No Pets</span>
-              </div>
-            </button>
           </div>
         </div>
       </div>

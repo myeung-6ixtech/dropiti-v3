@@ -58,7 +58,7 @@ export default function SavedPropertiesPage() {
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">{property.name}</h3>
-                  <span className="text-lg font-semibold text-blue-600">{property.price}</span>
+                  <span className="text-lg font-semibold text-black">{property.price}</span>
                 </div>
                 <p className="text-sm text-gray-600 mb-3">{formatPropertyLocation(property.address)}</p>
                 <div className="flex items-center space-x-4 text-sm text-gray-500 mb-4">

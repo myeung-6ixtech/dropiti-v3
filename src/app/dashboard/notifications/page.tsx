@@ -31,7 +31,7 @@ export default function NotificationsPage() {
       message: 'Your application for the Modern 2BR Apartment has been approved by the landlord.',
       timestamp: '2 hours ago',
       read: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
+      avatar: '/src/assets/img/Portrait_Placeholder.png',
       action: 'View Details'
     },
     {
@@ -41,7 +41,7 @@ export default function NotificationsPage() {
       message: 'Sarah Johnson sent you a message regarding your property inquiry.',
       timestamp: '4 hours ago',
       read: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
+      avatar: '/src/assets/img/Portrait_Placeholder.png',
       action: 'Reply'
     },
     {
@@ -237,7 +237,7 @@ export default function NotificationsPage() {
                           {notification.title}
                         </h3>
                         {!notification.read && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                             New
                           </span>
                         )}

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { PropertyService } from '@/app/api/graphql/services/propertyService';
+import { executeQuery } from '@/app/api/graphql/serverClient';
 
 export async function GET() {
   try {
@@ -48,12 +49,45 @@ export async function GET() {
       }
     }
     
+    // Test the offers table
+    console.log('Test Hasura: Testing offers table...');
+    let offersResult: unknown = null;
+    try {
+      const offersQuery = `
+        query TestOffers {
+          real_estate_offer {
+            id
+            offer_key
+            property_uuid
+            initiator_firebase_uid
+            recipient_firebase_uid
+            offer_status
+            created_at
+          }
+        }
+      `;
+      
+      offersResult = await executeQuery(offersQuery, {});
+      console.log('Test Hasura: Offers table query result:', offersResult);
+      
+      if (offersResult && typeof offersResult === 'object' && 'real_estate_offer' in offersResult) {
+        const offers = (offersResult as { real_estate_offer?: Array<unknown> }).real_estate_offer || [];
+        console.log('Test Hasura: Total offers in database:', offers.length);
+        if (offers.length > 0) {
+          console.log('Test Hasura: Sample offer:', offers[0]);
+        }
+      }
+    } catch (offersError) {
+      console.error('Test Hasura: Error querying offers table:', offersError);
+    }
+    
     return NextResponse.json({
       success: true,
       message: 'Database content and search tests completed',
       databaseContent: dbContent,
       searchTestHongKong: searchTest,
       searchTestWanChai: searchTest2,
+      offersTest: offersResult,
       timestamp: new Date().toISOString()
     });
   } catch (error) {

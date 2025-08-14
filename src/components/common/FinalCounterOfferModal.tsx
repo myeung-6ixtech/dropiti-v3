@@ -8,51 +8,47 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
-interface CreateOfferModalProps {
+interface Offer {
+  id: string;
+  proposingRentPrice: number;
+  proposingRentPriceCurrency: string;
+  numLeasingMonths: number;
+  paymentFrequency: string;
+  moveInDate: string;
+}
+
+interface FinalCounterOfferModalProps {
   isOpen: boolean;
   onClose: () => void;
-  propertyId?: string;
-  currentPrice?: number;
-  recipientFirebaseUid?: string; // Add recipient (landlord) Firebase UID
-  onOfferSubmit?: (offerData: OfferData) => void;
-  // New props for counter offer mode
-  mode?: 'create' | 'counter';
-  offerId?: string; // For counter offers
-  existingOffer?: {
+  offer: Offer | null;
+  onSubmit: (counterData: {
     rentalPrice: number;
     leaseDuration: number;
     paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
     moveInDate: string;
-  };
+    message?: string;
+  }) => Promise<void>;
+  loading?: boolean;
 }
 
-interface OfferData {
-  rentalPrice: number;
-  leaseDuration: number;
-  paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
-  moveInDate: string;
-  currency?: string;
-  message?: string;
-}
-
-export default function CreateOfferModal({ 
-  isOpen, 
-  onClose, 
-  currentPrice = 0,
-  onOfferSubmit,
-  mode = 'create',
-  existingOffer
-}: CreateOfferModalProps) {
-  const [offerData, setOfferData] = useState<OfferData>({
-    rentalPrice: existingOffer?.rentalPrice || currentPrice,
-    leaseDuration: existingOffer?.leaseDuration || 12,
-    paymentFrequency: existingOffer?.paymentFrequency || 'monthly',
-    moveInDate: existingOffer?.moveInDate || new Date().toISOString().split('T')[0],
+export default function FinalCounterOfferModal({
+  isOpen,
+  onClose,
+  offer,
+  onSubmit,
+  loading = false
+}: FinalCounterOfferModalProps) {
+  const [offerData, setOfferData] = useState({
+    rentalPrice: offer?.proposingRentPrice || 0,
+    leaseDuration: offer?.numLeasingMonths || 12,
+    paymentFrequency: (offer?.paymentFrequency as 'monthly' | 'quarterly' | 'yearly') || 'monthly',
+    moveInDate: offer?.moveInDate || new Date().toISOString().split('T')[0],
+    message: ''
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleInputChange = (field: keyof OfferData, value: string | number) => {
+  const handleInputChange = (field: keyof typeof offerData, value: string | number) => {
     setOfferData(prev => ({
       ...prev,
       [field]: value
@@ -87,22 +83,26 @@ export default function CreateOfferModal({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (validateForm()) {
-      if (onOfferSubmit) {
-        onOfferSubmit(offerData);
+      try {
+        await onSubmit(offerData);
+        onClose();
+        // Reset form
+        setOfferData({
+          rentalPrice: offer?.proposingRentPrice || 0,
+          leaseDuration: offer?.numLeasingMonths || 12,
+          paymentFrequency: (offer?.paymentFrequency as 'monthly' | 'quarterly' | 'yearly') || 'monthly',
+          moveInDate: offer?.moveInDate || new Date().toISOString().split('T')[0],
+          message: ''
+        });
+        setErrors({});
+      } catch (error) {
+        console.error('Error submitting final counter offer:', error);
+        alert('Failed to submit final counter offer. Please try again.');
       }
-      onClose();
-      // Reset form
-      setOfferData({
-        rentalPrice: currentPrice,
-        leaseDuration: 12,
-        paymentFrequency: 'monthly',
-        moveInDate: new Date().toISOString().split('T')[0],
-      });
-      setErrors({});
     }
   };
 
@@ -114,13 +114,15 @@ export default function CreateOfferModal({
     }).format(amount);
   };
 
+  if (!offer) return null;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} className="max-w-4xl w-full mx-4">
       <div className="bg-white rounded-lg shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            {mode === 'counter' ? 'Counter Offer' : 'Create Offer'}
+            Final Counter Offer
           </h2>
           <button
             onClick={onClose}
@@ -156,9 +158,9 @@ export default function CreateOfferModal({
                 {errors.rentalPrice && (
                   <p className="mt-1 text-xs text-red-600">{errors.rentalPrice}</p>
                 )}
-                {currentPrice > 0 && (
+                {offer?.proposingRentPrice > 0 && (
                   <p className="mt-1 text-xs text-gray-500">
-                    Current asking price: {formatCurrency(currentPrice)}
+                    Current offer price: {formatCurrency(offer.proposingRentPrice)}
                   </p>
                 )}
               </div>
@@ -251,7 +253,7 @@ export default function CreateOfferModal({
 
               {/* Summary */}
               <div className="bg-gray-50 rounded-md p-3">
-                <h4 className="font-medium text-gray-900 mb-2 text-sm">Offer Summary</h4>
+                <h4 className="font-medium text-gray-900 mb-2 text-sm">Final Counter Offer Summary</h4>
                 <div className="space-y-1 text-xs text-gray-600">
                   <div className="flex justify-between">
                     <span>Rental Price:</span>
@@ -293,9 +295,10 @@ export default function CreateOfferModal({
             </button>
             <button
               type="submit"
-              className="form-button flex-1 btn-primary text-sm py-2"
+              disabled={loading}
+              className="form-button flex-1 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 text-sm py-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {mode === 'counter' ? 'Submit Counter Offer' : 'Submit Offer'}
+              {loading ? 'Submitting...' : 'Submit Final Counter Offer'}
             </button>
           </div>
         </form>

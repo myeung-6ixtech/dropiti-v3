@@ -144,7 +144,7 @@ export default function ProfilePhotoUpload({
       <div className="flex items-center space-x-4">
         <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-200">
           <Image
-            src={getSafeProfileImage(currentPhotoUrl, 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=687&q=80')}
+            src={getSafeProfileImage(currentPhotoUrl, '/src/assets/img/Portrait_Placeholder.png')}
             alt="Profile"
             width={80}
             height={80}

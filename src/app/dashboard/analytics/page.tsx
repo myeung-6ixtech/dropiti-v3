@@ -56,8 +56,8 @@ export default function AnalyticsPage() {
             <div key={stat.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <stat.icon className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 bg-gray-100 rounded-lg">
+                    <stat.icon className="h-6 w-6 text-black" />
                   </div>
                 </div>
                 <div className="ml-4 flex-1">

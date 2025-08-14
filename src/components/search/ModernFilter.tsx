@@ -1,10 +1,7 @@
 'use client';
 
 import { 
-  XMarkIcon,
-  MapPinIcon, 
-  HomeIcon, 
-  CurrencyDollarIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 interface FilterData {
@@ -74,7 +71,6 @@ export default function ModernFilter({
             <div>
               <label className="form-label">
                 <div className="flex items-center space-x-2">
-                  <MapPinIcon className="h-5 w-5 text-blue-500" />
                   <span>Location</span>
                 </div>
               </label>
@@ -91,7 +87,6 @@ export default function ModernFilter({
             <div>
               <label className="form-label">
                 <div className="flex items-center space-x-2">
-                  <HomeIcon className="h-5 w-5 text-blue-500" />
                   <span>Minimum Bedrooms</span>
                 </div>
               </label>
@@ -113,7 +108,6 @@ export default function ModernFilter({
             <div>
               <label className="form-label">
                 <div className="flex items-center space-x-2">
-                  <CurrencyDollarIcon className="h-5 w-5 text-blue-500" />
                   <span>Maximum Price (HKD)</span>
                 </div>
               </label>

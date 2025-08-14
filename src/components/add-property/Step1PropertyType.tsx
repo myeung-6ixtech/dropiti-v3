@@ -2,11 +2,10 @@
 
 import { useState } from 'react';
 import { 
-  HomeIcon, 
-  BuildingOfficeIcon,
-  CubeIcon
+  BuildingOfficeIcon, 
+  CubeIcon 
 } from '@heroicons/react/24/outline';
-
+import { Residential, EntireApartment, VillageHouse } from '@/assets/icons';
 import { Step1PropertyTypeProps } from '@/types';
 
 const propertyTypes = [
@@ -14,29 +13,29 @@ const propertyTypes = [
     id: 'residential',
     title: 'Residential',
     description: 'Homes and apartments for living',
-    icon: HomeIcon,
+    icon: Residential,
     subTypes: [
       {
         id: 'serviced-apartment',
         title: 'Serviced Apartment',
         description: 'Fully furnished with hotel-like amenities',
-        icon: BuildingOfficeIcon,
+        icon: EntireApartment,
       },
       {
         id: 'village-house',
         title: 'Village House',
         description: 'Traditional village-style houses',
-        icon: HomeIcon,
+        icon: VillageHouse,
       },
       {
         id: 'apartment',
         title: 'Apartment',
         description: 'Standard residential apartments',
-        icon: BuildingOfficeIcon,
+        icon: EntireApartment,
       },
       {
         id: 'condo',
-        title: 'Condo',
+        title: 'Condominium',
         description: 'Condominium units',
         icon: CubeIcon,
       },

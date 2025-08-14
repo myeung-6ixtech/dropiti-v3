@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 import { 
-  validateOfferAction, 
-  calculateNewOfferStatus, 
+  validateOfferAction,
+  calculateNewOfferStatus,
   calculateNewNegotiationRound,
-  calculateNewLastActionBy,
-  validateCounterOffer,
-  createOfferAction,
-  createCounterActionData
+  calculateNewLastActionBy
 } from '@/lib/offer-negotiation';
 
 const COUNTER_OFFER_MUTATION = `
@@ -46,26 +43,17 @@ const COUNTER_OFFER_MUTATION = `
   }
 `;
 
-const CREATE_OFFER_ACTION_MUTATION = `
-  mutation CreateOfferAction($action: real_estate_offer_action_insert_input!) {
-    insert_real_estate_offer_action_one(object: $action) {
-      id
-      action
-      offer_id
-      offer_key
-      property_uuid
-      created_at
-      action_data
-    }
-  }
-`;
-
 export async function POST(request: NextRequest) {
   try {
     const { offerId, currentUserId, counterData } = await request.json();
     console.log('Counter Offer API: Received request:', { offerId, currentUserId, counterData });
 
     if (!offerId || !currentUserId || !counterData) {
+      console.log('Counter Offer API: Missing required fields:', { 
+        hasOfferId: !!offerId, 
+        hasCurrentUserId: !!currentUserId, 
+        hasCounterData: !!counterData 
+      });
       return NextResponse.json(
         { error: 'offerId, currentUserId, and counterData are required' },
         { status: 400 }
@@ -167,11 +155,18 @@ export async function POST(request: NextRequest) {
       updatedAt: offer.updated_at
     };
 
+    console.log('Counter Offer API: Transformed offer:', transformedOffer);
+    console.log('Counter Offer API: Current user ID:', currentUserId);
+    console.log('Counter Offer API: Offer initiator:', transformedOffer.initiatorFirebaseUid);
+    console.log('Counter Offer API: Offer recipient:', transformedOffer.recipientFirebaseUid);
+
     // Validate counter offer data
-    const validation = validateCounterOffer(transformedOffer, counterData);
+    const validation = validateOfferAction(transformedOffer, 'INITIATOR_COUNTERED', currentUserId);
+    console.log('Counter Offer API: Validation result:', validation);
     if (!validation.isValid) {
+      console.log('Counter Offer API: Validation failed:', validation.error);
       return NextResponse.json(
-        { error: 'Invalid counter offer data', details: validation.errors },
+        { error: validation.error || 'Invalid counter offer data' },
         { status: 400 }
       );
     }
@@ -180,7 +175,78 @@ export async function POST(request: NextRequest) {
     const isInitiator = offer.initiator_firebase_uid === currentUserId;
     const actionType = isInitiator ? 'INITIATOR_COUNTERED' : 'RECIPIENT_COUNTERED';
 
-    // Validate the action
+    // For final counter offers, we need to update the current fields with the new counter offer data
+    if (isInitiator && transformedOffer.negotiationRound >= 1) {
+      // This is a final counter offer - update current fields with the new counter offer
+      const updates = {
+        current_rent_price: counterData.rentPrice,
+        current_rent_price_currency: offer.proposing_rent_price_currency,
+        current_num_leasing_months: counterData.numLeasingMonths,
+        current_payment_frequency: counterData.paymentFrequency,
+        current_move_in_date: counterData.moveInDate,
+        offer_status: 'countered',
+        negotiation_round: transformedOffer.negotiationRound + 1,
+        last_action_by: 'initiator',
+        last_action_at: new Date().toISOString(),
+        last_action_type: 'INITIATOR_COUNTERED',
+        updated_at: new Date().toISOString()
+      };
+
+      console.log('Counter Offer API: Final counter offer updates:', updates);
+
+      // Update the offer
+      const updateResult = await executeMutation(COUNTER_OFFER_MUTATION, { 
+        offerId, 
+        updates 
+      }) as {
+        update_real_estate_offer: {
+          affected_rows: number;
+          returning: Array<{
+            id: string;
+            offer_key: string;
+            offer_status: string;
+            negotiation_round: number;
+            last_action_by: string;
+            last_action_at: string;
+            updated_at: string;
+          }>;
+        };
+      };
+
+      if (!updateResult.update_real_estate_offer || updateResult.update_real_estate_offer.affected_rows === 0) {
+        return NextResponse.json(
+          { error: 'Failed to update offer' },
+          { status: 500 }
+        );
+      }
+
+      const updatedOffer = updateResult.update_real_estate_offer.returning[0];
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          offerId: updatedOffer.id,
+          offerKey: updatedOffer.offer_key,
+          newStatus: updatedOffer.offer_status,
+          negotiationRound: updatedOffer.negotiation_round,
+          lastActionBy: updatedOffer.last_action_by,
+          lastActionAt: updatedOffer.last_action_at,
+          updatedAt: updatedOffer.updated_at,
+          action: 'INITIATOR_COUNTERED',
+          counterData: {
+            rentPrice: counterData.rentPrice,
+            numLeasingMonths: counterData.numLeasingMonths,
+            paymentFrequency: counterData.paymentFrequency,
+            moveInDate: counterData.moveInDate,
+            message: counterData.message,
+            reason: counterData.reason
+          }
+        },
+        message: 'Final counter offer submitted successfully',
+      });
+    }
+
+    // Validate the action for regular counter offers
     const actionValidation = validateOfferAction(transformedOffer, actionType, currentUserId);
     if (!actionValidation.isValid) {
       return NextResponse.json(
@@ -189,12 +255,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate new values
+    // Calculate new values for regular counter offers
     const newStatus = calculateNewOfferStatus(transformedOffer.offerStatus, actionType);
     const newNegotiationRound = calculateNewNegotiationRound(transformedOffer.negotiationRound, actionType);
     const newLastActionBy = calculateNewLastActionBy(actionType);
 
-    // Prepare the updates
+    // Prepare the updates for regular counter offers
     const updates = {
       current_rent_price: counterData.rentPrice,
       current_rent_price_currency: offer.current_rent_price_currency || offer.proposing_rent_price_currency,
@@ -208,6 +274,8 @@ export async function POST(request: NextRequest) {
       last_action_type: actionType,
       updated_at: new Date().toISOString()
     };
+
+    console.log('Counter Offer API: Regular counter offer updates:', updates);
 
     // Update the offer
     const updateResult = await executeMutation(COUNTER_OFFER_MUTATION, { 
@@ -236,6 +304,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the action record with detailed counter data
+    // TODO: Uncomment when real_estate_offer_action table is created
+    /*
     const actionData = createCounterActionData(transformedOffer, counterData);
     const offerAction = createOfferAction(transformedOffer, actionType, actionData);
 
@@ -246,6 +316,9 @@ export async function POST(request: NextRequest) {
       console.warn('Counter Offer API: Failed to create action record:', actionError);
       // Don't fail the whole request if action record creation fails
     }
+    */
+    
+    console.log('Counter Offer API: Skipping action record creation - table not yet implemented');
 
     const updatedOffer = updateResult.update_real_estate_offer.returning[0];
 

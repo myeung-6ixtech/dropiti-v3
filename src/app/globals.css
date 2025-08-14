@@ -136,7 +136,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm hover:shadow-md;
+    @apply btn bg-black text-white hover:bg-gray-800 focus:ring-black shadow-sm hover:shadow-md;
   }
 
   .btn-secondary {
@@ -386,16 +386,14 @@
     @apply space-y-2;
   }
 
-  .dashboard-view-button {
-    @apply w-full flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors;
+  .dashboard-view-toggle-button {
+    @apply w-full flex flex-col items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out
+           bg-white border border-gray-200 hover:border-black hover:shadow-sm
+           text-gray-700 hover:text-black hover:bg-gray-50;
   }
 
-  .dashboard-view-button-active {
-    @apply bg-blue-100 text-blue-700;
-  }
-
-  .dashboard-view-button-inactive {
-    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+  .dashboard-view-button:hover {
+    @apply transform scale-[1.02];
   }
 
   .dashboard-navigation {
@@ -407,11 +405,11 @@
   }
 
   .dashboard-nav-item {
-    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors;
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out;
   }
 
   .dashboard-nav-item-active {
-    @apply bg-blue-100 text-blue-700;
+    @apply bg-black text-white;
   }
 
   .dashboard-nav-item-inactive {

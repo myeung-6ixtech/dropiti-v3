@@ -221,9 +221,9 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-6 h-6 rounded-full border text-xs font-medium ${
                   currentStep > step.id
-                    ? 'bg-blue-600 border-blue-600 text-white'
+                    ? 'bg-black border-black text-white'
                     : currentStep === step.id
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-black text-black'
                     : 'border-gray-300 text-gray-400'
                 }`}>
                   {currentStep > step.id ? (
@@ -234,7 +234,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`w-4 h-0.5 mx-1 ${
-                    currentStep > step.id ? 'bg-blue-600' : 'bg-gray-300'
+                    currentStep > step.id ? 'bg-black' : 'bg-gray-300'
                   }`} />
                 )}
               </div>
@@ -261,7 +261,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
 
       {/* Step Content */}
       <div className="flex-1 min-h-0 overflow-auto">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             {/* Step Header */}
             <div className="px-6 py-4 border-b border-gray-200">

@@ -137,29 +137,11 @@ const amenities = [
   }
 ];
 
-const categories = [
-  'All',
-  'Internet & Technology',
-  'Climate Control',
-  'Entertainment',
-  'Kitchen',
-  'Laundry',
-  'Transportation',
-  'Fitness',
-  'Recreation',
-  'Safety',
-  'Accessibility',
-  'Outdoor',
-  'Work',
-  'Communication',
-  'Furnishing',
-  'Utilities',
-  'Services'
-];
+
 
 export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(data?.amenities || []);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
 
   const handleAmenityToggle = (amenityId: string) => {
     const updatedAmenities = selectedAmenities.includes(amenityId)
@@ -170,8 +152,8 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
     onUpdate({ amenities: updatedAmenities });
   };
 
-  const filteredAmenities = selectedCategory === 'All' 
-    ? amenities 
+  const filteredAmenities = selectedCategory === 'All' || selectedCategory === null
+    ? amenities
     : amenities.filter(amenity => amenity.category === selectedCategory);
 
   return (
@@ -185,18 +167,16 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
         </p>
 
         {/* Category Filter */}
-        <div className="space-y-3">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Filter by category
-          </label>
+        <div className="mb-6">
+          <h4 className="font-medium text-gray-900 text-base mb-3">Filter by Category</h4>
           <div className="flex flex-wrap gap-2">
-            {categories.map((category) => (
+            {['All', 'Internet & Technology', 'Climate Control', 'Entertainment', 'Kitchen', 'Laundry', 'Transportation', 'Fitness', 'Recreation', 'Safety', 'Accessibility', 'Outdoor', 'Furniture', 'Other'].map((category) => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-blue-600 text-white'
+                onClick={() => setSelectedCategory(category === 'All' ? null : category)}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  selectedCategory === category || (category === 'All' && selectedCategory === null)
+                    ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -207,7 +187,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
         </div>
 
         {/* Amenities Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filteredAmenities.map((amenity) => (
             <button
               key={amenity.id}
