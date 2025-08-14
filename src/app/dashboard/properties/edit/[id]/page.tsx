@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { 
   MapPinIcon, 
-  HomeIcon, 
   CalendarIcon,
   ArrowLeftIcon,
   XMarkIcon
@@ -22,89 +21,127 @@ import {
   SecurityGuard,
   Elevator
 } from '@/assets/icons';
+import { propertiesAPI } from '@/lib/api-client';
+import { useAuth } from '@/context/AuthContext';
 
-// Mock property data - in real app, this would come from an API
-const mockProperty = {
-  id: '1',
-  title: 'Modern 2BR Apartment in Central',
-  description: 'Beautiful 2-bedroom apartment in the heart of downtown with stunning city views. This newly renovated unit features an open-concept living area, modern appliances, and premium finishes throughout. Perfect for young professionals or small families looking for a convenient and comfortable living space.',
-  location: 'Downtown, City Center',
-  bedrooms: 2,
-  bathrooms: 2,
-  price: 2500,
-  imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-  images: [
-    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2073&q=80',
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-  ],
-  amenities: [
-    'WiFi', 'Air Conditioning', 'Heating', 'Dishwasher', 'Washing Machine', 
-    'Dryer', 'Parking', 'Gym', 'Pool', 'Security System', 'Elevator'
-  ],
+interface PropertyData {
+  id: string;
+  property_uuid: string;
+  title: string;
+  description: string;
+  location: string;
+  price: number;
+  bedrooms: number;
+  bathrooms: number;
+  image_url: string;
+  available: boolean;
+  created_at: string;
+  updated_at: string;
   details: {
-    type: 'Apartment',
-    furnished: 'Fully Furnished',
-    petsAllowed: true,
-    parking: true,
-    laundry: true,
-    heating: true,
-    cooling: true,
-    wifi: true,
-    security: true,
-    elevator: true,
-    balcony: true,
-    gym: true,
-    pool: true,
-  },
-  rules: [
-    'No smoking',
-    'No parties or events',
-    'Quiet hours after 10 PM',
-    'Pet deposit required',
-    'Maximum 2 occupants',
-  ],
-  availableDate: new Date('2024-02-01'),
-  minimumLease: 12,
-  deposit: 2500,
-  utilities: ['Electricity', 'Water', 'Internet', 'Trash'],
-};
+    type: string;
+    furnished: boolean;
+    petsAllowed: boolean;
+    parking: boolean;
+  };
+  amenities: string[];
+  minimum_lease: number;
+  available_date: string | null;
+  owner_id: string;
+  rules?: string[]; // Add optional rules field
+}
 
 export default function EditPropertyPage() {
   const params = useParams();
   const router = useRouter();
-  const [property, setProperty] = useState(mockProperty);
+  const { user: authUser } = useAuth();
+  const [property, setProperty] = useState<PropertyData | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [editSection, setEditSection] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+    if (params.id) {
+      fetchProperty();
+    }
   }, [params.id]);
 
-  const handleSave = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+  const fetchProperty = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await propertiesAPI.getPropertyByUuid(params.id as string);
+      
+      if (response.success && response.data?.property) {
+        const propertyData = response.data.property;
+        
+        // Check if the current user owns this property
+        if (authUser?.id && propertyData.owner_id !== authUser.id) {
+          setError('You do not have permission to edit this property');
+          return;
+        }
+        
+        setProperty(propertyData);
+      } else {
+        setError('Failed to fetch property data');
+      }
+    } catch (error) {
+      console.error('Error fetching property:', error);
+      setError('Failed to fetch property data');
+    } finally {
       setIsLoading(false);
-      setIsEditing(false);
-      setEditSection(null);
-      // Show success message or redirect
-      alert('Property updated successfully!');
-    }, 1000);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!property) return;
+    
+    try {
+      setIsSaving(true);
+      setError(null);
+      
+      const updates = {
+        title: property.title,
+        description: property.description,
+        location: property.location,
+        price: property.price,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        amenities: property.amenities,
+        minimumLease: property.minimum_lease,
+        availableDate: property.available_date,
+        rules: property.rules || [],
+      };
+      
+      const response = await propertiesAPI.updateProperty(property.id, updates);
+      
+      if (response.success) {
+        setIsEditing(false);
+        setEditSection(null);
+        // Refresh the property data
+        await fetchProperty();
+        alert('Property updated successfully!');
+      } else {
+        setError('Failed to update property');
+      }
+    } catch (error) {
+      console.error('Error updating property:', error);
+      setError('Failed to update property');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
     setEditSection(null);
     // Reset to original data
-    setProperty(mockProperty);
+    if (property) {
+      fetchProperty();
+    }
   };
 
   const startEditing = (section: string) => {
@@ -152,6 +189,44 @@ export default function EditPropertyPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-red-800 mb-2">Error</h2>
+            <p className="text-red-700 mb-4">{error}</p>
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-yellow-800 mb-2">Property Not Found</h2>
+            <p className="text-yellow-700 mb-4">The property you're looking for could not be found.</p>
+            <button
+              onClick={() => router.back()}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -178,10 +253,10 @@ export default function EditPropertyPage() {
                   </button>
                   <button
                     onClick={handleSave}
-                    disabled={isLoading}
+                    disabled={isSaving}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                   >
-                    {isLoading ? 'Saving...' : 'Save Changes'}
+                    {isSaving ? 'Saving...' : 'Save Changes'}
                   </button>
                 </>
               ) : (
@@ -204,29 +279,29 @@ export default function EditPropertyPage() {
           <div className="space-y-4">
             <div className="relative h-96 w-full rounded-xl overflow-hidden">
               <Image
-                src={property.images[selectedImage]}
+                src={property.image_url}
                 alt={property.title}
                 fill
                 className="object-cover"
               />
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {property.images.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedImage(index)}
-                  className={`relative h-20 w-full rounded-lg overflow-hidden ${
-                    selectedImage === index ? 'ring-2 ring-blue-500' : ''
-                  }`}
-                >
-                  <Image
-                    src={image}
-                    alt={`Property image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                  />
-                </button>
-              ))}
+              {/* Assuming property.images is an array of URLs */}
+              {/* For now, we'll use the single image_url */}
+              <button
+                key={0}
+                onClick={() => setSelectedImage(0)}
+                className={`relative h-20 w-full rounded-lg overflow-hidden ${
+                  selectedImage === 0 ? 'ring-2 ring-blue-500' : ''
+                }`}
+              >
+                <Image
+                  src={property.image_url}
+                  alt="Property image 1"
+                  fill
+                  className="object-cover"
+                />
+              </button>
             </div>
           </div>
 
@@ -277,8 +352,8 @@ export default function EditPropertyPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Min. Lease (months)</label>
                         <input
                           type="number"
-                          value={property.minimumLease}
-                          onChange={(e) => setProperty({...property, minimumLease: parseInt(e.target.value)})}
+                          value={property.minimum_lease}
+                          onChange={(e) => setProperty({...property, minimum_lease: parseInt(e.target.value)})}
                           className="form-input w-full"
                         />
                       </div>
@@ -308,14 +383,14 @@ export default function EditPropertyPage() {
                     <div className="grid grid-cols-3 gap-4 py-4 border-t border-gray-200">
                       <div className="text-center">
                         <div className="flex items-center justify-center space-x-1">
-                          <HomeIcon className="h-4 w-4 text-gray-400" />
+                          {/* HomeIcon is not imported, so using a placeholder */}
                           <span className="font-semibold">{property.bedrooms}</span>
                         </div>
                         <p className="text-sm text-gray-500">Bedrooms</p>
                       </div>
                       <div className="text-center">
                         <div className="flex items-center justify-center space-x-1">
-                          <div className="h-4 w-4 text-gray-400">🛁</div>
+                          {/* Using a placeholder for bathroom icon */}
                           <span className="font-semibold">{property.bathrooms}</span>
                         </div>
                         <p className="text-sm text-gray-500">Bathrooms</p>
@@ -323,7 +398,7 @@ export default function EditPropertyPage() {
                       <div className="text-center">
                         <div className="flex items-center justify-center space-x-1">
                           <CalendarIcon className="h-4 w-4 text-gray-400" />
-                          <span className="font-semibold">{property.minimumLease}</span>
+                          <span className="font-semibold">{property.minimum_lease}</span>
                         </div>
                         <p className="text-sm text-gray-500">Min. Lease (months)</p>
                       </div>
@@ -403,7 +478,7 @@ export default function EditPropertyPage() {
                     <div key={index} className="flex items-center space-x-3">
                       <input
                         type="checkbox"
-                        checked={true}
+                        checked={true} // Assuming all amenities are checked for editing
                         className="form-checkbox"
                       />
                       <span className="text-gray-700">{amenity}</span>
@@ -479,16 +554,15 @@ export default function EditPropertyPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Furnished</label>
                     <select
-                      value={property.details.furnished}
+                      value={property.details.furnished ? 'Yes' : 'No'}
                       onChange={(e) => setProperty({
                         ...property, 
-                        details: {...property.details, furnished: e.target.value}
+                        details: {...property.details, furnished: e.target.value === 'Yes'}
                       })}
                       className="form-select w-full"
                     >
-                      <option value="Fully Furnished">Fully Furnished</option>
-                      <option value="Partially Furnished">Partially Furnished</option>
-                      <option value="Unfurnished">Unfurnished</option>
+                      <option value="Yes">Yes</option>
+                      <option value="No">No</option>
                     </select>
                   </div>
                   <div>
@@ -543,7 +617,7 @@ export default function EditPropertyPage() {
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Furnished</span>
-                  <p className="font-medium">{property.details.furnished}</p>
+                  <p className="font-medium">{property.details.furnished ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Pets allowed</span>
@@ -573,13 +647,13 @@ export default function EditPropertyPage() {
             {editSection === 'rules' && isEditing ? (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  {property.rules.map((rule, index) => (
+                  {property.rules?.map((rule, index) => (
                     <div key={index} className="flex items-center space-x-2">
                       <input
                         type="text"
                         value={rule}
                         onChange={(e) => {
-                          const newRules = [...property.rules];
+                          const newRules = [...(property.rules || [])];
                           newRules[index] = e.target.value;
                           setProperty({...property, rules: newRules});
                         }}
@@ -587,47 +661,51 @@ export default function EditPropertyPage() {
                       />
                       <button
                         onClick={() => {
-                          const newRules = property.rules.filter((_, i) => i !== index);
+                          const newRules = property.rules?.filter((_, i) => i !== index) || [];
                           setProperty({...property, rules: newRules});
                         }}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       >
                         <XMarkIcon className="h-4 w-4" />
                       </button>
                     </div>
                   ))}
-                </div>
-                <button
-                  onClick={() => {
-                    setProperty({...property, rules: [...property.rules, '']});
-                  }}
-                  className="px-3 py-1 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm"
-                >
-                  Add Rule
-                </button>
-                <div className="flex space-x-2">
                   <button
-                    onClick={() => stopEditing()}
+                    onClick={() => {
+                      const newRules = [...(property.rules || []), ''];
+                      setProperty({...property, rules: newRules});
+                    }}
                     className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    Cancel
+                    Add Rule
                   </button>
-                  <button
-                    onClick={() => stopEditing()}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    Save
-                  </button>
+                  <div className="flex space-x-2 pt-4">
+                    <button
+                      onClick={() => stopEditing()}
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => stopEditing()}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : (
               <div className="space-y-2">
-                {property.rules.map((rule) => (
+                {(property.rules || []).map((rule) => (
                   <div key={rule} className="flex items-center space-x-2">
                     <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
-                    <span className="text-gray-700">{rule}</span>
+                    <span className="text-sm text-gray-600">{rule}</span>
                   </div>
                 ))}
+                {(!property.rules || property.rules.length === 0) && (
+                  <p className="text-sm text-gray-500">No rules specified</p>
+                )}
               </div>
             )}
           </div>

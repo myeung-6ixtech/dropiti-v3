@@ -4,10 +4,10 @@ import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { 
   MapPinIcon, 
-  HomeIcon,
   EyeIcon,
   PencilIcon
 } from '@heroicons/react/24/outline';
+import { Bed, Bathtub } from '@/assets/icons';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -65,6 +65,44 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
     return location;
   };
 
+  // Extract District and Country for simplified display
+  const getSimplifiedLocation = () => {
+    if (!location || location === 'No Location') return '';
+    
+    console.log('PropertyCard: Processing location:', location);
+    
+    // Try to parse the location to extract District and Country
+    // Location format is typically: "District, State, Country" or similar
+    if (location.includes(',')) {
+      const parts = location.split(',').map(part => part.trim());
+      console.log('PropertyCard: Location parts:', parts);
+      
+      // If we have at least 2 parts, show District and Country
+      if (parts.length >= 2) {
+        const district = parts[0];
+        const country = parts[parts.length - 1]; // Last part is usually country
+        
+        // If district and country are different, show both
+        if (district !== country) {
+          const result = `${district}, ${country}`;
+          console.log('PropertyCard: Simplified location (District, Country):', result);
+          return result;
+        }
+        // If they're the same, just show district
+        console.log('PropertyCard: Simplified location (District only):', district);
+        return district;
+      }
+      
+      // If we have only 1 part, return as is
+      console.log('PropertyCard: Simplified location (single part):', parts[0]);
+      return parts[0];
+    }
+    
+    // For simple addresses without commas, return as is
+    console.log('PropertyCard: Simplified location (no commas):', location);
+    return location;
+  };
+
   const handleViewDetails = () => {
     if (onViewDetails && propertyUuid) {
       onViewDetails(propertyUuid);
@@ -118,16 +156,17 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-gray-600">
             <MapPinIcon className="h-4 w-4 mr-2 text-gray-400" />
-            <span>{isDashboard ? getFormattedAddress() : location}</span>
+            <span>{getSimplifiedLocation()}</span>
           </div>
           
           <div className="flex items-center justify-between">
             <div className="flex items-center text-sm text-gray-600">
-              <HomeIcon className="h-4 w-4 mr-2 text-gray-400" />
+              <Bed className="h-4 w-4 mr-2 text-gray-400" />
               <span>{getBedrooms()} bed{getBedrooms() !== 1 ? 's' : ''}</span>
             </div>
             
             <div className="flex items-center text-sm text-gray-600">
+              <Bathtub className="h-4 w-4 mr-2 text-gray-400" />
               <span>{getBathrooms()} bath{getBathrooms() !== 1 ? 's' : ''}</span>
             </div>
           </div>

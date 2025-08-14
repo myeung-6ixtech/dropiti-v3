@@ -3,9 +3,9 @@
 import { 
   XMarkIcon,
   MapPinIcon, 
-  HomeIcon, 
-  CurrencyDollarIcon
+  CurrencyDollarIcon 
 } from '@heroicons/react/24/outline';
+import { Bed } from '@/assets/icons';
 
 interface FilterData {
   location: string;
@@ -91,7 +91,7 @@ export default function ModernFilter({
             <div>
               <label className="form-label">
                 <div className="flex items-center space-x-2">
-                  <HomeIcon className="h-5 w-5 text-blue-500" />
+                  <Bed className="h-5 w-5 text-blue-500" />
                   <span>Minimum Bedrooms</span>
                 </div>
               </label>

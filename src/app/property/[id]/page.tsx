@@ -85,6 +85,8 @@ export default function PropertyDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const { user: authUser } = useAuth(); // Get user from context
 
   // Function to fetch landlord details using owner_id
@@ -295,6 +297,56 @@ export default function PropertyDetailPage() {
     return amenityMap[amenityId] || amenityId;
   };
 
+  // Gallery functions
+  const openGallery = (index: number) => {
+    setSelectedImageIndex(index);
+    setIsGalleryModalOpen(true);
+  };
+
+  const closeGallery = () => {
+    setIsGalleryModalOpen(false);
+  };
+
+  const nextImage = () => {
+    const images = property?.uploaded_images;
+    if (images && Array.isArray(images)) {
+      setSelectedImageIndex((prev) => 
+        prev === images.length - 1 ? 0 : prev + 1
+      );
+    }
+  };
+
+  const previousImage = () => {
+    const images = property?.uploaded_images;
+    if (images && Array.isArray(images)) {
+      setSelectedImageIndex((prev) => 
+        prev === 0 ? images.length - 1 : prev - 1
+      );
+    }
+  };
+
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!isGalleryModalOpen) return;
+      
+      switch (event.key) {
+        case 'Escape':
+          closeGallery();
+          break;
+        case 'ArrowLeft':
+          previousImage();
+          break;
+        case 'ArrowRight':
+          nextImage();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isGalleryModalOpen]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
@@ -341,6 +393,15 @@ export default function PropertyDetailPage() {
 
   // Get the main display image or fallback
   const mainImage = property.image_url || property.display_image || fallbackImage;
+  
+  // Get all images for the gallery - prioritize uploaded_images, fallback to main image
+  const allImages = (() => {
+    if (property.uploaded_images && Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0) {
+      return property.uploaded_images;
+    }
+    // If no uploaded images, use the main image as the only image
+    return [mainImage];
+  })();
 
   return (
     <div className="min-h-screen bg-white">
@@ -378,22 +439,34 @@ export default function PropertyDetailPage() {
           <div className="lg:col-span-2 space-y-8">
             {/* Image Gallery */}
             <div className="space-y-4">
-              <div className="relative h-96 w-full rounded-xl overflow-hidden">
+              <div 
+                className="relative h-96 w-full rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity group"
+                onClick={() => openGallery(0)}
+              >
                 <Image
-                  src={mainImage}
+                  src={allImages[0]}
                   alt={property.title}
                   fill
                   className="object-cover"
                 />
+                {/* Hover overlay to indicate clickability */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-80 rounded-full p-2">
+                    <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
               
               {/* Image Thumbnails Gallery */}
-              {property.uploaded_images && Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0 ? (
+              {allImages.length > 1 ? (
                 <div className="grid grid-cols-4 gap-2">
-                  {property.uploaded_images.slice(0, 4).map((image, index) => (
+                  {allImages.slice(0, 4).map((image, index) => (
                     <div
                       key={index}
                       className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => openGallery(index)}
                     >
                       <Image
                         src={image}
@@ -403,32 +476,20 @@ export default function PropertyDetailPage() {
                       />
                     </div>
                   ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-4 gap-2">
-                  {Array.from({ length: 4 }).map((_, index) => (
-                    <div
-                      key={index}
-                      className="relative h-20 w-full rounded-lg overflow-hidden bg-gray-200"
+                  {allImages.length > 4 && (
+                    <div 
+                      className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity bg-gray-800"
+                      onClick={() => openGallery(4)}
                     >
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <svg
-                          className="w-6 h-6 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
+                      <div className="absolute inset-0 flex items-center justify-center text-white">
+                        <span className="text-sm font-medium">+{allImages.length - 4}</span>
                       </div>
                     </div>
-                  ))}
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <p className="text-gray-500 text-sm">No additional photos available</p>
                 </div>
               )}
             </div>
@@ -577,6 +638,96 @@ export default function PropertyDetailPage() {
         recipientFirebaseUid={landlord?.firebase_uid}
         onOfferSubmit={handleOfferSubmit}
       />
+
+      {/* Image Gallery Modal */}
+      {isGalleryModalOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center"
+          onClick={closeGallery}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <button
+              onClick={closeGallery}
+              className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Previous Button */}
+            {allImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  previousImage();
+                }}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
+            {/* Next Button */}
+            {allImages.length > 1 && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextImage();
+                }}
+                className=" absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-2"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            )}
+
+            {/* Main Image */}
+            <div 
+              className="relative w-full h-full flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={allImages[selectedImageIndex]}
+                alt={`${property.title} - Image ${selectedImageIndex + 1}`}
+                fill
+                className="object-contain"
+              />
+            </div>
+
+            {/* Image Counter */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 text-white bg-black bg-opacity-50 rounded-full px-4 py-2">
+                <span className="text-sm font-medium">
+                  {selectedImageIndex + 1} of {allImages.length}
+                </span>
+              </div>
+            )}
+
+            {/* Thumbnail Navigation */}
+            {allImages.length > 1 && (
+              <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10 flex space-x-2">
+                {allImages.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedImageIndex(index);
+                    }}
+                    className={`w-3 h-3 rounded-full transition-colors ${
+                      index === selectedImageIndex ? 'bg-white' : 'bg-white bg-opacity-50'
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

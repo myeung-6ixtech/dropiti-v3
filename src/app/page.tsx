@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, MapPinIcon, HomeIcon, CurrencyDollarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, MapPinIcon, CurrencyDollarIcon, UserIcon } from '@heroicons/react/24/outline';
+import { Bed, PropertyListings } from '@/assets/icons';
 import Footer from '@/components/common/Footer';
 
 export default function HomePage() {
@@ -75,7 +76,7 @@ export default function HomePage() {
 
                       {/* Bedrooms */}
                       <div className="flex-1 relative">
-                        <HomeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Bed className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <select
                           value={searchData.bedrooms}
                           onChange={(e) => setSearchData({ ...searchData, bedrooms: e.target.value })}
@@ -155,7 +156,7 @@ export default function HomePage() {
 
               <div className="text-center">
                 <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white mx-auto">
-                  <HomeIcon className="h-6 w-6" />
+                  <PropertyListings className="h-6 w-6" />
                 </div>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">Verified Properties</h3>
                 <p className="mt-2 text-base text-gray-600">

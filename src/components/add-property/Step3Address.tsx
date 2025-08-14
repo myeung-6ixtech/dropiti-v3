@@ -107,7 +107,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Building Details */}
           <div className="space-y-5">
             <h4 className="font-medium text-gray-900 text-base">Building Details</h4>
@@ -195,7 +195,12 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
                 className="form-input"
               />
             </div>
+          </div>
 
+          {/* Location Details */}
+          <div className="space-y-5">
+            <h4 className="font-medium text-gray-900 text-base">Location Details</h4>
+            
             <div className="space-y-2">
               <label className="form-label">
                 District *

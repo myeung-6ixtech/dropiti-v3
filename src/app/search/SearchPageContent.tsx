@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { propertiesAPI } from '@/lib/api-client';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { MagnifyingGlassIcon, MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { Bed } from '@/assets/icons';
 import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import Footer from '@/components/common/Footer';
 import { Property } from '@/types';
-import { MagnifyingGlassIcon, MapPinIcon, HomeIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 
 // The API returns data in the Property interface format (already transformed)
 // So we can use the Property interface directly
@@ -199,7 +200,7 @@ export default function SearchPageContent() {
                   )}
                   {filters.bedrooms && (
                     <div className="flex items-center space-x-1">
-                      <HomeIcon className="h-4 w-4" />
+                      <Bed className="h-4 w-4" />
                       <span>{filters.bedrooms}+ bedrooms</span>
                     </div>
                   )}

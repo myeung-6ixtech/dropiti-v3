@@ -97,7 +97,7 @@ export default function DashboardPage() {
   // Use real user data from auth context for DropitiPassport
   const userData = {
     name: authUser.displayName || authUser.name || 'User',
-    avatar: getSafeProfileImage(authUser.photoUrl || authUser.avatar, '/images/default-avatar.png'),
+    avatar: getSafeProfileImage(authUser.photoUrl || authUser.avatar, '/src/assets/img/Portrait_Placeholder.png'),
     email: authUser.email || 'user@example.com',
     location: authUser.location || 'Hong Kong',
     joinDate: authUser.userSince || authUser.createdAt || '2024-01-01',

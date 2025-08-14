@@ -14,6 +14,7 @@ import {
   ChatBubbleLeftRightIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
+import { ChartTreeMap, PropertyListings } from '@/assets/icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -99,7 +100,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   const tenantNavigation = [
-    { name: 'Dashboard', icon: HomeIcon, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
     { name: 'Applications', icon: ClockIcon, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
     { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
@@ -110,8 +111,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   ];
 
   const landlordNavigation = [
-    { name: 'Dashboard', icon: HomeIcon, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Properties', icon: BuildingOfficeIcon, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
+    { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: 'Properties', icon: PropertyListings, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
     { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },

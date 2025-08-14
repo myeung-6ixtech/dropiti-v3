@@ -129,7 +129,7 @@ export default function UserProfilePage() {
   // Map User to DropitiPassport2 format
   const mapToPassportFormat = (user: User) => ({
     displayName: user.display_name,
-    avatar: user.photo_url || 'https://via.placeholder.com/50', // Fallback avatar
+    avatar: user.photo_url || '/src/assets/img/Portrait_Placeholder.png', // Fallback avatar
     email: user.email,
     location: user.location,
     joinDate: user.user_since,

@@ -31,7 +31,7 @@ export default function NotificationsPage() {
       message: 'Your application for the Modern 2BR Apartment has been approved by the landlord.',
       timestamp: '2 hours ago',
       read: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
+      avatar: '/src/assets/img/Portrait_Placeholder.png',
       action: 'View Details'
     },
     {
@@ -41,7 +41,7 @@ export default function NotificationsPage() {
       message: 'Sarah Johnson sent you a message regarding your property inquiry.',
       timestamp: '4 hours ago',
       read: false,
-      avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=687&q=80',
+      avatar: '/src/assets/img/Portrait_Placeholder.png',
       action: 'Reply'
     },
     {
