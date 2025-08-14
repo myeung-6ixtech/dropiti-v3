@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
-import CounterOfferModal from './CounterOfferModal';
-import FinalCounterOfferModal from './FinalCounterOfferModal';
-import OfferCard from './OfferCard';
+import OfferCard from '@/components/common/OfferCard';
 import Toast from '@/components/ui/Toast';
 
 interface Offer {
@@ -68,29 +66,10 @@ export default function OutgoingOffers({
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
-  // Counter offer modal state
-  const [selectedCounterOffer, setSelectedCounterOffer] = useState<Offer | null>(null);
-  const [showCounterOfferModal, setShowCounterOfferModal] = useState(false);
-  const [loadingCounterDetails, setLoadingCounterDetails] = useState(false);
-  
-  // Final counter offer modal state
-  const [showFinalCounterModal, setShowFinalCounterModal] = useState(false);
-  
-  // Track submitted final counters
-  const [finalCounterSubmitted, setFinalCounterSubmitted] = useState<Set<string>>(new Set());
-  
-  // Loading states
-  const [respondingToCounter, setRespondingToCounter] = useState(false);
-
-  // Toast notification state
-  const [toast, setToast] = useState<{
-    message: string;
-    type: 'error' | 'success' | 'info' | 'warning';
-    isVisible: boolean;
-  }>({
+  const [finalCounterSubmitted] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState({
     message: '',
-    type: 'error',
+    type: 'error' as 'error' | 'success' | 'info' | 'warning',
     isVisible: false
   });
 
@@ -137,185 +116,6 @@ export default function OutgoingOffers({
       fetchOffers();
     }
   }, [initiatorFirebaseUid]);
-
-  // Handle viewing counter offer
-  const handleViewCounterOffer = async (offer: Offer) => {
-    setSelectedCounterOffer(offer);
-    setShowCounterOfferModal(true);
-    setLoadingCounterDetails(true);
-
-    try {
-      // Simulate loading for better UX
-      await new Promise(resolve => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error('Error setting up counter offer view:', error);
-      setError('Failed to load counter offer view');
-    } finally {
-      setLoadingCounterDetails(false);
-    }
-  };
-
-  // Handle final counter offer
-  const handleFinalCounterOffer = () => {
-    setShowFinalCounterModal(true);
-  };
-
-  // Handle submitting final counter offer
-  const handleSubmitFinalCounterOffer = async (counterData: {
-    rentalPrice: number;
-    leaseDuration: number;
-    paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
-    moveInDate: string;
-    currency?: string;
-    message?: string;
-  }) => {
-    if (!selectedCounterOffer) return;
-
-    setRespondingToCounter(true);
-    try {
-      // Debug: Log what we're sending
-      const apiPayload = {
-        rentPrice: counterData.rentalPrice,
-        numLeasingMonths: counterData.leaseDuration,
-        paymentFrequency: counterData.paymentFrequency,
-        moveInDate: counterData.moveInDate,
-        message: counterData.message
-      };
-      
-      console.log('Submitting final counter offer with payload:', apiPayload);
-      console.log('Selected counter offer:', selectedCounterOffer);
-
-      // Call the counter-offer API
-      const response = await offersAPI.counterOffer(
-        selectedCounterOffer.id,
-        initiatorFirebaseUid, // Send the actual Firebase UID
-        apiPayload
-      );
-
-      if (response.success) {
-        // Close modals and refresh offers
-        setShowFinalCounterModal(false);
-        setShowCounterOfferModal(false);
-        setSelectedCounterOffer(null);
-        
-        // Mark this offer as having a final counter submitted
-        if (selectedCounterOffer) {
-          setFinalCounterSubmitted(prev => new Set(prev).add(selectedCounterOffer.id));
-        }
-        
-        // Show success toast
-        showToast('Final counter offer submitted successfully!', 'success');
-        
-        // Refresh the offers list
-        setOffers([]);
-        setLoading(true);
-        try {
-          const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
-          if (refreshResponse.success && refreshResponse.data) {
-            setOffers(refreshResponse.data);
-          }
-        } catch (refreshError) {
-          console.error('Error refreshing offers:', refreshError);
-          showToast('Counter offer submitted but failed to refresh list', 'warning');
-        }
-        setError(null);
-      } else {
-        const errorMessage = response.error || 'Failed to submit counter offer';
-        setError(errorMessage);
-        showToast(errorMessage, 'error');
-      }
-    } catch (error) {
-      console.error('Error submitting final counter offer:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to submit counter offer';
-      setError(errorMessage);
-      showToast(errorMessage, 'error');
-    } finally {
-      setRespondingToCounter(false);
-    }
-  };
-
-  // Handle withdrawing offer
-  const handleWithdrawOffer = (offerId: string) => {
-    setOffers(prev => 
-      prev.map(offer => 
-        offer.id === offerId 
-          ? { ...offer, offerStatus: 'withdrawn' }
-          : offer
-      )
-    );
-    // TODO: Make API call to withdraw the offer
-    console.log('Withdrawing offer:', offerId);
-  };
-
-  // Handle accepting counter offer
-  const handleAcceptCounterOffer = async (offerId: string) => {
-    if (!selectedCounterOffer) return;
-    
-    try {
-      setRespondingToCounter(true);
-      
-      // Call the accept offer API
-      const response = await offersAPI.acceptOffer(offerId, initiatorFirebaseUid);
-      
-      if (response.success) {
-        showToast('Counter offer accepted successfully!', 'success');
-        
-        // Close modals and refresh offers
-        setShowCounterOfferModal(false);
-        setSelectedCounterOffer(null);
-        
-        // Refresh the offers list
-        const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
-        if (refreshResponse.success && refreshResponse.data) {
-          setOffers(refreshResponse.data);
-        }
-      } else {
-        const errorMessage = response.error || 'Failed to accept counter offer';
-        showToast(errorMessage, 'error');
-      }
-    } catch (error) {
-      console.error('Error accepting counter offer:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to accept counter offer';
-      showToast(errorMessage, 'error');
-    } finally {
-      setRespondingToCounter(false);
-    }
-  };
-
-  // Handle rejecting counter offer
-  const handleRejectCounterOffer = async (offerId: string) => {
-    if (!selectedCounterOffer) return;
-    
-    try {
-      setRespondingToCounter(true);
-      
-      // Call the reject offer API
-      const response = await offersAPI.rejectOffer(offerId, initiatorFirebaseUid);
-      
-      if (response.success) {
-        showToast('Counter offer rejected successfully!', 'success');
-        
-        // Close modals and refresh offers
-        setShowCounterOfferModal(false);
-        setSelectedCounterOffer(null);
-        
-        // Refresh the offers list
-        const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
-        if (refreshResponse.success && refreshResponse.data) {
-          setOffers(refreshResponse.data);
-        }
-      } else {
-        const errorMessage = response.error || 'Failed to reject counter offer';
-        showToast(errorMessage, 'error');
-      }
-    } catch (error) {
-      console.error('Error rejecting counter offer:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to reject counter offer';
-      showToast(errorMessage, 'error');
-    } finally {
-      setRespondingToCounter(false);
-    }
-  };
 
   if (loading) {
     return <CenteredLoadingSpinner />;
@@ -380,34 +180,82 @@ export default function OutgoingOffers({
             offer={offer}
             showPropertyInfo={showPropertyInfo}
             finalCounterSubmitted={finalCounterSubmitted.has(offer.id)}
-            onViewCounterOffer={handleViewCounterOffer}
-            onWithdrawOffer={handleWithdrawOffer}
+            onWithdrawOffer={() => {
+              // Handle withdrawing offer
+              setOffers(prev => 
+                prev.map(o => 
+                  o.id === offer.id 
+                    ? { ...o, offerStatus: 'withdrawn' }
+                    : o
+                )
+              );
+              // TODO: Make API call to withdraw the offer
+              console.log('Withdrawing offer:', offer.id);
+            }}
+            currentUserId={initiatorFirebaseUid}
+            onOfferStatusChange={() => {
+              // Refresh the offers list when an offer status changes
+              if (initiatorFirebaseUid) {
+                offersAPI.getOffersByInitiator(initiatorFirebaseUid)
+                  .then(response => {
+                    if (response.success && response.data) {
+                      setOffers(response.data);
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Error refreshing offers:', err);
+                  });
+              }
+            }}
+            onCounterOffer={(offerId: string) => {
+              // Handle counter offer - open modal or navigate to counter offer form
+              console.log('Counter offer requested for:', offerId);
+              // TODO: Implement counter offer modal/form
+            }}
+            onAcceptOffer={async (offerId: string) => {
+              try {
+                const response = await offersAPI.acceptOffer(offerId, initiatorFirebaseUid);
+                if (response.success) {
+                  showToast('Offer accepted successfully!', 'success');
+                  // Refresh offers list
+                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
+                  if (refreshResponse.success && refreshResponse.data) {
+                    setOffers(refreshResponse.data);
+                  }
+                } else {
+                  showToast('Failed to accept offer', 'error');
+                }
+              } catch (error) {
+                console.error('Error accepting offer:', error);
+                showToast('Error accepting offer', 'error');
+              }
+            }}
+            onRejectOffer={async (offerId: string) => {
+              try {
+                const response = await offersAPI.rejectOffer(offerId, initiatorFirebaseUid);
+                if (response.success) {
+                  showToast('Offer rejected successfully!', 'success');
+                  // Refresh offers list
+                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
+                  if (refreshResponse.success && refreshResponse.data) {
+                    setOffers(refreshResponse.data);
+                  }
+                } else {
+                  showToast('Failed to reject offer', 'error');
+                }
+              } catch (error) {
+                console.error('Error rejecting offer:', error);
+                showToast('Error rejecting offer', 'error');
+              }
+            }}
+            onFinalCounterOffer={(offer: Offer) => {
+              // Handle final counter offer - open modal or navigate to final counter offer form
+              console.log('Final counter offer requested for:', offer.id);
+              // TODO: Implement final counter offer modal/form
+            }}
           />
         ))}
       </div>
-
-      {/* Counter Offer Modal */}
-      <CounterOfferModal
-        isOpen={showCounterOfferModal}
-        onClose={() => setShowCounterOfferModal(false)}
-        offer={selectedCounterOffer}
-        loading={loadingCounterDetails}
-        responding={respondingToCounter}
-        finalCounterSubmitted={selectedCounterOffer ? finalCounterSubmitted.has(selectedCounterOffer.id) : false}
-        onAccept={handleAcceptCounterOffer}
-        onFinalCounter={handleFinalCounterOffer}
-        onReject={handleRejectCounterOffer}
-        isIncomingOffer={false}
-      />
-
-      {/* Final Counter Offer Modal */}
-      <FinalCounterOfferModal
-        isOpen={showFinalCounterModal}
-        onClose={() => setShowFinalCounterModal(false)}
-        onSubmit={handleSubmitFinalCounterOffer}
-        offer={selectedCounterOffer}
-        loading={respondingToCounter}
-      />
 
       {/* Toast Notification */}
       <Toast

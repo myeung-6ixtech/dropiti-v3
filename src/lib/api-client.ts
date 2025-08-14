@@ -286,9 +286,13 @@ export const offersAPI = {
   },
 
   // Get offers by recipient (landlord)
-  getOffersByRecipient: async (recipientFirebaseUid: string) => {
+  getOffersByRecipient: async (recipientFirebaseUid: string, propertyUuid?: string) => {
     try {
-      const response = await apiClient.get(`/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}`);
+      const url = propertyUuid 
+        ? `/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}&propertyUuid=${propertyUuid}`
+        : `/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}`;
+      
+      const response = await apiClient.get(url);
       return response.data;
     } catch (error) {
       console.error('Error fetching offers by recipient:', error);

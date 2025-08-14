@@ -133,33 +133,6 @@ export default function CounterOfferModal({
                 </div>
               ) : (
                 <>
-                  {/* Current Counter Offer Details */}
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <h4 className="font-medium text-blue-900 mb-3 text-sm">Current Counter Offer</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm text-blue-700">
-                          <span className="font-medium w-24">Rent:</span>
-                          <span>{formatCurrency(offer.currentRentPrice || offer.proposingRentPrice, offer.currentRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD')}/month</span>
-                        </div>
-                        <div className="flex items-center text-sm text-blue-700">
-                          <span className="font-medium w-24">Lease:</span>
-                          <span>{offer.currentNumLeasingMonths || offer.numLeasingMonths} months</span>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm text-blue-700">
-                          <span className="font-medium w-24">Move-in:</span>
-                          <span>{formatDate(offer.currentMoveInDate || offer.moveInDate)}</span>
-                        </div>
-                        <div className="flex items-center text-sm text-blue-700">
-                          <span className="font-medium w-24">Payment:</span>
-                          <span className="capitalize">{offer.currentPaymentFrequency || offer.paymentFrequency}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Landlord's Counter Offer Details */}
                   <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                     <h4 className="font-medium text-yellow-900 mb-3 text-sm">Landlord's Counter Offer</h4>
@@ -213,7 +186,7 @@ export default function CounterOfferModal({
                   disabled={responding}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Accept Counter Offer
+                  Accept Offer
                 </button>
                 
                 {!finalCounterSubmitted && (
@@ -226,7 +199,7 @@ export default function CounterOfferModal({
                     disabled={responding}
                     className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Final Counter Offer
+                    Final Offer
                   </button>
                 )}
                 
@@ -235,7 +208,7 @@ export default function CounterOfferModal({
                   disabled={responding}
                   className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Reject Counter Offer
+                  Reject Offer
                 </button>
               </div>
             </div>

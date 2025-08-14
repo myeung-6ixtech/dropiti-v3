@@ -17,7 +17,7 @@ interface Offer {
   moveInDate: string;
 }
 
-interface FinalCounterOfferModalProps {
+interface FinalCounterOfferModal2Props {
   isOpen: boolean;
   onClose: () => void;
   offer: Offer | null;
@@ -31,13 +31,13 @@ interface FinalCounterOfferModalProps {
   loading?: boolean;
 }
 
-export default function FinalCounterOfferModal({
+export default function FinalCounterOfferModal2({
   isOpen,
   onClose,
   offer,
   onSubmit,
   loading = false
-}: FinalCounterOfferModalProps) {
+}: FinalCounterOfferModal2Props) {
   const [offerData, setOfferData] = useState({
     rentalPrice: offer?.proposingRentPrice || 0,
     leaseDuration: offer?.numLeasingMonths || 12,
