@@ -1,11 +1,8 @@
 'use client';
 
 import { 
-  XMarkIcon,
-  MapPinIcon, 
-  CurrencyDollarIcon 
+  XMarkIcon
 } from '@heroicons/react/24/outline';
-import { Bed } from '@/assets/icons';
 
 interface FilterData {
   location: string;

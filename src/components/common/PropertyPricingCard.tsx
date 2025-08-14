@@ -55,10 +55,10 @@ export default function PropertyPricingCard({
 }: PropertyPricingCardProps) {
 
   // Fallback image URL for when no landlord avatar is available
-  const fallbackAvatar = "/src/assets/img/Portrait_Placeholder.png";
+  const fallbackAvatar = "/images/Portrait_Placeholder.png";
 
-  // Get the landlord avatar or fallback
-  const landlordAvatar = landlord.avatar || fallbackAvatar;
+  // Get the landlord avatar or fallback, ensuring it's a valid URL
+  const landlordAvatar = landlord.avatar && landlord.avatar.trim() !== '' ? landlord.avatar : fallbackAvatar;
 
 
   const formatCurrency = (amount: number) => {
@@ -148,15 +148,16 @@ export default function PropertyPricingCard({
             <div className="relative">
               <Image
                 src={landlordAvatar}
-                alt={landlord.name}
+                alt={`${landlord.name}'s profile picture`}
                 width={64}
                 height={64}
-                className="rounded-full object-cover"
+                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
                 onError={(e) => {
                   // Fallback to default avatar if image fails to load
                   const target = e.target as HTMLImageElement;
                   target.src = fallbackAvatar;
                 }}
+                priority={false}
               />
               {landlord.verified && (
                 <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">

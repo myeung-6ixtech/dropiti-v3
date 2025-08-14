@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { 
-  MapPinIcon, 
   EyeIcon,
   PencilIcon
 } from '@heroicons/react/24/outline';

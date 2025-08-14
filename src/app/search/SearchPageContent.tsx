@@ -22,7 +22,7 @@ export default function SearchPageContent() {
     bedrooms: searchParams.get('bedrooms') || '',
     maxPrice: searchParams.get('maxPrice') || '',
   });
-  const [searchTerm, setSearchTerm] = useState('');
+
 
   // Update URL when filters change
   const updateURL = useCallback((newFilters: typeof filters) => {
