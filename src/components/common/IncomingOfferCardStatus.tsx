@@ -25,11 +25,53 @@ export default function IncomingOfferCardStatus({
   // For incoming offers (landlord perspective)
   if (offer.offerStatus === 'accepted') {
     return (
-      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-        <p className="text-green-800 text-sm font-medium">
-          ✅ You accepted this tenant's offer
-        </p>
+      <div>
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+        <h4 className="text-green-900 text-sm font-semibold mb-3">
+            Final Accepted Terms
+          </h4>
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Monthly Rent:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {formatCurrency(
+                    offer.finalRentPrice || offer.proposingRentPrice, 
+                    offer.finalRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD'
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Lease Duration:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {offer.finalNumLeasingMonths || offer.numLeasingMonths} month{(offer.finalNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Payment Frequency:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {offer.finalPaymentFrequency || offer.paymentFrequency}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Move-in Date:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {formatDate(offer.finalMoveInDate || offer.moveInDate)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+          <p className="text-green-800 text-sm font-medium">
+            ✅ You accepted this tenant's offer
+          </p>
+        </div>
       </div>
+
     );
   }
 
@@ -80,37 +122,6 @@ export default function IncomingOfferCardStatus({
               <p className="text-yellow-700 text-xs mt-1">
                 This is your last chance to accept or reject
               </p>
-            </div>
-            
-            {/* Final Counter Offer Details */}
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Tenant's Final Counter Offer</h4>
-              <div className="grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span className="text-gray-600">Rent:</span>
-                  <span className="ml-2 font-medium text-gray-900">
-                    {offer.proposingRentPrice ? formatCurrency(offer.proposingRentPrice, offer.proposingRentPriceCurrency || 'USD') : 'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Lease Duration:</span>
-                  <span className="ml-2 font-medium text-gray-900">
-                    {offer.numLeasingMonths ? `${offer.numLeasingMonths} months` : 'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Move-in Date:</span>
-                  <span className="ml-2 font-medium text-gray-900">
-                    {offer.moveInDate ? formatDate(offer.moveInDate) : 'N/A'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-gray-600">Payment Frequency:</span>
-                  <span className="ml-2 font-medium text-gray-900">
-                    {offer.paymentFrequency ? offer.paymentFrequency : 'N/A'}
-                  </span>
-                </div>
-              </div>
             </div>
           </div>
         );

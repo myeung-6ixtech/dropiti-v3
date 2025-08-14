@@ -64,7 +64,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
       
       // If we have at least 2 parts, show District and Country
       if (parts.length >= 2) {
-        const district = parts[7];
+        const district = parts[5];
         const country = parts[parts.length - 1]; // Last part is usually country
         
         // If district and country are different, show both

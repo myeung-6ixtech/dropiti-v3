@@ -682,3 +682,22 @@
   .focus\:ring-airbnb:focus { @apply focus:ring-2 focus:ring-black focus:ring-offset-2; }
   .focus\:border-airbnb:focus { @apply focus:border-black; }
 }
+
+/* ========================================
+   TOAST ANIMATIONS
+   ======================================== */
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}

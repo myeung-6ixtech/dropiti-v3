@@ -31,6 +31,14 @@ export interface Offer {
   lastActionBy: 'initiator' | 'recipient';
   lastActionAt: string;
   lastActionType: OfferActionType;
+  // New fields for final accepted terms
+  finalRentPrice?: number;
+  finalRentPriceCurrency?: string;
+  finalNumLeasingMonths?: number;
+  finalPaymentFrequency?: string;
+  finalMoveInDate?: string;
+  finalAcceptedAt?: string;
+  finalAcceptedBy?: 'initiator' | 'recipient';
   // Related data
   initiator?: OfferUser;
   recipient?: OfferUser;

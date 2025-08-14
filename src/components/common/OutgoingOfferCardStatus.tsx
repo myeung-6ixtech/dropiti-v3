@@ -35,6 +35,18 @@ export default function OutgoingOfferCardStatus({
   };
 
 
+  const handleRejectOffer = async () => {
+    setIsRejecting(true);
+    try {
+      await offersAPI.rejectOffer(offer.id, currentUserId);
+      onOfferStatusChange?.();
+    } catch (error) {
+      console.error('Error rejecting offer:', error);
+      alert('Failed to reject offer. Please try again.');
+    } finally {
+      setIsRejecting(false);
+    }
+  };
 
   const handleFinalCounterOffer = async (counterData: {
     rentalPrice: number;
@@ -62,10 +74,51 @@ export default function OutgoingOfferCardStatus({
     }
   };
 
+
   // For outgoing offers (tenant perspective)
   if (offer.offerStatus === 'accepted') {
     return (
+      <>
       <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+        <h4 className="text-green-900 text-sm font-semibold mb-3">
+          Final Accepted Terms
+        </h4>
+        <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Monthly Rent:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {formatCurrency(
+                    offer.finalRentPrice || offer.proposingRentPrice, 
+                    offer.finalRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD'
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Lease Duration:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {offer.finalNumLeasingMonths || offer.numLeasingMonths} month{(offer.finalNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+              <span className="text-green-800 text-sm font-semibold">Payment Frequency:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {offer.finalPaymentFrequency || offer.paymentFrequency}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-green-800 text-sm font-semibold">Move-in Date:</span>
+                <span className="text-green-800 text-sm font-medium">
+                  {formatDate(offer.finalMoveInDate || offer.moveInDate)}
+                </span>
+              </div>
+            </div>
+        </div>
+      </div>
+       <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
         <p className="text-green-800 text-sm font-medium">
           🎉 Great news! The landlord accepted your offer
         </p>
@@ -73,6 +126,7 @@ export default function OutgoingOfferCardStatus({
           Contact the landlord to proceed with the rental agreement
         </p>
       </div>
+      </>
     );
   }
 
@@ -108,36 +162,6 @@ export default function OutgoingOfferCardStatus({
               <p className="text-blue-800 text-sm font-medium">
                   The landlord sent you a counter offer
               </p>     
-              {/* Counter Offer Details */}
-              <div className="mt-3 p-3">
-                <div className="grid grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <span className="text-blue-800">Rent:</span>
-                    <span className="ml-2 font-medium text-gray-900">
-                      {offer.currentRentPrice ? formatCurrency(offer.currentRentPrice, offer.currentRentPriceCurrency || 'USD') : 'N/A'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-blue-800">Lease Duration:</span>
-                    <span className="ml-2 font-medium text-gray-900">
-                      {offer.currentNumLeasingMonths ? `${offer.currentNumLeasingMonths} months` : 'N/A'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-blue-800">Move-in Date:</span>
-                    <span className="ml-2 font-medium text-gray-900">
-                      {offer.currentMoveInDate ? formatDate(offer.currentMoveInDate) : 'N/A'}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-blue-800">Payment Frequency:</span>
-                    <span className="ml-2 font-medium text-gray-900">
-                      {offer.currentPaymentFrequency ? offer.currentPaymentFrequency : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              
               <p className="text-blue-700 text-xs mt-1">
                 Review the terms and decide whether to accept, reject, or counter
               </p>             

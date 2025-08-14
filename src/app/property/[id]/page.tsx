@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { propertiesAPI, offersAPI } from '@/lib/api-client';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { 
   MapPinIcon, 
   StarIcon,
@@ -81,6 +82,7 @@ interface PropertyWithLandlord {
 export default function PropertyDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const { showToast } = useToast();
   const [propertyData, setPropertyData] = useState<PropertyWithLandlord | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -317,16 +319,22 @@ export default function PropertyDetailPage() {
       });
 
       if (response.success) {
-        alert(`Offer submitted successfully!\nOffer ID: ${response.data.offer_key}\nRental Price: ${offerData.rentalPrice} HKD\nLease Duration: ${offerData.leaseDuration} months\nPayment Frequency: ${offerData.paymentFrequency}\nMove-in Date: ${offerData.moveInDate}`);
+        // Show success toast
+        showToast('success', 'Offer Successfully Created!');
         
         // Close the modal
         setIsCreateOfferModalOpen(false);
+        
+        // Redirect to dashboard applications after a short delay
+        setTimeout(() => {
+          router.push('/dashboard/applications');
+        }, 1500); // 1.5 second delay to show the toast
       } else {
-        alert(`Failed to submit offer: ${response.error || 'Unknown error'}`);
+        showToast('error', `Failed to submit offer: ${response.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error creating offer:', error);
-      alert(`Error creating offer: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      showToast('error', `Error creating offer: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

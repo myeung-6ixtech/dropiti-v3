@@ -26,6 +26,13 @@ const GET_OFFER_QUERY = `
       last_action_by
       last_action_at
       last_action_type
+      final_rent_price
+      final_rent_price_currency
+      final_num_leasing_months
+      final_payment_frequency
+      final_move_in_date
+      final_accepted_at
+      final_accepted_by
       created_at
       updated_at
     }
@@ -72,6 +79,13 @@ export async function GET(request: NextRequest) {
         last_action_by: string;
         last_action_at: string;
         last_action_type: string;
+        final_rent_price?: number;
+        final_rent_price_currency?: string;
+        final_num_leasing_months?: number;
+        final_payment_frequency?: string;
+        final_move_in_date?: string;
+        final_accepted_at?: string;
+        final_accepted_by?: string;
         created_at: string;
         updated_at: string;
       };
@@ -109,6 +123,13 @@ export async function GET(request: NextRequest) {
       lastActionBy: offer.last_action_by as 'initiator' | 'recipient',
       lastActionAt: offer.last_action_at,
       lastActionType: offer.last_action_type as 'INITIATOR_CREATED' | 'INITIATOR_EDITED' | 'INITIATOR_CANCELLED' | 'INITIATOR_ACCEPTED' | 'INITIATOR_COUNTERED' | 'INITIATOR_REJECTED' | 'RECIPIENT_CREATED' | 'RECIPIENT_EDITED' | 'RECIPIENT_CANCELLED' | 'RECIPIENT_ACCEPTED' | 'RECIPIENT_COUNTERED' | 'RECIPIENT_REJECTED',
+      finalRentPrice: offer.final_rent_price,
+      finalRentPriceCurrency: offer.final_rent_price_currency,
+      finalNumLeasingMonths: offer.final_num_leasing_months,
+      finalPaymentFrequency: offer.final_payment_frequency,
+      finalMoveInDate: offer.final_move_in_date,
+      finalAcceptedAt: offer.final_accepted_at,
+      finalAcceptedBy: offer.final_accepted_by,
       createdAt: offer.created_at,
       updatedAt: offer.updated_at
     };

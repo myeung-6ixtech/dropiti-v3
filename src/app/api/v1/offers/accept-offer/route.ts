@@ -31,6 +31,13 @@ const ACCEPT_OFFER_MUTATION = `
         last_action_by
         last_action_at
         last_action_type
+        final_rent_price
+        final_rent_price_currency
+        final_num_leasing_months
+        final_payment_frequency
+        final_move_in_date
+        final_accepted_at
+        final_accepted_by
         created_at
         updated_at
       }
@@ -89,6 +96,13 @@ export async function POST(request: NextRequest) {
           last_action_by
           last_action_at
           last_action_type
+          final_rent_price
+          final_rent_price_currency
+          final_num_leasing_months
+          final_payment_frequency
+          final_move_in_date
+          final_accepted_at
+          final_accepted_by
           created_at
           updated_at
         }
@@ -175,6 +189,18 @@ export async function POST(request: NextRequest) {
     // Calculate new offer status
     const newStatus = calculateNewOfferStatus(transformedOffer.offerStatus, actionType);
 
+    // Determine the final accepted terms
+    // If there are counter offer terms, use those; otherwise use the original proposing terms
+    const finalTerms = {
+      finalRentPrice: transformedOffer.currentRentPrice || transformedOffer.proposingRentPrice,
+      finalRentPriceCurrency: transformedOffer.currentRentPriceCurrency || transformedOffer.proposingRentPriceCurrency || 'HKD',
+      finalNumLeasingMonths: transformedOffer.currentNumLeasingMonths || transformedOffer.numLeasingMonths,
+      finalPaymentFrequency: transformedOffer.currentPaymentFrequency || transformedOffer.paymentFrequency,
+      finalMoveInDate: transformedOffer.currentMoveInDate || transformedOffer.moveInDate,
+      finalAcceptedAt: new Date().toISOString(),
+      finalAcceptedBy: isInitiator ? 'initiator' : 'recipient'
+    };
+
     // Prepare the updates
     const updates = {
       offer_status: newStatus,
@@ -182,7 +208,15 @@ export async function POST(request: NextRequest) {
       last_action_by: isInitiator ? 'initiator' : 'recipient',
       last_action_at: new Date().toISOString(),
       last_action_type: actionType,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      // Save the final accepted terms
+      final_rent_price: finalTerms.finalRentPrice,
+      final_rent_price_currency: finalTerms.finalRentPriceCurrency,
+      final_num_leasing_months: finalTerms.finalNumLeasingMonths,
+      final_payment_frequency: finalTerms.finalPaymentFrequency,
+      final_move_in_date: finalTerms.finalMoveInDate,
+      final_accepted_at: finalTerms.finalAcceptedAt,
+      final_accepted_by: finalTerms.finalAcceptedBy
     };
 
     // Update the offer

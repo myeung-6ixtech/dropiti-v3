@@ -89,6 +89,13 @@ export async function POST(request: NextRequest) {
           last_action_by
           last_action_at
           last_action_type
+          final_rent_price
+          final_rent_price_currency
+          final_num_leasing_months
+          final_payment_frequency
+          final_move_in_date
+          final_accepted_at
+          final_accepted_by
           created_at
           updated_at
         }
