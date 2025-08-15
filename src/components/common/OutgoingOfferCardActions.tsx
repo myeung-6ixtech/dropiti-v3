@@ -84,7 +84,7 @@ export default function OutgoingOfferCardActions({
   const handleAcceptOffer = async () => {
     setIsAccepting(true);
     try {
-      await offersAPI.acceptOffer(offer.id, currentUserId);
+      const response = await offersAPI.acceptOffer(offer.id, currentUserId);
       
       // Determine the final accepted terms from the database final_* fields
       const finalTerms = {
@@ -95,10 +95,28 @@ export default function OutgoingOfferCardActions({
         moveInDate: offer.finalMoveInDate || offer.moveInDate
       };
 
-      // Show success toast with final deal details
-      const message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
-        ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
-        : 'Offer accepted successfully!';
+      // Check if there were bulk rejections
+      const bulkRejection = response?.data?.bulkRejection;
+      let message = '';
+
+      if (bulkRejection && bulkRejection.rejectedOffersCount > 0) {
+        // Show comprehensive message about acceptance and bulk rejection
+        const baseMessage = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+          : 'Offer accepted successfully!';
+        
+        const rejectionMessage = ` ${bulkRejection.rejectedOffersCount} other pending offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected.`;
+        
+        message = baseMessage + rejectionMessage;
+        
+        // Show additional info toast about bulk rejection
+        showToast('info', `${bulkRejection.rejectedOffersCount} other offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected for this property.`);
+      } else {
+        // Show standard success message
+        message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+          : 'Offer accepted successfully!';
+      }
       
       showToast('success', message);
       setIsAccepted(true);
@@ -167,58 +185,6 @@ export default function OutgoingOfferCardActions({
   };
 
   // CORRECTED FLOW LOGIC:
-  // For outgoing offers (tenant perspective)
-  if (offer.offerStatus === 'accepted') {
-    return (
-      <div className="mt-4 space-y-3">
-        {/* Final Accepted Terms Display */}
-        <div className="p-4 bg-green-100 border border-green-300 rounded-md">
-          <h4 className="text-green-900 text-sm font-semibold mb-3">
-            🎯 Final Accepted Terms
-          </h4>
-          
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            {/* Rent and Lease Duration */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-xs font-medium">Monthly Rent:</span>
-                <span className="text-green-900 text-sm font-semibold">
-                  {formatCurrency(
-                    offer.finalRentPrice || offer.proposingRentPrice, 
-                    offer.finalRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD'
-                  )}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-xs font-medium">Lease Duration:</span>
-                <span className="text-green-900 text-sm font-semibold">
-                  {offer.finalNumLeasingMonths || offer.numLeasingMonths} month{(offer.finalNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
-                </span>
-              </div>
-            </div>
-            
-            {/* Payment Frequency and Move-in Date */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-xs font-medium">Payment Frequency:</span>
-                <span className="text-green-900 text-sm font-semibold">
-                  {offer.finalPaymentFrequency || offer.paymentFrequency}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-xs font-medium">Move-in Date:</span>
-                <span className="text-green-900 text-sm font-semibold">
-                  {formatDate(offer.finalMoveInDate || offer.moveInDate)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }  
 
   // Rule 1: For pending offers, initiator (tenant) can only withdraw or view property
   if (offer.offerStatus === 'pending') {

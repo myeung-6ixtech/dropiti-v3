@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, MagnifyingGlassIcon, UserIcon, BuildingOfficeIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, MagnifyingGlassIcon, UserIcon, BuildingOfficeIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
+import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
 
 export default function Navigation() {
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuth();
+  const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -66,7 +68,7 @@ export default function Navigation() {
             <div className="flex items-center">
               <Link href="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
                 <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">dropiti</span>
+                <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:inline">dropiti</span>
               </Link>
             </div>
             
@@ -107,13 +109,11 @@ export default function Navigation() {
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
               
-              {/* Loading state for auth button */}
+              {/* Loading state for auth button - simplified skeleton */}
               <div className="flex items-center space-x-3">
+                {/* Skeleton profile photo */}
                 <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse"></div>
-                <div className="text-sm text-gray-700">
-                  <span className="hidden sm:inline">Welcome, </span>
-                  <span className="font-medium text-gray-400 animate-pulse">Loading...</span>
-                </div>
+                {/* Skeleton button */}
                 <div className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm font-medium animate-pulse">
                   <span className="hidden sm:inline">Loading...</span>
                   <span className="sm:hidden">...</span>
@@ -131,9 +131,20 @@ export default function Navigation() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
+            {/* Mobile menu button - only show on mobile and dashboard pages */}
+            {isMobile && pathname.startsWith('/dashboard') && (
+              <button
+                onClick={toggleSidebar}
+                className="mr-3 p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors lg:hidden"
+                aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+              >
+                <Bars3Icon className="h-6 w-6" />
+              </button>
+            )}
+            
             <Link href="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
               <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">dropiti</span>
+              <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:inline">dropiti</span>
             </Link>
           </div>
           

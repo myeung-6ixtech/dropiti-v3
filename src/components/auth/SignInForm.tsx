@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { authClasses, authFormPatterns } from "@/styles/auth";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,53 +50,53 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="auth-form-wrapper">
-      <div className="auth-section-spacing">
-        <Link href="/" className="auth-back-link">
+    <div className={authClasses.formWrapper}>
+      <div className={authClasses.sectionSpacing}>
+        <Link href="/" className={authClasses.backLink}>
           ← Back to dashboard
         </Link>
       </div>
       
       <div>
-        <div className="auth-section-spacing">
-          <h1 className="auth-title">
+        <div className={authClasses.sectionSpacing}>
+          <h1 className={authClasses.title}>
             Sign In
           </h1>
-          <p className="auth-subtitle">
+          <p className={authClasses.subtitle}>
             Enter your email and password to sign in to your account.
           </p>
         </div>
         
         {successMessage && (
-          <div className="auth-success">
+          <div className={authClasses.success}>
             {successMessage}
           </div>
         )}
         
         {error && (
-          <div className="auth-error">
+          <div className={authClasses.error}>
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="space-y-2">
-            <label className="auth-label">
-              Email address <span className="text-red-500">*</span>
+        <form onSubmit={handleSubmit} className={authClasses.form}>
+          <div className={authFormPatterns.field.container}>
+            <label className={authFormPatterns.field.label}>
+              Email address <span className={authFormPatterns.field.required}>*</span>
             </label>
             <input 
               type="email"
               placeholder="Enter your email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="auth-input"
+              className={authFormPatterns.field.input}
               required
             />
           </div>
           
-          <div className="space-y-2">
-            <label className="auth-label">
-              Password <span className="text-red-500">*</span>
+          <div className={authFormPatterns.fieldWithIcon.container}>
+            <label className={authFormPatterns.fieldWithIcon.label}>
+              Password <span className={authFormPatterns.fieldWithIcon.required}>*</span>
             </label>
             <div className="relative">
               <input
@@ -103,13 +104,13 @@ export default function SignInForm() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="auth-input-with-icon"
+                className={authFormPatterns.fieldWithIcon.input}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="auth-input-icon"
+                className={authFormPatterns.fieldWithIcon.icon}
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
@@ -117,18 +118,18 @@ export default function SignInForm() {
           </div>
           
           <div className="flex items-center justify-between">
-            <div className="flex items-center">
+            <div className={authFormPatterns.checkbox.container}>
               <input
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="auth-checkbox"
+                className={authFormPatterns.checkbox.input}
               />
-              <label htmlFor="remember-me" className="auth-checkbox-label">
+              <label htmlFor="remember-me" className={authFormPatterns.checkbox.label}>
                 Remember me
               </label>
             </div>
-            <Link href="/reset-password" className="auth-link-secondary">
+            <Link href="/reset-password" className={authClasses.linkSecondary}>
               Forgot password?
             </Link>
           </div>
@@ -137,17 +138,17 @@ export default function SignInForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="auth-button"
+              className={authClasses.button}
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
 
-        <div className="auth-section-spacing text-center">
-          <p className="auth-text-center">
+        <div className={`${authClasses.sectionSpacing} text-center`}>
+          <p className={authClasses.textCenter}>
             Don&apos;t have an account?{" "}
-            <Link href="/auth/signup" className="auth-link">
+            <Link href="/auth/signup" className={authClasses.link}>
               Sign up
             </Link>
           </p>

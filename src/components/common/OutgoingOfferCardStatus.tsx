@@ -1,24 +1,20 @@
 'use client';
 
-import { useState } from 'react';
 import { Offer } from '@/types/offer';
-import { offersAPI } from '@/lib/api-client';
-import FinalCounterOfferModal2 from './FinalCounterOfferModal2';
+import { offerStatusClasses } from '@/styles/offer-card-status';
 
 interface OutgoingOfferCardStatusProps {
   offer: Offer;
-  currentUserId: string;
-  onOfferStatusChange?: () => void;
+  bulkRejectionInfo?: {
+    rejectedOffersCount: number;
+    rejectedOffers: Array<{ id: string; offerKey: string }>;
+  };
 }
 
 export default function OutgoingOfferCardStatus({
   offer,
-  currentUserId,
-  onOfferStatusChange
+  bulkRejectionInfo
 }: OutgoingOfferCardStatusProps) {
-  const [isFinalCounterModalOpen, setIsFinalCounterModalOpen] = useState(false);
-  const [isSubmittingFinalCounter, setIsSubmittingFinalCounter] = useState(false);
-
   const formatCurrency = (amount: number, currency: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -34,109 +30,106 @@ export default function OutgoingOfferCardStatus({
     });
   };
 
-
-  const handleRejectOffer = async () => {
-    setIsRejecting(true);
-    try {
-      await offersAPI.rejectOffer(offer.id, currentUserId);
-      onOfferStatusChange?.();
-    } catch (error) {
-      console.error('Error rejecting offer:', error);
-      alert('Failed to reject offer. Please try again.');
-    } finally {
-      setIsRejecting(false);
-    }
-  };
-
-  const handleFinalCounterOffer = async (counterData: {
-    rentalPrice: number;
-    leaseDuration: number;
-    paymentFrequency: 'monthly' | 'quarterly' | 'yearly';
-    moveInDate: string;
-    message?: string;
-  }) => {
-    setIsSubmittingFinalCounter(true);
-    try {
-      await offersAPI.counterOffer(offer.id, currentUserId, {
-        rentPrice: counterData.rentalPrice,
-        numLeasingMonths: counterData.leaseDuration,
-        paymentFrequency: counterData.paymentFrequency,
-        moveInDate: counterData.moveInDate,
-        message: counterData.message
-      });
-      onOfferStatusChange?.();
-      setIsFinalCounterModalOpen(false);
-    } catch (error) {
-      console.error('Error submitting final counter offer:', error);
-      alert('Failed to submit final counter offer. Please try again.');
-    } finally {
-      setIsSubmittingFinalCounter(false);
-    }
-  };
-
-
   // For outgoing offers (tenant perspective)
   if (offer.offerStatus === 'accepted') {
     return (
-      <>
-      <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-        <h4 className="text-green-900 text-sm font-semibold mb-3">
-          Final Accepted Terms
-        </h4>
-        <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-sm font-semibold">Monthly Rent:</span>
-                <span className="text-green-800 text-sm font-medium">
+      <div className={offerStatusClasses.statusContainer}>
+        {/* Final Accepted Terms Display */}
+        <div className={offerStatusClasses.finalTermsContainer}>
+          <h4 className={offerStatusClasses.finalTermsHeader}>
+            🎯 Final Accepted Terms
+          </h4>
+          
+          <div className={offerStatusClasses.finalTermsGrid}>
+            {/* Rent and Lease Duration */}
+            <div className={offerStatusClasses.finalTermsColumn}>
+              <div className={offerStatusClasses.finalTermsRow}>
+                <span className={offerStatusClasses.finalTermsLabel}>Monthly Rent:</span>
+                <span className={offerStatusClasses.finalTermsValue}>
                   {formatCurrency(
                     offer.finalRentPrice || offer.proposingRentPrice, 
                     offer.finalRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD'
                   )}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-sm font-semibold">Lease Duration:</span>
-                <span className="text-green-800 text-sm font-medium">
+              
+              <div className={offerStatusClasses.finalTermsRow}>
+                <span className={offerStatusClasses.finalTermsLabel}>Lease Duration:</span>
+                <span className={offerStatusClasses.finalTermsValue}>
                   {offer.finalNumLeasingMonths || offer.numLeasingMonths} month{(offer.finalNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
                 </span>
               </div>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-              <span className="text-green-800 text-sm font-semibold">Payment Frequency:</span>
-                <span className="text-green-800 text-sm font-medium">
+            
+            {/* Payment Frequency and Move-in Date */}
+            <div className={offerStatusClasses.finalTermsColumn}>
+              <div className={offerStatusClasses.finalTermsRow}>
+                <span className={offerStatusClasses.finalTermsLabel}>Payment Frequency:</span>
+                <span className={offerStatusClasses.finalTermsValue}>
                   {offer.finalPaymentFrequency || offer.paymentFrequency}
                 </span>
               </div>
               
-              <div className="flex items-center justify-between">
-                <span className="text-green-800 text-sm font-semibold">Move-in Date:</span>
-                <span className="text-green-800 text-sm font-medium">
+              <div className={offerStatusClasses.finalTermsRow}>
+                <span className={offerStatusClasses.finalTermsLabel}>Move-in Date:</span>
+                <span className={offerStatusClasses.finalTermsValue}>
                   {formatDate(offer.finalMoveInDate || offer.moveInDate)}
                 </span>
               </div>
             </div>
+          </div>
+          
+          {/* Deal Completion Status */}
+          <div className={offerStatusClasses.finalTermsDivider}>
+            <div className={offerStatusClasses.finalTermsStatus}>
+              <span className={offerStatusClasses.finalTermsStatusLabel}>Deal Status:</span>
+              <span className={offerStatusClasses.finalTermsStatusBadge}>
+                ✅ Deal Completed
+              </span>
+            </div>
+          </div>
+          
+          {/* Bulk Rejection Information */}
+          {bulkRejectionInfo && bulkRejectionInfo.rejectedOffersCount > 0 && (
+            <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
+              <div className="flex items-center">
+                <span className="text-orange-600 mr-2">⚠️</span>
+                <span className="text-sm font-medium text-orange-800">
+                  Property Deal Finalized
+                </span>
+              </div>
+              <p className="text-xs text-orange-700 mt-1">
+                {bulkRejectionInfo.rejectedOffersCount} other pending offer{bulkRejectionInfo.rejectedOffersCount === 1 ? '' : 's'} automatically rejected when your offer was accepted.
+              </p>
+            </div>
+          )}
+        </div>
+        
+        {/* Status Message */}
+        <div className={offerStatusClasses.statusMessage}>
+          <p className={offerStatusClasses.statusMessageText}>
+            🎉 Great news! The landlord accepted your offer
+          </p>
+          <p className={offerStatusClasses.statusMessageSubtext}>
+            Contact the landlord to proceed with the rental agreement
+          </p>
+          {offer.finalAcceptedAt && (
+            <p className={offerStatusClasses.statusMessageSubtext}>
+              Accepted on {formatDate(offer.finalAcceptedAt)}
+            </p>
+          )}
         </div>
       </div>
-       <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-        <p className="text-green-800 text-sm font-medium">
-          🎉 Great news! The landlord accepted your offer
-        </p>
-        <p className="text-green-700 text-xs mt-1">
-          Contact the landlord to proceed with the rental agreement
-        </p>
-      </div>
-      </>
     );
   }
 
   if (offer.offerStatus === 'rejected') {
     return (
-      <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-        <p className="text-red-800 text-sm font-medium">
+      <div className={offerStatusClasses.rejected.container}>
+        <p className={offerStatusClasses.rejected.text}>
           😔 The landlord rejected your offer
         </p>
-        <p className="text-red-700 text-xs mt-1">
+        <p className={offerStatusClasses.rejected.subtext}>
           You can search for other properties or try a different offer
         </p>
       </div>
@@ -145,8 +138,8 @@ export default function OutgoingOfferCardStatus({
 
   if (offer.offerStatus === 'withdrawn') {
     return (
-      <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-md">
-        <p className="text-gray-800 text-sm font-medium">
+      <div className={offerStatusClasses.withdrawn.container}>
+        <p className={offerStatusClasses.withdrawn.text}>
           You withdrew this offer
         </p>
       </div>
@@ -157,12 +150,12 @@ export default function OutgoingOfferCardStatus({
     if (offer.lastActionType === 'RECIPIENT_COUNTERED') {
       if (offer.negotiationRound === 1) {
         return (
-          <div className="mt-4 space-y-3">
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
-              <p className="text-blue-800 text-sm font-medium">
-                  The landlord sent you a counter offer
+          <div className={offerStatusClasses.counterContainer}>
+            <div className={offerStatusClasses.counterRecipient.container}>
+              <p className={offerStatusClasses.counterRecipient.text}>
+                The landlord sent you a counter offer
               </p>     
-              <p className="text-blue-700 text-xs mt-1">
+              <p className={offerStatusClasses.counterRecipient.subtext}>
                 Review the terms and decide whether to accept, reject, or counter
               </p>             
             </div>
@@ -172,11 +165,11 @@ export default function OutgoingOfferCardStatus({
     } else if (offer.lastActionType === 'INITIATOR_COUNTERED') {
       if (offer.negotiationRound === 2) {
         return (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-yellow-800 text-sm font-medium">
+          <div className={offerStatusClasses.counterInitiator.container}>
+            <p className={offerStatusClasses.counterInitiator.text}>
               🔄 You sent a final counter offer to the landlord
             </p>
-            <p className="text-yellow-700 text-xs mt-1">
+            <p className={offerStatusClasses.counterInitiator.subtext}>
               Waiting for landlord's final decision...
             </p>
           </div>
@@ -188,11 +181,11 @@ export default function OutgoingOfferCardStatus({
   // Default case for pending offers
   if (offer.offerStatus === 'pending') {
     return (
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-        <p className="text-blue-800 text-sm font-medium">
+      <div className={offerStatusClasses.pending.container}>
+        <p className={offerStatusClasses.pending.text}>
           📋 Your offer is pending landlord review
         </p>
-        <p className="text-blue-700 text-xs mt-1">
+        <p className={offerStatusClasses.pending.subtext}>
           The landlord will review your offer and respond soon
         </p>
       </div>
@@ -202,13 +195,7 @@ export default function OutgoingOfferCardStatus({
   return (
     <>
       {/* Final Counter Offer Modal */}
-      <FinalCounterOfferModal2
-        isOpen={isFinalCounterModalOpen}
-        onClose={() => setIsFinalCounterModalOpen(false)}
-        offer={offer}
-        onSubmit={handleFinalCounterOffer}
-        loading={isSubmittingFinalCounter}
-      />
+      {/* This modal is no longer used for final counter offers */}
     </>
   );
 }

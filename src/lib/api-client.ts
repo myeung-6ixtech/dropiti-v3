@@ -381,6 +381,39 @@ export const offersAPI = {
     }
   },
 
+  // Get review opportunities for a user
+  getReviewOpportunities: async (userId: string) => {
+    try {
+      const response = await apiClient.get('/offers/get-review-opportunities', { 
+        params: { user_id: userId } 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching review opportunities:', error);
+      throw error;
+    }
+  },
+
+  // Create a review
+  createReview: async (reviewData: {
+    offerId: string;
+    offerUuid: string;
+    reviewType: string;
+    rating: number;
+    comment: string;
+    reviewerId: string;
+    reviewedUserId: string;
+    propertyUuid: string;
+  }) => {
+    try {
+      const response = await apiClient.post('/reviews/create-review', reviewData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating review:', error);
+      throw error;
+    }
+  },
+
   // Get negotiation state
   getNegotiationState: async (offerId: string, currentUserId: string) => {
     try {

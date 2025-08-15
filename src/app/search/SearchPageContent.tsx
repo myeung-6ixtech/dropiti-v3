@@ -9,6 +9,7 @@ import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import Footer from '@/components/common/Footer';
 import { Property } from '@/types';
+import { propertyCardClasses } from '@/styles/property-card';
 
 // The API returns data in the Property interface format (already transformed)
 // So we can use the Property interface directly
@@ -229,7 +230,7 @@ export default function SearchPageContent() {
 
             {/* Properties Grid */}
             {filteredProperties.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className={propertyCardClasses.grid.search}>
                 {filteredProperties.map((property) => {    
                   // The API already transforms the data, so we can use it directly
                   // Just ensure we have the property_uuid for navigation

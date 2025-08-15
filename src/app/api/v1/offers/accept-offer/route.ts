@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 import { validateOfferAction, calculateNewOfferStatus, createOfferAction } from '@/lib/offer-negotiation';
+import { REVIEW_CONSTANTS } from '@/constants/review';
 
 const ACCEPT_OFFER_MUTATION = `
   mutation AcceptOffer($offerId: Int!, $updates: real_estate_offer_set_input!) {
@@ -38,7 +39,41 @@ const ACCEPT_OFFER_MUTATION = `
         final_move_in_date
         final_accepted_at
         final_accepted_by
+        review_window_start
+        review_window_end
+        initiator_review_status
+        recipient_review_status
         created_at
+        updated_at
+      }
+    }
+  }
+`;
+
+const REJECT_PENDING_OFFERS_MUTATION = `
+  mutation RejectPendingOffers($propertyUuid: String!, $excludeOfferId: Int!) {
+    update_real_estate_offer(
+      where: { 
+        property_uuid: { _eq: $propertyUuid }
+        id: { _neq: $excludeOfferId }
+        offer_status: { _eq: "pending" }
+        is_active: { _eq: true }
+      }
+      _set: {
+        offer_status: "rejected"
+        is_active: false
+        last_action_by: "system"
+        last_action_at: "now()"
+        last_action_type: "SYSTEM_REJECTED"
+        updated_at: "now()"
+      }
+    ) {
+      affected_rows
+      returning {
+        id
+        offer_key
+        property_uuid
+        offer_status
         updated_at
       }
     }
@@ -55,6 +90,27 @@ const CREATE_OFFER_ACTION_MUTATION = `
       property_uuid
       created_at
       action_data
+    }
+  }
+`;
+
+const GET_PENDING_OFFERS_QUERY = `
+  query GetPendingOffers($propertyUuid: String!, $excludeOfferId: Int!) {
+    real_estate_offer(
+      where: { 
+        property_uuid: { _eq: $propertyUuid }
+        id: { _neq: $excludeOfferId }
+        offer_status: { _eq: "pending" }
+        is_active: { _eq: true }
+      }
+    ) {
+      id
+      offer_key
+      property_uuid
+      initiator_firebase_uid
+      recipient_firebase_uid
+      offer_status
+      created_at
     }
   }
 `;
@@ -201,6 +257,10 @@ export async function POST(request: NextRequest) {
       finalAcceptedBy: isInitiator ? 'initiator' : 'recipient'
     };
 
+    // Calculate review window timestamps
+    const reviewWindowStart = new Date();
+    const reviewWindowEnd = new Date(reviewWindowStart.getTime() + (REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS * 24 * 60 * 60 * 1000));
+
     // Prepare the updates
     const updates = {
       offer_status: newStatus,
@@ -216,7 +276,12 @@ export async function POST(request: NextRequest) {
       final_payment_frequency: finalTerms.finalPaymentFrequency,
       final_move_in_date: finalTerms.finalMoveInDate,
       final_accepted_at: finalTerms.finalAcceptedAt,
-      final_accepted_by: finalTerms.finalAcceptedBy
+      final_accepted_by: finalTerms.finalAcceptedBy,
+      // Set review window timestamps and status
+      review_window_start: reviewWindowStart.toISOString(),
+      review_window_end: reviewWindowEnd.toISOString(),
+      initiator_review_status: 'pending',
+      recipient_review_status: 'pending'
     };
 
     // Update the offer
@@ -242,7 +307,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the action record
+    // Create the action record for the accepted offer
     const actionData = {
       message: `Offer accepted by ${isInitiator ? 'tenant' : 'landlord'}`,
       acceptedAt: new Date().toISOString()
@@ -258,6 +323,83 @@ export async function POST(request: NextRequest) {
       // Don't fail the whole request if action record creation fails
     }
 
+    // Step 2: Reject all other pending offers for the same property
+    let rejectedOffersCount = 0;
+    let rejectedOffers: Array<{ id: string; offerKey: string }> = [];
+
+    try {
+      // First, get all pending offers for the same property
+      const pendingOffersData = await executeMutation(GET_PENDING_OFFERS_QUERY, {
+        propertyUuid: offer.property_uuid,
+        excludeOfferId: offerId
+      }) as {
+        real_estate_offer: Array<{
+          id: string;
+          offer_key: string;
+          property_uuid: string;
+          initiator_firebase_uid: string;
+          recipient_firebase_uid: string;
+          offer_status: string;
+          created_at: string;
+        }>;
+      };
+
+      if (pendingOffersData.real_estate_offer && pendingOffersData.real_estate_offer.length > 0) {
+        // Reject all pending offers
+        const rejectResult = await executeMutation(REJECT_PENDING_OFFERS_MUTATION, {
+          propertyUuid: offer.property_uuid,
+          excludeOfferId: offerId
+        }) as {
+          update_real_estate_offer: {
+            affected_rows: number;
+            returning: Array<{
+              id: string;
+              offer_key: string;
+              property_uuid: string;
+              offer_status: string;
+              updated_at: string;
+            }>;
+          };
+        };
+
+        if (rejectResult.update_real_estate_offer) {
+          rejectedOffersCount = rejectResult.update_real_estate_offer.affected_rows;
+          rejectedOffers = rejectResult.update_real_estate_offer.returning.map(offer => ({
+            id: offer.id,
+            offerKey: offer.offer_key
+          }));
+
+          console.log(`Accept Offer API: Rejected ${rejectedOffersCount} pending offers`);
+
+          // Create action records for all rejected offers
+          for (const rejectedOffer of rejectedOffers) {
+            const rejectedOfferAction = {
+              action: 'SYSTEM_REJECTED',
+              offerId: rejectedOffer.id,
+              offerKey: rejectedOffer.offerKey,
+              propertyUuid: offer.property_uuid,
+              createdAt: new Date().toISOString(),
+              actionData: {
+                message: 'Offer automatically rejected - property deal accepted',
+                rejectedAt: new Date().toISOString(),
+                reason: 'Another offer was accepted for this property'
+              }
+            };
+
+            try {
+              await executeMutation(CREATE_OFFER_ACTION_MUTATION, { action: rejectedOfferAction });
+            } catch (rejectActionError) {
+              console.warn(`Accept Offer API: Failed to create reject action record for offer ${rejectedOffer.id}:`, rejectActionError);
+            }
+          }
+        }
+      }
+    } catch (rejectError) {
+      console.error('Accept Offer API: Error rejecting pending offers:', rejectError);
+      // Don't fail the whole request if bulk rejection fails
+      // The main offer acceptance was successful
+    }
+
     const updatedOffer = updateResult.update_real_estate_offer.returning[0];
 
     return NextResponse.json({
@@ -267,7 +409,11 @@ export async function POST(request: NextRequest) {
         offerKey: updatedOffer.offer_key,
         newStatus: updatedOffer.offer_status,
         updatedAt: updatedOffer.updated_at,
-        action: actionType
+        action: actionType,
+        bulkRejection: {
+          rejectedOffersCount,
+          rejectedOffers
+        }
       },
       message: 'Offer accepted successfully',
     });

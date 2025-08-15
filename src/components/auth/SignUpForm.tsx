@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { usersAPI } from '@/lib/api-client';
+import { authClasses, authFormPatterns } from "@/styles/auth";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -94,61 +95,61 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="auth-form-wrapper">
-      <div className="auth-section-spacing">
-        <Link href="/" className="auth-back-link">
+    <div className={authClasses.formWrapper}>
+      <div className={authClasses.sectionSpacing}>
+        <Link href="/" className={authClasses.backLink}>
           ← Back to dashboard
         </Link>
       </div>
       
       <div>
-        <div className="auth-section-spacing">
-          <h1 className="auth-title">
+        <div className={authClasses.sectionSpacing}>
+          <h1 className={authClasses.title}>
             Create Account
           </h1>
-          <p className="auth-subtitle">
+          <p className={authClasses.subtitle}>
             Sign up to start managing your properties.
           </p>
         </div>
         
         {error && (
-          <div className="auth-error">
+          <div className={authClasses.error}>
             {error}
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="space-y-2">
-            <label className="auth-label">
-              Full Name <span className="text-red-500">*</span>
+        <form onSubmit={handleSubmit} className={authClasses.form}>
+          <div className={authFormPatterns.field.container}>
+            <label className={authFormPatterns.field.label}>
+              Full Name <span className={authFormPatterns.field.required}>*</span>
             </label>
             <input 
               type="text"
               placeholder="Enter your full name" 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="auth-input"
+              className={authFormPatterns.field.input}
               required
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="auth-label">
-              Email address <span className="text-red-500">*</span>
+          <div className={authFormPatterns.field.container}>
+            <label className={authFormPatterns.field.label}>
+              Email address <span className={authFormPatterns.field.required}>*</span>
             </label>
             <input 
               type="email"
               placeholder="Enter your email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="auth-input"
+              className={authFormPatterns.field.input}
               required
             />
           </div>
           
-          <div className="space-y-2">
-            <label className="auth-label">
-              Password <span className="text-red-500">*</span>
+          <div className={authFormPatterns.fieldWithIcon.container}>
+            <label className={authFormPatterns.fieldWithIcon.label}>
+              Password <span className={authFormPatterns.fieldWithIcon.required}>*</span>
             </label>
             <div className="relative">
               <input
@@ -156,22 +157,22 @@ export default function SignUpForm() {
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="auth-input-with-icon"
+                className={authFormPatterns.fieldWithIcon.input}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="auth-input-icon"
+                className={authFormPatterns.fieldWithIcon.icon}
               >
                 {showPassword ? "Hide" : "Show"}
               </button>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="auth-label">
-              Confirm Password <span className="text-red-500">*</span>
+          <div className={authFormPatterns.fieldWithIcon.container}>
+            <label className={authFormPatterns.fieldWithIcon.label}>
+              Confirm Password <span className={authFormPatterns.fieldWithIcon.required}>*</span>
             </label>
             <div className="relative">
               <input
@@ -179,13 +180,13 @@ export default function SignUpForm() {
                 placeholder="Confirm your password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="auth-input-with-icon"
+                className={authFormPatterns.fieldWithIcon.input}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="auth-input-icon"
+                className={authFormPatterns.fieldWithIcon.icon}
               >
                 {showConfirmPassword ? "Hide" : "Show"}
               </button>
@@ -196,17 +197,17 @@ export default function SignUpForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="auth-button"
+              className={authClasses.button}
             >
               {isLoading ? "Creating account..." : "Create account"}
             </button>
           </div>
         </form>
 
-        <div className="auth-section-spacing text-center">
-          <p className="auth-text-center">
+        <div className={`${authClasses.sectionSpacing} text-center`}>
+          <p className={authClasses.textCenter}>
             Already have an account?{" "}
-            <Link href="/auth/signin" className="auth-link">
+            <Link href="/auth/signin" className={authClasses.link}>
               Sign in
             </Link>
           </p>

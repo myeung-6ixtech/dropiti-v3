@@ -29,8 +29,6 @@ interface IncomingOfferCardActionsProps {
   onAcceptOffer?: (offerId: string) => void;
   onRejectOffer?: (offerId: string) => void;
   onCounterOffer?: (offerId: string) => void;
-  onViewCounterOffer?: (offer: { id: string; offerStatus: string; lastActionType?: string; negotiationRound?: number; currentRentPrice?: number; currentRentPriceCurrency?: string; currentNumLeasingMonths?: number; currentPaymentFrequency?: string; currentMoveInDate?: string; proposingRentPrice: number; proposingRentPriceCurrency: string; numLeasingMonths: number; moveInDate: string; paymentFrequency: string; }) => void;
-  respondingToCounter?: boolean;
   currentUserId: string;
   onOfferStatusChange?: () => void;
 }
@@ -40,7 +38,6 @@ export default function IncomingOfferCardActions({
   onAcceptOffer,
   onRejectOffer,
   onCounterOffer,
-  respondingToCounter = false,
   currentUserId,
   onOfferStatusChange
 }: IncomingOfferCardActionsProps) {
@@ -73,7 +70,7 @@ export default function IncomingOfferCardActions({
   const handleAcceptOffer = async () => {
     setIsAccepting(true);
     try {
-      await offersAPI.acceptOffer(offer.id, currentUserId);
+      const response = await offersAPI.acceptOffer(offer.id, currentUserId);
       
       // Determine the final accepted terms from the database final_* fields
       const finalTerms = {
@@ -84,10 +81,28 @@ export default function IncomingOfferCardActions({
         moveInDate: offer.finalMoveInDate || offer.moveInDate
       };
 
-      // Show success toast with final deal details
-      const message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
-        ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
-        : 'Offer accepted successfully!';
+      // Check if there were bulk rejections
+      const bulkRejection = response?.data?.bulkRejection;
+      let message = '';
+
+      if (bulkRejection && bulkRejection.rejectedOffersCount > 0) {
+        // Show comprehensive message about acceptance and bulk rejection
+        const baseMessage = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+          : 'Offer accepted successfully!';
+        
+        const rejectionMessage = ` ${bulkRejection.rejectedOffersCount} other pending offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected.`;
+        
+        message = baseMessage + rejectionMessage;
+        
+        // Show additional info toast about bulk rejection
+        showToast('info', `${bulkRejection.rejectedOffersCount} other offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected for this property.`);
+      } else {
+        // Show standard success message
+        message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+          : 'Offer accepted successfully!';
+      }
       
       showToast('success', message);
       setIsAccepted(true);

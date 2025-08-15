@@ -203,123 +203,6 @@
     @apply text-lg font-semibold text-gray-900 mb-3;
   }
 
-  /* Auth Components (Legacy Support) */
-  .auth-container {
-    @apply flex min-h-screen;
-  }
-
-  .auth-form-section {
-    @apply flex-1 flex flex-col justify-center px-6 py-12 bg-white;
-  }
-
-  .auth-content-section {
-    @apply hidden lg:block flex-1 bg-gray-100;
-  }
-
-  .auth-content-wrapper {
-    @apply flex items-center justify-center h-full px-8;
-  }
-
-  .auth-form-wrapper {
-    @apply w-full max-w-md mx-auto;
-  }
-
-  .auth-title {
-    @apply text-2xl font-bold text-gray-900 mb-2;
-  }
-
-  .auth-subtitle {
-    @apply text-gray-600;
-  }
-
-  .auth-button {
-    @apply bg-black text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm w-full;
-  }
-
-  .auth-button-secondary {
-    @apply bg-white text-black border-2 border-black px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm w-full;
-  }
-
-  .auth-input {
-    @apply form-input;
-  }
-
-  .auth-input-with-icon {
-    @apply form-input pr-12;
-  }
-
-  .auth-input-icon {
-    @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 hover:text-gray-800 transition-colors;
-  }
-
-  .auth-label {
-    @apply form-label;
-  }
-
-  .auth-form {
-    @apply space-y-6;
-  }
-
-  .auth-section-spacing {
-    @apply mb-8;
-  }
-
-  .auth-back-link {
-    @apply text-gray-600 hover:text-gray-900 transition-colors text-sm;
-  }
-
-  .auth-success {
-    @apply bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-green-800;
-  }
-
-  .auth-error {
-    @apply bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-800;
-  }
-
-  .auth-checkbox {
-    @apply h-4 w-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2;
-  }
-
-  .auth-checkbox-label {
-    @apply ml-2 text-sm text-gray-700;
-  }
-
-  .auth-link {
-    @apply text-black font-medium hover:text-gray-800 transition-colors;
-  }
-
-  .auth-link-secondary {
-    @apply text-gray-600 hover:text-gray-800 transition-colors text-sm;
-  }
-
-  .auth-text-center {
-    @apply text-gray-600;
-  }
-
-  .auth-heading {
-    @apply text-3xl font-bold text-gray-900 mb-4;
-  }
-
-  .auth-description {
-    @apply text-lg text-gray-600 mb-8;
-  }
-
-  .auth-content-spacing {
-    @apply space-y-6;
-  }
-
-  .auth-feature-item {
-    @apply flex items-center space-x-3;
-  }
-
-  .auth-feature-dot {
-    @apply w-3 h-3 bg-blue-600 rounded-full;
-  }
-
-  .auth-feature-text {
-    @apply text-gray-700;
-  }
-
   /* Dashboard Components (Legacy Support) */
   .dashboard-container {
     @apply h-screen bg-white flex overflow-hidden;
@@ -340,6 +223,7 @@
   /* Dashboard Sidebar Components */
   .dashboard-sidebar-content {
     @apply h-full flex flex-col;
+    @apply transition-all duration-300 ease-in-out;
   }
 
   .dashboard-sidebar-toggle {
@@ -348,6 +232,11 @@
 
   .dashboard-sidebar-toggle-button {
     @apply p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors;
+    @apply bg-white border border-gray-200 shadow-sm;
+  }
+
+  .dashboard-sidebar-toggle-button:hover {
+    @apply bg-gray-50 border-gray-300;
   }
 
   .dashboard-sidebar-close {
@@ -472,13 +361,50 @@
   /* Dashboard Responsive */
   @media (max-width: 1023px) {
     .dashboard-sidebar {
-      @apply fixed inset-y-0 left-0 z-50 transform transition-transform duration-300 ease-in-out;
+      @apply fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 ease-in-out;
+      @apply w-80 max-w-[85vw];
+      @apply shadow-2xl;
+      @apply bg-white;
+    }
+    
+    .dashboard-sidebar-open {
+      @apply translate-x-0;
+    }
+    
+    .dashboard-sidebar-closed {
+      @apply translate-x-full;
+    }
+    
+    .dashboard-sidebar-content {
+      @apply h-full;
+    }
+    
+    .dashboard-sidebar-toggle {
+      @apply sticky top-0 bg-white z-10;
+    }
+    
+    .dashboard-mobile-backdrop {
+      @apply z-40;
+    }
+    
+    .dashboard-main {
+      @apply z-30;
     }
   }
 
   @media (min-width: 1024px) {
     .dashboard-sidebar {
       @apply relative transform-none;
+      @apply w-64;
+      @apply z-30;
+    }
+    
+    .dashboard-sidebar-open {
+      @apply translate-x-0;
+    }
+    
+    .dashboard-sidebar-closed {
+      @apply -translate-x-full;
     }
   }
 }

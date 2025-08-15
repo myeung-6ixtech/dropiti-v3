@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
       finalPaymentFrequency: offer.final_payment_frequency,
       finalMoveInDate: offer.final_move_in_date,
       finalAcceptedAt: offer.final_accepted_at,
-      finalAcceptedBy: offer.final_accepted_by,
+      finalAcceptedBy: offer.final_accepted_by as 'initiator' | 'recipient' | undefined,
       createdAt: offer.created_at,
       updatedAt: offer.updated_at
     };

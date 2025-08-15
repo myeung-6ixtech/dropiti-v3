@@ -16,6 +16,7 @@ import { ChartTreeMap, PropertyListings } from '@/assets/icons';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useSidebar } from '@/context/SidebarContext';
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { FullScreenLoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -28,9 +29,8 @@ type ViewType = 'tenant' | 'landlord';
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
+  const { sidebarOpen, setSidebarOpen, isMobile } = useSidebar();
   const [activeView, setActiveView] = useState<ViewType>('landlord');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isMobile, setIsMobile] = useState(false);
   const [isViewChanging, setIsViewChanging] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -55,20 +55,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       });
     }
   }, [authUser]);
-
-  // Check if we're on mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth >= 1024) {
-        setSidebarOpen(true);
-      }
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   const handleViewChange = async (newView: ViewType) => {
     if (isViewChanging) return; // Prevent multiple rapid clicks
@@ -131,11 +117,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="dashboard-container">
       {/* Mobile sidebar backdrop */}
       {isMobile && sidebarOpen && (
-        <div className="dashboard-mobile-backdrop">
-          <div 
-            className="dashboard-mobile-backdrop-overlay" 
-            onClick={() => setSidebarOpen(false)} 
-          />
+        <div 
+          className="dashboard-mobile-backdrop"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <div className="dashboard-mobile-backdrop-overlay" />
         </div>
       )}
 
@@ -146,15 +132,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="dashboard-sidebar-content">
           {/* Sidebar toggle button - moved to top of sidebar */}
           <div className="dashboard-sidebar-toggle">
-            {/* Only show toggle button on desktop */}
-            {!isMobile && (
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="dashboard-sidebar-toggle-button"
-              >
+            {/* Show toggle button on both mobile and desktop */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="dashboard-sidebar-toggle-button"
+            >
+              {sidebarOpen ? (
+                <XMarkIcon className="h-5 w-5" />
+              ) : (
                 <Bars3Icon className="h-5 w-5" />
-              </button>
-            )}
+              )}
+            </button>
           </div>
           {/* User info */}
           <div className="dashboard-user-section">
@@ -186,17 +174,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <p className="dashboard-user-email">{user.email}</p>
                 </div>
               </div>
-              
-              {/* Mobile close button */}
-              {isMobile && (
-                <button
-                  onClick={() => setSidebarOpen(false)}
-                  className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  aria-label="Close menu"
-                >
-                  <XMarkIcon className="h-5 w-5 text-gray-600" />
-                </button>
-              )}
             </div>
           </div>
 
@@ -205,7 +182,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <p className="dashboard-view-toggle-title">View Mode</p>
             <div className="dashboard-view-toggle-buttons">
               <button
-                onClick={() => handleViewChange(activeView === 'tenant' ? 'landlord' : 'tenant')}
+                onClick={() => {
+                  handleViewChange(activeView === 'tenant' ? 'landlord' : 'tenant');
+                  // Close sidebar on mobile after view change
+                  if (isMobile) {
+                    setTimeout(() => setSidebarOpen(false), 100);
+                  }
+                }}
                 disabled={isViewChanging}
                 className={`dashboard-view-toggle-button ${isViewChanging ? 'opacity-75 cursor-not-allowed' : ''}`}
                 title={`Switch to ${activeView === 'tenant' ? 'Landlord' : 'Tenant'} View`}
@@ -255,6 +238,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     : 'dashboard-nav-item-inactive'
                 }`}
                 title={!sidebarOpen ? item.name : undefined}
+                onClick={() => isMobile && setSidebarOpen(false)}
               >
                 <item.icon className="h-5 w-5 mr-2" />
                 <span>{item.name}</span>
@@ -275,19 +259,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main content */}
       <div className="dashboard-main">
-        {/* Mobile menu button - always visible on mobile */}
-        {isMobile && (
-          <div className="lg:hidden fixed top-4 left-4 z-50">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="bg-white border border-gray-200 rounded-lg p-2 shadow-lg hover:bg-gray-50 transition-colors"
-              aria-label="Open menu"
-            >
-              <Bars3Icon className="h-6 w-6 text-gray-600" />
-            </button>
-          </div>
-        )}
-
         {/* Page content */}
         <main className="dashboard-content">
           {children}

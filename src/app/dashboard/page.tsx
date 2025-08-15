@@ -16,6 +16,7 @@ import { reviewsAPI } from '@/lib/api-client';
 import { useState, useEffect } from 'react';
 import { Review } from '@/types/review';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import ReviewOpportunities from '@/components/dashboard/ReviewOpportunities';
 
 export default function DashboardPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
@@ -285,6 +286,9 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
+
+          {/* Review Opportunities */}
+          <ReviewOpportunities />
         </div>
       </div>
     </div>
