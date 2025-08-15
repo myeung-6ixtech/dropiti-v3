@@ -424,3 +424,182 @@
   .space-section { margin-bottom: var(--spacing-2xl); }
   .space-component { margin-bottom: var(--spacing-xl); }
 }
+
+  .form-checkbox-label,
+  .form-radio-label {
+    @apply ml-2 block text-sm text-gray-700;
+  }
+
+  /* Form Validation */
+  .form-error {
+    @apply mt-1 text-sm text-red-600;
+  }
+
+  .form-help {
+    @apply mt-1 text-sm text-gray-500;
+  }
+
+  /* ========================================
+     AUTH COMPONENTS
+     ======================================== */
+
+  /* Main Layout */
+  .auth-container {
+    @apply flex min-h-screen;
+  }
+
+  .auth-form-section {
+    @apply flex-1 flex flex-col justify-center px-6 py-12 bg-white;
+  }
+
+  .auth-content-section {
+    @apply hidden lg:block flex-1 bg-gray-100;
+  }
+
+  .auth-content-wrapper {
+    @apply flex items-center justify-center h-full px-8;
+  }
+
+  .auth-form-wrapper {
+    @apply w-full max-w-md mx-auto;
+  }
+
+  /* Typography */
+  .auth-title {
+    @apply text-2xl font-bold text-gray-900 mb-2;
+  }
+
+  .auth-subtitle {
+    @apply text-gray-600;
+  }
+
+  .auth-heading {
+    @apply text-3xl font-bold text-gray-900 mb-4;
+  }
+
+  .auth-description {
+    @apply text-lg text-gray-600 mb-8;
+  }
+
+  .auth-text-center {
+    @apply text-gray-600;
+  }
+
+  /* Buttons */
+  .auth-button {
+    @apply bg-black text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm w-full;
+  }
+
+  .auth-button-secondary {
+    @apply bg-white text-black border-2 border-black px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm w-full;
+  }
+
+  /* Form Elements */
+  .auth-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors;
+  }
+
+  .auth-input-with-icon {
+    @apply w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors;
+  }
+
+  .auth-input-icon {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 hover:text-gray-800 transition-colors;
+  }
+
+  .auth-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  .auth-form {
+    @apply space-y-6;
+  }
+
+  .auth-checkbox {
+    @apply h-4 w-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2;
+  }
+
+  .auth-checkbox-label {
+    @apply ml-2 text-sm text-gray-700;
+  }
+
+  /* Spacing and Layout */
+  .auth-section-spacing {
+    @apply mb-8;
+  }
+
+  .auth-content-spacing {
+    @apply space-y-6;
+  }
+
+  /* Links */
+  .auth-back-link {
+    @apply text-gray-600 hover:text-gray-900 transition-colors text-sm;
+  }
+
+  .auth-link {
+    @apply text-black font-medium hover:text-gray-800 transition-colors;
+  }
+
+  .auth-link-secondary {
+    @apply text-gray-600 hover:text-gray-800 transition-colors text-sm;
+  }
+
+  /* Status Messages */
+  .auth-success {
+    @apply bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-green-800;
+  }
+
+  .auth-error {
+    @apply bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-800;
+  }
+
+  /* Content Features */
+  .auth-feature-item {
+    @apply flex items-center space-x-3;
+  }
+
+  .auth-feature-dot {
+    @apply w-3 h-3 bg-blue-600 rounded-full;
+  }
+
+  .auth-feature-text {
+    @apply text-gray-700;
+  }
+
+  /* Responsive Utilities */
+  .auth-responsive {
+    @apply sm:px-8 md:px-12 lg:px-16;
+  }
+
+  .auth-mobile-optimized {
+    @apply px-4 sm:px-6;
+  }
+
+  /* Loading States */
+  .auth-loading {
+    @apply opacity-75 cursor-not-allowed;
+  }
+
+  .auth-loading-text {
+    @apply text-gray-500;
+  }
+
+  /* Focus States */
+  .auth-focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
+  }
+
+  /* Hover Effects */
+  .auth-hover {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Animation Utilities */
+  .auth-fade-in {
+    @apply opacity-0 animate-pulse;
+  }
+
+  .auth-slide-up {
+    @apply transform translate-y-2 transition-transform duration-300;
+  }
