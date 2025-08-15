@@ -62,14 +62,14 @@ export default function HomePage() {
                 <div className="mt-8 sm:mt-10">
                   <form onSubmit={handleSearch} className="max-w-4xl mx-auto lg:mx-0">
                     <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
-                      {/* Location */}
-                      <div className="flex-1 relative">
+                      {/* Location - Made larger on desktop */}
+                      <div className="flex-1 sm:flex-[2] relative">
                         <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <input
                           type="text"
                           value={searchData.location}
                           onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
-                          placeholder="Enter city, neighborhood..."
+                          placeholder="Enter city, neighborhood, or address..."
                           className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl"
                         />
                       </div>
@@ -108,13 +108,14 @@ export default function HomePage() {
                         />
                       </div>
 
-                      {/* Search Button */}
+                      {/* Search Button - Full width on mobile, fixed width on desktop */}
                       <button
                         type="submit"
-                        className="flex-shrink-0 w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                        className="flex-shrink-0 w-full sm:w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                         disabled={!searchData.location && !searchData.bedrooms && !searchData.maxPrice}
                       >
                         <MagnifyingGlassIcon className="h-6 w-6 text-white" />
+                        <span className="sm:hidden ml-2 text-white font-medium">Search Properties</span>
                       </button>
                     </div>
                     
