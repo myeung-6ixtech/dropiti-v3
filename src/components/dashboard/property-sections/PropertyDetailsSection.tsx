@@ -1,6 +1,6 @@
 'use client';
 
-import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PencilIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 
 interface PropertyDetailsSectionProps {
@@ -44,15 +44,13 @@ export function PropertyDetailsSection({
               onClick={onCancelEdit}
               className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
-              <XMarkIcon className="h-4 w-4" />
               <span>Cancel</span>
             </button>
             <button
               onClick={onSaveEdit}
               disabled={isSaving}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              className="btn-primary"
             >
-              <CheckIcon className="h-4 w-4" />
               <span>{isSaving ? 'Saving...' : 'Save'}</span>
             </button>
           </div>
@@ -143,27 +141,27 @@ export function PropertyDetailsSection({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-sm text-gray-500">Bedrooms</span>
-              <p className="font-medium">{data.unitDetails?.bedrooms || 0}</p>
+              <p className="font-medium text-gray-700">{data.unitDetails?.bedrooms || 0}</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Bathrooms</span>
-              <p className="font-medium">{data.unitDetails?.bathrooms || 0}</p>
+              <p className="font-medium text-gray-700">{data.unitDetails?.bathrooms || 0}</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Gross Area</span>
-              <p className="font-medium">{data.unitDetails?.grossArea || 0} sq ft</p>
+              <p className="font-mediu text-gray-700">{data.unitDetails?.grossArea || 0} sq ft</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Net Area</span>
-              <p className="font-medium">{data.unitDetails?.netArea || 0} sq ft</p>
+              <p className="font-medium text-gray-700">{data.unitDetails?.netArea || 0} sq ft</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Furnished</span>
-              <p className="font-medium capitalize">{data.unitDetails?.furnished || 'Non-furnished'}</p>
+              <p className="font-medium capitalize text-gray-700">{data.unitDetails?.furnished || 'Non-furnished'}</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Pets Allowed</span>
-              <p className="font-medium">{data.unitDetails?.petsAllowed ? 'Yes' : 'No'}</p>
+              <p className="font-medium text-gray-700">{data.unitDetails?.petsAllowed ? 'Yes' : 'No'}</p>
             </div>
           </div>
         </div>

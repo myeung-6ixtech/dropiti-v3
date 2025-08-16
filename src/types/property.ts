@@ -36,6 +36,8 @@ export interface PropertyData {
   
   // Step 6
   photos?: File[];
+  displayImage?: string; // Main display image URL
+  uploadedImages?: string[]; // Array of uploaded image URLs
   
   // Step 7
   rentalDetails?: {

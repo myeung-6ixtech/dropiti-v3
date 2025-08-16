@@ -178,30 +178,7 @@
     @apply bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-300;
   }
 
-  /* Property Card Components */
-  .property-card {
-    @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-300;
-  }
-
-  .property-card-image {
-    @apply aspect-video bg-gray-100 relative overflow-hidden;
-  }
-
-  .property-card-content {
-    @apply p-4;
-  }
-
-  .property-card-title {
-    @apply font-semibold text-gray-900 mb-1 text-lg;
-  }
-
-  .property-card-location {
-    @apply text-sm text-gray-600 mb-2;
-  }
-
-  .property-card-price {
-    @apply text-lg font-semibold text-gray-900 mb-3;
-  }
+  /* Property Card Components - Now centralized in design-system.css */
 
   /* Dashboard Components (Legacy Support) */
   .dashboard-container {

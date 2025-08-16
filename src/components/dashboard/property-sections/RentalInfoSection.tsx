@@ -1,6 +1,6 @@
 'use client';
 
-import { PencilIcon, CurrencyDollarIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { PencilIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 
 interface RentalInfoSectionProps {
@@ -53,13 +53,12 @@ export function RentalInfoSection({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Rental Price (per month)</label>
             <div className="relative">
-              <CurrencyDollarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="number"
                 min="0"
                 value={tempData.rentalDetails?.rentalPrice || 0}
                 onChange={(e) => onUpdateField('rentalDetails', 'rentalPrice', parseInt(e.target.value) || 0)}
-                className="form-input w-full pl-10"
+                className="form-input w-full"
                 placeholder="Enter rental price"
               />
             </div>
@@ -78,22 +77,22 @@ export function RentalInfoSection({
       ) : (
         <div className="space-y-3">
           <div className="flex items-center space-x-3">
-            <CurrencyDollarIcon className="h-5 w-5 text-gray-400" />
             <div>
               <span className="text-sm text-gray-500">Monthly Rent</span>
-              <p className="font-medium text-lg">${data.rentalDetails?.rentalPrice || 0}</p>
+              <p className="font-medium text-gray-700 text-lg">${data.rentalDetails?.rentalPrice || 0}</p>
             </div>
           </div>
-          
-          {data.rentalDetails?.availableDate && (
-            <div className="flex items-center space-x-3">
-              <CalendarIcon className="h-5 w-5 text-gray-400" />
+          <div className="flex items-center space-x-3">
               <div>
                 <span className="text-sm text-gray-500">Available From</span>
-                <p className="font-medium">{new Date(data.rentalDetails.availableDate).toLocaleDateString()}</p>
+                <p className="font-medium text-gray-700">
+                  {data.rentalDetails?.availableDate 
+                    ? new Date(data.rentalDetails.availableDate).toLocaleDateString()
+                    : 'Not specified'
+                  }
+                </p>
               </div>
-            </div>
-          )}
+            </div>        
         </div>
       )}
 

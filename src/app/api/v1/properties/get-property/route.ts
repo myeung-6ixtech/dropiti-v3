@@ -2,34 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_PROPERTY_QUERY = `
-  query GetProperty($id: uuid!) {
-    properties_by_pk(id: $id) {
+  query GetProperty($property_uuid: uuid!) {
+    real_estate_property_listing(where: { property_uuid: { _eq: $property_uuid } }, limit: 1) {
       id
+      property_uuid
       title
       description
-      location
-      price
-      bedrooms
-      bathrooms
-      imageUrl
-      details {
-        type
-        furnished
-        petsAllowed
-        parking
-      }
-      rules
+      address
+      property_type
+      rental_space
+      num_bedroom
+      num_bathroom
+      gross_area_size
+      gross_area_size_unit
+      furnished
+      pets_allowed
       amenities
-      minimumLease
-      availableDate
-      createdAt
-      updatedAt
-      owner {
-        id
-        name
-        email
-        avatar
-      }
+      display_image
+      uploaded_images
+      rental_price
+      rental_price_currency
+      availability_date
+      is_public
+      created_at
+      updated_at
+      landlord_firebase_uid
     }
   }
 `;
@@ -37,50 +34,47 @@ const GET_PROPERTY_QUERY = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const propertyUuid = searchParams.get('property_uuid');
 
-    if (!id) {
+    if (!propertyUuid) {
       return NextResponse.json(
-        { error: 'Property ID is required' },
+        { error: 'Property UUID is required' },
         { status: 400 }
       );
     }
 
-    const data = await executeQuery(GET_PROPERTY_QUERY, { id });
+    const data = await executeQuery(GET_PROPERTY_QUERY, { property_uuid: propertyUuid });
 
     // Type assertion for the response data
     const typedData = data as {
-      properties_by_pk: {
-        id: string;
+      real_estate_property_listing: {
+        id: number;
+        property_uuid: string;
         title: string;
         description: string;
-        location: string;
-        price: number;
-        bedrooms: number;
-        bathrooms: number;
-        imageUrl: string;
-        details: {
-          type: string;
-          furnished: string;
-          petsAllowed: boolean;
-          parking: boolean;
-        };
-        rules: string[];
+        address: string;
+        property_type: string;
+        rental_space: string;
+        num_bedroom: number;
+        num_bathroom: number;
+        gross_area_size: number;
+        gross_area_size_unit: string;
+        furnished: boolean;
+        pets_allowed: boolean;
         amenities: string[];
-        minimumLease: number;
-        availableDate: string | null;
-        createdAt: string;
-        updatedAt: string;
-        owner: {
-          id: string;
-          name: string;
-          email: string;
-          avatar: string;
-        };
-      } | null;
+        display_image: string;
+        uploaded_images: string[];
+        rental_price: number;
+        rental_price_currency: string;
+        availability_date: string | null;
+        is_public: boolean;
+        created_at: string;
+        updated_at: string;
+        landlord_firebase_uid: string;
+      }[];
     };
 
-    if (!typedData.properties_by_pk) {
+    if (!typedData.real_estate_property_listing || typedData.real_estate_property_listing.length === 0) {
       return NextResponse.json(
         { error: 'Property not found' },
         { status: 404 }
@@ -89,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: typedData.properties_by_pk,
+      data: typedData.real_estate_property_listing[0],
     });
   } catch (error) {
     console.error('Get property error:', error);

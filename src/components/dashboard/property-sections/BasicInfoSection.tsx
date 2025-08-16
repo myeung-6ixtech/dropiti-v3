@@ -73,7 +73,6 @@ export function BasicInfoSection({
             >
               <option value="">Select property type</option>
               <option value="residential">Residential</option>
-              <option value="commercial">Commercial</option>
             </select>
           </div>
 
@@ -149,26 +148,26 @@ export function BasicInfoSection({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <span className="text-sm text-gray-500">Property Type</span>
-              <p className="font-medium">{data.propertyType || 'Not specified'}</p>
+              <p className="font-medium capitalize text-gray-700">{data.propertyType || 'Not specified'}</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Residential Type</span>
-              <p className="font-medium">{data.residentialType || 'Not specified'}</p>
+              <p className="font-medium capitalize text-gray-700">{data.residentialType || 'Not specified'}</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Rental Space</span>
-              <p className="font-medium">{data.rentalSpace || 'Not specified'}</p>
+              <p className="font-medium capitalize text-gray-700">{data.rentalSpace || 'Not specified'}</p>
             </div>
             <div>
               <span className="text-sm text-gray-500">Listing Name</span>
-              <p className="font-medium">{data.rentalDetails?.listingName || 'Not specified'}</p>
+              <p className="font-medium capitalize text-gray-700">{data.rentalDetails?.listingName || 'Not specified'}</p>
             </div>
           </div>
           
           {data.rentalDetails?.listingDescription && (
             <div>
               <span className="text-sm text-gray-500">Description</span>
-              <p className="text-gray-700 mt-1">{data.rentalDetails.listingDescription}</p>
+              <p className="font-medium text-gray-700 mt-1">{data.rentalDetails.listingDescription}</p>
             </div>
           )}
         </div>

@@ -61,8 +61,8 @@ export async function POST(request: NextRequest) {
       rental_price_currency: 'HKD', // Set default currency to HKD
       num_bedroom: parseInt(propertyData.bedrooms),
       num_bathroom: parseInt(propertyData.bathrooms),
-      display_image: propertyData.imageUrl || '',
-      uploaded_images: propertyData.imageUrl ? [propertyData.imageUrl] : [],
+      display_image: propertyData.photos?.[0] || propertyData.imageUrl || '',
+      uploaded_images: propertyData.photos || (propertyData.imageUrl ? [propertyData.imageUrl] : []),
       property_type: propertyData.details?.propertyType || 'residential',
       rental_space: propertyData.details?.rentalSpace || 'entire',
       furnished: propertyData.details?.furnished || 'non-furnished',

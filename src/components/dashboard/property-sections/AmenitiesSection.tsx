@@ -2,6 +2,8 @@
 
 import { PencilIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
+import { getAllAmenities } from '@/constants/amenities';
+import { getAmenityIconByName } from '@/constants/amenity-icons';
 
 interface AmenitiesSectionProps {
   data: PropertyData;
@@ -14,11 +16,6 @@ interface AmenitiesSectionProps {
   errors: Record<string, string>;
   isSaving: boolean;
 }
-
-const availableAmenities = [
-  'WiFi', 'Air Conditioning', 'Heating', 'Dishwasher', 'Washing Machine',
-  'Dryer', 'Parking', 'Gym', 'Pool', 'Security System', 'Elevator'
-];
 
 export function AmenitiesSection({
   data,
@@ -37,6 +34,15 @@ export function AmenitiesSection({
       ? currentAmenities.filter(a => a !== amenity)
       : [...currentAmenities, amenity];
     onUpdateField('amenities', 'amenities', newAmenities);
+  };
+
+  const renderAmenityIcon = (amenity: string) => {
+    const IconComponent = getAmenityIconByName(amenity);
+    if (IconComponent) {
+      return <IconComponent className="h-5 w-5 text-gray-600" />;
+    }
+    // Fallback to a generic icon if no specific icon is found
+    return <div className="h-5 w-5 bg-gray-400 rounded-full flex-shrink-0" />;
   };
 
   return (
@@ -64,16 +70,16 @@ export function AmenitiesSection({
       {isEditing ? (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            {availableAmenities.map((amenity) => (
-              <div key={amenity} className="flex items-center space-x-3">
+            {getAllAmenities().map((amenity) => (
+              <div key={amenity.id} className="flex items-center space-x-3">
                 <input
                   type="checkbox"
-                  id={amenity}
-                  checked={(tempData.amenities || []).includes(amenity)}
-                  onChange={() => handleAmenityToggle(amenity)}
+                  id={amenity.id}
+                  checked={(tempData.amenities || []).includes(amenity.name)}
+                  onChange={() => handleAmenityToggle(amenity.name)}
                   className="form-checkbox"
                 />
-                <label htmlFor={amenity} className="text-gray-700">{amenity}</label>
+                <label htmlFor={amenity.id} className="text-gray-700">{amenity.name}</label>
               </div>
             ))}
           </div>
@@ -82,8 +88,8 @@ export function AmenitiesSection({
         <div className="grid grid-cols-2 gap-4">
           {data.amenities?.map((amenity) => (
             <div key={amenity} className="flex items-center space-x-3">
-              <div className="h-5 w-5 bg-blue-600 rounded-full flex-shrink-0" />
-              <span className="text-gray-700">{amenity}</span>
+              {renderAmenityIcon(amenity)}
+              <span className="capitalize text-gray-700">{amenity}</span>
             </div>
           ))}
         </div>

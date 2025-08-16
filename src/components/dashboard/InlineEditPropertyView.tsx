@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { propertiesAPI } from '@/lib/api-client';
 import { PropertyData } from '@/types/property';
@@ -20,6 +20,7 @@ interface InlineEditPropertyViewProps {
 
 export default function InlineEditPropertyView({ propertyId, onSave, onCancel }: InlineEditPropertyViewProps) {
   const [propertyData, setPropertyData] = useState<PropertyData>({});
+  const propertyDataRef = useRef<PropertyData>({});
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,6 +37,7 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
       if (response.success && response.data?.property) {
         const transformedData = transformApiDataToPropertyData(response.data.property);
         setPropertyData(transformedData);
+        propertyDataRef.current = transformedData; // Initialize ref
         setTempData(transformedData);
         setOriginalData(transformedData);
       }
@@ -83,6 +85,8 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
       },
       amenities: apiProperty.amenities as string[] || [],
       photos: [], // Initialize as empty array since we can't convert strings to Files
+      displayImage: apiProperty.display_image as string || '',
+      uploadedImages: apiProperty.uploaded_images as string[] || [],
       rentalDetails: {
         listingName: apiProperty.title as string || '',
         listingDescription: apiProperty.description as string || '',
@@ -105,18 +109,45 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
   };
 
   const saveSection = async (section: string) => {
-    try {
+    try {      
+      // If this is the photos section, skip API call (PhotosSection handles it)
+      if (section === 'photos') {
+        console.log('InlineEditPropertyView: Photos section - skipping API call (handled by PhotosSection)');
+        setEditingSection(null);
+        setErrors({});
+        return;
+      }
+      
       setIsSaving(true);
       
-      // Update the main property data
-      const updatedData = { ...propertyData, ...tempData };
+      console.log('InlineEditPropertyView: saveSection - Current propertyData:', propertyData);
+      console.log('InlineEditPropertyView: saveSection - Current tempData:', tempData);
+      
+      // Small delay to ensure all state updates have been processed
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Use ref to ensure we have the latest data
+      const currentPropertyData = propertyDataRef.current;
+      const updatedData = { ...currentPropertyData, ...tempData };
+      console.log('InlineEditPropertyView: Updated data:', updatedData);
+      console.log('InlineEditPropertyView: Updated data.uploadedImages:', updatedData.uploadedImages);
+      console.log('InlineEditPropertyView: Updated data.displayImage:', updatedData.displayImage);
       setPropertyData(updatedData);
       
       // Transform back to API format and save
       const apiData = transformPropertyDataToApi(updatedData);
+      console.log('InlineEditPropertyView: API data to send:', apiData);
+      console.log('InlineEditPropertyView: API data.uploaded_images:', apiData.uploaded_images);
+      console.log('InlineEditPropertyView: API data.display_image:', apiData.display_image);
+      
       const response = await propertiesAPI.updateProperty(propertyId, apiData);
+      console.log('InlineEditPropertyView: API response:', response);
       
       if (response.success) {
+        // IMPORTANT: Update propertyData BEFORE changing editing state
+        console.log('InlineEditPropertyView: Setting propertyData to:', updatedData);
+        setPropertyData(updatedData);  // Keep this one
+        console.log('InlineEditPropertyView: Setting editingSection to null');
         setEditingSection(null);
         setErrors({});
         setOriginalData(updatedData);
@@ -133,34 +164,38 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
   };
 
   const transformPropertyDataToApi = (propertyData: PropertyData) => {
+    console.log('InlineEditPropertyView: transformPropertyDataToApi input:', propertyData);
+    console.log('InlineEditPropertyView: transformPropertyDataToApi input.uploadedImages:', propertyData.uploadedImages);
+    console.log('InlineEditPropertyView: transformPropertyDataToApi input.displayImage:', propertyData.displayImage);
+    
     // Transform PropertyData back to API format
-    return {
+    const apiData = {
       title: propertyData.rentalDetails?.listingName || 'Property Listing',
       description: propertyData.rentalDetails?.listingDescription || 'Property description',
-      location: buildLocationString(propertyData.address),
-      price: propertyData.rentalDetails?.rentalPrice || 0,
-      bedrooms: propertyData.unitDetails?.bedrooms || 0,
-      bathrooms: propertyData.unitDetails?.bathrooms || 0,
-      details: {
-        propertyType: propertyData.propertyType,
-        residentialType: propertyData.residentialType,
-        rentalSpace: propertyData.rentalSpace,
-        unit: propertyData.address?.unit,
-        floor: propertyData.address?.floor,
-        block: propertyData.address?.block,
-        buildingName: propertyData.address?.buildingName,
-        grossArea: propertyData.unitDetails?.grossArea,
-        netArea: propertyData.unitDetails?.netArea,
-        furnished: propertyData.unitDetails?.furnished,
-        petsAllowed: propertyData.unitDetails?.petsAllowed,
-        photoUrls: propertyData.photos,
-      },
+      address: buildLocationString(propertyData.address),
+      property_type: propertyData.propertyType,
+      rental_space: propertyData.rentalSpace,
+      num_bedroom: propertyData.unitDetails?.bedrooms || 0,
+      num_bathroom: propertyData.unitDetails?.bathrooms || 0,
+      gross_area_size: propertyData.unitDetails?.grossArea || 0,
+      gross_area_size_unit: 'sqft',
+      furnished: propertyData.unitDetails?.furnished || 'non-furnished',
+      pets_allowed: propertyData.unitDetails?.petsAllowed || false,
       amenities: propertyData.amenities || [],
-      minimumLease: 12,
-      availableDate: propertyData.rentalDetails?.availableDate 
+      rental_price: propertyData.rentalDetails?.rentalPrice || 0,
+      rental_price_currency: 'HKD',
+      availability_date: propertyData.rentalDetails?.availableDate 
         ? new Date(propertyData.rentalDetails.availableDate).toISOString()
         : null,
+      is_public: true,
+      display_image: propertyData.displayImage || '',
+      uploaded_images: propertyData.uploadedImages || [],
+      // Also include photos field for backward compatibility
+      photos: propertyData.uploadedImages || [],
     };
+    
+    console.log('InlineEditPropertyView: transformPropertyDataToApi output:', apiData);
+    return apiData;
   };
 
   const buildLocationString = (address: PropertyData['address']) => {
@@ -176,18 +211,49 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
   };
 
   const updateTempField = (section: string, field: string, value: unknown) => {
+    console.log('InlineEditPropertyView: updateTempField called with:', { section, field, value });
+    
     setTempData(prev => {
+      console.log('InlineEditPropertyView: setTempData prev state:', prev);
+      // If section is empty, this is a top-level field update
+      if (!section) {
+        const newState = {
+          ...prev,
+          [field]: value
+        };
+        console.log('InlineEditPropertyView: setTempData new state:', newState);
+        return newState;
+      }
+      
+      // Otherwise, this is a section-based field update
       const currentSection = prev[section as keyof PropertyData];
       const sectionData = typeof currentSection === 'object' && currentSection !== null ? currentSection : {};
       
-      return {
+      const newState = {
         ...prev,
         [section]: {
           ...sectionData,
           [field]: value
         }
       };
+      console.log('InlineEditPropertyView: setTempData new state (section):', newState);
+      return newState;
     });
+    
+    // ALSO update the main propertyData for immediate persistence
+    if (!section) {
+      console.log('InlineEditPropertyView: Updating main propertyData for field:', field, 'with value:', value);
+      setPropertyData(prev => {
+        const newState = {
+          ...prev,
+          [field]: value
+        };
+        console.log('InlineEditPropertyView: setPropertyData new state:', newState);
+        // Also update the ref to keep it in sync
+        propertyDataRef.current = newState;
+        return newState;
+      });
+    }
   };
 
   if (isLoading) {
@@ -243,6 +309,26 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
       {/* Property Display with Inline Editing */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-6">
+          {/* Photos Section */}
+          <PhotosSection
+            data={editingSection === 'photos' ? tempData : propertyData}
+            isEditing={editingSection === 'photos'}
+            onStartEdit={() => startEditing('photos')}
+            onCancelEdit={cancelEditing}
+            onSaveEdit={() => saveSection('photos')}
+            onUpdateField={updateTempField}
+            errors={errors}
+            isSaving={isSaving}
+            propertyId={propertyId}
+            onPhotoSaveSuccess={() => {
+              console.log('Photos saved successfully');
+              // Optionally refresh data or show success message
+            }}
+            onPhotoSaveError={(error) => {
+              console.error('Photo save error:', error);
+              setErrors({ photos: error });
+            }}
+          />
           {/* Basic Information Section */}
           <BasicInfoSection
             data={propertyData}
@@ -303,19 +389,6 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
             onStartEdit={() => startEditing('rental')}
             onCancelEdit={cancelEditing}
             onSaveEdit={() => saveSection('rental')}
-            onUpdateField={updateTempField}
-            errors={errors}
-            isSaving={isSaving}
-          />
-
-          {/* Photos Section */}
-          <PhotosSection
-            data={propertyData}
-            tempData={tempData}
-            isEditing={editingSection === 'photos'}
-            onStartEdit={() => startEditing('photos')}
-            onCancelEdit={cancelEditing}
-            onSaveEdit={() => saveSection('photos')}
             onUpdateField={updateTempField}
             errors={errors}
             isSaving={isSaving}

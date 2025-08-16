@@ -397,8 +397,8 @@ export const propertyPhotoService = {
       errors.push('At least one photo is required');
     }
     
-    if (files.length > 20) {
-      errors.push('Maximum 20 photos allowed');
+    if (files.length > 10) {
+      errors.push('Maximum 10 photos allowed');
     }
     
     for (const file of files) {

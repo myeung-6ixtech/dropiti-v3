@@ -158,16 +158,23 @@ export const propertiesAPI = {
   updateProperty: async (id: string, updates: {
     title?: string;
     description?: string;
-    location?: string;
-    price?: number;
-    bedrooms?: number;
-    bathrooms?: number;
-    imageUrl?: string;
-    details?: Record<string, unknown>;
-    rules?: string[];
+    address?: string;
+    property_type?: string;
+    rental_space?: string;
+    num_bedroom?: number;
+    num_bathroom?: number;
+    gross_area_size?: number;
+    gross_area_size_unit?: string;
+    furnished?: string;
+    pets_allowed?: boolean;
     amenities?: string[];
-    minimumLease?: number;
-    availableDate?: string | null;
+    display_image?: string;
+    uploaded_images?: string[];
+    rental_price?: number;
+    rental_price_currency?: string;
+    availability_date?: string | null;
+    is_public?: boolean;
+    photos?: string[]; // For backward compatibility
   }) => {
     const response = await apiClient.put('/properties/update-property', { id, updates });
     return response.data;

@@ -49,12 +49,13 @@ export default function EditPropertyPage() {
   }, [params.id, fetchProperty]);
 
   const handleSave = () => {
-    // Property has been saved successfully
-    router.push('/dashboard/properties');
+    // Property has been saved successfully - stay on edit page
+    // No redirect needed - user can continue editing
   };
 
   const handleCancel = () => {
-    router.push('/dashboard/properties');
+    // Cancel editing - stay on edit page
+    // No redirect needed - user can continue editing
   };
 
   if (isLoading) {

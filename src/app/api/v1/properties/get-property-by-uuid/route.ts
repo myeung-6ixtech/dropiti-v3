@@ -226,6 +226,8 @@ export async function GET(request: NextRequest) {
         bedrooms: property.num_bedroom || 0,
         bathrooms: property.num_bathroom || 0,
         image_url: property.display_image || (property.uploaded_images && property.uploaded_images.length > 0 ? property.uploaded_images[0] : ''),
+        display_image: property.display_image || '',
+        uploaded_images: property.uploaded_images || [],
         available: property.is_public || false,
         created_at: property.created_at,
         updated_at: property.created_at, // Using created_at as fallback

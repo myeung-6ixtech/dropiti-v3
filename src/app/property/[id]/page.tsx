@@ -7,34 +7,16 @@ import { propertiesAPI, offersAPI } from '@/lib/api-client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { 
-  MapPinIcon, 
   StarIcon,
   HeartIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
-import {
-  Wifi,
-  AirConditioner,
-  Lightning,
-  Oven,
-  WashingMachine,
-  ParkingSign,
-  Gym,
-  SwimmingPool,
-  SecurityGuard,
-  Elevator,
-  TV,
-  Balcony,
-  Home,
-  Clean,
-  Bed,
-  Bathtub,
-  Clock
-} from '@/assets/icons';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import PropertyPricingCard from '@/components/common/PropertyPricingCard';
 import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
+import { getAmenityIcon, getAmenityDisplayName } from '@/constants/amenity-icons';
+import { Bed, Bathtub, Clock } from '@/assets/icons';
 
 interface PropertyData {
   id: string;
@@ -310,12 +292,12 @@ export default function PropertyDetailPage() {
       const response = await offersAPI.createOffer({
         propertyId: propertyData.property.property_uuid,
         initiatorFirebaseUid: authUser.id,
-        recipientFirebaseUid: propertyData.landlord.firebase_uid,
+        recipientFirebaseUid: propertyData.landlord?.firebase_uid || '',
         proposingRentPrice: offerData.rentalPrice,
         numLeasingMonths: offerData.leaseDuration,
         paymentFrequency: offerData.paymentFrequency,
         moveInDate: offerData.moveInDate,
-        currency: 'HKD', // Default to HKD
+        currency: 'HKD'
       });
 
       if (response.success) {
@@ -337,62 +319,6 @@ export default function PropertyDetailPage() {
       showToast('error', `Error creating offer: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
-
-  const getAmenityIcon = (amenity: string) => {
-    const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-      'wifi': Wifi,
-      'air-conditioning': AirConditioner,
-      'heating': Lightning,
-      'tv': TV,
-      'dishwasher': Oven,
-      'washer': WashingMachine,
-      'dryer': WashingMachine,
-      'parking': ParkingSign,
-      'gym': Gym,
-      'pool': SwimmingPool,
-      'security': SecurityGuard,
-      'elevator': Elevator,
-      'balcony': Balcony,
-      'workspace': Home,
-      'phone': Home,
-      'furnished': Home,
-      'utilities-included': Lightning,
-      'cleaning': Clean
-    };
-    
-    return iconMap[amenity] || Home; // Use Home icon as default fallback
-  };
-
-  const getAmenityDisplayName = (amenityId: string) => {
-    const amenityMap: { [key: string]: string } = {
-      'wifi': 'WiFi',
-      'air-conditioning': 'Air Conditioning',
-      'heating': 'Heating',
-      'tv': 'TV',
-      'dishwasher': 'Dishwasher',
-      'washer': 'Washing Machine',
-      'dryer': 'Dryer',
-      'parking': 'Parking',
-      'gym': 'Gym',
-      'pool': 'Swimming Pool',
-      'security': 'Security System',
-      'elevator': 'Elevator',
-      'balcony': 'Balcony',
-      'workspace': 'Workspace',
-      'phone': 'Phone',
-      'furnished': 'Furnished',
-      'utilities-included': 'Utilities Included',
-      'cleaning': 'Cleaning Service'
-    };
-    
-    return amenityMap[amenityId] || amenityId;
-  };
-
-
-
-
-
-
 
   if (isLoading) {
     return (
@@ -544,7 +470,6 @@ export default function PropertyDetailPage() {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h1>
                   <div className="flex items-center text-gray-600">
-                    <MapPinIcon className="h-4 w-4 mr-1" />
                     <span>{property.location}</span>
                   </div>
                 </div>
@@ -612,23 +537,23 @@ export default function PropertyDetailPage() {
 
             {/* Property Details */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Property details</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Property Details</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-gray-500 text-sm">Property type</span>
-                  <p className="font-medium">{String(property.details?.type || 'Unknown')}</p>
+                  <span className="text-gray-500 text-sm">Property Type</span>
+                  <p className="text-gray-500 font-medium">{String(property.details?.type || 'Unknown')}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Furnished</span>
-                  <p className="font-medium">{String(property.details?.furnished || 'Unknown')}</p>
+                  <p className="text-gray-500 font-medium">{String(property.details?.furnished || 'Unknown')}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500 text-sm">Pets allowed</span>
-                  <p className="font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
+                  <span className="text-gray-500 text-sm">Pets Allowed</span>
+                  <p className="text-gray-500 font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
                   <span className="text-gray-500 text-sm">Parking</span>
-                  <p className="font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
+                  <p className="text-gray-500 font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
                 </div>
               </div>
             </div>

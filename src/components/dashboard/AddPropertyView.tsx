@@ -103,7 +103,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
       // Prepare property data with photo URLs
       const propertyDataWithPhotos: PropertyDataForAPI = {
         ...propertyData,
-        photos: photoUrls, // Replace File objects with S3 URLs
+        photos: photoUrls, // Array of S3 URLs - this is what the API now expects
       };
       
       console.log('Submitting property data:', propertyDataWithPhotos);

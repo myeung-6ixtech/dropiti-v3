@@ -1,23 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Wifi,
-  AirConditioner,
-  TV,
-  WashingMachine,
-  CarPark,
-  Gym,
-  SwimmingPool,
-  SecurityGuard,
-  Elevator,
-  Balcony,
-  Table,
-  Chat,
-  Home,
-  Lightning,
-  Clean
-} from '@/assets/icons';
+import { getAllAmenities, getAmenitiesByCategory, AMENITY_CATEGORIES } from '@/constants/amenities';
+import { getAmenityIconByName } from '@/constants/amenity-icons';
 
 interface Step5AmenitiesProps {
   data?: {
@@ -25,119 +10,6 @@ interface Step5AmenitiesProps {
   };
   onUpdate: (data: { amenities?: string[] }) => void;
 }
-
-const amenities = [
-  {
-    id: 'wifi',
-    name: 'WiFi',
-    icon: Wifi,
-    category: 'Internet & Technology'
-  },
-  {
-    id: 'air-conditioning',
-    name: 'Air Conditioning',
-    icon: AirConditioner,
-    category: 'Climate Control'
-  },
-  {
-    id: 'heating',
-    name: 'Heating',
-    icon: Lightning,
-    category: 'Climate Control'
-  },
-  {
-    id: 'tv',
-    name: 'TV',
-    icon: TV,
-    category: 'Entertainment'
-  },
-  {
-    id: 'dishwasher',
-    name: 'Dishwasher',
-    icon: Clean,
-    category: 'Kitchen'
-  },
-  {
-    id: 'washer',
-    name: 'Washing Machine',
-    icon: WashingMachine,
-    category: 'Laundry'
-  },
-  {
-    id: 'dryer',
-    name: 'Dryer',
-    icon: WashingMachine,
-    category: 'Laundry'
-  },
-  {
-    id: 'parking',
-    name: 'Parking',
-    icon: CarPark,
-    category: 'Transportation'
-  },
-  {
-    id: 'gym',
-    name: 'Gym',
-    icon: Gym,
-    category: 'Fitness'
-  },
-  {
-    id: 'pool',
-    name: 'Swimming Pool',
-    icon: SwimmingPool,
-    category: 'Recreation'
-  },
-  {
-    id: 'security',
-    name: 'Security System',
-    icon: SecurityGuard,
-    category: 'Safety'
-  },
-  {
-    id: 'elevator',
-    name: 'Elevator',
-    icon: Elevator,
-    category: 'Accessibility'
-  },
-  {
-    id: 'balcony',
-    name: 'Balcony',
-    icon: Balcony,
-    category: 'Outdoor'
-  },
-  {
-    id: 'workspace',
-    name: 'Workspace',
-    icon: Table,
-    category: 'Work'
-  },
-  {
-    id: 'phone',
-    name: 'Phone',
-    icon: Chat,
-    category: 'Communication'
-  },
-  {
-    id: 'furnished',
-    name: 'Furnished',
-    icon: Home,
-    category: 'Furnishing'
-  },
-  {
-    id: 'utilities-included',
-    name: 'Utilities Included',
-    icon: Lightning,
-    category: 'Utilities'
-  },
-  {
-    id: 'cleaning',
-    name: 'Cleaning Service',
-    icon: Clean,
-    category: 'Services'
-  }
-];
-
-
 
 export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(data?.amenities || []);
@@ -153,8 +25,8 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
   };
 
   const filteredAmenities = selectedCategory === 'All' || selectedCategory === null
-    ? amenities
-    : amenities.filter(amenity => amenity.category === selectedCategory);
+    ? getAllAmenities()
+    : getAmenitiesByCategory(selectedCategory as keyof typeof AMENITY_CATEGORIES);
 
   return (
     <div className="space-y-8">
@@ -170,7 +42,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
         <div className="mb-6">
           <h4 className="font-medium text-gray-900 text-base mb-3">Filter by Category</h4>
           <div className="flex flex-wrap gap-2">
-            {['All', 'Internet & Technology', 'Climate Control', 'Entertainment', 'Kitchen', 'Laundry', 'Transportation', 'Fitness', 'Recreation', 'Safety', 'Accessibility', 'Outdoor', 'Furniture', 'Other'].map((category) => (
+            {['All', ...Object.keys(AMENITY_CATEGORIES)].map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category === 'All' ? null : category)}
@@ -187,92 +59,96 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
         </div>
 
         {/* Amenities Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-          {filteredAmenities.map((amenity) => (
-            <button
-              key={amenity.id}
-              onClick={() => handleAmenityToggle(amenity.id)}
-              className={`relative p-4 border-2 rounded-lg text-center transition-all duration-200 ${
-                selectedAmenities.includes(amenity.id)
-                  ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600 ring-opacity-20'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
-              }`}
-            >
-              <div className="flex flex-col items-center space-y-2">
-                <div className={`p-2 rounded-lg ${
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {filteredAmenities.map((amenity) => (
+              <div
+                key={amenity.id}
+                className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                   selectedAmenities.includes(amenity.id)
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  <amenity.icon 
-                    className={`w-6 h-6 ${
-                      selectedAmenities.includes(amenity.id)
-                        ? 'text-white'
-                        : 'text-gray-600'
-                    }`}
-                  />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 text-sm">{amenity.name}</h4>
-                  <p className="text-xs text-gray-500">{amenity.category}</p>
-                </div>
-              </div>
-              
-              {selectedAmenities.includes(amenity.id) && (
-                <div className="absolute top-2 right-2">
-                  <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center">
-                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => handleAmenityToggle(amenity.id)}
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedAmenities.includes(amenity.id)}
+                  onChange={() => handleAmenityToggle(amenity.id)}
+                  className="sr-only"
+                />
+                
+                <div className="flex flex-col items-center space-y-3">
+                  <div className={`p-3 rounded-full ${
+                    selectedAmenities.includes(amenity.id)
+                      ? 'bg-blue-100'
+                      : 'bg-gray-100'
+                  }`}>
+                    {(() => {
+                      const IconComponent = getAmenityIconByName(amenity.name);
+                      return IconComponent ? <IconComponent className="h-6 w-6 text-gray-600" /> : null;
+                    })()}
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="font-medium text-gray-900 text-sm">{amenity.name}</p>
+                    <p className="text-xs text-gray-500">{amenity.category}</p>
                   </div>
                 </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
 
-      {/* Selected Amenities Summary */}
-      {selectedAmenities.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">
-            Selected Amenities ({selectedAmenities.length})
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            {selectedAmenities.map((amenityId) => {
-              const amenity = amenities.find(a => a.id === amenityId);
-              return amenity ? (
-                <span
-                  key={amenityId}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                >
-                  {amenity.name}
-                </span>
-              ) : null;
-            })}
+                {selectedAmenities.includes(amenity.id) && (
+                  <div className="absolute top-2 right-2">
+                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
-      )}
 
-      {/* Help Text */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <div className="flex">
-          <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-            </svg>
-          </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-gray-800">
-              Amenities Help
-            </h3>
-            <div className="mt-2 text-sm text-gray-600">
-              <p>
-                Select all amenities that are available in your property. This information helps tenants make informed decisions and sets clear expectations about what&apos;s included.
-              </p>
+        {/* Selected Amenities Summary */}
+        {selectedAmenities.length > 0 && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-medium text-blue-900 mb-3">
+              Selected Amenities ({selectedAmenities.length})
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {selectedAmenities.map((amenityId) => {
+                const amenity = getAllAmenities().find(a => a.id === amenityId);
+                return (
+                  <div
+                    key={amenityId}
+                    className="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-blue-200"
+                  >
+                    {(() => {
+                      const IconComponent = amenity ? getAmenityIconByName(amenity.name) : null;
+                      return IconComponent ? <IconComponent className="h-4 w-4 text-blue-600" /> : null;
+                    })()}
+                    <span className="text-sm text-blue-900">{amenity?.name}</span>
+                    <button
+                      onClick={() => handleAmenityToggle(amenityId)}
+                      className="text-blue-400 hover:text-blue-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        </div>
+        )}
+      </div>
+
+      {/* Help Section */}
+      <div className="bg-gray-50 rounded-lg p-6">
+        <h4 className="font-medium text-gray-900 mb-3">Amenities Help</h4>
+        <p className="text-gray-600 text-sm leading-relaxed">
+          Select all amenities that are available in your property. This information helps tenants make informed decisions and sets clear expectations about what&apos;s included.
+        </p>
       </div>
     </div>
   );
