@@ -1,9 +1,9 @@
 "use client";
 import Image from "next/image";
-import Link from "next/link";
 import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
+import { headerDropdownStyles } from "@/styles/index";
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,20 +22,20 @@ export default function NotificationDropdown() {
     setNotifying(false);
   };
   return (
-    <div className="relative">
+    <div className={headerDropdownStyles.notificationDropdown.container}>
       <button
-        className="relative dropdown-toggle flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+        className={headerDropdownStyles.notificationDropdown.button}
         onClick={handleClick}
       >
         <span
-          className={`absolute right-0 top-0.5 z-10 h-2 w-2 rounded-full bg-orange-400 ${
-            !notifying ? "hidden" : "flex"
+          className={`${headerDropdownStyles.notificationDropdown.indicator} ${
+            !notifying ? headerDropdownStyles.notificationDropdown.indicatorHidden : headerDropdownStyles.notificationDropdown.indicatorVisible
           }`}
         >
-          <span className="absolute inline-flex w-full h-full bg-orange-400 rounded-full opacity-75 animate-ping"></span>
+          <span className={headerDropdownStyles.notificationDropdown.ping}></span>
         </span>
         <svg
-          className="fill-current"
+          className={headerDropdownStyles.notificationDropdown.icon}
           width="20"
           height="20"
           viewBox="0 0 20 20"
@@ -52,18 +52,18 @@ export default function NotificationDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
+        className={headerDropdownStyles.notificationDropdown.menu}
       >
-        <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
-          <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+        <div className={headerDropdownStyles.notificationDropdown.header}>
+          <h5 className={headerDropdownStyles.notificationDropdown.title}>
             Notification
           </h5>
           <button
             onClick={toggleDropdown}
-            className="text-gray-500 transition dropdown-toggle dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            className={headerDropdownStyles.notificationDropdown.closeButton}
           >
             <svg
-              className="fill-current"
+              className={headerDropdownStyles.notificationDropdown.closeIcon}
               width="24"
               height="24"
               viewBox="0 0 24 24"
@@ -78,40 +78,36 @@ export default function NotificationDropdown() {
             </svg>
           </button>
         </div>
-        <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
+        <ul className={headerDropdownStyles.notificationDropdown.list}>
           {/* Example notification items */}
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
                   src="/images/user/user-02.jpg"
                   alt="User"
-                  className="w-full overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Terry Franci
-                  </span>
-                  <span>requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>John Doe</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>2 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>5 min ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  New message received
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  You have a new message from John Doe
+                </p>
               </span>
             </DropdownItem>
           </li>
@@ -119,35 +115,31 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
                   src="/images/user/user-03.jpg"
                   alt="User"
-                  className="w-full overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 block space-x-1  text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Alena Franci
-                  </span>
-                  <span> requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Jane Smith</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>4 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>8 min ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Property inquiry
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  New inquiry for your property listing
+                </p>
               </span>
             </DropdownItem>
           </li>
@@ -155,36 +147,31 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-              href="#"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
                   src="/images/user/user-04.jpg"
                   alt="User"
-                  className="w-full overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 block space-x-1 text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Jocelyn Kenter
-                  </span>
-                  <span>requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Mike Johnson</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>6 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>15 min ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Review submitted
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  New review submitted for your property
+                </p>
               </span>
             </DropdownItem>
           </li>
@@ -192,72 +179,31 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-              href="#"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
                   src="/images/user/user-05.jpg"
                   alt="User"
-                  className="w-full overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-error-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Brandon Philips
-                  </span>
-                  <span> requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Sarah Wilson</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>8 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>1 hr ago</span>
-                </span>
-              </span>
-            </DropdownItem>
-          </li>
-
-          <li>
-            <DropdownItem
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-              onItemClick={closeDropdown}
-            >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
-                <Image
-                  width={40}
-                  height={40}
-                  src="/images/user/user-02.jpg"
-                  alt="User"
-                  className="w-full overflow-hidden rounded-full"
-                />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
-              </span>
-
-              <span className="block">
-                <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Terry Franci
-                  </span>
-                  <span>requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
-                </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>5 min ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Offer received
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  New offer received for your property
+                </p>
               </span>
             </DropdownItem>
           </li>
@@ -265,35 +211,31 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
-                  src="/images/user/user-03.jpg"
+                  src="/images/user/user-06.jpg"
                   alt="User"
-                  className="w-full overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Alena Franci
-                  </span>
-                  <span>requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>David Brown</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>10 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>8 min ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Payment confirmed
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Payment has been confirmed for your property
+                </p>
               </span>
             </DropdownItem>
           </li>
@@ -301,35 +243,31 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
-                  src="/images/user/user-04.jpg"
+                  src="/images/user/user-07.jpg"
                   alt="User"
-                  className="w-full overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-success-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Jocelyn Kenter
-                  </span>
-                  <span>requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Lisa Davis</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>12 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>15 min ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Booking request
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  New booking request for your property
+                </p>
               </span>
             </DropdownItem>
           </li>
@@ -337,47 +275,163 @@ export default function NotificationDropdown() {
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
-              className="flex gap-3 rounded-lg border-b border-gray-100 p-3 px-4.5 py-3 hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-white/5"
-              href="#"
+              className={headerDropdownStyles.notificationDropdown.item}
             >
-              <span className="relative block w-full h-10 rounded-full z-1 max-w-10">
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
                 <Image
                   width={40}
                   height={40}
-                  src="/images/user/user-05.jpg"
+                  src="/images/user/user-08.jpg"
                   alt="User"
-                  className="overflow-hidden rounded-full"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
                 />
-                <span className="absolute bottom-0 right-0 z-10 h-2.5 w-full max-w-2.5 rounded-full border-[1.5px] border-white bg-error-500 dark:border-gray-900"></span>
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
               </span>
 
-              <span className="block">
-                <span className="mb-1.5 space-x-1 block text-theme-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Brandon Philips
-                  </span>
-                  <span>requests permission to change</span>
-                  <span className="font-medium text-gray-800 dark:text-white/90">
-                    Project - Nganter App
-                  </span>
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Tom Anderson</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>14 hours ago</span>
                 </span>
-
-                <span className="flex items-center gap-2 text-gray-500 text-theme-xs dark:text-gray-400">
-                  <span>Project</span>
-                  <span className="w-1 h-1 bg-gray-400 rounded-full"></span>
-                  <span>1 hr ago</span>
-                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Maintenance request
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  New maintenance request submitted
+                </p>
               </span>
             </DropdownItem>
           </li>
-          {/* Add more items as needed */}
+
+          <li>
+            <DropdownItem
+              onItemClick={closeDropdown}
+              className={headerDropdownStyles.notificationDropdown.item}
+            >
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
+                <Image
+                  width={40}
+                  height={40}
+                  src="/images/user/user-09.jpg"
+                  alt="User"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
+                />
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
+              </span>
+
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Emma Taylor</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>16 hours ago</span>
+                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Contract signed
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Contract has been signed for your property
+                </p>
+              </span>
+            </DropdownItem>
+          </li>
+
+          <li>
+            <DropdownItem
+              onItemClick={closeDropdown}
+              className={headerDropdownStyles.notificationDropdown.item}
+            >
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
+                <Image
+                  width={40}
+                  height={40}
+                  src="/images/user/user-10.jpg"
+                  alt="User"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
+                />
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
+              </span>
+
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Chris Martin</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>18 hours ago</span>
+                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Inspection scheduled
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Property inspection has been scheduled
+                </p>
+              </span>
+            </DropdownItem>
+          </li>
+
+          <li>
+            <DropdownItem
+              onItemClick={closeDropdown}
+              className={headerDropdownStyles.notificationDropdown.item}
+            >
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
+                <Image
+                  width={40}
+                  height={40}
+                  src="/images/user/user-11.jpg"
+                  alt="User"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
+                />
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
+              </span>
+
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Rachel Green</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>20 hours ago</span>
+                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Insurance updated
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Property insurance has been updated
+                </p>
+              </span>
+            </DropdownItem>
+          </li>
+
+          <li>
+            <DropdownItem
+              onItemClick={closeDropdown}
+              className={headerDropdownStyles.notificationDropdown.item}
+            >
+              <span className={headerDropdownStyles.notificationDropdown.avatarContainer}>
+                <Image
+                  width={40}
+                  height={40}
+                  src="/images/user/user-12.jpg"
+                  alt="User"
+                  className={headerDropdownStyles.notificationDropdown.avatar}
+                />
+                <span className={headerDropdownStyles.notificationDropdown.statusBadge}></span>
+              </span>
+
+              <span className={headerDropdownStyles.notificationDropdown.content}>
+                <span className={headerDropdownStyles.notificationDropdown.meta}>
+                  <span>Alex Johnson</span>
+                  <span className={headerDropdownStyles.notificationDropdown.dot}></span>
+                  <span>22 hours ago</span>
+                </span>
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Tax documents ready
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Tax documents are ready for download
+                </p>
+              </span>
+            </DropdownItem>
+          </li>
         </ul>
-        <Link
-          href="/"
-          className="block px-4 py-2 mt-3 text-sm font-medium text-center text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700"
-        >
-          View All Notifications
-        </Link>
       </Dropdown>
     </div>
   );

@@ -53,10 +53,7 @@ export default function EditPropertyPage() {
     // No redirect needed - user can continue editing
   };
 
-  const handleCancel = () => {
-    // Cancel editing - stay on edit page
-    // No redirect needed - user can continue editing
-  };
+
 
   if (isLoading) {
     return (
@@ -117,7 +114,6 @@ export default function EditPropertyPage() {
     <InlineEditPropertyView
       propertyId={params.id as string}
       onSave={handleSave}
-      onCancel={handleCancel}
     />
   );
 }

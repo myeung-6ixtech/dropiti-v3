@@ -16,11 +16,11 @@ interface Property {
   title: string;
   description: string;
   location: string;
-  rental_price: number;
-  rental_price_currency: string;
-  bedrooms: number;
-  bathrooms: number;
-  photos: string[];
+  rental_price?: number;
+  rental_price_currency?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  photos?: string[];
   rating?: number;
   review_count?: number;
 }
@@ -138,11 +138,11 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
                   </h3>
                   <p className="text-xs text-gray-600 mb-2">{property.location}</p>
                   <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                    <span>{property.bedrooms} bed • {property.bathrooms} bath</span>
+                    <span>{property.bedrooms || 0} bed • {property.bathrooms || 0} bath</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-900">
-                      {property.rental_price_currency} {property.rental_price.toLocaleString()}/month
+                      {property.rental_price_currency || '$'} {property.rental_price ? property.rental_price.toLocaleString() : 'N/A'}/month
                     </span>
                     <button
                       onClick={() => handleCreateOffer(property.property_uuid)}

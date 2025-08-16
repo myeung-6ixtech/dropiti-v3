@@ -17,7 +17,7 @@ interface DropitiPassport2Props {
     avatar: string;
     email: string;
     location?: string;
-    joinDate: string;
+    joinDate?: string;
     verified: boolean;
     rating: number;
     reviewCount: number;
@@ -33,11 +33,25 @@ interface DropitiPassport2Props {
 }
 
 export default function DropitiPassport2({ user }: DropitiPassport2Props) {
-  const formatJoinDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
-    });
+  const formatJoinDate = (dateString?: string) => {
+    if (!dateString) {
+      return 'Unknown';
+    }
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Invalid date';
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long'
+      });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Invalid date';
+    }
   };
 
   return (

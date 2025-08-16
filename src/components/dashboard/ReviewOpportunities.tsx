@@ -89,7 +89,7 @@ export default function ReviewOpportunities() {
 
   if (isLoading) {
     return (
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
+      <div className="dashboard-card">
         <div className="animate-pulse">
           <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="space-y-3">
@@ -103,28 +103,30 @@ export default function ReviewOpportunities() {
 
   return (
     <>
-      <div className="bg-white border border-gray-200 rounded-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Review Opportunities</h2>
+      <div className="dashboard-card mb-8">
+        <div className="dashboard-card-header">
+          <h2 className="dashboard-card-title">Review Opportunities</h2>
           <div className="text-sm text-gray-500">
             {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days to leave reviews after accepting offers
           </div>
         </div>
         
         {opportunities.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-gray-400 mb-2">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+          <div className="dashboard-card-content">
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-2">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <p className="text-gray-500">No review opportunities at this time.</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Reviews become available after accepting offers and expire in {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days.
+              </p>
             </div>
-            <p className="text-gray-500">No review opportunities at this time.</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Reviews become available after accepting offers and expire in {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days.
-            </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="dashboard-card-content">
             {opportunities.map((opportunity) => {
               const daysRemaining = calculateDaysRemaining(opportunity.reviewWindowEnd);
               const isExpired = daysRemaining === 0;
@@ -133,57 +135,52 @@ export default function ReviewOpportunities() {
               return (
                 <div 
                   key={opportunity.id} 
-                  className={`border rounded-lg p-4 ${
+                  className={`dashboard-review-opportunity-item ${
                     isExpired 
-                      ? 'border-red-200 bg-red-50' 
+                      ? 'dashboard-review-opportunity-item-expired' 
                       : isUrgent 
-                        ? 'border-yellow-200 bg-yellow-50' 
-                        : 'border-gray-200 bg-white'
+                        ? 'dashboard-review-opportunity-item-urgent' 
+                        : 'dashboard-review-opportunity-item-normal'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{opportunity.propertyTitle}</h3>
-                      <p className="text-sm text-gray-600">
+                  <div className="dashboard-review-opportunity-content">
+                    <div className="dashboard-review-opportunity-details">
+                      <h3 className="dashboard-review-opportunity-title">{opportunity.propertyTitle}</h3>
+                      <p className="dashboard-review-opportunity-description">
                         Review {opportunity.otherPartyName} as{' '}
                         {opportunity.reviewType === REVIEW_TYPES.TENANT_TO_LANDLORD 
                           ? 'Tenant to Landlord' 
                           : 'Landlord to Tenant'
                         }
                       </p>
-                      <div className="flex items-center space-x-4 mt-2">
+                      <div className="dashboard-review-opportunity-meta">
                         {isExpired ? (
-                          <span className="text-red-600 text-sm font-medium">Expired</span>
+                          <span className="dashboard-review-opportunity-status-expired">Expired</span>
                         ) : (
-                          <span className={`text-sm font-medium ${
-                            isUrgent ? 'text-yellow-600' : 'text-gray-600'
+                          <span className={`${
+                            isUrgent ? 'dashboard-review-opportunity-status-urgent' : 'dashboard-review-opportunity-status-normal'
                           }`}>
                             {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} remaining
                           </span>
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="dashboard-review-opportunity-expiry">
                           Expires: {new Date(opportunity.reviewWindowEnd).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="dashboard-review-opportunity-actions">
                       {opportunity.status === REVIEW_STATUS.PENDING && !isExpired ? (
                         <button 
                           onClick={() => handleLeaveReview(opportunity)}
-                          className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
-                            isUrgent 
-                              ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
-                              : 'btn-primary'
-                          }`}
+                          className={isUrgent ? 'dashboard-review-opportunity-button-urgent' : 'btn-primary'}
                         >
                           {isUrgent ? 'Review Now' : 'Leave Review'}
                         </button>
                       ) : (
-                        <span className={`text-sm font-medium px-3 py-2 rounded-lg ${
-                          opportunity.status === REVIEW_STATUS.COMPLETED 
-                            ? 'text-green-600 bg-green-100' 
-                            : 'text-red-600 bg-red-100'
-                        }`}>
+                        <span className={opportunity.status === REVIEW_STATUS.COMPLETED 
+                          ? 'dashboard-review-opportunity-status-completed' 
+                          : 'dashboard-review-opportunity-status-expired-badge'
+                        }>
                           {opportunity.status === REVIEW_STATUS.COMPLETED ? 'Completed' : 'Expired'}
                         </span>
                       )}

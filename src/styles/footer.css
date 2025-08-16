@@ -1,0 +1,103 @@
+/* ========================================
+   FOOTER COMPONENTS
+   ======================================== */
+
+.footer-container {
+  @apply bg-gray-900 text-white;
+}
+
+.footer-main-content {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+}
+
+.footer-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8;
+}
+
+.footer-company-info {
+  @apply lg:col-span-1;
+}
+
+.footer-company-header {
+  @apply flex items-center space-x-2 mb-4;
+}
+
+.footer-company-icon {
+  @apply h-8 w-8 text-blue-400;
+}
+
+.footer-company-name {
+  @apply text-xl font-bold;
+}
+
+.footer-company-description {
+  @apply text-gray-300 mb-6 text-sm;
+}
+
+.footer-social-links {
+  @apply flex space-x-4;
+}
+
+.footer-social-link {
+  @apply text-gray-400 hover:text-white transition-colors duration-200;
+}
+
+.footer-social-sr-only {
+  @apply sr-only;
+}
+
+.footer-section {
+  @apply text-sm font-semibold text-white uppercase tracking-wider mb-4;
+}
+
+.footer-section-links {
+  @apply space-y-2;
+}
+
+.footer-section-link {
+  @apply text-gray-300 hover:text-white transition-colors duration-200 text-sm;
+}
+
+.footer-contact-section {
+  @apply mt-8 pt-8 border-t border-gray-800;
+}
+
+.footer-contact-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+}
+
+.footer-contact-item {
+  @apply flex items-center space-x-3;
+}
+
+.footer-contact-icon {
+  @apply h-5 w-5 text-blue-400 flex-shrink-0;
+}
+
+.footer-contact-link {
+  @apply text-gray-300 hover:text-white transition-colors duration-200 text-sm;
+}
+
+.footer-bottom-bar {
+  @apply bg-gray-800 border-t border-gray-700;
+}
+
+.footer-bottom-content {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+}
+
+.footer-bottom-flex {
+  @apply flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0;
+}
+
+.footer-copyright {
+  @apply text-gray-300 text-sm;
+}
+
+.footer-bottom-links {
+  @apply flex space-x-6 text-sm;
+}
+
+.footer-bottom-link {
+  @apply text-gray-300 hover:text-white transition-colors duration-200;
+}

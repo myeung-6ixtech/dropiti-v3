@@ -1,0 +1,202 @@
+/* ========================================
+   DROPITI PASSPORT COMPONENTS
+   ======================================== */
+  /* ========================================
+     MAIN PASSPORT CONTAINER
+     ======================================== */
+
+  .passport-container {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+
+  /* ========================================
+     PASSPORT HEADER
+     ======================================== */
+
+  .passport-header {
+    @apply text-center mb-6 pb-4 border-b border-gray-100;
+  }
+
+  .passport-logo {
+    @apply inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-3;
+  }
+
+  .passport-logo-text {
+    @apply text-white text-lg font-bold;
+  }
+
+  .passport-title {
+    @apply text-lg font-bold text-gray-900 mb-0;
+  }
+
+  .passport-subtitle {
+    @apply text-xs text-gray-500;
+  }
+
+  /* ========================================
+     PROFILE SECTION
+     ======================================== */
+
+  .passport-profile {
+    @apply mb-6;
+  }
+
+  .passport-profile-content {
+    @apply flex items-start space-x-3;
+  }
+
+  .passport-avatar-container {
+    @apply relative;
+  }
+
+  .passport-avatar {
+    @apply w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-100;
+  }
+
+  .passport-avatar-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .passport-verification-badge {
+    @apply absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1;
+  }
+
+  .passport-verification-icon {
+    @apply h-2.5 w-2.5 text-white;
+  }
+
+  .passport-profile-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .passport-profile-name {
+    @apply font-semibold text-gray-900 text-base mb-0;
+  }
+
+  .passport-profile-rating {
+    @apply flex items-center space-x-1;
+  }
+
+  .passport-rating-star {
+    @apply h-3 w-3 text-yellow-400;
+  }
+
+  .passport-rating-value {
+    @apply text-xs font-medium text-gray-900;
+  }
+
+  .passport-rating-separator {
+    @apply text-xs text-gray-500;
+  }
+
+  .passport-review-count {
+    @apply text-xs text-gray-600;
+  }
+
+  /* ========================================
+     QUICK STATS SECTION
+     ======================================== */
+
+  .passport-stats {
+    @apply flex items-center justify-between text-xs mb-4 p-3 bg-gray-50 rounded-xl;
+  }
+
+  .passport-stat-item {
+    @apply text-center;
+  }
+
+  .passport-stat-value {
+    @apply font-semibold text-gray-900;
+  }
+
+  .passport-stat-label {
+    @apply text-gray-500;
+  }
+
+  /* ========================================
+     CONTENT SECTIONS
+     ======================================== */
+
+  .passport-section {
+    @apply mb-4;
+  }
+
+  .passport-section-title {
+    @apply font-medium text-gray-900 mb-2 text-sm flex items-center;
+  }
+
+  .passport-section-content {
+    @apply text-xs text-gray-700 leading-relaxed line-clamp-3;
+  }
+
+  .passport-section-simple {
+    @apply flex items-center space-x-2;
+  }
+
+  .passport-section-text {
+    @apply text-xs text-gray-700;
+  }
+
+  /* ========================================
+     LANGUAGES SECTION
+     ======================================== */
+
+  .passport-languages {
+    @apply flex flex-wrap gap-1.5;
+  }
+
+  .passport-language-tag {
+    @apply bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  /* ========================================
+     LOCATION & JOIN DATE SECTION
+     ======================================== */
+
+  .passport-info-section {
+    @apply mb-4 p-3 bg-gray-50 rounded-xl;
+  }
+
+  .passport-info-content {
+    @apply space-y-2;
+  }
+
+  .passport-info-item {
+    @apply flex items-center space-x-2;
+  }
+
+  .passport-info-text {
+    @apply text-xs text-gray-700;
+  }
+
+  /* ========================================
+     PASSPORT FOOTER
+     ======================================== */
+
+  .passport-footer {
+    @apply text-center pt-3 border-t border-gray-100;
+  }
+
+  .passport-verified-text {
+    @apply text-xs text-blue-600 font-medium;
+  }
+
+  .passport-trust-text {
+    @apply text-xs text-gray-500 mt-1;
+  }
+
+  /* ========================================
+     RESPONSIVE UTILITIES
+     ======================================== */
+
+  .passport-responsive-container {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+
+  .passport-responsive-avatar {
+    @apply w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-100;
+  }
+
+  .passport-responsive-text {
+    @apply text-xs text-gray-700;
+  }

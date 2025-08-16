@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, FormEvent } from "react";
+import { formStyles } from "@/styles/index";
 
 interface FormProps {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -13,7 +14,7 @@ const Form: FC<FormProps> = ({ onSubmit, children, className }) => {
         event.preventDefault(); // Prevent default form submission
         onSubmit(event);
       }}
-      className={` ${className}`} // Default spacing between form fields
+      className={`${formStyles.container} ${className || ''}`} // Use centralized styles with optional additional classes
     >
       {children}
     </form>

@@ -15,10 +15,9 @@ import { PhotosSection } from './property-sections/PhotosSection';
 interface InlineEditPropertyViewProps {
   propertyId: string;
   onSave?: () => void;
-  onCancel?: () => void;
 }
 
-export default function InlineEditPropertyView({ propertyId, onSave, onCancel }: InlineEditPropertyViewProps) {
+export default function InlineEditPropertyView({ propertyId, onSave }: InlineEditPropertyViewProps) {
   const [propertyData, setPropertyData] = useState<PropertyData>({});
   const propertyDataRef = useRef<PropertyData>({});
   const [editingSection, setEditingSection] = useState<string | null>(null);
@@ -52,6 +51,17 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
     loadPropertyData();
   }, [loadPropertyData]);
 
+  const normalizeAmenities = (amenities: unknown): string[] => {
+    if (Array.isArray(amenities)) {
+      return amenities;
+    } else if (amenities && typeof amenities === 'string') {
+      return [amenities];
+    } else if (amenities && typeof amenities === 'object') {
+      return Object.values(amenities).filter(val => typeof val === 'string') as string[];
+    }
+    return [];
+  };
+
   const transformApiDataToPropertyData = (apiProperty: Record<string, unknown>): PropertyData => {
     // Transform API property data to PropertyData format
     return {
@@ -83,7 +93,7 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
                    ((apiProperty.details as Record<string, unknown>)?.furnished as string) === 'partially' ? 'partially' : 'non-furnished',
         petsAllowed: (apiProperty.details as Record<string, unknown>)?.petsAllowed as boolean || false,
       },
-      amenities: apiProperty.amenities as string[] || [],
+      amenities: normalizeAmenities(apiProperty.amenities),
       photos: [], // Initialize as empty array since we can't convert strings to Files
       displayImage: apiProperty.display_image as string || '',
       uploadedImages: apiProperty.uploaded_images as string[] || [],
@@ -97,14 +107,34 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
   };
 
   const startEditing = (section: string) => {
+    console.log('InlineEditPropertyView: startEditing called for section:', section);
+    console.log('InlineEditPropertyView: propertyData before setting tempData:', propertyData);
+    
+    // Ensure amenities is always an array when starting to edit
+    const normalizedPropertyData = {
+      ...propertyData,
+      amenities: normalizeAmenities(propertyData.amenities)
+    };
+    
+    console.log('InlineEditPropertyView: normalizedPropertyData:', normalizedPropertyData);
     setEditingSection(section);
-    setTempData(propertyData);
+    setTempData(normalizedPropertyData);
     setErrors({});
   };
 
   const cancelEditing = () => {
+    console.log('InlineEditPropertyView: cancelEditing called');
+    console.log('InlineEditPropertyView: originalData before setting tempData:', originalData);
+    
+    // Ensure amenities is always an array when canceling
+    const normalizedOriginalData = {
+      ...originalData,
+      amenities: normalizeAmenities(originalData.amenities)
+    };
+    
+    console.log('InlineEditPropertyView: normalizedOriginalData:', normalizedOriginalData);
     setEditingSection(null);
-    setTempData(originalData);
+    setTempData(normalizedOriginalData);
     setErrors({});
   };
 
@@ -258,7 +288,7 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-96 bg-gray-200 rounded-lg mb-8"></div>
@@ -274,41 +304,27 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="inline-edit-container bg-white">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="inline-edit-header">
+        <div className="inline-edit-header-content">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.back()}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
-                <ArrowLeftIcon className="w-5 h-5" />
+                <ArrowLeftIcon className="w-5 h-5 text-gray-900" />
               </button>
-              <h1 className="text-lg font-semibold text-gray-900">Edit Property Listing</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={onCancel}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => onSave?.()}
-                className="btn-primary"
-              >
-                Done Editing
-              </button>
+              <h1 className="text-lg font-semibold text-gray-900 mb-0">Edit Property Listing</h1>
             </div>
           </div>
         </div>
       </div>
 
       {/* Property Display with Inline Editing */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-6">
+      <div className="inline-edit-content">
+        <div className="inline-edit-sections">
           {/* Photos Section */}
           <PhotosSection
             data={editingSection === 'photos' ? tempData : propertyData}
@@ -345,14 +361,9 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
           {/* Location Section */}
           <LocationSection
             data={propertyData}
-            tempData={tempData}
-            isEditing={editingSection === 'location'}
-            onStartEdit={() => startEditing('location')}
-            onCancelEdit={cancelEditing}
-            onSaveEdit={() => saveSection('location')}
+            propertyId={propertyId}
             onUpdateField={updateTempField}
             errors={errors}
-            isSaving={isSaving}
           />
 
           {/* Property Details Section */}
@@ -371,14 +382,9 @@ export default function InlineEditPropertyView({ propertyId, onSave, onCancel }:
           {/* Amenities Section */}
           <AmenitiesSection
             data={propertyData}
-            tempData={tempData}
-            isEditing={editingSection === 'amenities'}
-            onStartEdit={() => startEditing('amenities')}
-            onCancelEdit={cancelEditing}
-            onSaveEdit={() => saveSection('amenities')}
+            propertyId={propertyId}
             onUpdateField={updateTempField}
             errors={errors}
-            isSaving={isSaving}
           />
 
           {/* Rental Information Section */}

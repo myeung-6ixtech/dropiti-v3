@@ -1,38 +1,87 @@
 'use client';
 
-import { PencilIcon, CheckIcon, XMarkIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { PencilIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
+import { propertiesAPI } from '@/lib/api-client';
 
 interface LocationSectionProps {
   data: PropertyData;
-  tempData: Partial<PropertyData>;
-  isEditing: boolean;
-  onStartEdit: () => void;
-  onCancelEdit: () => void;
-  onSaveEdit: () => void;
+  propertyId: string;
   onUpdateField: (section: string, field: string, value: unknown) => void;
   errors: Record<string, string>;
-  isSaving: boolean;
 }
 
 export function LocationSection({
   data,
-  tempData,
-  isEditing,
-  onStartEdit,
-  onCancelEdit,
-  onSaveEdit,
+  propertyId,
   onUpdateField,
-  errors,
-  isSaving
+  errors
 }: LocationSectionProps) {
+  
+  // Internal state management
+  const [isEditing, setIsEditing] = useState(false);
+  const [localAddress, setLocalAddress] = useState<PropertyData['address']>({});
+  const [isSavingLocally, setIsSavingLocally] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  
+  // Initialize local address when data changes
+  useEffect(() => {
+    setLocalAddress(data.address || {});
+  }, [data.address]);
+  
+  // Internal edit functions
+  const handleStartEdit = () => {
+    setIsEditing(true);
+    setShowSuccessMessage(false);
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    // Reset to original data
+    setLocalAddress(data.address || {});
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      setIsSavingLocally(true);
+      
+      // Call the API to update the property
+      const response = await propertiesAPI.updateProperty(propertyId, {
+        address: localAddress as Record<string, unknown>
+      });
+      
+      if (response.success) {
+        // Call the parent's onUpdateField to sync the parent component
+        onUpdateField('address', 'address', localAddress);
+        
+        // Show success message
+        setShowSuccessMessage(true);
+        
+        // Exit edit mode
+        setIsEditing(false);
+        
+        // Hide success message after 3 seconds
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+        }, 3000);
+      } else {
+        console.error('Failed to update address:', response.error);
+      }
+    } catch (error) {
+      console.error('Error updating address:', error);
+    } finally {
+      setIsSavingLocally(false);
+    }
+  };
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-900">Location & Address</h2>
         {!isEditing ? (
           <button
-            onClick={onStartEdit}
+            onClick={handleStartEdit}
             className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <PencilIcon className="h-4 w-4" />
@@ -41,19 +90,17 @@ export function LocationSection({
         ) : (
           <div className="flex items-center space-x-2">
             <button
-              onClick={onCancelEdit}
-              className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={handleCancelEdit}
+              className="btn-secondary"
             >
-              <XMarkIcon className="h-4 w-4" />
               <span>Cancel</span>
             </button>
             <button
-              onClick={onSaveEdit}
-              disabled={isSaving}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              onClick={handleSaveEdit}
+              disabled={isSavingLocally}
+              className="btn-primary"
             >
-              <CheckIcon className="h-4 w-4" />
-              <span>{isSaving ? 'Saving...' : 'Save'}</span>
+              <span>{isSavingLocally ? 'Saving...' : 'Save Address'}</span>
             </button>
           </div>
         )}
@@ -61,13 +108,13 @@ export function LocationSection({
 
       {isEditing ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
               <input
                 type="text"
-                value={tempData.address?.unit || ''}
-                onChange={(e) => onUpdateField('address', 'unit', e.target.value)}
+                value={localAddress?.unit || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, unit: e.target.value })}
                 className="form-input w-full"
                 placeholder="Unit number"
               />
@@ -76,10 +123,20 @@ export function LocationSection({
               <label className="block text-sm font-medium text-gray-700 mb-2">Floor</label>
               <input
                 type="text"
-                value={tempData.address?.floor || ''}
-                onChange={(e) => onUpdateField('address', 'floor', e.target.value)}
+                value={localAddress?.floor || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, floor: e.target.value })}
                 className="form-input w-full"
                 placeholder="Floor number"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Block</label>
+              <input
+                type="text"
+                value={localAddress?.block || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, block: e.target.value })}
+                className="form-input w-full"
+                placeholder="Block number"
               />
             </div>
           </div>
@@ -88,8 +145,8 @@ export function LocationSection({
             <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
             <input
               type="text"
-              value={tempData.address?.buildingName || ''}
-              onChange={(e) => onUpdateField('address', 'buildingName', e.target.value)}
+              value={localAddress?.buildingName || ''}
+              onChange={(e) => setLocalAddress({ ...localAddress, buildingName: e.target.value })}
               className="form-input w-full"
               placeholder="Building name"
             />
@@ -99,8 +156,8 @@ export function LocationSection({
             <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 1</label>
             <input
               type="text"
-              value={tempData.address?.addressLine1 || ''}
-              onChange={(e) => onUpdateField('address', 'addressLine1', e.target.value)}
+              value={localAddress?.addressLine1 || ''}
+              onChange={(e) => setLocalAddress({ ...localAddress, addressLine1: e.target.value })}
               className="form-input w-full"
               placeholder="Street address"
             />
@@ -110,8 +167,8 @@ export function LocationSection({
             <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 2</label>
             <input
               type="text"
-              value={tempData.address?.addressLine2 || ''}
-              onChange={(e) => onUpdateField('address', 'addressLine2', e.target.value)}
+              value={localAddress?.addressLine2 || ''}
+              onChange={(e) => setLocalAddress({ ...localAddress, addressLine2: e.target.value })}
               className="form-input w-full"
               placeholder="Apartment, suite, etc."
             />
@@ -122,8 +179,8 @@ export function LocationSection({
               <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
               <input
                 type="text"
-                value={tempData.address?.district || ''}
-                onChange={(e) => onUpdateField('address', 'district', e.target.value)}
+                value={localAddress?.district || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, district: e.target.value })}
                 className="form-input w-full"
                 placeholder="District"
               />
@@ -132,8 +189,8 @@ export function LocationSection({
               <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
               <input
                 type="text"
-                value={tempData.address?.state || ''}
-                onChange={(e) => onUpdateField('address', 'state', e.target.value)}
+                value={localAddress?.state || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, state: e.target.value })}
                 className="form-input w-full"
                 placeholder="State"
               />
@@ -142,8 +199,8 @@ export function LocationSection({
               <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
               <input
                 type="text"
-                value={tempData.address?.country || ''}
-                onChange={(e) => onUpdateField('address', 'country', e.target.value)}
+                value={localAddress?.country || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, country: e.target.value })}
                 className="form-input w-full"
                 placeholder="Country"
               />
@@ -154,8 +211,8 @@ export function LocationSection({
             <input
               type="checkbox"
               id="showSpecificLocation"
-              checked={tempData.address?.showSpecificLocation || false}
-              onChange={(e) => onUpdateField('address', 'showSpecificLocation', e.target.checked)}
+              checked={localAddress?.showSpecificLocation || false}
+              onChange={(e) => setLocalAddress({ ...localAddress, showSpecificLocation: e.target.checked })}
               className="form-checkbox"
             />
             <label htmlFor="showSpecificLocation" className="text-sm text-gray-700">
@@ -170,6 +227,7 @@ export function LocationSection({
             <div className="flex-1">
               <p className="font-medium text-gray-900">
                 {data.address?.buildingName && `${data.address.buildingName}, `}
+                {data.address?.block && `Block ${data.address.block}, `}
                 {data.address?.unit && `Unit ${data.address.unit}, `}
                 {data.address?.floor && `Floor ${data.address.floor}`}
               </p>
@@ -190,6 +248,12 @@ export function LocationSection({
               ✓ Specific location will be shown to potential tenants
             </div>
           )}
+        </div>
+      )}
+
+      {showSuccessMessage && (
+        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-700 text-sm mb-0">✅ Address updated successfully!</p>
         </div>
       )}
 

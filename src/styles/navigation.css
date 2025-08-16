@@ -1,0 +1,182 @@
+/* ========================================
+   NAVIGATION COMPONENTS
+   ======================================== */
+  /* ========================================
+     MAIN NAVIGATION BAR
+     ======================================== */
+
+  .nav-container {
+    @apply bg-white shadow-lg border-b border-gray-200;
+  }
+
+  .nav-content {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .nav-header {
+    @apply flex justify-between h-16;
+  }
+
+  .nav-brand {
+    @apply flex items-center;
+  }
+
+  .nav-brand-link {
+    @apply flex-shrink-0 flex items-center hover:opacity-80 transition-opacity;
+  }
+
+  .nav-brand-icon {
+    @apply h-8 w-8 text-blue-600;
+  }
+
+  .nav-brand-text {
+    @apply ml-2 text-xl font-bold text-gray-900 hidden sm:inline;
+  }
+
+  .nav-menu {
+    @apply flex items-center space-x-4 sm:space-x-8;
+  }
+
+  .nav-menu-button {
+    @apply mr-3 p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors lg:hidden;
+  }
+
+  .nav-menu-icon {
+    @apply h-6 w-6;
+  }
+
+  /* ========================================
+     NAVIGATION LINKS
+     ======================================== */
+
+  .nav-link {
+    @apply flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors;
+  }
+
+  .nav-link-active {
+    @apply text-blue-600 bg-blue-50;
+  }
+
+  .nav-link-inactive {
+    @apply text-gray-700 hover:text-blue-600 hover:bg-gray-50;
+  }
+
+  .nav-link-icon {
+    @apply h-5 w-5 mr-1;
+  }
+
+  .nav-link-text {
+    @apply hidden sm:inline;
+  }
+
+  /* ========================================
+     USER AUTHENTICATION SECTION
+     ======================================== */
+
+  .nav-auth {
+    @apply flex items-center space-x-3;
+  }
+
+  .nav-auth-button {
+    @apply bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm;
+  }
+
+  .nav-auth-text {
+    @apply hidden sm:inline;
+  }
+
+  .nav-auth-text-mobile {
+    @apply sm:hidden;
+  }
+
+  /* ========================================
+     USER DROPDOWN
+     ======================================== */
+
+  .nav-user-dropdown {
+    @apply relative;
+  }
+
+  .nav-user-button {
+    @apply flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .nav-user-avatar {
+    @apply w-8 h-8 rounded-full overflow-hidden border-2 border-gray-200;
+  }
+
+  .nav-user-avatar-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .nav-user-chevron {
+    @apply h-4 w-4 text-gray-600 transition-transform;
+  }
+
+  .nav-user-chevron-open {
+    @apply rotate-180;
+  }
+
+  /* ========================================
+     DROPDOWN MENU
+     ======================================== */
+
+  .nav-dropdown-menu {
+    @apply absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200;
+  }
+
+  .nav-dropdown-item {
+    @apply flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors;
+  }
+
+  .nav-dropdown-item-icon {
+    @apply h-4 w-4 mr-3 text-gray-500;
+  }
+
+  .nav-dropdown-item-button {
+    @apply w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ========================================
+     LOADING STATES
+     ======================================== */
+
+  .nav-loading-skeleton {
+    @apply flex items-center space-x-3;
+  }
+
+  .nav-loading-avatar {
+    @apply w-8 h-8 rounded-full bg-gray-300 animate-pulse;
+  }
+
+  .nav-loading-button {
+    @apply bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm font-medium animate-pulse;
+  }
+
+  .nav-loading-text {
+    @apply hidden sm:inline;
+  }
+
+  .nav-loading-text-mobile {
+    @apply sm:hidden;
+  }
+
+  /* ========================================
+     RESPONSIVE UTILITIES
+     ======================================== */
+
+  .nav-responsive-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .nav-responsive-menu {
+    @apply flex items-center space-x-4 sm:space-x-8;
+  }
+
+  .nav-responsive-text {
+    @apply hidden sm:inline;
+  }
+
+  .nav-responsive-text-mobile {
+    @apply sm:hidden;
+  }

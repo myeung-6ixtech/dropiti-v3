@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { 
-  EyeIcon,
   PencilIcon
 } from '@heroicons/react/24/outline';
 import { Bed, Bathtub } from '@/assets/icons';
@@ -187,10 +186,9 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
             </button>
             <Link
               href={`/dashboard/properties/${propertyUuid}/incoming-offers`}
-              className={`${propertyCardClasses.actions.button} ${propertyCardClasses.actions.buttonSecondary}`}
+              className={`btn-secondary`}
               title="View Incoming Offers"
             >
-              <EyeIcon className="h-4 w-4 mr-1" />
               Offers
             </Link>
           </div>

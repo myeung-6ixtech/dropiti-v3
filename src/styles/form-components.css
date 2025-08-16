@@ -1,0 +1,255 @@
+/* ========================================
+   FORM COMPONENTS
+   ======================================== */
+  /* ========================================
+     BASE FORM CONTAINER
+     ======================================== */
+
+  .form-container {
+    @apply space-y-6;
+  }
+
+  .form-wrapper {
+    @apply w-full max-w-md mx-auto;
+  }
+
+  .form-section {
+    @apply mb-8;
+  }
+
+  .form-section-spacing {
+    @apply mb-8;
+  }
+
+  .form-content-spacing {
+    @apply space-y-6;
+  }
+
+  /* ========================================
+     FORM TYPOGRAPHY
+     ======================================== */
+
+  .form-title {
+    @apply text-2xl font-bold text-gray-900 mb-2;
+  }
+
+  .form-subtitle {
+    @apply text-gray-600;
+  }
+
+  .form-heading {
+    @apply text-3xl font-bold text-gray-900 mb-4;
+  }
+
+  .form-description {
+    @apply text-lg text-gray-600 mb-8;
+  }
+
+  .form-text-center {
+    @apply text-gray-600;
+  }
+
+  /* ========================================
+     FORM FIELDS
+     ======================================== */
+
+  .form-field-container {
+    @apply space-y-2;
+  }
+
+  .form-field-label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  .form-field-label-required::after {
+    content: ' *';
+    @apply text-red-500;
+  }
+
+  .form-field-input {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors;
+  }
+
+  .form-field-input-with-icon {
+    @apply w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors;
+  }
+
+  .form-field-icon {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 hover:text-gray-800 transition-colors;
+  }
+
+  .form-field-textarea {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors resize-y;
+    min-height: 2.5rem;
+    line-height: 1.5;
+  }
+
+  .form-field-select {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 bg-white transition-colors appearance-none cursor-pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+  }
+
+  .form-field-checkbox {
+    @apply h-4 w-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2;
+  }
+
+  .form-field-checkbox-label {
+    @apply ml-2 text-sm text-gray-700;
+  }
+
+  .form-field-radio {
+    @apply h-4 w-4 text-black border-gray-300 focus:ring-black focus:ring-2;
+  }
+
+  .form-field-radio-label {
+    @apply ml-2 text-sm text-gray-700;
+  }
+
+  /* ========================================
+     FORM BUTTONS
+     ======================================== */
+
+  .form-button {
+    @apply bg-black text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm w-full;
+  }
+
+  .form-button-secondary {
+    @apply bg-white text-black border-2 border-black px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm w-full;
+  }
+
+  .form-button:disabled,
+  .form-button-secondary:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  /* ========================================
+     FORM VALIDATION
+     ======================================== */
+
+  .form-error {
+    @apply mt-1 text-sm text-red-600;
+  }
+
+  .form-help {
+    @apply mt-1 text-sm text-gray-500;
+  }
+
+  .form-success {
+    @apply bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-green-800;
+  }
+
+  .form-error-message {
+    @apply bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-800;
+  }
+
+  /* ========================================
+     FORM LAYOUT
+     ======================================== */
+
+  .form-row {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2;
+  }
+
+  .form-group {
+    @apply space-y-2;
+  }
+
+  .form-actions {
+    @apply flex items-center justify-between pt-4;
+  }
+
+  .form-actions-left {
+    @apply flex items-center space-x-4;
+  }
+
+  .form-actions-right {
+    @apply flex items-center space-x-4;
+  }
+
+  /* ========================================
+     FORM LINKS
+     ======================================== */
+
+  .form-back-link {
+    @apply text-gray-600 hover:text-gray-900 transition-colors text-sm;
+  }
+
+  .form-link {
+    @apply text-black font-medium hover:text-gray-800 transition-colors;
+  }
+
+  .form-link-secondary {
+    @apply text-gray-600 hover:text-gray-800 transition-colors text-sm;
+  }
+
+  /* ========================================
+     FORM FEATURES
+     ======================================== */
+
+  .form-feature-item {
+    @apply flex items-center space-x-3;
+  }
+
+  .form-feature-dot {
+    @apply w-3 h-3 bg-blue-600 rounded-full;
+  }
+
+  .form-feature-text {
+    @apply text-gray-700;
+  }
+
+  /* ========================================
+     FORM RESPONSIVE
+     ======================================== */
+
+  .form-responsive {
+    @apply sm:px-8 md:px-12 lg:px-16;
+  }
+
+  .form-mobile-optimized {
+    @apply px-4 sm:px-6;
+  }
+
+  /* ========================================
+     FORM LOADING STATES
+     ======================================== */
+
+  .form-loading {
+    @apply opacity-75 cursor-not-allowed;
+  }
+
+  .form-loading-text {
+    @apply text-gray-500;
+  }
+
+  /* ========================================
+     FORM FOCUS STATES
+     ======================================== */
+
+  .form-focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
+  }
+
+  /* ========================================
+     FORM HOVER EFFECTS
+     ======================================== */
+
+  .form-hover {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* ========================================
+     FORM ANIMATIONS
+     ======================================== */
+
+  .form-fade-in {
+    @apply opacity-0 animate-pulse;
+  }
+
+  .form-slide-up {
+    @apply transform translate-y-2 transition-transform duration-300;
+  }

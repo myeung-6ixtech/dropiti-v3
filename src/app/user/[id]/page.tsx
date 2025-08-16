@@ -95,7 +95,7 @@ export default function UserProfilePage() {
     avatar: user.photo_url || '/images/placeholder.png', // Fallback avatar
     email: user.email,
     location: user.location,
-    joinDate: user.user_since,
+    joinDate: user.user_since || new Date().toISOString(),
     verified: user.verified,
     rating: user.rating,
     reviewCount: user.review_count,
