@@ -371,18 +371,11 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
             onUpdateField={updateTempField}
             errors={errors}
           />
-
           {/* Rental Information Section */}
           <RentalInfoSection
-            data={propertyData}
-            tempData={tempData}
-            isEditing={editingSection === 'rental'}
-            onStartEdit={() => startEditing('rental')}
-            onCancelEdit={cancelEditing}
-            onSaveEdit={() => saveSection('rental')}
+            propertyId={propertyId}
             onUpdateField={updateTempField}
             errors={errors}
-            isSaving={isSaving}
           />
         </div>
       </div>
