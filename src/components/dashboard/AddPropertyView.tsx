@@ -285,19 +285,19 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                   <button
                     onClick={prevStep}
                     disabled={currentStep === 1}
-                    className="form-button-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                    Previous
+                    <ArrowLeftIcon className="h-4 w-4" />
+                    <span>Previous</span>
                   </button>
 
                   <button
                     onClick={nextStep}
                     disabled={!isStepComplete(currentStep)}
-                    className="form-button disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="form-button inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Next
-                    <ArrowRightIcon className="h-4 w-4 ml-2" />
+                    <span>Next</span>
+                    <ArrowRightIcon className="h-4 w-4" />
                   </button>
                 </div>
               </div>

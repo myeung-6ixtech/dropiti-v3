@@ -583,11 +583,11 @@
 }
 
 .passport-verified-text {
-  @apply text-xs text-blue-600 font-medium;
+  @apply text-xs text-blue-600 font-medium mb-0 mt-2;
 }
 
 .passport-trust-text {
-  @apply text-xs text-gray-500 mt-1;
+  @apply text-xs text-gray-500 mt-1 mb-0;
 }
 
 .passport-responsive-container {
@@ -860,7 +860,7 @@
   }
 
   .auth-subtitle {
-    @apply text-gray-600;
+    @apply text-gray-600 text-sm;
   }
 
   .auth-heading {
@@ -877,7 +877,7 @@
 
   /* Buttons */
   .auth-button {
-    @apply bg-black text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm w-full;
+    @apply bg-black mb-4 text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm w-full;
   }
 
   .auth-button-secondary {
@@ -1553,7 +1553,7 @@
 }
 
 .offer-final-terms-label {
-  @apply text-green-800 text-xs font-medium;
+  @apply text-green-800 text-xs font-medium mb-0;
 }
 
 .offer-final-terms-value {
@@ -1565,11 +1565,11 @@
 }
 
 .offer-final-terms-status {
-  @apply flex items-center justify-between;
+  @apply flex items-center justify-between mb-0;
 }
 
 .offer-final-terms-status-label {
-  @apply text-green-800 text-xs font-medium;
+  @apply text-green-800 text-xs font-medium mb-0;
 }
 
 .offer-final-terms-status-badge {
@@ -1578,15 +1578,15 @@
 
 /* Status Message Container */
 .offer-status-message {
-  @apply p-3 bg-green-50 border border-green-200 rounded-md;
+  @apply p-3 bg-green-50 border border-green-200 rounded-md mb-1;
 }
 
 .offer-status-message-text {
-  @apply text-green-800 text-sm font-medium;
+  @apply text-green-800 text-sm font-medium mb-1;
 }
 
 .offer-status-message-subtext {
-  @apply text-green-700 text-xs mt-1;
+  @apply text-green-700 text-xs mt-1 mb-1;
 }
 
 /* Status Container Wrapper */

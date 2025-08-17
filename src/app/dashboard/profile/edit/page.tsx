@@ -45,7 +45,7 @@ export default function EditProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
     displayName: 'dropiti User',
-    avatar: '/src/assets/img/Portrait_Placeholder.png',
+            avatar: '/images/Portrait_Placeholder.png',
     email: 'new.user@dropiti.com',
     location: 'Central, Hong Kong',
     joinDate: '2020-03-15',
@@ -87,7 +87,7 @@ export default function EditProfilePage() {
             
             const newProfile: UserProfile = {
               displayName: userData.display_name || 'Unknown User',
-              avatar: userData.photo_url || '/src/assets/img/Portrait_Placeholder.png',
+              avatar: userData.photo_url || '/images/Portrait_Placeholder.png',
               email: userData.email || '',
               location: userData.location || '',
               joinDate: userData.created_at ? new Date(userData.created_at).toLocaleDateString() : new Date().toLocaleDateString(),

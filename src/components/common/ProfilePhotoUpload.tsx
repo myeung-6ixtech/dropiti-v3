@@ -144,7 +144,7 @@ export default function ProfilePhotoUpload({
       <div className="flex items-center space-x-4">
         <div className="relative w-20 h-20 rounded-full overflow-hidden bg-gray-200">
           <Image
-            src={getSafeProfileImage(currentPhotoUrl, '/src/assets/img/Portrait_Placeholder.png')}
+            src={getSafeProfileImage(currentPhotoUrl, '/images/Portrait_Placeholder.png')}
             alt="Profile"
             width={80}
             height={80}

@@ -95,11 +95,11 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           <div className="flex">
             <MapPinIcon className="h-5 w-5 text-blue-400 mt-0.5" />
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Address Guidelines
+              <h3 className="text-sm font-medium text-blue-800 mb-0">
+                Address &amp; Location Guidelines
               </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
+              <div className="mt-2 text-sm text-blue-700 mb-0">
+                <p className="text-sm font-medium text-gray-600 mb-0">
                   Please provide as much detail as possible. This helps tenants understand the exact location and accessibility of your property.
                 </p>
               </div>
@@ -258,8 +258,8 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
                 <EyeSlashIcon className="h-5 w-5 text-gray-400" />
               )}
               <div>
-                <h4 className="font-medium text-gray-900">Show Specific Location</h4>
-                <p className="text-sm text-gray-600">
+                <h4 className="font-medium text-sm text-gray-900 mb-0">Show Specific Location</h4>
+                <p className="text-sm text-gray-600 mb-0">
                   {showSpecificLocation 
                     ? 'Tenants will see the exact address details' 
                     : 'Tenants will only see the general area/district'

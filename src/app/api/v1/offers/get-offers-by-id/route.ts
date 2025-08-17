@@ -5,6 +5,7 @@ import { executeQuery } from '@/app/api/graphql/serverClient';
 interface GraphQLOffer {
   id: string;
   offer_key: string;
+  offer_uuid?: string;
   property_uuid: string;
   initiator_firebase_uid: string;
   recipient_firebase_uid: string;
@@ -81,6 +82,7 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
     ) {
       id
       offer_key
+      offer_uuid
       property_uuid
       initiator_firebase_uid
       recipient_firebase_uid
@@ -126,6 +128,7 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
     ) {
       id
       offer_key
+      offer_uuid
       property_uuid
       initiator_firebase_uid
       recipient_firebase_uid

@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       firebase_uid: userData.firebase_uid,
       display_name: userData.display_name,
       email: userData.email,
-      photo_url: userData.photo_url || '/src/assets/img/Portrait_Placeholder.png', // Set default profile photo
+      photo_url: userData.photo_url || '/images/Portrait_Placeholder.png', // Set default profile photo
       auth_provider: userData.auth_provider || 'firebase',
       // Only include fields that are guaranteed to exist in the database
       // Remove fields that might not exist or cause parsing errors

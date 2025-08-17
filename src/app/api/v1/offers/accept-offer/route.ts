@@ -259,7 +259,21 @@ export async function POST(request: NextRequest) {
 
     // Calculate review window timestamps
     const reviewWindowStart = new Date();
-    const reviewWindowEnd = new Date(reviewWindowStart.getTime() + (REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS * 24 * 60 * 60 * 1000));
+    
+    // Calculate review window end date (14 days from now)
+    // Use a more explicit calculation to avoid any potential issues
+    const reviewWindowEnd = new Date();
+    reviewWindowEnd.setDate(reviewWindowEnd.getDate() + REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS);
+    
+    // Add some debugging to verify the calculation
+    console.log('Accept Offer API: Review window calculation:', {
+      start: reviewWindowStart.toISOString(),
+      end: reviewWindowEnd.toISOString(),
+      daysToAdd: REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS,
+      startDate: reviewWindowStart.toDateString(),
+      endDate: reviewWindowEnd.toDateString(),
+      differenceInDays: Math.round((reviewWindowEnd.getTime() - reviewWindowStart.getTime()) / (1000 * 60 * 60 * 24))
+    });
 
     // Prepare the updates
     const updates = {
