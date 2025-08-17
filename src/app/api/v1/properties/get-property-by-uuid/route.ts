@@ -35,7 +35,7 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 const GET_LANDLORD_BY_FIREBASE_UID_QUERY = `
   query GetLandlordByFirebaseUid($firebase_uid: String!) {
     real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
-      id
+      uuid
       firebase_uid
       display_name
       email
@@ -43,11 +43,6 @@ const GET_LANDLORD_BY_FIREBASE_UID_QUERY = `
       verified
       rating
       review_count
-      response_time
-      response_rate
-      total_properties
-      total_guests
-      user_since
       about
       location
       phone_number
@@ -55,6 +50,8 @@ const GET_LANDLORD_BY_FIREBASE_UID_QUERY = `
       education
       occupation
       marital_status
+      created_at
+      updated_at
     }
   }
 `;
@@ -163,7 +160,7 @@ export async function GET(request: NextRequest) {
 
         const typedLandlordData = landlordData as {
           real_estate_user?: Array<{
-            id: string;
+            uuid: string;
             firebase_uid: string;
             display_name: string;
             email: string;
@@ -171,11 +168,6 @@ export async function GET(request: NextRequest) {
             verified: boolean;
             rating: number;
             review_count: number;
-            response_time?: string;
-            response_rate: number;
-            total_properties: number;
-            total_guests: number;
-            user_since?: string;
             about?: string;
             location?: string;
             phone_number?: string;
@@ -183,6 +175,8 @@ export async function GET(request: NextRequest) {
             education?: string;
             occupation?: string;
             marital_status?: string;
+            created_at?: string;
+            updated_at?: string;
           }>;
         };
 
@@ -226,6 +220,13 @@ export async function GET(request: NextRequest) {
         price: property.rental_price || 0,
         bedrooms: property.num_bedroom || 0,
         bathrooms: property.num_bathroom || 0,
+        // Add raw database fields for PropertyDetailsSection
+        num_bedroom: property.num_bedroom,
+        num_bathroom: property.num_bathroom,
+        gross_area_size: property.gross_area_size,
+        gross_area_size_unit: property.gross_area_size_unit,
+        furnished: property.furnished,
+        pets_allowed: property.pets_allowed,
         image_url: property.display_image || (property.uploaded_images && property.uploaded_images.length > 0 ? property.uploaded_images[0] : ''),
         display_image: property.display_image || '',
         uploaded_images: property.uploaded_images || [],
@@ -244,7 +245,7 @@ export async function GET(request: NextRequest) {
         owner_id: property.landlord_firebase_uid, // This maps to the frontend's owner_id field
       },
       landlord: landlord ? {
-        id: landlord.id,
+        id: landlord.uuid, // Map uuid to id for frontend compatibility
         firebase_uid: landlord.firebase_uid,
         name: landlord.display_name,
         email: landlord.email,
@@ -252,11 +253,11 @@ export async function GET(request: NextRequest) {
         verified: landlord.verified,
         rating: landlord.rating,
         review_count: landlord.review_count,
-        response_time: landlord.response_time || 'Unknown',
-        response_rate: landlord.response_rate,
-        total_properties: landlord.total_properties,
-        total_guests: landlord.total_guests,
-        user_since: landlord.user_since,
+        response_time: 'Unknown', // Default value since field doesn't exist
+        response_rate: 0, // Default value since field doesn't exist in schema
+        total_properties: 0, // Default value since field doesn't exist in schema
+        total_guests: 0, // Default value since field doesn't exist in schema
+        user_since: landlord.created_at,
         about: landlord.about,
         location: landlord.location,
         phone_number: landlord.phone_number,
@@ -272,7 +273,7 @@ export async function GET(request: NextRequest) {
       property_uuid: response.property.property_uuid,
       landlord_firebase_uid: property.landlord_firebase_uid,
       landlord_data: response.landlord ? {
-        id: response.landlord.id,
+        id: response.landlord.id, // This is now mapped from uuid
         firebase_uid: response.landlord.firebase_uid,
         name: response.landlord.name,
         verified: response.landlord.verified,

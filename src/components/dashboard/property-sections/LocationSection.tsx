@@ -26,14 +26,14 @@ export function LocationSection({
   const [localAddress, setLocalAddress] = useState<PropertyData['address']>({});
   const [originalAddress, setOriginalAddress] = useState<PropertyData['address']>({}); // Store original data
   const [isSavingLocally, setIsSavingLocally] = useState(false);
-  const [isLoadingAddress, setIsLoadingAddress] = useState(true);
+
 
 
   // Fetch address data directly from database
   useEffect(() => {
     const fetchAddressData = async () => {
       try {
-        setIsLoadingAddress(true);
+
         console.log('🔍 LocationSection: Fetching address data for propertyId:', propertyId);
         
         const response = await propertiesAPI.getPropertyByUuid(propertyId);
@@ -109,7 +109,7 @@ export function LocationSection({
           
           // ✅ Only call onUpdateField if we have meaningful data to share
           // This prevents infinite loops and unnecessary parent updates
-          if (Object.keys(addressData).length > 0) {
+          if (addressData && Object.keys(addressData).length > 0) {
             console.log('🔍 LocationSection: Updating parent with fetched address data');
             onUpdateField('address', 'address', addressData);
           }
@@ -120,8 +120,6 @@ export function LocationSection({
       } catch (error) {
         console.error('🔍 LocationSection: Error fetching address data:', error);
         showToast('error', 'Error loading address data');
-      } finally {
-        setIsLoadingAddress(false);
       }
     };
     

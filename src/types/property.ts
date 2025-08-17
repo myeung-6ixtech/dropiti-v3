@@ -25,6 +25,7 @@ export interface PropertyData {
   // Step 4
   unitDetails?: {
     grossArea?: number;
+    grossAreaUnit?: string;
     netArea?: number;
     bedrooms?: number;
     bathrooms?: number;

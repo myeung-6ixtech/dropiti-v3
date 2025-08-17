@@ -352,7 +352,6 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
 
           {/* Location Section */}
           <LocationSection
-            data={propertyData}
             propertyId={propertyId}
             onUpdateField={updateTempField}
             errors={errors}
@@ -360,15 +359,9 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
 
           {/* Property Details Section */}
           <PropertyDetailsSection
-            data={propertyData}
-            tempData={tempData}
-            isEditing={editingSection === 'details'}
-            onStartEdit={() => startEditing('details')}
-            onCancelEdit={cancelEditing}
-            onSaveEdit={() => saveSection('details')}
+            propertyId={propertyId}
             onUpdateField={updateTempField}
             errors={errors}
-            isSaving={isSaving}
           />
 
           {/* Amenities Section */}
