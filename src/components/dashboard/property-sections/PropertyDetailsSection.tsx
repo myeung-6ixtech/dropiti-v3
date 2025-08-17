@@ -32,6 +32,17 @@ interface UpdatePropertyData {
   pets_allowed?: boolean;
 }
 
+// Default unit details to prevent undefined state - moved outside component to avoid dependency issues
+const defaultUnitDetails: Required<NonNullable<PropertyData['unitDetails']>> = {
+  bedrooms: 0,
+  bathrooms: 0,
+  grossArea: 0,
+  grossAreaUnit: '',
+  netArea: 0,
+  furnished: 'non-furnished',
+  petsAllowed: false
+};
+
 export function PropertyDetailsSection({
   propertyId,
   onUpdateField,
@@ -39,17 +50,6 @@ export function PropertyDetailsSection({
 }: PropertyDetailsSectionProps) {
   
   const { showToast } = useToast();
-  
-  // Default unit details to prevent undefined state
-  const defaultUnitDetails: Required<NonNullable<PropertyData['unitDetails']>> = {
-    bedrooms: 0,
-    bathrooms: 0,
-    grossArea: 0,
-    grossAreaUnit: '',
-    netArea: 0,
-    furnished: 'non-furnished',
-    petsAllowed: false
-  };
 
   // Internal state management
   const [isEditing, setIsEditing] = useState(false);
@@ -107,7 +107,7 @@ export function PropertyDetailsSection({
     if (propertyId) {
       fetchPropertyDetails();
     }
-  }, [propertyId, showToast]);
+  }, [propertyId, showToast, onUpdateField]);
   
   // Internal edit functions
   const handleStartEdit = () => {

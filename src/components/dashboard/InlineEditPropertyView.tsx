@@ -29,30 +29,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
   const [originalData, setOriginalData] = useState<PropertyData>({});
   const router = useRouter();
 
-  // Load existing property data
-  const loadPropertyData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await propertiesAPI.getPropertyByUuid(propertyId);
-      if (response.success && response.data?.property) {
-        const transformedData = transformApiDataToPropertyData(response.data.property);
-        setPropertyData(transformedData);
-        propertyDataRef.current = transformedData; // Initialize ref
-        setTempData(transformedData);
-        setOriginalData(transformedData);
-      }
-    } catch (error) {
-      console.error('Error loading property:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [propertyId]);
-
-  useEffect(() => {
-    loadPropertyData();
-  }, [loadPropertyData]);
-
-  const normalizeAmenities = (amenities: unknown): string[] => {
+  const normalizeAmenities = useCallback((amenities: unknown): string[] => {
     if (Array.isArray(amenities)) {
       return amenities;
     } else if (amenities && typeof amenities === 'string') {
@@ -61,9 +38,9 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       return Object.values(amenities).filter(val => typeof val === 'string') as string[];
     }
     return [];
-  };
+  }, []);
 
-  const transformApiDataToPropertyData = (apiProperty: Record<string, unknown>): PropertyData => {
+  const transformApiDataToPropertyData = useCallback((apiProperty: Record<string, unknown>): PropertyData => {
     // Transform API property data to PropertyData format
     return {
       propertyType: ((apiProperty.details as Record<string, unknown>)?.propertyType as string) === 'residential' ? 'residential' : 'commercial',
@@ -106,7 +83,30 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
         availableDate: apiProperty.availableDate as string || null,
       },
     };
-  };
+  }, [normalizeAmenities]);
+
+  // Load existing property data
+  const loadPropertyData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await propertiesAPI.getPropertyByUuid(propertyId);
+      if (response.success && response.data?.property) {
+        const transformedData = transformApiDataToPropertyData(response.data.property);
+        setPropertyData(transformedData);
+        propertyDataRef.current = transformedData; // Initialize ref
+        setTempData(transformedData);
+        setOriginalData(transformedData);
+      }
+    } catch (error) {
+      console.error('Error loading property:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [propertyId, transformApiDataToPropertyData]);
+
+  useEffect(() => {
+    loadPropertyData();
+  }, [loadPropertyData]);
 
   const startEditing = (section: string) => {
     console.log('InlineEditPropertyView: startEditing called for section:', section);

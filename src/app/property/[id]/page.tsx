@@ -249,7 +249,7 @@ export default function PropertyDetailPage() {
     };
 
     loadProperty();
-  }, [params.id]);
+  }, [params.id, authUser?.id, checkExistingOffer]);
 
   // Check for existing offers when auth user changes
   useEffect(() => {

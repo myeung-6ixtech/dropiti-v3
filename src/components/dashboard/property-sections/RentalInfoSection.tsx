@@ -24,6 +24,14 @@ interface UpdateRentalData {
   availability_date?: string;
 }
 
+// Default rental details to prevent undefined state - moved outside component to avoid dependency issues
+const defaultRentalDetails: Required<NonNullable<PropertyData['rentalDetails']>> = {
+  listingName: '',
+  listingDescription: '',
+  rentalPrice: 0,
+  availableDate: null
+};
+
 export function RentalInfoSection({
   propertyId,
   onUpdateField,
@@ -31,14 +39,6 @@ export function RentalInfoSection({
 }: RentalInfoSectionProps) {
   
   const { showToast } = useToast();
-  
-  // Default rental details to prevent undefined state
-  const defaultRentalDetails: Required<NonNullable<PropertyData['rentalDetails']>> = {
-    listingName: '',
-    listingDescription: '',
-    rentalPrice: 0,
-    availableDate: null
-  };
 
   // Internal state management
   const [isEditing, setIsEditing] = useState(false);
@@ -86,7 +86,7 @@ export function RentalInfoSection({
     if (propertyId) {
       fetchRentalDetails();
     }
-  }, [propertyId, showToast]); // Removed onUpdateField from dependencies
+  }, [propertyId, showToast, onUpdateField]); // Added onUpdateField back to dependencies
   
   // Internal edit functions
   const handleStartEdit = () => {
@@ -107,7 +107,7 @@ export function RentalInfoSection({
       const updateData: UpdateRentalData = {};
       
       if (localRentalDetails.rentalPrice !== undefined) updateData.rental_price = localRentalDetails.rentalPrice;
-      if (localRentalDetails.availableDate) updateData.availability_date = localRentalDetails.availableDate;
+      if (localRentalDetails.availableDate) updateData.availability_date = localRentalDetails.availableDate.toString();
       
       const response = await propertiesAPI.updateProperty(propertyId, updateData);
       

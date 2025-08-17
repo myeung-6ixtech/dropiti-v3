@@ -126,7 +126,7 @@ export function LocationSection({
     if (propertyId) {
       fetchAddressData();
     }
-  }, [propertyId, showToast]); // ✅ Removed onUpdateField from dependencies
+  }, [propertyId, showToast, onUpdateField]); // Added onUpdateField back to dependencies
 
   // Internal edit functions
   const handleStartEdit = () => {    
