@@ -74,7 +74,7 @@ export default function PropertiesPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Properties</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-0">Properties</h1>
             <p className="text-gray-600 mt-1">Manage your property listings</p>
           </div>
           <Link href="/dashboard/add-property" className="btn-primary flex items-center">
@@ -88,7 +88,7 @@ export default function PropertiesPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center space-x-4">
           <div className="relative flex-1 max-w-md">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
               type="text"
               placeholder="Search properties..."

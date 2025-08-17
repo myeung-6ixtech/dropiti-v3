@@ -53,6 +53,7 @@ const footerSections: FooterSection[] = [
       { name: 'Terms of Service', href: '/terms' },
       { name: 'Privacy Policy', href: '/privacy' },
       { name: 'Cookie Policy', href: '/cookies' },
+      { name: 'Listing Guidelines', href: '/listing-guidelines' },
     ]
   }
 ];
@@ -225,6 +226,12 @@ export default function Footer({ className = '' }: FooterProps) {
                 className={footerStyles.bottomLink}
               >
                 Cookies
+              </Link>
+              <Link
+                href="/listing-guidelines"
+                className={footerStyles.bottomLink}
+              >
+                Guidelines
               </Link>
             </div>
           </div>
