@@ -6,6 +6,7 @@ import { PropertyData } from '@/types/property';
 import { getAllAmenities } from '@/constants/amenities';
 import { getAmenityIconByName } from '@/constants/amenity-icons';
 import { propertiesAPI } from '@/lib/api-client';
+import { useToast } from '@/context/ToastContext'; // ✅ Added toast import
 
 interface AmenitiesSectionProps {
   data: PropertyData;
@@ -21,27 +22,20 @@ export function AmenitiesSection({
   errors
 }: AmenitiesSectionProps) {
   
+  const { showToast } = useToast(); // ✅ Added toast hook
+  
   // Internal state management
   const [isEditing, setIsEditing] = useState(false);
   const [localAmenities, setLocalAmenities] = useState<string[]>([]);
   const [isSavingLocally, setIsSavingLocally] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  // ✅ Removed showSuccessMessage state - no longer needed
   
   // Initialize local amenities when data changes
   useEffect(() => {
     const normalizedAmenities = normalizeAmenities(data.amenities);
     setLocalAmenities(normalizedAmenities);
   }, [data.amenities]);
-  
-  // Debug logging when component renders
-  console.log('=== AMENITIES SECTION RENDER ===');
-  console.log('isEditing:', isEditing);
-  console.log('data.amenities:', data.amenities);
-  console.log('localAmenities:', localAmenities);
-  console.log('Type of localAmenities:', typeof localAmenities);
-  console.log('Is Array?', Array.isArray(localAmenities));
-  console.log('=== END RENDER DEBUG ===');
-  
+ 
   // Helper function to normalize amenities data
   const normalizeAmenities = (amenities: unknown): string[] => {
     if (Array.isArray(amenities)) {
@@ -56,42 +50,25 @@ export function AmenitiesSection({
   
   const handleAmenityToggle = (amenityId: string) => {
     try {
-      console.log('=== AMENITY TOGGLE DEBUG ===');
-      console.log('Toggling amenity ID:', amenityId);
-      console.log('Current localAmenities:', localAmenities);
-      console.log('Type of localAmenities:', typeof localAmenities);
-      console.log('Is Array?', Array.isArray(localAmenities));
-      
       // Use local state directly - it's guaranteed to be an array
       const currentAmenities = localAmenities;
-      console.log('Using localAmenities directly:', currentAmenities);
-      
-      console.log('Checking if amenityId exists:', amenityId, 'in array:', currentAmenities);
-      console.log('Result of includes check:', currentAmenities.includes(amenityId));
-      
       const newAmenities = currentAmenities.includes(amenityId)
         ? currentAmenities.filter(a => a !== amenityId)
         : [...currentAmenities, amenityId];
       
-      console.log('New amenities array:', newAmenities);
-      console.log('Updating local state with:', newAmenities);
-      
       // Update local state
       setLocalAmenities(newAmenities);
-      
-      console.log('=== END AMENITY TOGGLE DEBUG ===');
+  
     } catch (error) {
       console.error('Error in handleAmenityToggle:', error);
     }
   };
 
   const handleStartEdit = () => {
-    console.log('Starting edit mode');
     setIsEditing(true);
   };
 
   const handleCancelEdit = () => {
-    console.log('Canceling edit mode');
     setIsEditing(false);
     // Reset to original data
     const normalizedAmenities = normalizeAmenities(data.amenities);
@@ -99,14 +76,14 @@ export function AmenitiesSection({
   };
 
   const handleSaveEdit = async () => {
-    try {      
-      // Set local loading state
+    try {
       setIsSavingLocally(true);
       
-      // Call the API to update the property
       const response = await propertiesAPI.updateProperty(propertyId, {
         amenities: localAmenities
       });
+      
+      console.log('API response:', response);
       
       if (response.success) {        
         // Call the parent's onUpdateField to sync the parent component
@@ -115,23 +92,22 @@ export function AmenitiesSection({
         // Update local state to reflect the saved data
         setLocalAmenities(localAmenities);
         
-        // Show success message
-        setShowSuccessMessage(true);
+        // ✅ Show success toast instead of inline message
+        showToast('success', 'Amenities updated successfully!');
         
         // Exit edit mode
         setIsEditing(false);
         
-        // Hide success message after 3 seconds
-        setTimeout(() => {
-          setShowSuccessMessage(false);
-        }, 3000);
+        // ✅ No need for setTimeout - toast handles its own timing
       } else {
         console.error('Failed to update amenities:', response.error);
-        // You could set an error state here if needed
+        // ✅ Show error toast for better user feedback
+        showToast('error', `Failed to update amenities: ${response.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error updating amenities:', error);
-      // You could set an error state here if needed
+      // ✅ Show error toast for better user feedback
+      showToast('error', 'Error updating amenities. Please try again.');
     } finally {
       // Always clear the loading state
       setIsSavingLocally(false);
@@ -144,7 +120,7 @@ export function AmenitiesSection({
       return <IconComponent className="h-5 w-5 text-gray-600" />;
     }
     // Fallback to a generic icon if no specific icon is found
-    return <div className="h-5 w-5 bg-gray-400 rounded-full flex-shrink-0" />;
+    return <div className="h-5 w-4 bg-gray-400 rounded-full flex-shrink-0" />;
   };
 
   const getAmenityDisplayName = (amenityId: string) => {
@@ -181,8 +157,6 @@ export function AmenitiesSection({
               // Use localAmenities directly - it's guaranteed to be an array
               const isChecked = localAmenities.includes(amenity.id);
               
-              console.log(`Amenity ${amenity.id} (${amenity.name}): isChecked = ${isChecked}, localAmenities =`, localAmenities);
-              
               return (
                 <div key={amenity.id} className="flex items-center space-x-3">
                   <input
@@ -201,14 +175,18 @@ export function AmenitiesSection({
       ) : (
         <div className="grid grid-cols-2 gap-4">
           {(() => {
-            // Ensure amenities is always an array for display
-            let amenitiesToShow: string[] = [];
-            if (Array.isArray(data.amenities)) {
-              amenitiesToShow = data.amenities;
-            } else if (data.amenities && typeof data.amenities === 'string') {
-              amenitiesToShow = [data.amenities];
-            } else if (data.amenities && typeof data.amenities === 'object') {
-              amenitiesToShow = Object.values(data.amenities).filter(val => typeof val === 'string') as string[];
+            // ✅ Use localAmenities instead of data.amenities for immediate display updates
+            let amenitiesToShow: string[] = localAmenities;
+            
+            // Fallback to data.amenities only if localAmenities is empty
+            if (!amenitiesToShow || amenitiesToShow.length === 0) {
+              if (Array.isArray(data.amenities)) {
+                amenitiesToShow = data.amenities;
+              } else if (data.amenities && typeof data.amenities === 'string') {
+                amenitiesToShow = [data.amenities];
+              } else if (data.amenities && typeof data.amenities === 'object') {
+                amenitiesToShow = Object.values(data.amenities).filter(val => typeof val === 'string') as string[];
+              }
             }
             
             if (amenitiesToShow.length > 0) {
@@ -229,11 +207,7 @@ export function AmenitiesSection({
         </div>
       )}
 
-      {showSuccessMessage && (
-        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-700 text-sm mb-0">✅ Amenities updated successfully!</p>
-        </div>
-      )}
+      {/* ✅ Removed showSuccessMessage display - now using toast notifications */}
       
       {errors.amenities && (
         <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">

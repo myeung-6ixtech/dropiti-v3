@@ -152,21 +152,13 @@ export function LocationSection({
   const handleSaveEdit = async () => {
     try {
       setIsSavingLocally(true);
-      
-      console.log('🔍 LocationSection: handleSaveEdit called');
-      console.log('🔍 LocationSection: localAddress before formatting:', localAddress);
-      
       // Format the address using the utility function to ensure consistent database structure
-      const formattedAddress = formatAddressForDatabase(localAddress);
-      console.log('🔍 LocationSection: formattedAddress for database:', formattedAddress);
-      
-      // Call the API to update the property with the standardized address format
-      console.log('🔍 LocationSection: Calling updateProperty API with:', { propertyId, address: formattedAddress });
+      const formattedAddress = formatAddressForDatabase(localAddress)
+
       const response = await propertiesAPI.updateProperty(propertyId, {
         address: formattedAddress
       });
-      
-      console.log('🔍 LocationSection: API response:', response);
+
       
       if (response.success) {
         // ✅ Update both current and original address data after successful save
@@ -181,7 +173,6 @@ export function LocationSection({
         // Exit edit mode
         setIsEditing(false);
         
-        console.log('🔍 LocationSection: Address update completed successfully');
       } else {
         console.error('🔍 LocationSection: Failed to update address:', response.error);
         showToast('error', 'Failed to update address. Please try again.');
