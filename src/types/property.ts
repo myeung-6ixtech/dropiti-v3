@@ -12,12 +12,13 @@ export interface PropertyData {
     unit?: string;
     floor?: string;
     block?: string;
-    buildingName?: string;
+    building?: string;
     addressLine1?: string;
     addressLine2?: string;
     district?: string;
     state?: string;
     country?: string;
+    city?: string;
     showSpecificLocation?: boolean;
   };
   

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
+import { formatPropertyLocation } from '@/lib/utils';
 
 const GET_PROPERTY_QUERY = `
   query GetProperty($property_uuid: uuid!) {
@@ -81,9 +82,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const property = typedData.real_estate_property_listing[0];
+    
+    // Transform the response to include both raw address and formatted location
+    const transformedProperty = {
+      ...property,
+      location: formatPropertyLocation(property.address), // Formatted location for display
+      address: property.address, // Raw JSON address data for editing
+    };
+
     return NextResponse.json({
       success: true,
-      data: typedData.real_estate_property_listing[0],
+      data: transformedProperty,
     });
   } catch (error) {
     console.error('Get property error:', error);

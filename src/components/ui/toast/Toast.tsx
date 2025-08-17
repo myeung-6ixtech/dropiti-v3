@@ -53,7 +53,7 @@ const Toast: React.FC<ToastProps> = ({ type, message, onClose }) => {
           {getIcon()}
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium">{message}</p>
+          <p className="text-sm font-medium mb-0">{message}</p>
         </div>
       </div>
       <button

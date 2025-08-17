@@ -222,6 +222,7 @@ export async function GET(request: NextRequest) {
         title: property.title,
         description: property.description,
         location: formatPropertyLocation(property.address),
+        address: property.address, // Raw JSON address data for editing
         price: property.rental_price || 0,
         bedrooms: property.num_bedroom || 0,
         bathrooms: property.num_bathroom || 0,

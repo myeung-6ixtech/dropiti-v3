@@ -43,11 +43,6 @@ export function PhotosSection({
   onPhotoSaveError
 }: PhotosSectionProps) {
   
-  // Debug logging to track data changes
-  console.log('PhotosSection: Received data:', data);
-  console.log('PhotosSection: isEditing:', isEditing);
-  console.log('PhotosSection: data.uploadedImages:', data.uploadedImages);
-  console.log('PhotosSection: data.displayImage:', data.displayImage);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -144,14 +139,9 @@ export function PhotosSection({
   };
 
   const handleSave = async () => {
-    try {
-      console.log('PhotosSection: handleSave called with selectedFiles:', selectedFiles.length);
-      console.log('PhotosSection: Current data.uploadedImages:', data.uploadedImages);
-      console.log('PhotosSection: Current data.displayImage:', data.displayImage);
-      
+    try {      
       // If there are new files to upload, handle S3 upload here
       if (selectedFiles.length > 0) {
-        console.log('PhotosSection: Starting S3 upload for', selectedFiles.length, 'files');
         
         // Create FormData for the upload API
         const formData = new FormData();
@@ -172,31 +162,24 @@ export function PhotosSection({
         }
 
         const uploadResult: { success: boolean; data?: { uploadedFiles: UploadedFile[] }; error?: string } = await uploadResponse.json();
-        console.log('PhotosSection: S3 upload result:', uploadResult);
         
         if (uploadResult.success && uploadResult.data?.uploadedFiles) {
           // Get the URLs of uploaded files
-          const uploadedUrls = uploadResult.data.uploadedFiles.map((file: UploadedFile) => file.url);
-          console.log('PhotosSection: Uploaded URLs:', uploadedUrls);
-          
+          const uploadedUrls = uploadResult.data.uploadedFiles.map((file: UploadedFile) => file.url);        
           // Update the property data with new photo URLs
           const currentUploadedImages = data.uploadedImages || [];
           const newUploadedImages = [...currentUploadedImages, ...uploadedUrls];
-          console.log('PhotosSection: New uploadedImages array:', newUploadedImages);
           
           // Update the uploadedImages field - this is a top-level field
-          console.log('PhotosSection: Calling onUpdateField for uploadedImages with value:', newUploadedImages);
           onUpdateField('', 'uploadedImages', newUploadedImages);
           
           // Update the displayImage field to the first photo if it's empty - this is also a top-level field
           if (!data.displayImage && uploadedUrls.length > 0) {
-            console.log('PhotosSection: Setting displayImage to:', uploadedUrls[0]);
             onUpdateField('', 'displayImage', uploadedUrls[0]);
           }
           
           // Clear selected files after successful upload
           setSelectedFiles([]);
-          console.log('PhotosSection: Selected files cleared');
           
           // NEW: Call property update API directly
           const propertyUpdateData = {
@@ -204,15 +187,7 @@ export function PhotosSection({
             uploaded_images: newUploadedImages,
             photos: newUploadedImages, // backward compatibility
           };
-          
-          console.log('PhotosSection: Calling property update API with:', propertyUpdateData);
-          console.log('PhotosSection: Property ID:', propertyId);
-          console.log('PhotosSection: API endpoint:', `/api/v1/properties/update-property`);
-          console.log('PhotosSection: Full request payload:', {
-            id: propertyId,
-            updates: propertyUpdateData
-          });
-          
+                  
           try {
             const propertyResponse = await fetch(`/api/v1/properties/update-property`, {
               method: 'PUT',
@@ -227,16 +202,12 @@ export function PhotosSection({
             
             if (!propertyResponse.ok) {
               const errorText = await propertyResponse.text();
-              console.error('PhotosSection: Property update failed with status:', propertyResponse.status);
-              console.error('PhotosSection: Error response:', errorText);
               throw new Error(`Failed to update property photos: ${propertyResponse.status} - ${errorText}`);
             }
             
             const propertyResult = await propertyResponse.json();
-            console.log('PhotosSection: Property update result:', propertyResult);
             
             if (propertyResult.success) {
-              console.log('PhotosSection: Photos saved successfully');
               onPhotoSaveSuccess?.();
               // Exit editing mode
               onSaveEdit();

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { propertiesAPI } from '@/lib/api-client';
 import { PropertyData } from '@/types/property';
+import { formatAddressForDatabase } from '@/utils/addressFormatter';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { BasicInfoSection } from './property-sections/BasicInfoSection';
 import { LocationSection } from './property-sections/LocationSection';
@@ -76,12 +77,13 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
         unit: (apiProperty.details as Record<string, unknown>)?.unit as string || '',
         floor: (apiProperty.details as Record<string, unknown>)?.floor as string || '',
         block: (apiProperty.details as Record<string, unknown>)?.block as string || '',
-        buildingName: (apiProperty.details as Record<string, unknown>)?.buildingName as string || '',
-        addressLine1: (apiProperty.address as Record<string, unknown>)?.addressLine1 as string || (apiProperty.address as Record<string, unknown>)?.street as string || '',
+        building: (apiProperty.address as Record<string, unknown>)?.building as string || (apiProperty.details as Record<string, unknown>)?.buildingName as string || '',
+        addressLine1: (apiProperty.address as Record<string, unknown>)?.addressLine1 as string || '',
         addressLine2: (apiProperty.address as Record<string, unknown>)?.addressLine2 as string || '',
-        district: (apiProperty.address as Record<string, unknown>)?.district as string || (apiProperty.address as Record<string, unknown>)?.city as string || '',
+        district: (apiProperty.address as Record<string, unknown>)?.district as string || '',
         state: (apiProperty.address as Record<string, unknown>)?.state as string || '',
         country: (apiProperty.address as Record<string, unknown>)?.country as string || '',
+        city: (apiProperty.address as Record<string, unknown>)?.city as string || (apiProperty.address as Record<string, unknown>)?.district as string || '',
         showSpecificLocation: (apiProperty.address as Record<string, unknown>)?.showSpecificLocation as boolean || false,
       },
       unitDetails: {
@@ -202,7 +204,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     const apiData = {
       title: propertyData.rentalDetails?.listingName || 'Property Listing',
       description: propertyData.rentalDetails?.listingDescription || 'Property description',
-      address: buildLocationString(propertyData.address),
+      address: formatAddressForDatabase(propertyData.address),
       property_type: propertyData.propertyType,
       rental_space: propertyData.rentalSpace,
       num_bedroom: propertyData.unitDetails?.bedrooms || 0,
@@ -228,17 +230,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     return apiData;
   };
 
-  const buildLocationString = (address: PropertyData['address']) => {
-    if (!address) return '';
-    const parts = [];
-    if (address.buildingName) parts.push(address.buildingName);
-    if (address.addressLine1) parts.push(address.addressLine1);
-    if (address.addressLine2) parts.push(address.addressLine2);
-    if (address.district) parts.push(address.district);
-    if (address.state) parts.push(address.state);
-    if (address.country) parts.push(address.country);
-    return parts.join(', ');
-  };
+
 
   const updateTempField = (section: string, field: string, value: unknown) => {
     console.log('InlineEditPropertyView: updateTempField called with:', { section, field, value });

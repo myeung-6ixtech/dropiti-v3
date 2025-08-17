@@ -1,75 +1,194 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PencilIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { PencilIcon} from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 import { propertiesAPI } from '@/lib/api-client';
+import { formatAddressForDatabase } from '@/utils/addressFormatter';
+import { useToast } from '@/context/ToastContext';
 
 interface LocationSectionProps {
-  data: PropertyData;
   propertyId: string;
   onUpdateField: (section: string, field: string, value: unknown) => void;
   errors: Record<string, string>;
 }
 
 export function LocationSection({
-  data,
   propertyId,
   onUpdateField,
   errors
 }: LocationSectionProps) {
   
+  const { showToast } = useToast();
+  
   // Internal state management
   const [isEditing, setIsEditing] = useState(false);
   const [localAddress, setLocalAddress] = useState<PropertyData['address']>({});
+  const [originalAddress, setOriginalAddress] = useState<PropertyData['address']>({}); // Store original data
   const [isSavingLocally, setIsSavingLocally] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
-  
-  // Initialize local address when data changes
+  const [isLoadingAddress, setIsLoadingAddress] = useState(true);
+
+
+  // Fetch address data directly from database
   useEffect(() => {
-    setLocalAddress(data.address || {});
-  }, [data.address]);
-  
+    const fetchAddressData = async () => {
+      try {
+        setIsLoadingAddress(true);
+        console.log('🔍 LocationSection: Fetching address data for propertyId:', propertyId);
+        
+        const response = await propertiesAPI.getPropertyByUuid(propertyId);
+        console.log('🔍 LocationSection: API response:', response);
+        
+        if (response.success && response.data?.property) {
+          const property = response.data.property;
+          console.log('🔍 LocationSection: Property data received:', property);
+          console.log('🔍 LocationSection: Property address field:', property.address);
+          console.log('🔍 LocationSection: Property location field:', property.location);
+          console.log('🔍 LocationSection: All property keys:', Object.keys(property));
+          console.log('🔍 LocationSection: Property details field:', property.details);
+          
+          // Extract address data from the API response
+          let addressData: PropertyData['address'] = {};
+          
+          console.log('🔍 LocationSection: Processing address data from API response');
+          console.log('🔍 LocationSection: property.address type:', typeof property.address);
+          console.log('🔍 LocationSection: property.address value:', property.address);
+          
+          if (property.address && typeof property.address === 'string') {
+            // If address is a JSON string, parse it
+            try {
+              const parsedAddress = JSON.parse(property.address);
+              console.log('🔍 LocationSection: Parsed address from JSON string:', parsedAddress);
+              addressData = {
+                unit: parsedAddress.unit || '',
+                floor: parsedAddress.floor || '',
+                block: parsedAddress.block || '',
+                building: parsedAddress.building || '',
+                addressLine1: parsedAddress.addressLine1 || '',
+                addressLine2: parsedAddress.addressLine2 || '',
+                district: parsedAddress.district || '',
+                state: parsedAddress.state || '',
+                country: parsedAddress.country || '',
+                city: parsedAddress.city || '',
+                showSpecificLocation: parsedAddress.showSpecificLocation || false,
+              };
+            } catch (parseError) {
+              console.error('🔍 LocationSection: Error parsing address JSON:', parseError);
+              showToast('error', 'Error parsing address data');
+            }
+          } else if (property.address && typeof property.address === 'object') {
+            // If address is already an object, use it directly
+            console.log('🔍 LocationSection: Using address object directly:', property.address);
+            addressData = property.address as PropertyData['address'];
+          } else if (property.details) {
+            // Extract address data from details (fallback for old format)
+            console.log('🔍 LocationSection: Using details fallback for address data');
+            const details = property.details as Record<string, unknown>;
+            addressData = {
+              unit: details.unit as string || '',
+              floor: details.floor as string || '',
+              block: (details.block as string) || '',
+              building: (details.buildingName as string) || '',
+              addressLine1: details.addressLine1 as string || '',
+              addressLine2: details.addressLine2 as string || '',
+              district: details.district as string || '',
+              state: details.state as string || '',
+              country: details.country as string || '',
+              city: details.city as string || '',
+              showSpecificLocation: false,
+            };
+          } else {
+            console.warn('🔍 LocationSection: No address data found in any expected location');
+          }
+          
+          console.log('🔍 LocationSection: Final extracted address data:', addressData);
+          
+          // ✅ Store both current and original address data
+          setLocalAddress(addressData);
+          setOriginalAddress(addressData); // Keep a copy of the original data
+          
+          // ✅ Only call onUpdateField if we have meaningful data to share
+          // This prevents infinite loops and unnecessary parent updates
+          if (Object.keys(addressData).length > 0) {
+            console.log('🔍 LocationSection: Updating parent with fetched address data');
+            onUpdateField('address', 'address', addressData);
+          }
+        } else {
+          console.error('🔍 LocationSection: Failed to fetch property data:', response.error);
+          showToast('error', 'Failed to load address data');
+        }
+      } catch (error) {
+        console.error('🔍 LocationSection: Error fetching address data:', error);
+        showToast('error', 'Error loading address data');
+      } finally {
+        setIsLoadingAddress(false);
+      }
+    };
+    
+    if (propertyId) {
+      fetchAddressData();
+    }
+  }, [propertyId, showToast]); // ✅ Removed onUpdateField from dependencies
+
   // Internal edit functions
-  const handleStartEdit = () => {
+  const handleStartEdit = () => {    
+    console.log('🔍 LocationSection: handleStartEdit called');
+    console.log('🔍 LocationSection: Current localAddress state:', localAddress);
+    console.log('🔍 LocationSection: Setting isEditing to true');
+    
     setIsEditing(true);
-    setShowSuccessMessage(false);
+    // ✅ No need to modify localAddress - it already has the current data
   };
 
   const handleCancelEdit = () => {
+    console.log('🔍 LocationSection: handleCancelEdit called');
+    console.log('🔍 LocationSection: Resetting to original address:', originalAddress);
+    
     setIsEditing(false);
-    // Reset to original data
-    setLocalAddress(data.address || {});
+    // ✅ Reset to the original fetched data, not data.address
+    setLocalAddress(originalAddress);
   };
 
   const handleSaveEdit = async () => {
     try {
       setIsSavingLocally(true);
       
-      // Call the API to update the property
+      console.log('🔍 LocationSection: handleSaveEdit called');
+      console.log('🔍 LocationSection: localAddress before formatting:', localAddress);
+      
+      // Format the address using the utility function to ensure consistent database structure
+      const formattedAddress = formatAddressForDatabase(localAddress);
+      console.log('🔍 LocationSection: formattedAddress for database:', formattedAddress);
+      
+      // Call the API to update the property with the standardized address format
+      console.log('🔍 LocationSection: Calling updateProperty API with:', { propertyId, address: formattedAddress });
       const response = await propertiesAPI.updateProperty(propertyId, {
-        address: localAddress as Record<string, unknown>
+        address: formattedAddress
       });
       
+      console.log('🔍 LocationSection: API response:', response);
+      
       if (response.success) {
+        // ✅ Update both current and original address data after successful save
+        setOriginalAddress(localAddress);
+        
         // Call the parent's onUpdateField to sync the parent component
         onUpdateField('address', 'address', localAddress);
         
-        // Show success message
-        setShowSuccessMessage(true);
+        // Show success toast instead of inline message
+        showToast('success', 'Address updated successfully!');
         
         // Exit edit mode
         setIsEditing(false);
         
-        // Hide success message after 3 seconds
-        setTimeout(() => {
-          setShowSuccessMessage(false);
-        }, 3000);
+        console.log('🔍 LocationSection: Address update completed successfully');
       } else {
-        console.error('Failed to update address:', response.error);
+        console.error('🔍 LocationSection: Failed to update address:', response.error);
+        showToast('error', 'Failed to update address. Please try again.');
       }
     } catch (error) {
-      console.error('Error updating address:', error);
+      console.error('🔍 LocationSection: Error updating address:', error);
+      showToast('error', 'Error updating address. Please try again.');
     } finally {
       setIsSavingLocally(false);
     }
@@ -105,7 +224,6 @@ export function LocationSection({
           </div>
         )}
       </div>
-
       {isEditing ? (
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
@@ -140,15 +258,14 @@ export function LocationSection({
               />
             </div>
           </div>
-          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Building Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Estate/Building</label>
             <input
               type="text"
-              value={localAddress?.buildingName || ''}
-              onChange={(e) => setLocalAddress({ ...localAddress, buildingName: e.target.value })}
+              value={localAddress?.building || ''}
+              onChange={(e) => setLocalAddress({ ...localAddress, building: e.target.value })}
               className="form-input w-full"
-              placeholder="Building name"
+              placeholder="Building, apartment, or estate name"
             />
           </div>
 
@@ -159,7 +276,7 @@ export function LocationSection({
               value={localAddress?.addressLine1 || ''}
               onChange={(e) => setLocalAddress({ ...localAddress, addressLine1: e.target.value })}
               className="form-input w-full"
-              placeholder="Street address"
+              placeholder="Additional address info"
             />
           </div>
 
@@ -171,6 +288,17 @@ export function LocationSection({
               onChange={(e) => setLocalAddress({ ...localAddress, addressLine2: e.target.value })}
               className="form-input w-full"
               placeholder="Apartment, suite, etc."
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+            <input
+              type="text"
+              value={localAddress?.city || ''}
+              onChange={(e) => setLocalAddress({ ...localAddress, city: e.target.value })}
+              className="form-input w-full"
+              placeholder="City"
             />
           </div>
 
@@ -223,37 +351,48 @@ export function LocationSection({
       ) : (
         <div className="space-y-3">
           <div className="flex items-start space-x-3">
-            <MapPinIcon className="h-5 w-5 text-gray-400 mt-0.5" />
             <div className="flex-1">
+              {/* Primary Address Line - Building, Block, Unit, Floor */}
               <p className="font-medium text-gray-900">
-                {data.address?.buildingName && `${data.address.buildingName}, `}
-                {data.address?.block && `Block ${data.address.block}, `}
-                {data.address?.unit && `Unit ${data.address.unit}, `}
-                {data.address?.floor && `Floor ${data.address.floor}`}
+                {localAddress?.building && `${localAddress.building}`}
+                {localAddress?.block && `, Block ${localAddress.block}`}
+                {localAddress?.unit && `, Unit ${localAddress.unit}`}
+                {localAddress?.floor && `, Floor ${localAddress.floor}`}
               </p>
+              
+              {/* Secondary Address Lines */}
+              {(localAddress?.addressLine1 || localAddress?.addressLine2) && (
+                <p className="text-gray-600">
+                  {localAddress?.addressLine1}
+                  {localAddress?.addressLine2 && localAddress.addressLine1 && `, `}
+                  {localAddress?.addressLine2}
+                </p>
+              )}
+              
+              {/* City, District, State, Country */}
               <p className="text-gray-600">
-                {data.address?.addressLine1}
-                {data.address?.addressLine2 && `, ${data.address.addressLine2}`}
+                {[
+                  localAddress?.city,
+                  localAddress?.district,
+                  localAddress?.state,
+                  localAddress?.country
+                ].filter(Boolean).join(', ')}
               </p>
-              <p className="text-gray-600">
-                {data.address?.district}
-                {data.address?.state && `, ${data.address.state}`}
-                {data.address?.country && `, ${data.address.country}`}
-              </p>
+              
+              {/* Show if no address data is available */}
+              {(!localAddress || Object.keys(localAddress).length === 0 || 
+                (!localAddress.building && !localAddress.block && !localAddress.unit && 
+                 !localAddress.floor && !localAddress.city)) && (
+                <p className="text-gray-500 italic">No address information available</p>
+              )}
             </div>
           </div>
           
-          {data.address?.showSpecificLocation && (
+          {localAddress?.showSpecificLocation && (
             <div className="text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
               ✓ Specific location will be shown to potential tenants
             </div>
           )}
-        </div>
-      )}
-
-      {showSuccessMessage && (
-        <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-700 text-sm mb-0">✅ Address updated successfully!</p>
         </div>
       )}
 
