@@ -31,6 +31,14 @@ export interface Offer {
   lastActionBy: 'initiator' | 'recipient';
   lastActionAt: string;
   lastActionType: OfferActionType;
+  // New fields for final accepted terms
+  finalRentPrice?: number;
+  finalRentPriceCurrency?: string;
+  finalNumLeasingMonths?: number;
+  finalPaymentFrequency?: string;
+  finalMoveInDate?: string;
+  finalAcceptedAt?: string;
+  finalAcceptedBy?: 'initiator' | 'recipient';
   // Related data
   initiator?: OfferUser;
   recipient?: OfferUser;
@@ -67,7 +75,8 @@ export type OfferActionType =
   | 'RECIPIENT_CANCELLED'
   | 'RECIPIENT_ACCEPTED'
   | 'RECIPIENT_COUNTERED'
-  | 'RECIPIENT_REJECTED';
+  | 'RECIPIENT_REJECTED'
+  | 'SYSTEM_REJECTED';
 
 // ========================================
 // OFFER ACTION INTERFACE
@@ -238,7 +247,8 @@ export const OFFER_ACTION_LABELS: Record<OfferActionType, string> = {
   RECIPIENT_CANCELLED: 'Offer Cancelled',
   RECIPIENT_ACCEPTED: 'Offer Accepted',
   RECIPIENT_COUNTERED: 'Counter Offer Sent',
-  RECIPIENT_REJECTED: 'Offer Rejected'
+  RECIPIENT_REJECTED: 'Offer Rejected',
+  SYSTEM_REJECTED: 'Automatically Rejected'
 };
 
 // ========================================

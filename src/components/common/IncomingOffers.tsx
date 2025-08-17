@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
-import CounterOfferModal from '@/components/common/CounterOfferModal';
 import OfferCard from '@/components/common/OfferCard';
 import { Offer } from '@/types/offer';
 
@@ -28,9 +27,6 @@ export default function IncomingOffers({
   const [error, setError] = useState<string | null>(null);
   const [isCounterOfferModalOpen, setIsCounterOfferModalOpen] = useState(false);
   const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<Offer | null>(null);
-  const [isCounterOfferViewModalOpen, setIsCounterOfferViewModalOpen] = useState(false);
-  const [selectedOfferForView, setSelectedOfferForView] = useState<Offer | null>(null);
-  const [respondingToCounter, setRespondingToCounter] = useState(false);
 
   // Fetch offers for the recipient (landlord)
   useEffect(() => {
@@ -136,68 +132,6 @@ export default function IncomingOffers({
     }
   };
 
-  // Handle viewing counter offer details
-  const handleViewCounterOffer = (offer: Offer) => {
-    setSelectedOfferForView(offer);
-    setIsCounterOfferViewModalOpen(true);
-  };
-
-  // Handle accepting counter offer
-  const handleAcceptCounterOffer = async (offerId: string) => {
-    try {
-      setRespondingToCounter(true);
-      
-      // Call the accept offer API
-      const response = await offersAPI.acceptOffer(offerId, recipientFirebaseUid);
-      
-      if (response.success) {
-        // Close modal and refresh offers
-        setIsCounterOfferViewModalOpen(false);
-        setSelectedOfferForView(null);
-        
-        // Refresh the offers list
-        const refreshResponse = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
-        if (refreshResponse.success && refreshResponse.data) {
-          setOffers(refreshResponse.data);
-        }
-      } else {
-        console.error('Failed to accept counter offer:', response.error);
-      }
-    } catch (error) {
-      console.error('Error accepting counter offer:', error);
-    } finally {
-      setRespondingToCounter(false);
-    }
-  };
-
-  // Handle rejecting counter offer
-  const handleRejectCounterOffer = async (offerId: string) => {
-    try {
-      setRespondingToCounter(true);
-      
-      // Call the reject offer API
-      const response = await offersAPI.rejectOffer(offerId, recipientFirebaseUid);
-      
-      if (response.success) {
-        // Close modal and refresh offers
-        setIsCounterOfferViewModalOpen(false);
-        setSelectedOfferForView(null);
-        
-        // Refresh the offers list
-        const refreshResponse = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
-        if (refreshResponse.success && refreshResponse.data) {
-          setOffers(refreshResponse.data);
-        }
-      } else {
-        console.error('Failed to reject counter offer:', response.error);
-      }
-    } catch (error) {
-      console.error('Error rejecting counter offer:', error);
-    } finally {
-      setRespondingToCounter(false);
-    }
-  };
-
   if (loading) {
     return <CenteredLoadingSpinner />;
   }
@@ -253,8 +187,6 @@ export default function IncomingOffers({
             onAcceptOffer={handleAcceptOffer}
             onRejectOffer={handleRejectOffer}
             onCounterOffer={handleCounterOffer}
-            onViewCounterOfferDetails={handleViewCounterOffer}
-            respondingToCounter={respondingToCounter}
             currentUserId={recipientFirebaseUid}
             onOfferStatusChange={() => {
               // Refresh the offers list when an offer status changes
@@ -293,25 +225,6 @@ export default function IncomingOffers({
             moveInDate: selectedOfferForCounter.moveInDate
           }}
           onOfferSubmit={handleCounterOfferSubmit}
-        />
-      )}
-
-      {/* Counter Offer View Modal */}
-      {selectedOfferForView && (
-        <CounterOfferModal
-          isOpen={isCounterOfferViewModalOpen}
-          onClose={() => {
-            setIsCounterOfferViewModalOpen(false);
-            setSelectedOfferForView(null);
-          }}
-          offer={selectedOfferForView}
-          loading={false}
-          responding={respondingToCounter}
-          finalCounterSubmitted={false}
-          onAccept={handleAcceptCounterOffer}
-          onFinalCounter={() => {}} // Not applicable for incoming offers
-          onReject={handleRejectCounterOffer}
-          isIncomingOffer={true}
         />
       )}
     </div>

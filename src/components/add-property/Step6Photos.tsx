@@ -213,9 +213,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
             <li>• Include photos of all major rooms and areas</li>
             <li>• Make sure photos are well-lit and clean</li>
             <li>• Avoid blurry or dark images</li>
-            <li>• Maximum 20 photos allowed</li>
-            <li>• Photos will be stored securely in S3 with organized folder structure</li>
-            <li>• Upload happens automatically when you submit the listing</li>
+            <li>• Maximum 10 photos allowed</li>
           </ul>
         </div>
       </div>

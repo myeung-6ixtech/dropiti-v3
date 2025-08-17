@@ -28,6 +28,14 @@ interface GraphQLOffer {
   last_action_by?: 'initiator' | 'recipient';
   last_action_type?: string;
   last_action_at?: string;
+  // Final accepted terms fields
+  final_rent_price?: number;
+  final_rent_price_currency?: string;
+  final_num_leasing_months?: number;
+  final_payment_frequency?: string;
+  final_move_in_date?: string;
+  final_accepted_at?: string;
+  final_accepted_by?: 'initiator' | 'recipient';
 }
 
 interface GraphQLUser {
@@ -96,6 +104,14 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
       last_action_by
       last_action_type
       last_action_at
+      # Final accepted terms fields
+      final_rent_price
+      final_rent_price_currency
+      final_num_leasing_months
+      final_payment_frequency
+      final_move_in_date
+      final_accepted_at
+      final_accepted_by
     }
   }
 `;
@@ -133,6 +149,14 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
       last_action_by
       last_action_type
       last_action_at
+      # Final accepted terms fields
+      final_rent_price
+      final_rent_price_currency
+      final_num_leasing_months
+      final_payment_frequency
+      final_move_in_date
+      final_accepted_at
+      final_accepted_by
     }
   }
 `;
@@ -281,6 +305,14 @@ export async function GET(request: NextRequest) {
         lastActionBy: offer.last_action_by,
         lastActionType: offer.last_action_type,
         lastActionAt: offer.last_action_at,
+        // Final accepted terms fields
+        finalRentPrice: offer.final_rent_price,
+        finalRentPriceCurrency: offer.final_rent_price_currency,
+        finalNumLeasingMonths: offer.final_num_leasing_months,
+        finalPaymentFrequency: offer.final_payment_frequency,
+        finalMoveInDate: offer.final_move_in_date,
+        finalAcceptedAt: offer.final_accepted_at,
+        finalAcceptedBy: offer.final_accepted_by,
         // Include initiator (tenant) details
         initiator: initiator ? {
           uuid: initiator.uuid,

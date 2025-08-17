@@ -5,6 +5,7 @@ import {
   StarIcon, 
   CheckCircleIcon,
 } from '@heroicons/react/24/outline';
+import { passportStyles } from '@/styles/index';
 
 interface DropitiPassportProps {
   user: {
@@ -39,42 +40,42 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+    <div className={passportStyles.container}>
       {/* Dropiti Passport Header */}
-      <div className="text-center mb-6 pb-4 border-b border-gray-100">
-        <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-3">
-          <span className="text-white text-lg font-bold">D</span>
+      <div className={passportStyles.header}>
+        <div className={passportStyles.logo}>
+          <span className={passportStyles.logoText}>D</span>
         </div>
-        <h2 className="text-lg font-bold text-gray-900">Dropiti Passport</h2>
-        <p className="text-xs text-gray-500">Your Digital Identity</p>
+        <h2 className={passportStyles.title}>Dropiti Passport</h2>
+        <p className={passportStyles.subtitle}>Your Digital Identity</p>
       </div>
 
       {/* Profile Section - Instagram Style */}
-      <div className="mb-6">
-        <div className="flex items-start space-x-3">
-          <div className="relative">
-            <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-100">
+      <div className={passportStyles.profile}>
+        <div className={passportStyles.profileContent}>
+          <div className={passportStyles.avatarContainer}>
+            <div className={passportStyles.avatar}>
               <Image
                 src={user.avatar || '/src/assets/img/Portrait_Placeholder.png'}
                 alt={user.name}
                 width={64}
                 height={64}
-                className="w-full h-full object-cover"
+                className={passportStyles.avatarImage}
               />
             </div>
             {user.verified && (
-              <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1">
-                <CheckCircleIcon className="h-2.5 w-2.5 text-white" />
+              <div className={passportStyles.verificationBadge}>
+                <CheckCircleIcon className={passportStyles.verificationIcon} />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-gray-900 text-base">{user.name}</h3>
-            <div className="flex items-center space-x-1">
-              <StarIcon className="h-3 w-3 text-yellow-400" />
-              <span className="text-xs font-medium text-gray-900">{user.rating}</span>
-              <span className="text-xs text-gray-500">•</span>
-              <span className="text-xs text-gray-600">{user.reviewCount} reviews</span>
+          <div className={passportStyles.profileInfo}>
+            <h3 className={passportStyles.profileName}>{user.name}</h3>
+            <div className={passportStyles.profileRating}>
+              <StarIcon className={passportStyles.ratingStar} />
+              <span className={passportStyles.ratingValue}>{user.rating}</span>
+              <span className={passportStyles.ratingSeparator}>•</span>
+              <span className={passportStyles.reviewCount}>{user.reviewCount} reviews</span>
             </div>
           </div>
         </div>
@@ -82,43 +83,43 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
 
       {/* Quick Stats Row */}
       {user.stats && (
-        <div className="flex items-center justify-between text-xs mb-4 p-3 bg-gray-50 rounded-xl">
-          <div className="text-center">
-            <div className="font-semibold text-gray-900">{user.stats.totalProperties}</div>
-            <div className="text-gray-500">Properties</div>
+        <div className={passportStyles.stats}>
+          <div className={passportStyles.statItem}>
+            <div className={passportStyles.statValue}>{user.stats.totalProperties}</div>
+            <div className={passportStyles.statLabel}>Properties</div>
           </div>
-          <div className="text-center">
-            <div className="font-semibold text-gray-900">{user.stats.totalGuests}</div>
-            <div className="text-gray-500">Tenants</div>
+          <div className={passportStyles.statItem}>
+            <div className={passportStyles.statValue}>{user.stats.totalGuests}</div>
+            <div className={passportStyles.statLabel}>Tenants</div>
           </div>
-          <div className="text-center">
-            <div className="font-semibold text-gray-900">{user.stats.responseRate}%</div>
-            <div className="text-gray-500">Response Rate</div>
+          <div className={passportStyles.statItem}>
+            <div className={passportStyles.statValue}>{user.stats.responseRate}%</div>
+            <div className={passportStyles.statLabel}>Response Rate</div>
           </div>
         </div>
       )}
 
       {/* About Section */}
       {user.about && (
-        <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
+        <div className={passportStyles.section}>
+          <h4 className={passportStyles.sectionTitle}>
             About
           </h4>
-          <p className="text-xs text-gray-700 leading-relaxed line-clamp-3">{user.about}</p>
+          <p className={passportStyles.sectionContent}>{user.about}</p>
         </div>
       )}
 
       {/* Languages Section */}
       {user.languages && Array.isArray(user.languages) && user.languages.length > 0 && (
-        <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
+        <div className={passportStyles.section}>
+          <h4 className={passportStyles.sectionTitle}>
             Languages
           </h4>
-          <div className="flex flex-wrap gap-1.5">
+          <div className={passportStyles.languages}>
             {user.languages.map((language) => (
               <span
                 key={language}
-                className="bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium"
+                className={passportStyles.languageTag}
               >
                 {language}
               </span>
@@ -129,58 +130,58 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
 
       {/* Education Section */}
       {user.education && (
-        <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
+        <div className={passportStyles.section}>
+          <h4 className={passportStyles.sectionTitle}>
             Education
           </h4>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-700">{user.education}</span>
+          <div className={passportStyles.sectionSimple}>
+            <span className={passportStyles.sectionText}>{user.education}</span>
           </div>
         </div>
       )}
 
       {/* Occupation Section */}
       {user.occupation && (
-        <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
+        <div className={passportStyles.section}>
+          <h4 className={passportStyles.sectionTitle}>
             Occupation
           </h4>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-700">{user.occupation}</span>
+          <div className={passportStyles.sectionSimple}>
+            <span className={passportStyles.sectionText}>{user.occupation}</span>
           </div>
         </div>
       )}
 
       {/* Marital Status Section */}
       {user.maritalStatus && (
-        <div className="mb-4">
-          <h4 className="font-medium text-gray-900 mb-2 text-sm flex items-center">
+        <div className={passportStyles.section}>
+          <h4 className={passportStyles.sectionTitle}>
             Marital Status
           </h4>
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-700">{user.maritalStatus}</span>
+          <div className={passportStyles.sectionSimple}>
+            <span className={passportStyles.sectionText}>{user.maritalStatus}</span>
           </div>
         </div>
       )}
 
       {/* Location & Join Date */}
-      <div className="mb-4 p-3 bg-gray-50 rounded-xl">
-        <div className="space-y-2">
+      <div className={passportStyles.infoSection}>
+        <div className={passportStyles.infoContent}>
           {user.location && (
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-700">{user.location}</span>
+            <div className={passportStyles.infoItem}>
+              <span className={passportStyles.infoText}>{user.location}</span>
             </div>
           )}
-          <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-700">Member since {formatJoinDate(user.joinDate)}</span>
+          <div className={passportStyles.infoItem}>
+            <span className={passportStyles.infoText}>Member since {formatJoinDate(user.joinDate)}</span>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="text-center pt-3 border-t border-gray-100">
-        <p className="text-xs text-blue-600 font-medium">Dropiti Verified Profile</p>
-        <p className="text-xs text-gray-500 mt-1">Building trust in the community</p>
+      <div className={passportStyles.footer}>
+        <p className={passportStyles.verifiedText}>Dropiti Verified Profile</p>
+        <p className={passportStyles.trustText}>Building trust in the community</p>
       </div>
     </div>
   );

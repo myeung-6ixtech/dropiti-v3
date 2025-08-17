@@ -19,8 +19,6 @@ interface OfferCardProps {
   onAcceptOffer?: (offerId: string) => void;
   onRejectOffer?: (offerId: string) => void;
   onCounterOffer?: (offerId: string) => void;
-  onViewCounterOfferDetails?: (offer: Offer) => void;
-  respondingToCounter?: boolean;
   currentUserId: string;
   onOfferStatusChange?: () => void;
 }
@@ -34,8 +32,6 @@ export default function OfferCard({
   onAcceptOffer,
   onRejectOffer,
   onCounterOffer,
-  onViewCounterOfferDetails,
-  respondingToCounter = false,
   currentUserId,
   onOfferStatusChange
 }: OfferCardProps) {
@@ -62,7 +58,6 @@ export default function OfferCard({
           onAcceptOffer={onAcceptOffer}
           onRejectOffer={onRejectOffer}
           onCounterOffer={onCounterOffer}
-          respondingToCounter={respondingToCounter}
           currentUserId={currentUserId}
           onOfferStatusChange={onOfferStatusChange}
         />
@@ -74,8 +69,7 @@ export default function OfferCard({
           offer={offer}
           onAcceptOffer={onAcceptOffer}
           onRejectOffer={onRejectOffer}
-          onViewCounterOffer={onViewCounterOfferDetails ? () => onViewCounterOfferDetails(offer) : undefined}
-          respondingToCounter={respondingToCounter}
+          onCounterOffer={onCounterOffer}
           currentUserId={currentUserId}
           onOfferStatusChange={onOfferStatusChange}
         />
@@ -109,8 +103,6 @@ export default function OfferCard({
       ) : (
         <OutgoingOfferCardStatus
           offer={offer}
-          currentUserId={currentUserId}
-          onOfferStatusChange={onOfferStatusChange}
         />
       )}
     </div>

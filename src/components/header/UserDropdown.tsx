@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useAuth } from "@/context/AuthContext";
+import { headerDropdownStyles } from "@/styles/index";
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,12 +20,12 @@ export default function UserDropdown() {
   }
 
   return (
-    <div className="relative">
+    <div className={headerDropdownStyles.userDropdown.container}>
       <button
         onClick={toggleDropdown}
-        className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
+        className={headerDropdownStyles.userDropdown.button}
       >
-        <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
+        <span className={headerDropdownStyles.userDropdown.avatar}>
           <Image
             width={44}
             height={44}
@@ -34,8 +35,8 @@ export default function UserDropdown() {
         </span>
 
         <svg
-          className={`stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
+          className={`${headerDropdownStyles.userDropdown.chevron} ${
+            isOpen ? headerDropdownStyles.userDropdown.chevronOpen : ""
           }`}
           width="18"
           height="20"
@@ -56,24 +57,24 @@ export default function UserDropdown() {
       <Dropdown
         isOpen={isOpen}
         onClose={closeDropdown}
-        className="absolute right-0 mt-[17px] flex w-[260px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
+        className={headerDropdownStyles.userDropdown.menu}
       >
         <div>
-          <span className="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">
+          <span className={headerDropdownStyles.userDropdown.email}>
             {user?.email}
           </span>
         </div>
 
-        <ul className="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
+        <ul className={headerDropdownStyles.userDropdown.list}>
           <li>
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
               href="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              className={headerDropdownStyles.userDropdown.item}
             >
               <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
+                className={headerDropdownStyles.userDropdown.itemIcon}
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -95,10 +96,10 @@ export default function UserDropdown() {
               onItemClick={closeDropdown}
               tag="a"
               href="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              className={headerDropdownStyles.userDropdown.item}
             >
               <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
+                className={headerDropdownStyles.userDropdown.itemIcon}
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -120,10 +121,10 @@ export default function UserDropdown() {
               onItemClick={closeDropdown}
               tag="a"
               href="/profile"
-              className="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+              className={headerDropdownStyles.userDropdown.item}
             >
               <svg
-                className="fill-gray-500 group-hover:fill-gray-700 dark:fill-gray-400 dark:group-hover:fill-gray-300"
+                className={headerDropdownStyles.userDropdown.itemIcon}
                 width="24"
                 height="24"
                 viewBox="0 0 24 24"
@@ -143,10 +144,10 @@ export default function UserDropdown() {
         </ul>
         <button
           onClick={() => { logout(); closeDropdown(); }}
-          className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300 w-full"
+          className={headerDropdownStyles.userDropdown.logoutButton}
         >
           <svg
-            className="fill-gray-500 group-hover:fill-gray-700 dark:group-hover:fill-gray-300"
+            className={headerDropdownStyles.userDropdown.logoutIcon}
             width="24"
             height="24"
             viewBox="0 0 24 24"

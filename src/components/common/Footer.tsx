@@ -7,6 +7,7 @@ import {
   EnvelopeIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline';
+import { footerStyles } from '@/styles/index';
 
 interface FooterProps {
   className?: string;
@@ -121,32 +122,32 @@ export default function Footer({ className = '' }: FooterProps) {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className={`bg-gray-900 text-white ${className}`}>
+    <footer className={`${footerStyles.container} ${className}`}>
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className={footerStyles.mainContent}>
+        <div className={footerStyles.grid}>
           {/* Company Info */}
-          <div className="lg:col-span-1">
-            <div className="flex items-center space-x-2 mb-4">
-              <BuildingOfficeIcon className="h-8 w-8 text-blue-400" />
-              <span className="text-xl font-bold">Dropiti</span>
+          <div className={footerStyles.companyInfo}>
+            <div className={footerStyles.companyHeader}>
+              <BuildingOfficeIcon className={footerStyles.companyIcon} />
+              <span className={footerStyles.companyName}>Dropiti</span>
             </div>
-            <p className="text-gray-300 mb-6 text-sm">
+            <p className={footerStyles.companyDescription}>
               Your trusted partner in finding the perfect property. We connect tenants with landlords 
               and help everyone find their ideal space.
             </p>
             
             {/* Social Links */}
-            <div className="flex space-x-4">
+            <div className={footerStyles.socialLinks}>
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   target={social.external ? '_blank' : undefined}
                   rel={social.external ? 'noopener noreferrer' : undefined}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                  className={footerStyles.socialLink}
                 >
-                  <span className="sr-only">{social.name}</span>
+                  <span className={footerStyles.socialSrOnly}>{social.name}</span>
                   {social.icon()}
                 </a>
               ))}
@@ -156,15 +157,15 @@ export default function Footer({ className = '' }: FooterProps) {
           {/* Footer Sections */}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">
+              <h3 className={footerStyles.section}>
                 {section.title}
               </h3>
-              <ul className="space-y-2">
+              <ul className={footerStyles.sectionLinks}>
                 {section.links.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+                      className={footerStyles.sectionLink}
                     >
                       {link.name}
                     </Link>
@@ -176,16 +177,16 @@ export default function Footer({ className = '' }: FooterProps) {
         </div>
 
         {/* Contact Information */}
-        <div className="mt-8 pt-8 border-t border-gray-800">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className={footerStyles.contactSection}>
+          <div className={footerStyles.contactGrid}>
             {contactInfo.map((contact, index) => {
               const Icon = contact.icon;
               return (
-                <div key={index} className="flex items-center space-x-3">
-                  <Icon className="h-5 w-5 text-blue-400 flex-shrink-0" />
+                <div key={index} className={footerStyles.contactItem}>
+                  <Icon className={footerStyles.contactIcon} />
                   <a
                     href={contact.href}
-                    className="text-gray-300 hover:text-white transition-colors duration-200 text-sm"
+                    className={footerStyles.contactLink}
                   >
                     {contact.text}
                   </a>
@@ -197,31 +198,31 @@ export default function Footer({ className = '' }: FooterProps) {
       </div>
 
       {/* Bottom Bar */}
-      <div className="bg-gray-800 border-t border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+      <div className={footerStyles.bottomBar}>
+        <div className={footerStyles.bottomContent}>
+          <div className={footerStyles.bottomFlex}>
             {/* Copyright */}
-            <div className="text-gray-300 text-sm">
+            <div className={footerStyles.copyright}>
               © {currentYear} Dropiti. All rights reserved.
             </div>
 
             {/* Additional Links */}
-            <div className="flex space-x-6 text-sm">
+            <div className={footerStyles.bottomLinks}>
               <Link
                 href="/terms"
-                className="text-gray-300 hover:text-white transition-colors duration-200"
+                className={footerStyles.bottomLink}
               >
                 Terms
               </Link>
               <Link
                 href="/privacy"
-                className="text-gray-300 hover:text-white transition-colors duration-200"
+                className={footerStyles.bottomLink}
               >
                 Privacy
               </Link>
               <Link
                 href="/cookies"
-                className="text-gray-300 hover:text-white transition-colors duration-200"
+                className={footerStyles.bottomLink}
               >
                 Cookies
               </Link>

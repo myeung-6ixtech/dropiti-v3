@@ -3,14 +3,17 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, MagnifyingGlassIcon, UserIcon, BuildingOfficeIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, MagnifyingGlassIcon, UserIcon, BuildingOfficeIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
+import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
+import { navigationStyles } from '@/styles/index';
 
 export default function Navigation() {
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuth();
+  const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -60,63 +63,61 @@ export default function Navigation() {
   // Show loading state while determining authentication status
   if (isLoading) {
     return (
-      <nav className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link href="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
-                <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">dropiti</span>
+      <nav className={navigationStyles.container}>
+        <div className={navigationStyles.content}>
+          <div className={navigationStyles.header}>
+            <div className={navigationStyles.brand}>
+              <Link href="/" className={navigationStyles.brandLink}>
+                <BuildingOfficeIcon className={navigationStyles.brandIcon} />
+                <span className={navigationStyles.brandText}>dropiti</span>
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4 sm:space-x-8">
+            <div className={navigationStyles.menu}>
               <Link
                 href="/"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`${navigationStyles.link} ${
                   isActive('/') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    ? navigationStyles.linkActive
+                    : navigationStyles.linkInactive
                 }`}
               >
-                <HomeIcon className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Home</span>
+                <HomeIcon className={navigationStyles.linkIcon} />
+                <span className={navigationStyles.linkText}>Home</span>
               </Link>
               
               <Link
                 href="/search"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`${navigationStyles.link} ${
                   isActive('/search') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    ? navigationStyles.linkActive
+                    : navigationStyles.linkInactive
                 }`}
               >
-                <MagnifyingGlassIcon className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Search</span>
+                <MagnifyingGlassIcon className={navigationStyles.linkIcon} />
+                <span className={navigationStyles.linkText}>Search</span>
               </Link>
               
               <Link
                 href="/dashboard"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`${navigationStyles.link} ${
                   isActive('/dashboard') 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                    ? navigationStyles.linkActive
+                    : navigationStyles.linkInactive
                 }`}
               >
-                <UserIcon className="h-5 w-5 mr-1" />
-                <span className="hidden sm:inline">Dashboard</span>
+                <UserIcon className={navigationStyles.linkIcon} />
+                <span className={navigationStyles.linkText}>Dashboard</span>
               </Link>
               
-              {/* Loading state for auth button */}
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse"></div>
-                <div className="text-sm text-gray-700">
-                  <span className="hidden sm:inline">Welcome, </span>
-                  <span className="font-medium text-gray-400 animate-pulse">Loading...</span>
-                </div>
-                <div className="bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm font-medium animate-pulse">
-                  <span className="hidden sm:inline">Loading...</span>
-                  <span className="sm:hidden">...</span>
+              {/* Loading state for auth button - simplified skeleton */}
+              <div className={navigationStyles.loadingSkeleton}>
+                {/* Skeleton profile photo */}
+                <div className={navigationStyles.loadingAvatar}></div>
+                {/* Skeleton button */}
+                <div className={navigationStyles.loadingButton}>
+                  <span className={navigationStyles.loadingText}>Loading...</span>
+                  <span className={navigationStyles.loadingTextMobile}>...</span>
                 </div>
               </div>
             </div>
@@ -127,67 +128,78 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="bg-white shadow-lg border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0 flex items-center hover:opacity-80 transition-opacity">
-              <BuildingOfficeIcon className="h-8 w-8 text-blue-600" />
-              <span className="ml-2 text-xl font-bold text-gray-900">dropiti</span>
+    <nav className={navigationStyles.container}>
+      <div className={navigationStyles.content}>
+        <div className={navigationStyles.header}>
+          <div className={navigationStyles.brand}>
+            {/* Mobile menu button - only show on mobile and dashboard pages */}
+            {isMobile && pathname.startsWith('/dashboard') && (
+              <button
+                onClick={toggleSidebar}
+                className={navigationStyles.menuButton}
+                aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+              >
+                <Bars3Icon className={navigationStyles.menuIcon} />
+              </button>
+            )}
+            
+            <Link href="/" className={navigationStyles.brandLink}>
+              <BuildingOfficeIcon className={navigationStyles.brandIcon} />
+              <span className={navigationStyles.brandText}>dropiti</span>
             </Link>
           </div>
           
-          <div className="flex items-center space-x-4 sm:space-x-8">
+          <div className={navigationStyles.menu}>
             <Link
               href="/"
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`${navigationStyles.link} ${
                 isActive('/') 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  ? navigationStyles.linkActive
+                  : navigationStyles.linkInactive
               }`}
             >
-              <HomeIcon className="h-5 w-5 mr-1" />
-              <span className="hidden sm:inline">Home</span>
+              <HomeIcon className={navigationStyles.linkIcon} />
+              <span className={navigationStyles.linkText}>Home</span>
             </Link>
             
             <Link
               href="/search"
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`${navigationStyles.link} ${
                 isActive('/search') 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  ? navigationStyles.linkActive
+                  : navigationStyles.linkInactive
               }`}
             >
-              <MagnifyingGlassIcon className="h-5 w-5 mr-1" />
-              <span className="hidden sm:inline">Search</span>
+              <MagnifyingGlassIcon className={navigationStyles.linkIcon} />
+              <span className={navigationStyles.linkText}>Search</span>
             </Link>
             
             <Link
               href="/dashboard"
-              className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`${navigationStyles.link} ${
                 isActive('/dashboard') 
-                  ? 'text-blue-600 bg-blue-50' 
-                  : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
+                  ? navigationStyles.linkActive
+                  : navigationStyles.linkInactive
               }`}
             >
-              <UserIcon className="h-5 w-5 mr-1" />
-              <span className="hidden sm:inline">Dashboard</span>
+              <UserIcon className={navigationStyles.linkIcon} />
+              <span className={navigationStyles.linkText}>Dashboard</span>
             </Link>
             
             {isAuthenticated ? (
-              <div className="relative" ref={dropdownRef}>
+              <div className={navigationStyles.userDropdown} ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={navigationStyles.userButton}
                 >
-                  <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-gray-200">
+                  <div className={navigationStyles.userAvatar}>
                     {user?.avatar ? (
                       <Image 
                         src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')} 
                         alt="User avatar" 
                         width={32}
                         height={32}
-                        className="w-full h-full object-cover"
+                        className={navigationStyles.userAvatarImage}
                       />
                     ) : (
                       <Image
@@ -195,22 +207,22 @@ export default function Navigation() {
                         alt="Default avatar"
                         width={32}
                         height={32}
-                        className="w-full h-full object-cover"
+                        className={navigationStyles.userAvatarImage}
                       />
                     )}
                   </div>
-                  <ChevronDownIcon className={`h-4 w-4 text-gray-600 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDownIcon className={`${navigationStyles.userChevron} ${isDropdownOpen ? navigationStyles.userChevronOpen : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                  <div className={navigationStyles.dropdownMenu}>
                     <Link
                       href="/dashboard"
-                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      className={navigationStyles.dropdownItem}
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      <UserIcon className="h-4 w-4 mr-3 text-gray-500" />
+                      <UserIcon className={navigationStyles.dropdownItemIcon} />
                       View Dashboard
                     </Link>
                     <button
@@ -219,7 +231,7 @@ export default function Navigation() {
                         handleLogout();
                       }}
                       disabled={isLoggingOut}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={navigationStyles.dropdownItemButton}
                     >
                       {isLoggingOut ? (
                         <>
@@ -231,7 +243,7 @@ export default function Navigation() {
                         </>
                       ) : (
                         <>
-                          <svg className="h-4 w-4 mr-3 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className={navigationStyles.dropdownItemIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                           </svg>
                           Logout
@@ -244,10 +256,10 @@ export default function Navigation() {
             ) : (
               <Link
                 href="/auth/signin"
-                className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm"
+                className={navigationStyles.authButton}
               >
-                <span className="hidden sm:inline">Sign In</span>
-                <span className="sm:hidden">Login</span>
+                <span className={navigationStyles.authText}>Sign In</span>
+                <span className={navigationStyles.authTextMobile}>Login</span>
               </Link>
             )}
           </div>

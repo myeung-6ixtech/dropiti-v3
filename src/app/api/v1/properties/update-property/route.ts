@@ -2,25 +2,36 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 
 const UPDATE_PROPERTY_MUTATION = `
-  mutation UpdateProperty($id: uuid!, $updates: properties_set_input!) {
-    update_properties_by_pk(
-      pk_columns: { id: $id }
+  mutation UpdateProperty($property_uuid: uuid!, $updates: real_estate_property_listing_set_input!) {
+    update_real_estate_property_listing(
+      where: { property_uuid: { _eq: $property_uuid } }
       _set: $updates
     ) {
-      id
-      title
-      description
-      location
-      price
-      bedrooms
-      bathrooms
-      imageUrl
-      details
-      rules
-      amenities
-      minimumLease
-      availableDate
-      updatedAt
+      affected_rows
+      returning {
+        id
+        property_uuid
+        title
+        description
+        address
+        property_type
+        rental_space
+        num_bedroom
+        num_bathroom
+        gross_area_size
+        gross_area_size_unit
+        furnished
+        pets_allowed
+        amenities
+        display_image
+        uploaded_images
+        rental_price
+        rental_price_currency
+        availability_date
+        is_public
+        created_at
+        updated_at
+      }
     }
   }
 `;
@@ -47,63 +58,86 @@ export async function PUT(request: NextRequest) {
     const preparedUpdates: {
       title?: string;
       description?: string;
-      location?: string;
-      price?: number;
-      bedrooms?: number;
-      bathrooms?: number;
-      imageUrl?: string;
-      details?: Record<string, unknown>;
-      rules?: string[];
+      address?: string;
+      property_type?: string;
+      rental_space?: string;
+      num_bedroom?: number;
+      num_bathroom?: number;
+      gross_area_size?: number;
+      gross_area_size_unit?: string;
+      furnished?: boolean;
+      pets_allowed?: boolean;
       amenities?: string[];
-      minimumLease?: number;
-      availableDate?: string | null;
-      updatedAt?: string;
+      display_image?: string;
+      uploaded_images?: string[];
+      rental_price?: number;
+      rental_price_currency?: string;
+      availability_date?: string | null;
+      is_public?: boolean;
+      updated_at?: string;
     } = {};
     
     if (updates.title) preparedUpdates.title = updates.title;
     if (updates.description) preparedUpdates.description = updates.description;
-    if (updates.location) preparedUpdates.location = updates.location;
-    if (updates.price) preparedUpdates.price = parseFloat(updates.price);
-    if (updates.bedrooms) preparedUpdates.bedrooms = parseInt(updates.bedrooms);
-    if (updates.bathrooms) preparedUpdates.bathrooms = parseInt(updates.bathrooms);
-    if (updates.imageUrl) preparedUpdates.imageUrl = updates.imageUrl;
-    if (updates.details) preparedUpdates.details = updates.details;
-    if (updates.rules) preparedUpdates.rules = updates.rules;
-    if (updates.amenities) preparedUpdates.amenities = updates.amenities;
-    if (updates.minimumLease) preparedUpdates.minimumLease = parseInt(updates.minimumLease);
-    if (updates.availableDate) preparedUpdates.availableDate = updates.availableDate;
+    if (updates.address) preparedUpdates.address = updates.address;
+    if (updates.property_type) preparedUpdates.property_type = updates.property_type;
+    if (updates.rental_space) preparedUpdates.rental_space = updates.rental_space;
+    if (updates.num_bedroom) preparedUpdates.num_bedroom = parseInt(updates.num_bedroom);
+    if (updates.num_bathroom) preparedUpdates.num_bathroom = parseInt(updates.num_bathroom);
+    if (updates.gross_area_size) preparedUpdates.gross_area_size = parseFloat(updates.gross_area_size);
+    if (updates.gross_area_size_unit) preparedUpdates.gross_area_size_unit = updates.gross_area_size_unit;
+    if (updates.furnished !== undefined) preparedUpdates.furnished = updates.furnished;
+    if (updates.pets_allowed !== undefined) preparedUpdates.pets_allowed = updates.pets_allowed;
+    if (updates.amenities !== undefined) preparedUpdates.amenities = updates.amenities;
+    if (updates.display_image !== undefined) preparedUpdates.display_image = updates.display_image;
+    if (updates.uploaded_images !== undefined) preparedUpdates.uploaded_images = updates.uploaded_images;
+    if (updates.rental_price) preparedUpdates.rental_price = parseFloat(updates.rental_price);
+    if (updates.rental_price_currency) preparedUpdates.rental_price_currency = updates.rental_price_currency;
+    if (updates.availability_date) preparedUpdates.availability_date = updates.availability_date;
+    if (updates.is_public !== undefined) preparedUpdates.is_public = updates.is_public;
     
-    // Always update the updatedAt timestamp
-    preparedUpdates.updatedAt = new Date().toISOString();
+    // Always update the updated_at timestamp
+    preparedUpdates.updated_at = new Date().toISOString();
 
     const data = await executeMutation(UPDATE_PROPERTY_MUTATION, { 
-      id, 
+      property_uuid: id, 
       updates: preparedUpdates 
     });
 
     // Type assertion for the response data
     const typedData = data as {
-      update_properties_by_pk: {
-        id: string;
-        title: string;
-        description: string;
-        location: string;
-        price: number;
-        bedrooms: number;
-        bathrooms: number;
-        imageUrl: string;
-        details: Record<string, unknown>;
-        rules: string[];
-        amenities: string[];
-        minimumLease: number;
-        availableDate: string | null;
-        updatedAt: string;
+      update_real_estate_property_listing: {
+        affected_rows: number;
+        returning: {
+          id: number;
+          property_uuid: string;
+          title: string;
+          description: string;
+          address: string;
+          property_type: string;
+          rental_space: string;
+          num_bedroom: number;
+          num_bathroom: number;
+          gross_area_size: number;
+          gross_area_size_unit: string;
+          furnished: boolean;
+          pets_allowed: boolean;
+          amenities: string[];
+          display_image: string;
+          uploaded_images: string[];
+          rental_price: number;
+          rental_price_currency: string;
+          availability_date: string | null;
+          is_public: boolean;
+          created_at: string;
+          updated_at: string;
+        }[];
       };
     };
 
     return NextResponse.json({
       success: true,
-      data: typedData.update_properties_by_pk,
+      data: typedData.update_real_estate_property_listing.returning[0],
       message: 'Property updated successfully',
     });
   } catch (error) {

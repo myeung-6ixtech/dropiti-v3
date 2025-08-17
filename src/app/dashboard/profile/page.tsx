@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
 import { 
   UserIcon,
@@ -10,13 +11,10 @@ import {
   BriefcaseIcon,
   HeartIcon,
   MapPinIcon,
-  EyeIcon,
-  ClockIcon
+  ClockIcon,
+  PencilIcon
 } from '@heroicons/react/24/outline';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
-import ProfilePhotoUpload from '@/components/common/ProfilePhotoUpload';
-import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages } from '@/types';
-import { User } from '@/types/user'; // Import specifically from user types to avoid conflicts
 
 interface UserProfile {
   displayName: string;
@@ -43,10 +41,11 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const { user: authUser } = useAuth();
+  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
-    displayName: 'Sarah Johnson',
+    displayName: 'dropiti User',
     avatar: '/src/assets/img/Portrait_Placeholder.png',
-    email: 'sarah.johnson@email.com',
+    email: 'new.user@dropiti.com',
     location: 'Central, Hong Kong',
     joinDate: '2020-03-15',
     verified: true,
@@ -66,14 +65,8 @@ export default function ProfilePage() {
     }
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
   const [isLoading, setIsLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
-  useEffect(() => {
-    setTempProfile(profile);
-  }, [profile]);
 
   // Load user data from API when component mounts
   useEffect(() => {
@@ -81,21 +74,10 @@ export default function ProfilePage() {
       if (authUser?.id) {
         try {
           setIsLoading(true);
-          // For now, we'll use the email to identify the user since NextAuth doesn't have firebase_uid
-          // In a real implementation, you'd need to link NextAuth with your user database
           const response = await usersAPI.getUserByFirebaseUid(authUser.id);
           
           if (response.success && response.data) {
             const userData = response.data;
-            
-            // Debug: Log the languages field to see what we're getting
-            console.log('API languages field:', userData.languages);
-            console.log('API languages type:', typeof userData.languages);
-            console.log('API languages isArray:', Array.isArray(userData.languages));
-            
-            // Debug: Log the photo URL
-            console.log('API photo_url field:', userData.photo_url);
-            console.log('API photo_url type:', typeof userData.photo_url);
             
             const newProfile: UserProfile = {
               displayName: userData.display_name || 'Unknown User',
@@ -108,7 +90,6 @@ export default function ProfilePage() {
               reviewCount: userData.review_count || 0,
               about: userData.about || '',
               languages: (() => {
-                // Handle languages field - it might be a JSON string, array, or null
                 if (!userData.languages) return [];
                 if (Array.isArray(userData.languages)) return userData.languages;
                 if (typeof userData.languages === 'string') {
@@ -116,29 +97,24 @@ export default function ProfilePage() {
                     const parsed = JSON.parse(userData.languages);
                     return Array.isArray(parsed) ? parsed : [];
                   } catch {
-                    // If parsing fails, treat as comma-separated string
                     return userData.languages.split(',').map((lang: string) => lang.trim()).filter((lang: string) => lang);
                   }
                 }
                 return [];
               })(),
-              responseTime: 'Within 24 hours', // Default value since response_time field is removed
+              responseTime: 'Within 24 hours',
               education: userData.education || '',
               occupation: userData.occupation || '',
               maritalStatus: userData.marital_status || '',
               phoneNumber: userData.phone_number || '',
               stats: {
                 responseRate: userData.response_rate || 0,
-                totalProperties: 0, // Will be calculated from related tables
-                totalGuests: 0 // Will be calculated from related tables
+                totalProperties: 0,
+                totalGuests: 0
               }
             };
             
-            // Debug: Log the final profile avatar
-            console.log('Final profile avatar:', newProfile.avatar);
-            
             setProfile(newProfile);
-            setTempProfile(newProfile);
           }
         } catch (error) {
           console.error('Failed to load user profile:', error);
@@ -155,112 +131,8 @@ export default function ProfilePage() {
     loadUserProfile();
   }, [authUser?.id]);
 
-  const handleInputChange = (field: keyof UserProfile, value: string | string[]) => {
-    setTempProfile(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleLanguageToggle = (language: string) => {
-    setTempProfile(prev => ({
-      ...prev,
-      languages: prev.languages.includes(language)
-        ? prev.languages.filter(l => l !== language)
-        : [...prev.languages, language]
-    }));
-  };
-
-  const handleSave = async () => {
-    if (!authUser?.id) {
-      setSaveMessage({
-        type: 'error',
-        message: 'You must be logged in to save changes'
-      });
-      return;
-    }
-
-    // Validate required fields
-    if (!tempProfile.displayName.trim()) {
-      setSaveMessage({
-        type: 'error',
-        message: 'Display Name is required'
-      });
-      return;
-    }
-
-    if (!tempProfile.about?.trim()) {
-      setSaveMessage({
-        type: 'error',
-        message: 'About section is required'
-      });
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setSaveMessage(null);
-
-      console.log('Saving profile for Firebase UID:', authUser.id);
-
-      // Since the real_estate_user table uses firebase_uid as the primary key,
-      // we can update directly using the firebase_uid from the auth context
-      
-      // Prepare updates for the API - using the exact field names from User type
-      const updates: Partial<User> = {
-        display_name: tempProfile.displayName,
-        photo_url: tempProfile.avatar,
-        location: tempProfile.location,
-        about: tempProfile.about,
-        languages: tempProfile.languages,
-        phone_number: tempProfile.phoneNumber
-      };
-
-      // Only add fields that exist in the simplified user structure
-      if (tempProfile.education) {
-        updates.education = tempProfile.education;
-      }
-      if (tempProfile.occupation) {
-        updates.occupation = tempProfile.occupation;
-      }
-      if (tempProfile.maritalStatus) {
-        updates.marital_status = tempProfile.maritalStatus;
-      }
-
-      console.log('Updating profile with data:', updates);
-      console.log('Languages field type:', typeof updates.languages, 'Value:', updates.languages);
-
-      // Call the update API using the firebase_uid directly
-      const updateResponse = await usersAPI.updateUser(authUser.id, updates);
-
-      if (updateResponse.success) {
-        setProfile(tempProfile);
-        setIsEditing(false);
-        setSaveMessage({
-          type: 'success',
-          message: 'Profile updated successfully!'
-        });
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => setSaveMessage(null), 3000);
-      } else {
-        throw new Error(updateResponse.error || 'Failed to update profile');
-      }
-    } catch (error) {
-      console.error('Failed to save profile:', error);
-      setSaveMessage({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Failed to save profile'
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setTempProfile(profile);
-    setIsEditing(false);
-    setSaveMessage(null);
+  const handleEditProfile = () => {
+    router.push('/dashboard/profile/edit');
   };
 
   // Map UserProfile to DropitiPassport2 format
@@ -277,30 +149,42 @@ export default function ProfilePage() {
     languages: profile.languages,
     stats: {
       responseRate: profile.stats.responseRate,
-      avgResponseTime: '1h', // Default value since this field is removed from database
+      avgResponseTime: '1h',
       totalProperties: profile.stats.totalProperties,
       totalGuests: profile.stats.totalGuests
     }
   });
 
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/3 mb-8"></div>
+          <div className="space-y-6">
+            <div className="h-96 bg-gray-200 rounded-lg"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Profile Settings</h1>
-        <p className="text-gray-600 mt-2">Customize your Dropiti Passport and manage your profile information</p>
-      </div>
-
-      {/* Loading State */}
-      {isLoading && (
-        <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-3"></div>
-            <span className="text-gray-800">
-              {isEditing ? 'Saving profile changes...' : 'Loading profile data...'}
-            </span>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
+            <p className="text-gray-600 mt-2">View and manage your profile information</p>
           </div>
+          <button
+            onClick={handleEditProfile}
+            className="btn-primary flex items-center space-x-2"
+          >
+            <PencilIcon className="h-4 w-4" />
+            <span>Edit Profile</span>
+          </button>
         </div>
-      )}
+      </div>
 
       {/* Save Message */}
       {saveMessage && (
@@ -346,286 +230,143 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Dropiti Passport Display - Above the form */}
+      {/* Dropiti Passport Display */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-            <EyeIcon className="h-5 w-5 mr-2 text-black" />
-            Your Dropiti Passport
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900">Your Dropiti Passport</h2>
           <span className="text-sm text-gray-500">Live Preview</span>
         </div>
         <p className="text-sm text-gray-600 mb-4">
-          This is how your Dropiti Passport will appear to others. The information you fill out below will be reflected here in real-time.
+          This is how your Dropiti Passport appears to others. Click "Edit Profile" to make changes.
         </p>
         <div className="bg-gray-50 rounded-lg p-4">
-          <DropitiPassport2 user={mapToPassportFormat(tempProfile)} />
+          <DropitiPassport2 user={mapToPassportFormat(profile)} />
         </div>
       </div>
 
-      {/* Profile Form */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900">Personal Information</h2>
-          {!isEditing ? (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="btn-primary font-medium"
-            >
-              Edit Profile
-            </button>
-          ) : (
-            <div className="flex space-x-3">
-              <button
-                onClick={handleSave}
-                disabled={isLoading}
-                className={`px-4 py-2 text-white rounded-lg transition-colors font-medium ${
-                  isLoading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Saving...
+      {/* Profile Summary */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Summary</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Basic Information */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Basic Information</h3>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <UserIcon className="h-5 w-5 text-gray-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Display Name</p>
+                  <p className="font-medium">{profile.displayName}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3">
+                <UserIcon className="h-5 w-5 text-gray-400" />
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium">{profile.email}</p>
+                </div>
+              </div>
+
+              {profile.location && (
+                <div className="flex items-center space-x-3">
+                  <MapPinIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Location</p>
+                    <p className="font-medium">{profile.location}</p>
                   </div>
-                ) : (
-                  'Save Changes'
-                )}
-              </button>
-              <button
-                onClick={handleCancel}
-                disabled={isLoading}
-                className={`px-4 py-2 rounded-lg transition-colors font-medium ${
-                  isLoading 
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                }`}
-              >
-                Cancel
-              </button>
+                </div>
+              )}
+
+              {profile.phoneNumber && (
+                <div className="flex items-center space-x-3">
+                  <UserIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Phone Number</p>
+                    <p className="font-medium">{profile.phoneNumber}</p>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
+
+          {/* Additional Details */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">Additional Details</h3>
+            
+            <div className="space-y-3">
+              {profile.education && (
+                <div className="flex items-center space-x-3">
+                  <AcademicCapIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Education</p>
+                    <p className="font-medium">{profile.education}</p>
+                  </div>
+                </div>
+              )}
+
+              {profile.occupation && (
+                <div className="flex items-center space-x-3">
+                  <BriefcaseIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Occupation</p>
+                    <p className="font-medium">{profile.occupation}</p>
+                  </div>
+                </div>
+              )}
+
+              {profile.maritalStatus && (
+                <div className="flex items-center space-x-3">
+                  <HeartIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Marital Status</p>
+                    <p className="font-medium">{profile.maritalStatus}</p>
+                  </div>
+                </div>
+              )}
+
+              {profile.languages.length > 0 && (
+                <div className="flex items-center space-x-3">
+                  <GlobeAltIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Languages</p>
+                    <p className="font-medium">{profile.languages.join(', ')}</p>
+                  </div>
+                </div>
+              )}
+
+              {profile.responseTime && (
+                <div className="flex items-center space-x-3">
+                  <ClockIcon className="h-5 w-5 text-gray-400" />
+                  <div>
+                    <p className="text-sm text-gray-500">Response Time</p>
+                    <p className="font-medium">{profile.responseTime}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Display Name Field */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-black" />
-                Display Name
-              </span>
-            </label>
-            <input
-              type="text"
-              value={tempProfile.displayName}
-              onChange={(e) => handleInputChange('displayName', e.target.value)}
-              disabled={!isEditing}
-              className="form-input disabled:bg-gray-50 disabled:text-gray-500"
-              placeholder="Enter your display name"
-            />
+        {/* About Section */}
+        {profile.about && (
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900 mb-3">About You</h3>
+            <p className="text-gray-700 leading-relaxed">{profile.about}</p>
           </div>
+        )}
 
-          {/* Profile Photo */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-black" />
-                Profile Photo
-              </span>
-            </label>
-            <ProfilePhotoUpload
-              currentPhotoUrl={tempProfile.avatar}
-              onPhotoChange={(newPhotoUrl) => handleInputChange('avatar', newPhotoUrl)}
-              isEditing={isEditing}
-              disabled={isLoading}
-            />
-          </div>
-
-          {/* About Yourself */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-black" />
-                Tell me About Yourself?
-              </span>
-            </label>
-            <textarea
-              value={tempProfile.about || ''}
-              onChange={(e) => handleInputChange('about', e.target.value)}
-              disabled={!isEditing}
-              rows={4}
-              maxLength={500}
-              className="form-textarea disabled:bg-gray-50 disabled:text-gray-500"
-              placeholder="Share a bit about yourself, your interests, and what makes you unique..."
-            />
-            <div className="flex justify-between items-center mt-1">
-              <p className="text-xs text-gray-500">This will be displayed on your public profile</p>
-              <p className="text-xs text-gray-500">
-                {tempProfile.about?.length || 0}/500 characters
-              </p>
-            </div>
-          </div>
-
-          {/* Languages */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <GlobeAltIcon className="h-4 w-4 mr-2 text-black" />
-                Languages you speak?
-              </span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {availableLanguages.map((language) => (
-                <button
-                  key={language}
-                  onClick={() => isEditing && handleLanguageToggle(language)}
-                  disabled={!isEditing}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    tempProfile.languages.includes(language)
-                      ? 'bg-black text-white border border-black'
-                      : 'bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200'
-                  } ${
-                    !isEditing ? 'cursor-default' : 'cursor-pointer'
-                  }`}
-                >
-                  {language}
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-500 mt-1">Select all languages you can communicate in</p>
-          </div>
-
-          {/* Education */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <AcademicCapIcon className="h-4 w-4 mr-2 text-green-600" />
-                What is your education level?
-              </span>
-            </label>
-            <select
-              value={tempProfile.education || ''}
-              onChange={(e) => handleInputChange('education', e.target.value)}
-              disabled={!isEditing}
-              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
-            >
-              <option value="">Select education level</option>
-              {educationOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Occupation */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <BriefcaseIcon className="h-4 w-4 mr-2 text-purple-600" />
-                What is your occupation?
-              </span>
-            </label>
-            <select
-              value={tempProfile.occupation || ''}
-              onChange={(e) => handleInputChange('occupation', e.target.value)}
-              disabled={!isEditing}
-              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
-            >
-              <option value="">Select occupation</option>
-              {occupationOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Marital Status */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <HeartIcon className="h-4 w-4 mr-2 text-pink-600" />
-                What is your marital status?
-              </span>
-            </label>
-            <select
-              value={tempProfile.maritalStatus || ''}
-              onChange={(e) => handleInputChange('maritalStatus', e.target.value)}
-              disabled={!isEditing}
-              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
-            >
-              <option value="">Select marital status</option>
-              {maritalStatusOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Phone Number */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <UserIcon className="h-4 w-4 mr-2 text-black" />
-                Phone Number
-              </span>
-            </label>
-            <input
-              type="text"
-              value={tempProfile.phoneNumber || ''}
-              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
-              disabled={!isEditing}
-              className="form-input disabled:bg-gray-50 disabled:text-gray-500"
-              placeholder="Enter your phone number"
-            />
-          </div>
-
-          {/* Response Time */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <ClockIcon className="h-4 w-4 mr-2 text-black" />
-                Typical Response Time
-              </span>
-            </label>
-            <select
-              value={tempProfile.responseTime || ''}
-              onChange={(e) => handleInputChange('responseTime', e.target.value)}
-              disabled={!isEditing}
-              className="form-select disabled:bg-gray-50 disabled:text-gray-500"
-            >
-              <option value="">Select response time</option>
-              <option value="Within 1 hour">Within 1 hour</option>
-              <option value="Within 2 hours">Within 2 hours</option>
-              <option value="Within 4 hours">Within 4 hours</option>
-              <option value="Within 24 hours">Within 24 hours</option>
-              <option value="Within 48 hours">Within 48 hours</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">How quickly do you typically respond to messages?</p>
-          </div>
-
-          {/* Location */}
-          <div>
-            <label className="form-label">
-              <span className="flex items-center">
-                <MapPinIcon className="h-4 w-4 mr-2 text-red-600" />
-                Location
-              </span>
-            </label>
-            <input
-              type="text"
-              value={tempProfile.location || ''}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              disabled={!isEditing}
-              className="form-input disabled:bg-gray-50 disabled:text-gray-500"
-              placeholder="Enter your city and country"
-            />
-          </div>
+        {/* Edit Profile CTA */}
+        <div className="mt-8 pt-6 border-t border-gray-200 text-center">
+          <p className="text-gray-600 mb-4">Need to update your information?</p>
+          <button
+            onClick={handleEditProfile}
+            className="btn-primary"
+          >
+            Edit Profile
+          </button>
         </div>
       </div>
     </div>

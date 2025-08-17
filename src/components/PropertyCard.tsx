@@ -3,12 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { 
-  EyeIcon,
   PencilIcon
 } from '@heroicons/react/24/outline';
 import { Bed, Bathtub } from '@/assets/icons';
 import Image from 'next/image';
 import Link from 'next/link';
+import { propertyCardClasses } from '@/styles/property-card';
 
 interface PropertyCardProps {
   property: Property & { 
@@ -51,8 +51,6 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
     return property?.num_bathroom || property?.bathrooms || 0;
   };
 
-
-
   // Extract District and Country for simplified display
   const getSimplifiedLocation = () => {
     if (!location || location === 'No Location') return '';
@@ -64,7 +62,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
       
       // If we have at least 2 parts, show District and Country
       if (parts.length >= 2) {
-        const district = parts[7];
+        const district = parts[5];
         const country = parts[parts.length - 1]; // Last part is usually country
         
         // If district and country are different, show both
@@ -99,95 +97,98 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 relative">
+    <div className={propertyCardClasses.container}>
       {/* Dashboard Edit Icon - Top Right */}
       {isDashboard && (
-        <div className="absolute top-3 right-3 z-10">
+        <div className={propertyCardClasses.editIcon.container}>
           <Link
             href={`/dashboard/properties/edit/${propertyUuid}`}
-            className="bg-white/90 backdrop-blur-sm w-8 h-8 rounded-full shadow-lg hover:bg-white hover:shadow-xl transition-all duration-200 flex items-center justify-center border border-gray-200"
+            className={propertyCardClasses.editIcon.link}
             title="Edit Listing"
           >
-            <PencilIcon className="h-4 w-4 text-gray-700" />
+            <PencilIcon className={propertyCardClasses.editIcon.svg} />
           </Link>
         </div>
       )}
 
       {/* Property Image */}
-      <div className="relative h-48 w-full">
+      <div className={propertyCardClasses.image.container}>
         {imageUrl && imageUrl.trim() !== '' ? (
           <Image
             src={imageUrl}
             alt={title}
             fill
-            className="object-cover"
+            className={propertyCardClasses.image.placeholder}
           />
         ) : (
           <Image
             src="/images/placeholder.png"
             alt="Property placeholder"
             fill
-            className="object-cover"
+            className={propertyCardClasses.image.placeholder}
           />
         )}
       </div>
 
       {/* Property Details */}
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-1">
+      <div className={propertyCardClasses.details}>
+        <h3 className={propertyCardClasses.title}>
           {title}
         </h3>
         {/* Property Features */}
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-900">
+        <div className={propertyCardClasses.features.container}>
+          <div className={propertyCardClasses.features.location}>
             <span>{getSimplifiedLocation()}</span>
           </div>
           
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-600">
-              <Bed className="h-4 w-4 mr-2 text-gray-400" />
-              <span>{getBedrooms()} bed{getBedrooms() !== 1 ? 's' : ''}</span>
+          <div className={propertyCardClasses.features.row}>
+            <div className={propertyCardClasses.features.feature}>
+              <Bed className={propertyCardClasses.features.icon} />
+              <span className={propertyCardClasses.features.text}>
+                {getBedrooms()} bed{getBedrooms() !== 1 ? 's' : ''}
+              </span>
             </div>
             
-            <div className="flex items-center text-sm text-gray-600">
-              <Bathtub className="h-4 w-4 mr-2 text-gray-400" />
-              <span>{getBathrooms()} bath{getBathrooms() !== 1 ? 's' : ''}</span>
+            <div className={propertyCardClasses.features.feature}>
+              <Bathtub className={propertyCardClasses.features.icon} />
+              <span className={propertyCardClasses.features.text}>
+                {getBathrooms()} bath{getBathrooms() !== 1 ? 's' : ''}
+              </span>
             </div>
           </div>
 
           {/* Property Type for Dashboard */}
           {isDashboard && propertyType && (
-            <div className="text-xs text-gray-500 capitalize">
+            <div className={propertyCardClasses.features.type}>
               {propertyType}
             </div>
           )}
         </div>
 
         {/* Price */}
-        <div className="flex items-center justify-between">
+        <div className={propertyCardClasses.price.container}>
           <div className="flex items-center">
-            <span className="text-xl font-bold text-gray-900">
+            <span className={propertyCardClasses.price.amount}>
               {price.toLocaleString()}
             </span>
-            <span className="text-gray-600 ml-1">/month</span>
+            <span className={propertyCardClasses.price.unit}>/month</span>
           </div>
         </div>
 
         {/* Dashboard Actions */}
         {isDashboard ? (
-          <div className="flex space-x-2 mt-4">
+          <div className={propertyCardClasses.actions.container}>
             <button
               onClick={handleViewDetails}
-              className="flex-1 btn-primary py-2 px-4 text-sm font-medium"
+              className={`${propertyCardClasses.actions.button} ${propertyCardClasses.actions.buttonPrimary}`}
             >
               View Details
             </button>
             <Link
               href={`/dashboard/properties/${propertyUuid}/incoming-offers`}
-              className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+              className={`btn-secondary`}
               title="View Incoming Offers"
             >
-              <EyeIcon className="h-4 w-4 mr-1" />
               Offers
             </Link>
           </div>
@@ -195,7 +196,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
           /* Regular View Details Button */
           <button
             onClick={handleViewDetails}
-            className="w-full mt-4 btn-primary py-2 px-4 text-sm font-medium"
+            className={propertyCardClasses.actions.buttonFull}
           >
             View Details
           </button>

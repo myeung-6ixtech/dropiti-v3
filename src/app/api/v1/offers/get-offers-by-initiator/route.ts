@@ -25,6 +25,14 @@ interface GraphQLOffer {
   offer_status: string;
   created_at: string;
   updated_at?: string;
+  // Final accepted terms fields
+  final_rent_price?: number;
+  final_rent_price_currency?: string;
+  final_num_leasing_months?: number;
+  final_payment_frequency?: string;
+  final_move_in_date?: string;
+  final_accepted_at?: string;
+  final_accepted_by?: string;
 }
 
 interface GraphQLUser {
@@ -101,6 +109,14 @@ const GET_OFFERS_BY_INITIATOR_QUERY = `
       offer_status
       created_at
       updated_at
+      # Final accepted terms fields
+      final_rent_price
+      final_rent_price_currency
+      final_num_leasing_months
+      final_payment_frequency
+      final_move_in_date
+      final_accepted_at
+      final_accepted_by
     }
   }
 `;
@@ -228,6 +244,14 @@ export async function GET(request: NextRequest) {
         lastActionBy: offer.last_action_by,
         lastActionType: offer.last_action_type,
         lastActionAt: offer.last_action_at,
+        // Final accepted terms
+        finalRentPrice: offer.final_rent_price,
+        finalRentPriceCurrency: offer.final_rent_price_currency,
+        finalNumLeasingMonths: offer.final_num_leasing_months,
+        finalPaymentFrequency: offer.final_payment_frequency,
+        finalMoveInDate: offer.final_move_in_date,
+        finalAcceptedAt: offer.final_accepted_at,
+        finalAcceptedBy: offer.final_accepted_by,
         // Recipient (landlord) details
         recipient: recipient ? {
           uuid: recipient.uuid,

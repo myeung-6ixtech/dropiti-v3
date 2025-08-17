@@ -1,37 +1,38 @@
 'use client';
 
 import SignInForm from '@/components/auth/SignInForm';
+import { authClasses } from '@/styles/auth';
 
 export default function SignInPage() {
   return (
-    <div className="auth-container">
+    <div className={authClasses.container}>
       {/* Left Side - Form (50%) */}
-      <div className="auth-form-section">
+      <div className={authClasses.formSection}>
         <SignInForm />
       </div>
 
       {/* Right Side - Content (50%) */}
-      <div className="auth-content-section">
-        <div className="auth-content-wrapper">
+      <div className={authClasses.contentSection}>
+        <div className={authClasses.contentWrapper}>
           <div className="max-w-md">
-            <h2 className="auth-heading">
+            <h2 className={authClasses.heading}>
               Welcome to Dropiti
             </h2>
-            <p className="auth-description">
+            <p className={authClasses.description}>
               Find your perfect property or list your space with our comprehensive real estate platform.
             </p>
-            <div className="auth-content-spacing">
-              <div className="auth-feature-item">
-                <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Search thousands of properties</span>
+            <div className={authClasses.contentSpacing}>
+              <div className={authClasses.featureItem}>
+                <div className={authClasses.featureDot}></div>
+                <span className={authClasses.featureText}>Search thousands of properties</span>
               </div>
-              <div className="auth-feature-item">
-                <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Secure authentication</span>
+              <div className={authClasses.featureItem}>
+                <div className={authClasses.featureDot}></div>
+                <span className={authClasses.featureText}>Secure authentication</span>
               </div>
-              <div className="auth-feature-item">
-                <div className="auth-feature-dot"></div>
-                <span className="auth-feature-text">Manage your properties</span>
+              <div className={authClasses.featureItem}>
+                <div className={authClasses.featureDot}></div>
+                <span className={authClasses.featureText}>Manage your properties</span>
               </div>
             </div>
           </div>

@@ -16,6 +16,7 @@ import { reviewsAPI } from '@/lib/api-client';
 import { useState, useEffect } from 'react';
 import { Review } from '@/types/review';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import ReviewOpportunities from '@/components/dashboard/ReviewOpportunities';
 
 export default function DashboardPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
@@ -154,120 +155,120 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Welcome Header */}
-      <div className="mb-8">
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white">
-          <div className="flex items-center space-x-4 mb-4">
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+      <div className="dashboard-welcome-header">
+        <div className="dashboard-welcome-container">
+          <div className="dashboard-welcome-content">
+            <div className="dashboard-welcome-icon">
               <UserIcon className="h-8 w-8" />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">Welcome back, {authUser.displayName || authUser.name || 'User'}! 👋</h1>
-              <p className="text-gray-100 text-lg">Here's what's happening with your properties today</p>
+            <div className="dashboard-welcome-text">
+              <h1 className="dashboard-welcome-title">Welcome back, {authUser.displayName || authUser.name || 'User'}! 👋</h1>
+              <p className="dashboard-welcome-subtitle">Here's what's happening with your properties today</p>
             </div>
           </div>
           
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold">{userData.stats.totalProperties}</div>
-              <div className="text-gray-100 text-sm">Properties</div>
+          <div className="dashboard-welcome-stats">
+            <div className="dashboard-stat-item">
+              <div className="dashboard-stat-value">{userData.stats.totalProperties}</div>
+              <div className="dashboard-stat-label">Properties</div>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold">{userData.stats.totalGuests}</div>
-              <div className="text-gray-100 text-sm">Tenants</div>
+            <div className="dashboard-stat-item">
+              <div className="dashboard-stat-value">{userData.stats.totalGuests}</div>
+              <div className="dashboard-stat-label">Tenants</div>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold">{userData.stats.responseRate}%</div>
-              <div className="text-gray-100 text-sm">Response Rate</div>
+            <div className="dashboard-stat-item">
+              <div className="dashboard-stat-value">{userData.stats.responseRate}%</div>
+              <div className="dashboard-stat-label">Response Rate</div>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-xl p-4 text-center">
-              <div className="text-2xl font-bold">{userData.rating}</div>
-              <div className="text-gray-100 text-sm">Rating</div>
+            <div className="dashboard-stat-item">
+              <div className="dashboard-stat-value">{userData.rating}</div>
+              <div className="dashboard-stat-label">Rating</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="dashboard-content-grid">
         {/* Left Column - DropitiPassport */}
-        <div className="lg:col-span-1">
+        <div className="dashboard-left-column">
           <DropitiPassport user={userData} />
         </div>
 
         {/* Right Column - Content */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="dashboard-right-column">
           {/* Quick Actions */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="quick-actions-container">
+            <h2 className="quick-actions-title">Quick Actions</h2>
+            <div className="quick-actions-grid">
               <Link
                 href="/dashboard/add-property"
-                className="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors group"
+                className="quick-action-item quick-action-primary quick-action-hover group"
               >
-                <div className="w-12 h-12 bg-black rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                  <PlusIcon className="h-6 w-6 text-white" />
+                <div className="quick-action-icon-container quick-action-icon-container-primary">
+                  <PlusIcon className="quick-action-icon" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Add New Property</h3>
-                  <p className="text-sm text-gray-600">List a new rental property</p>
+                <div className="quick-action-content">
+                  <p className="quick-action-title">Add New Property</p>
+                  <p className="quick-action-description">List a new rental property</p>
                 </div>
               </Link>
 
               <Link
                 href="/dashboard/properties"
-                className="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors group"
+                className="quick-action-item quick-action-secondary quick-action-hover group"
               >
-                <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform">
-                  <BuildingOfficeIcon className="h-6 w-6 text-white" />
+                <div className="quick-action-icon-container quick-action-icon-container-secondary">
+                  <BuildingOfficeIcon className="quick-action-icon" />
                 </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">Manage Properties</h3>
-                  <p className="text-sm text-gray-600">View and edit your listings</p>
+                <div className="quick-action-content">
+                  <p className="quick-action-title">Manage Properties</p>
+                  <p className="quick-action-description">View and edit your listings</p>
                 </div>
               </Link>
             </div>
           </div>
 
           {/* Recent Reviews */}
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Your Reviews</h2>
+          <div className="dashboard-card">
+            <div className="dashboard-card-header">
+              <h2 className="dashboard-card-title">Your Reviews</h2>
               <Link
                 href="/dashboard/reviews"
-                className="text-black hover:text-gray-700 text-sm font-medium"
+                className="dashboard-card-link"
               >
                 View All →
               </Link>
             </div>
             
-            <div className="space-y-4">
+            <div className="dashboard-card-content">
               {reviews.length > 0 ? (
                 reviews.map((review) => (
-                  <div key={review.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
-                    <div className="flex items-start space-x-3">
-                      <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                  <div key={review.id} className="dashboard-review-item">
+                    <div className="dashboard-review-content">
+                      <div className="dashboard-review-avatar">
                         <Image
                           src={getSafeProfileImage(review.reviewer?.photoUrl, '/src/assets/img/Portrait_Placeholder.png')}
                           alt={review.reviewer?.displayName || 'Reviewer'}
                           width={40}
                           height={40}
-                          className="w-full h-full object-cover"
+                          className="dashboard-review-avatar-image"
                         />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
+                      <div className="dashboard-review-details">
+                        <div className="dashboard-review-header">
                           <div>
-                            <h4 className="font-medium text-gray-900">{review.reviewer?.displayName || 'Unknown Reviewer'}</h4>
-                            <p className="text-sm text-gray-500">{review.property?.title || 'Property not specified'}</p>
+                            <h4 className="dashboard-review-reviewer">{review.reviewer?.displayName || 'Unknown Reviewer'}</h4>
+                            <p className="dashboard-review-property">{review.property?.title || 'Property not specified'}</p>
                           </div>
-                          <div className="flex items-center space-x-1">
+                          <div className="dashboard-review-rating">
                             {renderStars(review.rating)}
                           </div>
                         </div>
-                        <p className="text-sm text-gray-700 mb-2">{review.comment || 'No comment provided'}</p>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <CalendarIcon className="h-3 w-3 mr-1" />
+                        <p className="dashboard-review-comment">{review.comment || 'No comment provided'}</p>
+                        <div className="dashboard-review-date">
+                          <CalendarIcon className="dashboard-review-date-icon" />
                           {formatDate(review.createdAt)}
                         </div>
                       </div>
@@ -275,16 +276,19 @@ export default function DashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8">
+                <div className="dashboard-review-empty">
                   <div className="text-gray-500">
-                    <StarIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm">No reviews yet</p>
-                    <p className="text-xs text-gray-400">Reviews will appear here once you receive them</p>
+                    <StarIcon className="dashboard-review-empty-icon" />
+                    <p className="dashboard-review-empty-text">No reviews yet</p>
+                    <p className="dashboard-review-empty-subtext">Reviews will appear here once you receive them</p>
                   </div>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Review Opportunities */}
+          <ReviewOpportunities />
         </div>
       </div>
     </div>

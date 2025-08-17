@@ -295,6 +295,7 @@ export function calculateNewOfferStatus(
       
     case 'INITIATOR_REJECTED':
     case 'RECIPIENT_REJECTED':
+    case 'SYSTEM_REJECTED':
       return 'rejected';
       
     case 'INITIATOR_CANCELLED':
@@ -425,4 +426,71 @@ export function getNegotiationSummary(offer: Offer): string {
   const statusText = offer.offerStatus === 'countered' ? 'Counter Offer' : offer.offerStatus;
   
   return `${roundText} - ${statusText}`;
+}
+
+// ========================================
+// BULK OFFER OPERATIONS
+// ========================================
+
+/**
+ * Check if a property has any accepted offers
+ */
+export function hasAcceptedOffers(offers: Offer[], propertyUuid: string): boolean {
+  return offers.some(offer => 
+    offer.propertyUuid === propertyUuid && 
+    offer.offerStatus === 'accepted'
+  );
+}
+
+/**
+ * Get all pending offers for a specific property
+ */
+export function getPendingOffersForProperty(offers: Offer[], propertyUuid: string): Offer[] {
+  return offers.filter(offer => 
+    offer.propertyUuid === propertyUuid && 
+    offer.offerStatus === 'pending' &&
+    offer.isActive
+  );
+}
+
+/**
+ * Validate that only one offer can be accepted per property
+ */
+export function validateSingleAcceptance(
+  offers: Offer[], 
+  propertyUuid: string, 
+  currentOfferId: string
+): { isValid: boolean; error?: string } {
+  const acceptedOffers = offers.filter(offer => 
+    offer.propertyUuid === propertyUuid && 
+    offer.offerStatus === 'accepted' &&
+    offer.id !== currentOfferId
+  );
+
+  if (acceptedOffers.length > 0) {
+    return {
+      isValid: false,
+      error: 'Another offer has already been accepted for this property'
+    };
+  }
+
+  return { isValid: true };
+}
+
+/**
+ * Get the negotiation summary for bulk operations
+ */
+export function getBulkOperationSummary(
+  acceptedOffer: Offer,
+  rejectedOffers: Offer[]
+): string {
+  const acceptedText = `Offer accepted by ${acceptedOffer.finalAcceptedBy === 'initiator' ? 'tenant' : 'landlord'}`;
+  
+  if (rejectedOffers.length === 0) {
+    return acceptedText;
+  }
+
+  const rejectedText = `${rejectedOffers.length} other pending offer${rejectedOffers.length === 1 ? '' : 's'} automatically rejected`;
+  
+  return `${acceptedText}. ${rejectedText}.`;
 }

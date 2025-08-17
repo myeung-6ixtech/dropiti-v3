@@ -2,6 +2,7 @@ import axios from 'axios';
 import { PropertyDataForAPI, CreateUserInput, User } from '@/types';
 import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
 import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
+import { StandardizedAddress, formatAddressForDatabase } from '@/utils/addressFormatter';
 
 // Base API configuration
 const apiClient = axios.create({
@@ -40,27 +41,12 @@ apiClient.interceptors.response.use(
 
 // Helper function to transform PropertyData to API format
 const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: string) => {
-  // Preserve the full address structure as a JSON object for better searchability
-  // Don't convert to string - keep as structured object
-  const addressObject = propertyData.address ? {
-    unit: propertyData.address.unit,
-    floor: propertyData.address.floor,
-    block: propertyData.address.block,
-    buildingName: propertyData.address.buildingName,
-    addressLine1: propertyData.address.addressLine1,
-    addressLine2: propertyData.address.addressLine2,
-    district: propertyData.address.district,
-    state: propertyData.address.state,
-    country: propertyData.address.country,
-    // Add additional fields that might be useful for search
-    street: propertyData.address.addressLine1, // Map addressLine1 to street for search
-    city: propertyData.address.district, // Map district to city for search
-    apartmentEstate: propertyData.address.buildingName, // Map buildingName to apartmentEstate
-  } : {};
+  // Use the utility function to ensure consistent address structure
+  const addressObject = formatAddressForDatabase(propertyData.address);
 
   // Build a human-readable location string for display purposes
   const addressParts = [];
-  if (propertyData.address?.buildingName) addressParts.push(propertyData.address.buildingName);
+  if (propertyData.address?.building) addressParts.push(propertyData.address.building);
   if (propertyData.address?.addressLine1) addressParts.push(propertyData.address.addressLine1);
   if (propertyData.address?.addressLine2) addressParts.push(propertyData.address.addressLine2);
   if (propertyData.address?.district) addressParts.push(propertyData.address.district);
@@ -77,7 +63,7 @@ const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: 
     unit: propertyData.address?.unit,
     floor: propertyData.address?.floor,
     block: propertyData.address?.block,
-    buildingName: propertyData.address?.buildingName,
+    building: propertyData.address?.building,
     grossArea: propertyData.unitDetails?.grossArea,
     netArea: propertyData.unitDetails?.netArea,
     furnished: propertyData.unitDetails?.furnished,
@@ -158,16 +144,23 @@ export const propertiesAPI = {
   updateProperty: async (id: string, updates: {
     title?: string;
     description?: string;
-    location?: string;
-    price?: number;
-    bedrooms?: number;
-    bathrooms?: number;
-    imageUrl?: string;
-    details?: Record<string, unknown>;
-    rules?: string[];
+    address?: StandardizedAddress;
+    property_type?: string;
+    rental_space?: string;
+    num_bedroom?: number;
+    num_bathroom?: number;
+    gross_area_size?: number;
+    gross_area_size_unit?: string;
+    furnished?: string;
+    pets_allowed?: boolean;
     amenities?: string[];
-    minimumLease?: number;
-    availableDate?: string | null;
+    display_image?: string;
+    uploaded_images?: string[];
+    rental_price?: number;
+    rental_price_currency?: string;
+    availability_date?: string | null;
+    is_public?: boolean;
+    photos?: string[]; // For backward compatibility
   }) => {
     const response = await apiClient.put('/properties/update-property', { id, updates });
     return response.data;
@@ -377,6 +370,39 @@ export const offersAPI = {
       return response.data;
     } catch (error) {
       console.error('Error fetching offer actions:', error);
+      throw error;
+    }
+  },
+
+  // Get review opportunities for a user
+  getReviewOpportunities: async (userId: string) => {
+    try {
+      const response = await apiClient.get('/offers/get-review-opportunities', { 
+        params: { user_id: userId } 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching review opportunities:', error);
+      throw error;
+    }
+  },
+
+  // Create a review
+  createReview: async (reviewData: {
+    offerId: string;
+    offerUuid: string;
+    reviewType: string;
+    rating: number;
+    comment: string;
+    reviewerId: string;
+    reviewedUserId: string;
+    propertyUuid: string;
+  }) => {
+    try {
+      const response = await apiClient.post('/reviews/create-review', reviewData);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating review:', error);
       throw error;
     }
   },

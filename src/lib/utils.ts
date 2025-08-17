@@ -42,8 +42,6 @@ export function formatAddress(address: unknown): string {
     if (addressObj.district) parts.push(addressObj.district);
     if (addressObj.state) parts.push(addressObj.state);
     if (addressObj.country) parts.push(addressObj.country);
-    if (addressObj.street) parts.push(addressObj.street);
-    if (addressObj.apartmentEstate) parts.push(addressObj.apartmentEstate);
 
     return parts.length > 0 ? parts.join(', ') : 'Address not specified';
   }

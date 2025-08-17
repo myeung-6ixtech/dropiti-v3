@@ -96,6 +96,7 @@ export async function GET(request: NextRequest) {
         title: typedProperty.title,
         description: typedProperty.description,
         location: location,
+        address: typedProperty.address, // Raw JSON address data for editing
         price: typedProperty.rental_price || 0,
         bedrooms: typedProperty.num_bedroom || 0,
         bathrooms: typedProperty.num_bathroom || 0,
@@ -139,6 +140,13 @@ export async function GET(request: NextRequest) {
             title: 'Modern Downtown Apartment',
             description: 'Beautiful 2-bedroom apartment in the heart of downtown.',
             location: 'Downtown, City Center',
+            address: {
+              country: 'United States',
+              state: 'California',
+              city: 'San Francisco',
+              district: 'Downtown',
+              building: '123 Main St, Apt 4B'
+            },
             price: 2500,
             bedrooms: 2,
             bathrooms: 2,
@@ -156,6 +164,13 @@ export async function GET(request: NextRequest) {
             title: 'Cozy Suburban House',
             description: 'Family-friendly 3-bedroom house in a quiet neighborhood.',
             location: 'Suburban Area, North District',
+            address: {
+              country: 'United States',
+              state: 'California',
+              city: 'San Francisco',
+              district: 'Suburban Area',
+              building: '456 Oak Ave'
+            },
             price: 3200,
             bedrooms: 3,
             bathrooms: 2,

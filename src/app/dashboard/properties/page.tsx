@@ -8,6 +8,7 @@ import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/o
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import Link from 'next/link';
 import { Property } from '@/types';
+import { propertyCardClasses } from '@/styles/property-card';
 
 export default function PropertiesPage() {
   const { user: authUser, isAuthenticated } = useAuth();
@@ -152,7 +153,7 @@ export default function PropertiesPage() {
       {/* Properties Grid */}
       {!isLoading && !error && filteredProperties.length > 0 && (
         <div className="flex-1 overflow-auto p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={propertyCardClasses.grid.default}>
             {filteredProperties.map((property) => (
               <PropertyCard
                 key={property.id}

@@ -12,18 +12,20 @@ export interface PropertyData {
     unit?: string;
     floor?: string;
     block?: string;
-    buildingName?: string;
+    building?: string;
     addressLine1?: string;
     addressLine2?: string;
     district?: string;
     state?: string;
     country?: string;
+    city?: string;
     showSpecificLocation?: boolean;
   };
   
   // Step 4
   unitDetails?: {
     grossArea?: number;
+    grossAreaUnit?: string;
     netArea?: number;
     bedrooms?: number;
     bathrooms?: number;
@@ -36,6 +38,8 @@ export interface PropertyData {
   
   // Step 6
   photos?: File[];
+  displayImage?: string; // Main display image URL
+  uploadedImages?: string[]; // Array of uploaded image URLs
   
   // Step 7
   rentalDetails?: {

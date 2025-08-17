@@ -1,10 +1,10 @@
 /* ========================================
-   DROPITI DESIGN SYSTEM
+   DESIGN SYSTEM - CENTRALIZED STYLES
    ======================================== */
 
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+/* ========================================
+   DROPITI DESIGN SYSTEM
+   ======================================== */
 
 /* ========================================
    CSS CUSTOM PROPERTIES (DESIGN TOKENS)
@@ -136,8 +136,6 @@
 /* ========================================
    BASE STYLES
    ======================================== */
-
-@layer base {
   * {
     box-sizing: border-box;
   }
@@ -191,13 +189,420 @@
     outline: 2px solid var(--color-primary-500);
     outline-offset: 2px;
   }
-}
 
 /* ========================================
    COMPONENT STYLES
    ======================================== */
 
-@layer components {
+/* ========================================
+   NAVIGATION COMPONENTS
+   ======================================== */
+
+.nav-container {
+  @apply bg-white shadow-lg border-b border-gray-200;
+}
+
+.nav-content {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.nav-header {
+  @apply flex justify-between h-16;
+}
+
+.nav-brand {
+  @apply flex items-center;
+}
+
+.nav-brand-link {
+  @apply flex-shrink-0 flex items-center hover:opacity-80 transition-opacity;
+}
+
+.nav-brand-icon {
+  @apply h-8 w-8 text-blue-600;
+}
+
+.nav-brand-text {
+  @apply ml-2 text-xl font-bold text-gray-900 hidden sm:inline;
+}
+
+.nav-menu {
+  @apply flex items-center space-x-4 sm:space-x-8;
+}
+
+.nav-menu-button {
+  @apply p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 lg:hidden;
+}
+
+.nav-menu-icon {
+  @apply h-6 w-6;
+}
+
+.nav-link {
+  @apply flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors;
+}
+
+.nav-link-active {
+  @apply text-blue-600 bg-blue-50;
+}
+
+.nav-link-inactive {
+  @apply text-gray-700 hover:text-blue-600 hover:bg-gray-50;
+}
+
+.nav-link-icon {
+  @apply h-5 w-5 mr-1;
+}
+
+.nav-link-text {
+  @apply hidden sm:inline;
+}
+
+.nav-auth-button {
+  @apply bg-black text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm;
+}
+
+.nav-auth-text {
+  @apply hidden sm:inline;
+}
+
+.nav-auth-text-mobile {
+  @apply sm:hidden;
+}
+
+.nav-user-dropdown {
+  @apply relative;
+}
+
+.nav-user-button {
+  @apply flex items-center text-gray-700 dark:text-gray-400;
+}
+
+.nav-user-avatar {
+  @apply mr-3 overflow-hidden rounded-full h-11 w-11 flex-shrink-0;
+}
+
+.nav-user-avatar-image {
+  @apply w-full h-full object-cover rounded-full;
+}
+
+.nav-user-chevron {
+  @apply stroke-gray-500 dark:stroke-gray-400 transition-transform duration-200;
+}
+
+.nav-user-chevron-open {
+  @apply rotate-180;
+}
+
+.nav-dropdown-menu {
+  @apply absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200;
+}
+
+.nav-dropdown-item {
+  @apply flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left;
+}
+
+.nav-dropdown-item-icon {
+  @apply mr-3 h-4 w-4 text-gray-400;
+}
+
+.nav-dropdown-item-button {
+  @apply flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left;
+}
+
+.nav-loading-skeleton {
+  @apply flex items-center space-x-3;
+}
+
+.nav-loading-avatar {
+  @apply w-8 h-8 rounded-full bg-gray-300 animate-pulse;
+}
+
+.nav-loading-button {
+  @apply bg-gray-300 text-gray-600 px-4 py-2 rounded-md text-sm font-medium animate-pulse;
+}
+
+.nav-loading-text {
+  @apply hidden sm:inline;
+}
+
+  .nav-loading-text-mobile {
+  @apply sm:hidden;
+}
+
+/* ========================================
+   FOOTER COMPONENTS
+   ======================================== */
+
+.footer-container {
+  @apply bg-gray-900 text-white;
+}
+
+.footer-main-content {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+}
+
+.footer-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8;
+}
+
+.footer-company-info {
+  @apply lg:col-span-1;
+}
+
+.footer-company-header {
+  @apply flex items-center space-x-2 mb-4;
+}
+
+.footer-company-icon {
+  @apply h-8 w-8 text-blue-400;
+}
+
+.footer-company-name {
+  @apply text-xl font-bold;
+}
+
+.footer-company-description {
+  @apply text-gray-300 mb-6 text-sm;
+}
+
+.footer-social-links {
+  @apply flex space-x-4;
+}
+
+.footer-social-link {
+  @apply text-gray-400 hover:text-white transition-colors duration-200;
+}
+
+.footer-social-sr-only {
+  @apply sr-only;
+}
+
+.footer-section {
+  @apply text-sm font-semibold text-white uppercase tracking-wider mb-4;
+}
+
+.footer-section-links {
+  @apply space-y-2;
+}
+
+.footer-section-link {
+  @apply text-gray-300 hover:text-white transition-colors duration-200 text-sm;
+}
+
+.footer-contact-section {
+  @apply mt-8 pt-8 border-t border-gray-800;
+}
+
+.footer-contact-grid {
+  @apply grid grid-cols-1 md:grid-cols-3 gap-6;
+}
+
+.footer-contact-item {
+  @apply flex items-center space-x-3;
+}
+
+.footer-contact-icon {
+  @apply h-5 w-5 text-blue-400 flex-shrink-0;
+}
+
+.footer-contact-link {
+  @apply text-gray-300 hover:text-white transition-colors duration-200 text-sm;
+}
+
+.footer-bottom-bar {
+  @apply bg-gray-800 border-t border-gray-700;
+}
+
+.footer-bottom-content {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+}
+
+.footer-bottom-flex {
+  @apply flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0;
+}
+
+.footer-copyright {
+  @apply text-gray-300 text-sm;
+}
+
+.footer-bottom-links {
+  @apply flex space-x-6 text-sm;
+}
+
+.footer-bottom-link {
+  @apply text-gray-300 hover:text-white transition-colors duration-200;
+}
+
+/* ========================================
+   DROPITI PASSPORT COMPONENTS
+   ======================================== */
+
+.passport-container {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+}
+
+.passport-header {
+  @apply text-center mb-6 pb-4 border-b border-gray-100;
+}
+
+.passport-logo {
+  @apply inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full mb-3;
+}
+
+.passport-logo-text {
+  @apply text-white text-lg font-bold;
+}
+
+.passport-title {
+  @apply text-lg font-bold text-gray-900 mb-0;
+}
+
+.passport-subtitle {
+  @apply text-xs text-gray-500;
+}
+
+.passport-profile {
+  @apply mb-6;
+}
+
+.passport-profile-content {
+  @apply flex items-start space-x-3;
+}
+
+.passport-avatar-container {
+  @apply relative;
+}
+
+.passport-avatar {
+  @apply w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-100;
+}
+
+.passport-avatar-image {
+  @apply w-full h-full object-cover;
+}
+
+.passport-verification-badge {
+  @apply absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1;
+}
+
+.passport-verification-icon {
+  @apply h-2.5 w-2.5 text-white;
+}
+
+.passport-profile-info {
+  @apply flex-1 min-w-0;
+}
+
+.passport-profile-name {
+  @apply font-semibold text-gray-900 text-base mb-0;
+}
+
+.passport-profile-rating {
+  @apply flex items-center space-x-1;
+}
+
+.passport-rating-star {
+  @apply h-3 w-3 text-yellow-400;
+}
+
+.passport-rating-value {
+  @apply text-xs font-medium text-gray-900;
+}
+
+.passport-rating-separator {
+  @apply text-xs text-gray-500;
+}
+
+.passport-review-count {
+  @apply text-xs text-gray-600;
+}
+
+.passport-stats {
+  @apply flex items-center justify-between text-xs mb-4 p-3 bg-gray-50 rounded-xl;
+}
+
+.passport-stat-item {
+  @apply text-center;
+}
+
+.passport-stat-value {
+  @apply font-semibold text-gray-900;
+}
+
+.passport-stat-label {
+  @apply text-gray-500;
+}
+
+.passport-section {
+  @apply mb-4;
+}
+
+.passport-section-title {
+  @apply font-medium text-gray-900 mb-2 text-sm flex items-center;
+}
+
+.passport-section-content {
+  @apply text-xs text-gray-700 leading-relaxed line-clamp-3;
+}
+
+.passport-section-simple {
+  @apply flex items-center space-x-2;
+}
+
+.passport-section-text {
+  @apply text-xs text-gray-700;
+}
+
+.passport-languages {
+  @apply flex flex-wrap gap-1.5;
+}
+
+.passport-language-tag {
+  @apply bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.passport-info-section {
+  @apply mb-4 p-3 bg-gray-50 rounded-xl;
+}
+
+.passport-info-content {
+  @apply space-y-2;
+}
+
+.passport-info-item {
+  @apply flex items-center space-x-2;
+}
+
+.passport-info-text {
+  @apply text-xs text-gray-700;
+}
+
+.passport-footer {
+  @apply text-center pt-3 border-t border-gray-100;
+}
+
+.passport-verified-text {
+  @apply text-xs text-blue-600 font-medium;
+}
+
+.passport-trust-text {
+  @apply text-xs text-gray-500 mt-1;
+}
+
+.passport-responsive-container {
+  @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+}
+
+.passport-responsive-avatar {
+  @apply w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-100;
+}
+
+.passport-responsive-text {
+  @apply text-xs text-gray-700;
+}
+
+
   /* ========================================
      LAYOUT COMPONENTS
      ======================================== */
@@ -425,9 +830,10 @@
   }
 
   /* ========================================
-     AUTH COMPONENTS (Legacy Support)
+     AUTH COMPONENTS
      ======================================== */
 
+  /* Main Layout */
   .auth-container {
     @apply flex min-h-screen;
   }
@@ -440,10 +846,15 @@
     @apply hidden lg:block flex-1 bg-gray-100;
   }
 
+  .auth-content-wrapper {
+    @apply flex items-center justify-center h-full px-8;
+  }
+
   .auth-form-wrapper {
     @apply w-full max-w-md mx-auto;
   }
 
+  /* Typography */
   .auth-title {
     @apply text-2xl font-bold text-gray-900 mb-2;
   }
@@ -452,16 +863,135 @@
     @apply text-gray-600;
   }
 
-  .auth-button {
-    @apply btn-primary w-full;
+  .auth-heading {
+    @apply text-3xl font-bold text-gray-900 mb-4;
   }
 
+  .auth-description {
+    @apply text-lg text-gray-600 mb-8;
+  }
+
+  .auth-text-center {
+    @apply text-gray-600;
+  }
+
+  /* Buttons */
+  .auth-button {
+    @apply bg-black text-white px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors shadow-sm w-full;
+  }
+
+  .auth-button-secondary {
+    @apply bg-white text-black border-2 border-black px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm w-full;
+  }
+
+  /* Form Elements */
   .auth-input {
-    @apply form-input;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors;
+  }
+
+  .auth-input-with-icon {
+    @apply w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors;
+  }
+
+  .auth-input-icon {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-600 hover:text-gray-800 transition-colors;
   }
 
   .auth-label {
-    @apply form-label;
+    @apply block text-sm font-medium text-gray-700 mb-2;
+  }
+
+  .auth-form {
+    @apply space-y-6;
+  }
+
+  .auth-checkbox {
+    @apply h-4 w-4 text-black border-gray-300 rounded focus:ring-black focus:ring-2;
+  }
+
+  .auth-checkbox-label {
+    @apply ml-2 text-sm text-gray-700;
+  }
+
+  /* Spacing and Layout */
+  .auth-section-spacing {
+    @apply mb-8;
+  }
+
+  .auth-content-spacing {
+    @apply space-y-6;
+  }
+
+  /* Links */
+  .auth-back-link {
+    @apply text-gray-600 hover:text-gray-900 transition-colors text-sm;
+  }
+
+  .auth-link {
+    @apply text-black font-medium hover:text-gray-800 transition-colors;
+  }
+
+  .auth-link-secondary {
+    @apply text-gray-600 hover:text-gray-800 transition-colors text-sm;
+  }
+
+  /* Status Messages */
+  .auth-success {
+    @apply bg-green-50 border border-green-200 rounded-lg p-4 mb-6 text-green-800;
+  }
+
+  .auth-error {
+    @apply bg-red-50 border border-red-200 rounded-lg p-4 mb-6 text-red-800;
+  }
+
+  /* Content Features */
+  .auth-feature-item {
+    @apply flex items-center space-x-3;
+  }
+
+  .auth-feature-dot {
+    @apply w-3 h-3 bg-blue-600 rounded-full;
+  }
+
+  .auth-feature-text {
+    @apply text-gray-700;
+  }
+
+  /* Responsive Utilities */
+  .auth-responsive {
+    @apply sm:px-8 md:px-12 lg:px-16;
+  }
+
+  .auth-mobile-optimized {
+    @apply px-4 sm:px-6;
+  }
+
+  /* Loading States */
+  .auth-loading {
+    @apply opacity-75 cursor-not-allowed;
+  }
+
+  .auth-loading-text {
+    @apply text-gray-500;
+  }
+
+  /* Focus States */
+  .auth-focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2;
+  }
+
+  /* Hover Effects */
+  .auth-hover {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  /* Animation Utilities */
+  .auth-fade-in {
+    @apply opacity-0 animate-pulse;
+  }
+
+  .auth-slide-up {
+    @apply transform translate-y-2 transition-transform duration-300;
   }
 
   /* ========================================
@@ -482,6 +1012,305 @@
 
   .dashboard-content {
     @apply flex-1 py-8 px-4 sm:px-6 lg:px-8 overflow-y-auto;
+  }
+
+  /* Dashboard Sidebar Components */
+  .dashboard-sidebar-content {
+    @apply h-full flex flex-col;
+    @apply transition-all duration-300 ease-in-out;
+  }
+
+  .dashboard-sidebar-toggle {
+    @apply p-4 border-b border-gray-200 flex justify-between items-center;
+  }
+
+  .dashboard-sidebar-toggle-button {
+    @apply p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors;
+    @apply bg-white border border-gray-200 shadow-sm;
+  }
+
+  .dashboard-sidebar-toggle-button:hover {
+    @apply bg-gray-50 border-gray-300;
+  }
+
+  .dashboard-sidebar-close {
+    @apply p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors;
+  }
+
+  .dashboard-user-section {
+    @apply p-4 border-b border-gray-200;
+  }
+
+  .dashboard-user-avatar {
+    @apply h-10 w-10 rounded-full flex items-center justify-center;
+  }
+
+  .dashboard-user-info {
+    @apply ml-3 min-w-0 flex-1;
+  }
+
+  .dashboard-user-name {
+    @apply text-sm font-medium text-gray-900 truncate mb-0;
+  }
+
+  .dashboard-user-email {
+    @apply text-xs text-gray-500 truncate mb-0;
+  }
+
+  .dashboard-view-toggle {
+    @apply p-4 border-b border-gray-200;
+  }
+
+  .dashboard-view-toggle-title {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wider mb-3;
+  }
+
+  .dashboard-view-toggle-buttons {
+    @apply space-y-2;
+  }
+
+  .dashboard-view-toggle-button {
+    @apply w-full flex flex-col items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out
+           bg-white border border-gray-200 hover:border-black hover:shadow-sm
+           text-gray-700 hover:text-black hover:bg-gray-50;
+  }
+
+  .dashboard-view-button:hover {
+    @apply transform scale-[1.02];
+  }
+
+  .dashboard-navigation {
+    @apply flex-1 p-4 space-y-1;
+  }
+
+  .dashboard-navigation-title {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wider mb-3;
+  }
+
+  .dashboard-nav-item {
+    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out;
+  }
+
+  .dashboard-nav-item-active {
+    @apply bg-black text-white;
+  }
+
+  .dashboard-nav-item-inactive {
+    @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
+  }
+
+  .dashboard-sidebar-footer {
+    @apply p-4 border-t border-gray-200 mt-auto;
+  }
+
+  .dashboard-footer-links {
+    @apply text-center;
+  }
+
+  /* Dashboard Sidebar States */
+  .dashboard-sidebar-open {
+    @apply translate-x-0;
+  }
+
+  .dashboard-sidebar-closed {
+    @apply -translate-x-full;
+  }
+
+  .dashboard-sidebar.collapsed {
+    @apply w-16;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-sidebar-content {
+    @apply items-center;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-user-info,
+  .dashboard-sidebar.collapsed .dashboard-view-toggle,
+  .dashboard-sidebar.collapsed .dashboard-navigation,
+  .dashboard-sidebar.collapsed .dashboard-sidebar-footer {
+    @apply hidden;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-sidebar-toggle {
+    @apply justify-center;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-user-section {
+    @apply p-2;
+  }
+
+  .dashboard-sidebar.collapsed .dashboard-user-avatar {
+    @apply h-8 w-8;
+  }
+
+  /* Dashboard Mobile Styles */
+  .dashboard-mobile-backdrop {
+    @apply fixed inset-0 z-40 lg:hidden;
+  }
+
+  .dashboard-mobile-backdrop-overlay {
+    @apply fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity;
+  }
+
+  /* Dashboard Responsive */
+  @media (max-width: 1023px) {
+    .dashboard-sidebar {
+      @apply fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 ease-in-out;
+      @apply w-80 max-w-[85vw];
+      @apply shadow-2xl;
+      @apply bg-white;
+    }
+    
+    .dashboard-sidebar-open {
+      @apply translate-x-0;
+    }
+    
+    .dashboard-sidebar-closed {
+      @apply translate-x-full;
+    }
+    
+    .dashboard-sidebar-content {
+      @apply h-full;
+    }
+    
+    .dashboard-sidebar-toggle {
+      @apply sticky top-0 bg-white z-10;
+    }
+    
+    .dashboard-mobile-backdrop {
+      @apply z-40;
+    }
+    
+    .dashboard-main {
+      @apply z-30;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-sidebar {
+      @apply relative transform-none;
+      @apply w-64;
+      @apply z-30;
+    }
+    
+    .dashboard-sidebar-open {
+      @apply translate-x-0;
+    }
+    
+    .dashboard-sidebar-closed {
+      @apply -translate-x-full;
+    }
+  }
+
+  /* ========================================
+     INLINE EDIT PROPERTY VIEW COMPONENTS
+     ======================================== */
+
+  .inline-edit-container {
+    @apply min-h-screen bg-gray-50;
+  }
+
+  .inline-edit-header {
+    @apply bg-white border-b border-gray-200;
+  }
+
+  .inline-edit-header-content {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+  }
+
+  .inline-edit-header-actions {
+    @apply flex items-center space-x-2;
+  }
+
+  .inline-edit-content {
+    @apply max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+
+  .inline-edit-sections {
+    @apply space-y-6;
+  }
+
+  /* ========================================
+     QUICK ACTIONS COMPONENTS
+     ======================================== */
+
+  .quick-actions-container {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8;
+  }
+
+  .quick-actions-title {
+    @apply text-base font-bold text-gray-900 mb-4;
+  }
+
+  .quick-actions-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 items-start;
+  }
+
+  .quick-action-item {
+    @apply flex items-start p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors;
+  }
+
+  .quick-action-item:hover {
+    @apply transform scale-[1.02];
+  }
+
+  .quick-action-icon-container {
+    @apply w-12 h-12 rounded-lg flex items-center justify-center mr-4 group-hover:scale-110 transition-transform;
+  }
+
+  .quick-action-icon-container-primary {
+    @apply bg-black;
+  }
+
+  .quick-action-icon-container-secondary {
+    @apply bg-green-600;
+  }
+
+  .quick-action-icon {
+    @apply h-6 w-6 text-white ;
+  }
+
+  .quick-action-content {
+    @apply flex-1 pt-1;
+  }
+
+  .quick-action-title {
+    @apply font-semibold text-gray-900 mb-0;
+  }
+
+  .quick-action-description {
+    @apply text-sm text-gray-600 mb-0;
+  }
+
+  /* Quick Action Variants */
+  .quick-action-primary {
+    @apply quick-action-item;
+  }
+
+  .quick-action-primary .quick-action-icon-container {
+    @apply quick-action-icon-container-primary;
+  }
+
+  .quick-action-secondary {
+    @apply quick-action-item;
+  }
+
+  .quick-action-secondary .quick-action-icon-container {
+    @apply quick-action-icon-container-secondary;
+  }
+
+  /* Quick Action Hover Effects */
+  .quick-action-hover {
+    @apply hover:shadow-md transition-shadow duration-200;
+  }
+
+  /* Quick Action Responsive */
+  .quick-action-responsive {
+    @apply sm:flex-row md:flex-col lg:flex-row;
+  }
+
+  .quick-action-mobile-optimized {
+    @apply p-3 md:p-4;
   }
 
   /* ========================================
@@ -522,13 +1351,10 @@
   .section-lg {
     @apply py-12;
   }
-}
 
 /* ========================================
    UTILITY CLASSES
    ======================================== */
-
-@layer utilities {
   /* Custom Animations */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-in-out;
@@ -681,4 +1507,568 @@
   /* Focus States */
   .focus\:ring-airbnb:focus { @apply focus:ring-2 focus:ring-black focus:ring-offset-2; }
   .focus\:border-airbnb:focus { @apply focus:border-black; }
+
+/* ========================================
+   TOAST ANIMATIONS
+   ======================================== */
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+/* ========================================
+   OFFER CARD STATUS COMPONENTS
+   ======================================== */
+
+/* Final Accepted Terms Container */
+.offer-final-terms {
+  @apply p-4 bg-green-100 border border-green-300 rounded-md;
+}
+
+.offer-final-terms-header {
+  @apply text-green-900 text-sm font-semibold mb-3;
+}
+
+.offer-final-terms-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-3 text-xs;
+}
+
+.offer-final-terms-column {
+  @apply space-y-2;
+}
+
+.offer-final-terms-row {
+  @apply flex items-center justify-between;
+}
+
+.offer-final-terms-label {
+  @apply text-green-800 text-xs font-medium;
+}
+
+.offer-final-terms-value {
+  @apply text-green-900 text-sm font-semibold;
+}
+
+.offer-final-terms-divider {
+  @apply mt-3 pt-3 border-t border-green-300;
+}
+
+.offer-final-terms-status {
+  @apply flex items-center justify-between;
+}
+
+.offer-final-terms-status-label {
+  @apply text-green-800 text-xs font-medium;
+}
+
+.offer-final-terms-status-badge {
+  @apply text-green-900 text-xs font-semibold bg-green-200 px-2 py-1 rounded;
+}
+
+/* Status Message Container */
+.offer-status-message {
+  @apply p-3 bg-green-50 border border-green-200 rounded-md;
+}
+
+.offer-status-message-text {
+  @apply text-green-800 text-sm font-medium;
+}
+
+.offer-status-message-subtext {
+  @apply text-green-700 text-xs mt-1;
+}
+
+/* Status Container Wrapper */
+.offer-status-container {
+  @apply mt-4 space-y-3;
+}
+
+/* Accepted Status Variants */
+.offer-status-accepted {
+  @apply bg-green-50 border border-green-200;
+}
+
+.offer-status-accepted-text {
+  @apply text-green-800 text-sm font-medium;
+}
+
+.offer-status-accepted-subtext {
+  @apply text-green-700 text-xs mt-1;
+}
+
+/* Rejected Status Variants */
+.offer-status-rejected {
+  @apply bg-red-50 border border-red-200;
+}
+
+.offer-status-rejected-text {
+  @apply text-red-800 text-sm font-medium;
+}
+
+.offer-status-rejected-subtext {
+  @apply text-red-700 text-xs mt-1;
+}
+
+/* Withdrawn Status Variants */
+.offer-status-withdrawn {
+  @apply bg-gray-50 border border-gray-200;
+}
+
+.offer-status-withdrawn-text {
+  @apply text-gray-800 text-sm font-medium;
+}
+
+/* Pending Status Variants */
+.offer-status-pending {
+  @apply bg-blue-50 border border-blue-200;
+}
+
+.offer-status-pending-text {
+  @apply text-blue-800 text-sm font-medium;
+}
+
+.offer-status-pending-subtext {
+  @apply text-blue-700 text-xs mt-1;
+}
+
+/* Counter Offer Status Variants */
+.offer-status-counter-recipient {
+  @apply bg-blue-50 border border-blue-200;
+}
+
+.offer-status-counter-recipient-text {
+  @apply text-blue-800 text-sm font-medium;
+}
+
+.offer-status-counter-recipient-subtext {
+  @apply text-blue-700 text-xs mt-1;
+}
+
+.offer-status-counter-initiator {
+  @apply bg-yellow-50 border border-yellow-200;
+}
+
+.offer-status-counter-initiator-text {
+  @apply text-yellow-800 text-sm font-medium;
+}
+
+.offer-status-counter-initiator-subtext {
+  @apply text-yellow-700 text-xs mt-1;
+}
+
+/* Counter Offer Container */
+.offer-counter-container {
+  @apply mt-4 space-y-3;
+}
+
+/* Utility Classes for Offer Status */
+.offer-status-rounded {
+  @apply rounded-md;
+}
+
+.offer-status-padding {
+  @apply p-3;
+}
+
+.offer-status-margin {
+  @apply mt-4;
+}
+
+/* ========================================
+   PROPERTY CARD COMPONENTS
+   ======================================== */
+
+/* Main Property Card Container */
+.property-card {
+  @apply bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 relative;
+}
+
+/* Property Card Image Container */
+.property-card-image {
+  @apply relative h-48 w-full;
+}
+
+.property-card-image-placeholder {
+  @apply object-cover;
+}
+
+/* Property Card Details Container */
+.property-card-details {
+  @apply p-4;
+}
+
+/* Property Card Title */
+.property-card-title {
+  @apply text-lg font-semibold text-gray-900 mb-2 line-clamp-1;
+}
+
+/* Property Card Features Section */
+.property-card-features {
+  @apply space-y-2 mb-4;
+}
+
+.property-card-location {
+  @apply flex items-center text-sm text-gray-900;
+}
+
+.property-card-features-row {
+  @apply flex items-center justify-between;
+}
+
+.property-card-feature {
+  @apply flex items-center text-sm text-gray-600;
+}
+
+.property-card-feature-icon {
+  @apply h-4 w-4 mr-2 text-gray-400;
+}
+
+.property-card-feature-text {
+  @apply text-sm text-gray-600;
+}
+
+.property-card-type {
+  @apply text-xs text-gray-500 capitalize;
+}
+
+/* Property Card Price Section */
+.property-card-price-container {
+  @apply flex items-center justify-between;
+}
+
+.property-card-price-amount {
+  @apply text-xl font-bold text-gray-900;
+}
+
+.property-card-price-unit {
+  @apply text-gray-600 ml-1;
+}
+
+/* Property Card Actions */
+.property-card-actions {
+  @apply flex space-x-2 mt-4;
+}
+
+.property-card-action-button {
+  @apply flex-1 py-2 px-4 text-sm font-medium;
+}
+
+.property-card-action-button-primary {
+  @apply btn-primary;
+}
+
+.property-card-action-button-secondary {
+  @apply bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center;
+}
+
+.property-card-action-button-full {
+  @apply w-full mt-4 btn-primary py-2 px-4 text-sm font-medium;
+}
+
+/* Dashboard Edit Icon */
+.property-card-edit-icon {
+  @apply absolute top-3 right-3 z-10;
+}
+
+.property-card-edit-link {
+  @apply bg-white/90 backdrop-blur-sm w-8 h-8 rounded-full shadow-lg hover:bg-white hover:shadow-xl transition-all duration-200 flex items-center justify-center border border-gray-200;
+}
+
+.property-card-edit-icon-svg {
+  @apply h-4 w-4 text-gray-700;
+}
+
+/* Property Card Grid Layouts */
+.property-card-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6;
+}
+
+.property-card-grid-search {
+  @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6;
+}
+
+/* Property Card Hover Effects */
+.property-card-hover {
+  @apply hover:shadow-lg transition-shadow duration-300;
+}
+
+/* Property Card Loading States */
+.property-card-skeleton {
+  @apply animate-pulse;
+}
+
+.property-card-skeleton-image {
+  @apply bg-gray-200 h-48 w-full;
+}
+
+.property-card-skeleton-content {
+  @apply p-4 space-y-3;
+}
+
+.property-card-skeleton-title {
+  @apply h-6 bg-gray-200 rounded w-3/4;
+}
+
+.property-card-skeleton-feature {
+  @apply h-4 bg-gray-200 rounded w-1/2;
+}
+
+.property-card-skeleton-price {
+  @apply h-6 bg-gray-200 rounded w-1/3;
+}
+
+/* Property Card Responsive Utilities */
+.property-card-responsive {
+  @apply sm:max-w-sm lg:max-w-none;
+}
+
+.property-card-mobile-optimized {
+  @apply sm:p-2 md:p-4;
+}
+
+  /* ========================================
+     DASHBOARD WELCOME HEADER COMPONENTS
+     ======================================== */
+
+  .dashboard-welcome-header {
+    @apply mb-8;
+  }
+
+  .dashboard-welcome-container {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white;
+  }
+
+  .dashboard-welcome-content {
+    @apply flex items-center space-x-4 mb-4;
+  }
+
+  .dashboard-welcome-icon {
+    @apply w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center;
+  }
+
+  .dashboard-welcome-text {
+    @apply flex-1;
+  }
+
+  .dashboard-welcome-title {
+    @apply text-3xl font-bold text-white mb-2;
+  }
+
+  .dashboard-welcome-subtitle {
+    @apply text-gray-100 text-lg;
+  }
+
+  .dashboard-welcome-stats {
+    @apply grid grid-cols-1 md:grid-cols-4 gap-4 mt-6;
+  }
+
+  .dashboard-stat-item {
+    @apply bg-white bg-opacity-20 rounded-xl p-4 text-center;
+  }
+
+  .dashboard-stat-value {
+    @apply text-2xl font-bold text-white;
+  }
+
+  .dashboard-stat-label {
+    @apply text-gray-100 text-sm;
+  }
+
+  /* ========================================
+     DASHBOARD CONTENT GRID COMPONENTS
+     ======================================== */
+
+  .dashboard-content-grid {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+  }
+
+  .dashboard-left-column {
+    @apply lg:col-span-1;
+  }
+
+  .dashboard-right-column {
+    @apply lg:col-span-2;
+  }
+
+  /* ========================================
+     DASHBOARD CARD COMPONENTS
+     ======================================== */
+
+  .dashboard-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8;
+  }
+
+  .dashboard-card-header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  .dashboard-card-title {
+    @apply text-xl font-bold text-gray-900;
+  }
+
+  .dashboard-card-link {
+    @apply text-black hover:text-gray-700 text-sm font-medium;
+  }
+
+  .dashboard-card-content {
+    @apply space-y-4;
+  }
+
+  /* ========================================
+     QUICK ACTIONS COMPONENTS
+     ======================================== */
+
+  /* ========================================
+     DASHBOARD REVIEW COMPONENTS
+     ======================================== */
+
+  .dashboard-review-item {
+    @apply border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow;
+  }
+
+  .dashboard-review-content {
+    @apply flex items-start space-x-3;
+  }
+
+  .dashboard-review-avatar {
+    @apply w-10 h-10 rounded-full overflow-hidden flex-shrink-0;
+  }
+
+  .dashboard-review-avatar-image {
+    @apply w-full h-full object-cover;
+  }
+
+  .dashboard-review-details {
+    @apply flex-1 min-w-0;
+  }
+
+  .dashboard-review-header {
+    @apply flex items-center justify-between mb-2;
+  }
+
+  .dashboard-review-reviewer {
+    @apply font-medium text-gray-900;
+  }
+
+  .dashboard-review-property {
+    @apply text-sm text-gray-500;
+  }
+
+  .dashboard-review-rating {
+    @apply flex items-center space-x-1;
+  }
+
+  .dashboard-review-comment {
+    @apply text-sm text-gray-700 mb-2;
+  }
+
+  .dashboard-review-date {
+    @apply flex items-center text-xs text-gray-500;
+  }
+
+  .dashboard-review-date-icon {
+    @apply h-3 w-3 mr-1;
+  }
+
+  .dashboard-review-empty {
+    @apply text-center py-8;
+  }
+
+  .dashboard-review-empty-icon {
+    @apply h-12 w-12 mx-auto mb-3 text-gray-300;
+  }
+
+  .dashboard-review-empty-text {
+    @apply text-sm text-gray-500;
+  }
+
+  .dashboard-review-empty-subtext {
+    @apply text-xs text-gray-400;
+  }
+
+  /* ========================================
+     DASHBOARD REVIEW OPPORTUNITIES COMPONENTS
+     ======================================== */
+
+  .dashboard-review-opportunity-item {
+    @apply border rounded-lg p-4;
+  }
+
+  .dashboard-review-opportunity-item-expired {
+    @apply border-red-200 bg-red-50;
+  }
+
+  .dashboard-review-opportunity-item-urgent {
+    @apply border-yellow-200 bg-yellow-50;
+  }
+
+  .dashboard-review-opportunity-item-normal {
+    @apply border-gray-200 bg-white;
+  }
+
+  .dashboard-review-opportunity-content {
+    @apply flex items-center justify-between;
+  }
+
+  .dashboard-review-opportunity-details {
+    @apply flex-1;
+  }
+
+  .dashboard-review-opportunity-title {
+    @apply font-medium text-gray-900;
+  }
+
+  .dashboard-review-opportunity-description {
+    @apply text-sm text-gray-600;
+  }
+
+  .dashboard-review-opportunity-meta {
+    @apply flex items-center space-x-4 mt-2;
+  }
+
+  .dashboard-review-opportunity-status-expired {
+    @apply text-red-600 text-sm font-medium;
+  }
+
+  .dashboard-review-opportunity-status-urgent {
+    @apply text-yellow-600 text-sm font-medium;
+  }
+
+  .dashboard-review-opportunity-status-normal {
+    @apply text-gray-600 text-sm font-medium;
+  }
+
+  .dashboard-review-opportunity-expiry {
+    @apply text-xs text-gray-500;
+  }
+
+  .dashboard-review-opportunity-actions {
+    @apply flex space-x-2;
+  }
+
+  .dashboard-review-opportunity-button-urgent {
+    @apply px-4 py-2 rounded-lg font-medium text-sm transition-colors bg-yellow-600 text-white hover:bg-yellow-700;
+  }
+
+  .dashboard-review-opportunity-status-completed {
+    @apply text-sm font-medium px-3 py-2 rounded-lg text-green-600 bg-green-100;
+  }
+
+  .dashboard-review-opportunity-status-expired-badge {
+    @apply text-sm font-medium px-3 py-2 rounded-lg text-red-600 bg-red-100;
+  }
+
+  /* ========================================
+     QUICK ACTIONS COMPONENTS
+     ======================================== */

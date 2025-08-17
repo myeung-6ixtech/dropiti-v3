@@ -225,6 +225,183 @@ export const componentSizes = {
 } as const;
 
 /* ========================================
+   COMPONENT STYLES
+   ======================================== */
+
+export const componentStyles = {
+  offerCardStatus: {
+    // Final Accepted Terms
+    finalTerms: {
+      container: 'offer-final-terms',
+      header: 'offer-final-terms-header',
+      grid: 'offer-final-terms-grid',
+      column: 'offer-final-terms-column',
+      row: 'offer-final-terms-row',
+      label: 'offer-final-terms-label',
+      value: 'offer-final-terms-value',
+      divider: 'offer-final-terms-divider',
+      status: 'offer-final-terms-status',
+      statusLabel: 'offer-final-terms-status-label',
+      statusBadge: 'offer-final-terms-status-badge',
+    },
+    // Status Messages
+    status: {
+      container: 'offer-status-container',
+      message: 'offer-status-message',
+      messageText: 'offer-status-message-text',
+      messageSubtext: 'offer-status-message-subtext',
+    },
+    // Status Variants
+    variants: {
+      accepted: {
+        container: 'offer-status-accepted offer-status-rounded offer-status-padding offer-status-margin',
+        text: 'offer-status-accepted-text',
+        subtext: 'offer-status-accepted-subtext',
+      },
+      rejected: {
+        container: 'offer-status-rejected offer-status-rounded offer-status-padding offer-status-margin',
+        text: 'offer-status-rejected-text',
+        subtext: 'offer-status-rejected-subtext',
+      },
+      withdrawn: {
+        container: 'offer-status-withdrawn offer-status-rounded offer-status-padding offer-status-margin',
+        text: 'offer-status-withdrawn-text',
+      },
+      pending: {
+        container: 'offer-status-pending offer-status-rounded offer-status-padding offer-status-margin',
+        text: 'offer-status-pending-text',
+        subtext: 'offer-status-pending-subtext',
+      },
+      counterRecipient: {
+        container: 'offer-status-counter-recipient offer-status-rounded offer-status-padding',
+        text: 'offer-status-counter-recipient-text',
+        subtext: 'offer-status-counter-recipient-subtext',
+      },
+      counterInitiator: {
+        container: 'offer-status-counter-initiator offer-status-rounded offer-status-padding',
+        text: 'offer-status-counter-initiator-text',
+        subtext: 'offer-status-counter-initiator-subtext',
+      },
+    },
+    // Counter Offer Container
+    counterContainer: 'offer-counter-container',
+  },
+  propertyCard: {
+    // Main Container
+    container: 'property-card',
+    // Image Section
+    image: {
+      container: 'property-card-image',
+      placeholder: 'property-card-image-placeholder',
+    },
+    // Details Section
+    details: 'property-card-details',
+    title: 'property-card-title',
+    // Features Section
+    features: {
+      container: 'property-card-features',
+      location: 'property-card-location',
+      row: 'property-card-features-row',
+      feature: 'property-card-feature',
+      icon: 'property-card-feature-icon',
+      text: 'property-card-feature-text',
+      type: 'property-card-type',
+    },
+    // Price Section
+    price: {
+      container: 'property-card-price-container',
+      amount: 'property-card-price-amount',
+      unit: 'property-card-price-unit',
+    },
+    // Actions Section
+    actions: {
+      container: 'property-card-actions',
+      button: 'property-card-action-button',
+      buttonPrimary: 'property-card-action-button-primary',
+      buttonSecondary: 'property-card-action-button-secondary',
+      buttonFull: 'property-card-action-button-full',
+    },
+    // Dashboard Edit Icon
+    editIcon: {
+      container: 'property-card-edit-icon',
+      link: 'property-card-edit-link',
+      svg: 'property-card-edit-icon-svg',
+    },
+    // Grid Layouts
+    grid: {
+      default: 'property-card-grid',
+      search: 'property-card-grid-search',
+    },
+    // Hover Effects
+    hover: 'property-card-hover',
+    // Loading States
+    skeleton: {
+      container: 'property-card-skeleton',
+      image: 'property-card-skeleton-image',
+      content: 'property-card-skeleton-content',
+      title: 'property-card-skeleton-title',
+      feature: 'property-card-skeleton-feature',
+      price: 'property-card-skeleton-price',
+    },
+    // Responsive Utilities
+    responsive: 'property-card-responsive',
+    mobileOptimized: 'property-card-mobile-optimized',
+  },
+  auth: {
+    // Main Layout
+    container: 'auth-container',
+    formSection: 'auth-form-section',
+    contentSection: 'auth-content-section',
+    contentWrapper: 'auth-content-wrapper',
+    formWrapper: 'auth-form-wrapper',
+    // Typography
+    title: 'auth-title',
+    subtitle: 'auth-subtitle',
+    heading: 'auth-heading',
+    description: 'auth-description',
+    textCenter: 'auth-text-center',
+    // Buttons
+    button: 'auth-button',
+    buttonSecondary: 'auth-button-secondary',
+    // Form Elements
+    input: 'auth-input',
+    inputWithIcon: 'auth-input-with-icon',
+    inputIcon: 'auth-input-icon',
+    label: 'auth-label',
+    form: 'auth-form',
+    checkbox: 'auth-checkbox',
+    checkboxLabel: 'auth-checkbox-label',
+    // Spacing and Layout
+    sectionSpacing: 'auth-section-spacing',
+    contentSpacing: 'auth-content-spacing',
+    // Links
+    backLink: 'auth-back-link',
+    link: 'auth-link',
+    linkSecondary: 'auth-link-secondary',
+    // Status Messages
+    success: 'auth-success',
+    error: 'auth-error',
+    // Content Features
+    featureItem: 'auth-feature-item',
+    featureDot: 'auth-feature-dot',
+    featureText: 'auth-feature-text',
+    // Responsive Utilities
+    responsive: 'auth-responsive',
+    mobileOptimized: 'auth-mobile-optimized',
+    // Loading States
+    loading: 'auth-loading',
+    loadingText: 'auth-loading-text',
+    // Focus States
+    focusRing: 'auth-focus-ring',
+    // Hover Effects
+    hover: 'auth-hover',
+    // Animation Utilities
+    fadeIn: 'auth-fade-in',
+    slideUp: 'auth-slide-up',
+  },
+} as const;
+
+/* ========================================
    THEME CONFIGURATION
    ======================================== */
 
