@@ -105,8 +105,8 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
                   <type.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">{type.title}</h4>
-                  <p className="text-sm text-gray-500">{type.description}</p>
+                  <h4 className="font-semibold text-gray-900 mb-0">{type.title}</h4>
+                  <p className="text-sm text-gray-500 mb-0">{type.description}</p>
                 </div>
               </div>
               
@@ -148,8 +148,8 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
                     <subType.icon className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-900">{subType.title}</h4>
-                    <p className="text-xs text-gray-500 mt-1">{subType.description}</p>
+                    <h4 className="font-semibold text-gray-900 mb-0">{subType.title}</h4>
+                    <p className="text-xs text-gray-500 mt-1 mb-0">{subType.description}</p>
                   </div>
                 </div>
               </button>
@@ -159,7 +159,7 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
       )}
 
       {/* Help Text */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-0">
         <div className="flex">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -167,11 +167,11 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800">
+            <h3 className="text-sm font-medium text-blue-800 mb-0">
               Property Type Help
             </h3>
-            <div className="mt-2 text-sm text-blue-700">
-              <p>
+            <div className="mt-2 text-sm mb-0">
+              <p className="text-sm text-gray-600 mb-0">
                 Choose the property type that best describes your listing. This helps potential tenants understand what type of space they&apos;re looking at.
               </p>
             </div>

@@ -10,7 +10,8 @@ import {
   ClockIcon,
   UsersIcon,
   ChatBubbleLeftRightIcon,
-  PlusIcon
+  PlusIcon,
+  StarIcon
 } from '@heroicons/react/24/outline';
 import { ChartTreeMap, PropertyListings } from '@/assets/icons';
 import Link from 'next/link';
@@ -93,6 +94,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
     { name: 'Applications', icon: ClockIcon, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
+    { name: 'Reviews', icon: StarIcon, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
     // { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
@@ -105,6 +107,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Properties', icon: PropertyListings, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
     { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
+    { name: 'Reviews', icon: StarIcon, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
@@ -152,7 +155,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                   <div className="dashboard-user-avatar">
                     {user.avatar ? (
                       <Image
-                        src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')}
+                        src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')}
                         alt={user.name}
                         width={40}
                         height={40}
@@ -160,7 +163,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       />
                     ) : (
                       <Image
-                        src="/src/assets/img/Portrait_Placeholder.png"
+                        src="/images/Portrait_Placeholder.png"
                         alt="Default avatar"
                         width={40}
                         height={40}

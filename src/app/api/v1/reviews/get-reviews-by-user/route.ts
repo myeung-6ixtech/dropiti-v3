@@ -29,7 +29,7 @@ interface GraphQLUser {
 }
 
 interface GraphQLProperty {
-  property_uuid: string;
+  uuid: string;
   title: string;
   location: string;
   rental_price: number;
@@ -136,8 +136,8 @@ const GET_USER_BY_FIREBASE_UID_QUERY = `
 // GraphQL query to get property details by UUID
 const GET_PROPERTY_BY_UUID_QUERY = `
   query GetPropertyByUuid($propertyUuid: String!) {
-    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }) {
-      property_uuid
+    real_estate_property_listing(where: { uuid: { _eq: $propertyUuid } }) {
+      uuid
       title
       location
       rental_price
@@ -281,7 +281,7 @@ export async function GET(request: NextRequest) {
         } : null,
         // Include property details
         property: property ? {
-          propertyUuid: property.property_uuid,
+          propertyUuid: property.uuid,
           title: property.title,
           location: property.location,
           rentalPrice: property.rental_price,

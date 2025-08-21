@@ -89,6 +89,7 @@ const GET_OFFERS_BY_INITIATOR_QUERY = `
     real_estate_offer(where: { initiator_firebase_uid: { _eq: $initiatorFirebaseUid } }, order_by: { created_at: desc }) {
       id
       offer_key
+      offer_uuid
       property_uuid
       initiator_firebase_uid
       recipient_firebase_uid

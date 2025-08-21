@@ -114,11 +114,6 @@ export default function Navigation() {
               <div className={navigationStyles.loadingSkeleton}>
                 {/* Skeleton profile photo */}
                 <div className={navigationStyles.loadingAvatar}></div>
-                {/* Skeleton button */}
-                <div className={navigationStyles.loadingButton}>
-                  <span className={navigationStyles.loadingText}>Loading...</span>
-                  <span className={navigationStyles.loadingTextMobile}>...</span>
-                </div>
               </div>
             </div>
           </div>
@@ -195,7 +190,7 @@ export default function Navigation() {
                   <div className={navigationStyles.userAvatar}>
                     {user?.avatar ? (
                       <Image 
-                        src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')} 
+                        src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')} 
                         alt="User avatar" 
                         width={32}
                         height={32}
@@ -203,7 +198,7 @@ export default function Navigation() {
                       />
                     ) : (
                       <Image
-                        src="/src/assets/img/Portrait_Placeholder.png"
+                        src="/images/Portrait_Placeholder.png"
                         alt="Default avatar"
                         width={32}
                         height={32}

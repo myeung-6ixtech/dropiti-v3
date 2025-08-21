@@ -9,6 +9,7 @@ export * from './ui';
 export * from './api';
 export * from './assets';
 export * from './user';
+export * from './review';
 
 // ========================================
 // LEGACY TYPES (Keeping for backward compatibility)

@@ -7,8 +7,7 @@ import {
   CheckCircleIcon,
   MapPinIcon,
   CalendarIcon,
-  ChatBubbleLeftRightIcon,
-  HeartIcon
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassport2Props {
@@ -61,7 +60,7 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
         <div className="relative">
           <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden ring-4 ring-gray-100">
             <Image
-              src={getSafeProfileImage(user.avatar, '/src/assets/img/Portrait_Placeholder.png')}
+              src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')}
               alt={user.displayName}
               width={128}
               height={128}
@@ -167,10 +166,6 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
           <button className="flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
             <ChatBubbleLeftRightIcon className="h-4 w-4 mr-2" />
             Contact
-          </button>
-          <button className="flex items-center justify-center px-6 py-2.5 bg-gray-50 text-gray-700 rounded-lg font-medium border border-gray-200 hover:bg-gray-100 transition-colors text-sm">
-            <HeartIcon className="h-4 w-4 mr-2" />
-            Follow
           </button>
         </div>
       </div>

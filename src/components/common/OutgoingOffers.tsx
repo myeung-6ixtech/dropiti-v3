@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
@@ -108,12 +109,12 @@ export default function OutgoingOffers({
           <p className="text-gray-600 mb-4">
             You haven't submitted any rental applications yet.
           </p>
-          <a
+          <Link
             href="/search"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             Browse Properties
-          </a>
+          </Link>
         </div>
       </div>
     );

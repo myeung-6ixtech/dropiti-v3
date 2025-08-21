@@ -44,7 +44,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
     displayName: 'dropiti User',
-    avatar: '/src/assets/img/Portrait_Placeholder.png',
+            avatar: '/images/Portrait_Placeholder.png',
     email: 'new.user@dropiti.com',
     location: 'Central, Hong Kong',
     joinDate: '2020-03-15',
@@ -81,7 +81,7 @@ export default function ProfilePage() {
             
             const newProfile: UserProfile = {
               displayName: userData.display_name || 'Unknown User',
-              avatar: userData.photo_url || '/src/assets/img/Portrait_Placeholder.png',
+              avatar: userData.photo_url || '/images/Portrait_Placeholder.png',
               email: userData.email || '',
               location: userData.location || '',
               joinDate: userData.created_at ? new Date(userData.created_at).toLocaleDateString() : new Date().toLocaleDateString(),
@@ -211,10 +211,10 @@ export default function ProfilePage() {
           <div className="flex items-center space-x-3">
             <div className={`w-3 h-3 rounded-full ${profile.verified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
             <div>
-              <h3 className="text-sm font-medium text-gray-900">
+              <h3 className="text-sm font-medium text-gray-900 mb-0">
                 Profile Status: {profile.verified ? 'Verified' : 'Unverified'}
               </h3>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mb-0">
                 {profile.verified 
                   ? 'Your profile is verified and visible to all users' 
                   : 'Complete your profile to increase visibility and trust'
@@ -232,9 +232,9 @@ export default function ProfilePage() {
 
       {/* Dropiti Passport Display */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Your Dropiti Passport</h2>
-          <span className="text-sm text-gray-500">Live Preview</span>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="text-lg font-semibold text-gray-900 mb-0">Your Dropiti Passport</h2>
+          <span className="text-sm text-gray-500 mt-1mb-0">Live Preview</span>
         </div>
         <p className="text-sm text-gray-600 mb-4">
           This is how your Dropiti Passport appears to others. Click "Edit Profile" to make changes.
@@ -257,16 +257,16 @@ export default function ProfilePage() {
               <div className="flex items-center space-x-3">
                 <UserIcon className="h-5 w-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Display Name</p>
-                  <p className="font-medium">{profile.displayName}</p>
+                  <p className="text-sm text-gray-500 mb-0">Display Name</p>
+                  <p className="text-md font-medium text-gray-700">{profile.displayName}</p>
                 </div>
               </div>
 
               <div className="flex items-center space-x-3">
                 <UserIcon className="h-5 w-5 text-gray-400" />
                 <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-medium">{profile.email}</p>
+                  <p className="text-sm text-gray-500 mb-0">Email</p>
+                  <p className="font-medium text-gray-700">{profile.email}</p>
                 </div>
               </div>
 
@@ -274,8 +274,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <MapPinIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Location</p>
-                    <p className="font-medium">{profile.location}</p>
+                    <p className="text-sm text-gray-500 mb-0">Location</p>
+                    <p className="font-medium text-gray-700">{profile.location}</p>
                   </div>
                 </div>
               )}
@@ -284,8 +284,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <UserIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Phone Number</p>
-                    <p className="font-medium">{profile.phoneNumber}</p>
+                    <p className="text-sm text-gray-500 mb-0">Phone Number</p>
+                    <p className="font-medium text-gray-700">{profile.phoneNumber}</p>
                   </div>
                 </div>
               )}
@@ -301,8 +301,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <AcademicCapIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Education</p>
-                    <p className="font-medium">{profile.education}</p>
+                    <p className="text-sm text-gray-500 mb-0">Education</p>
+                    <p className="font-medium text-gray-700">{profile.education}</p>
                   </div>
                 </div>
               )}
@@ -311,8 +311,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <BriefcaseIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Occupation</p>
-                    <p className="font-medium">{profile.occupation}</p>
+                    <p className="text-sm text-gray-500 mb-0">Occupation</p>
+                    <p className="font-medium text-gray-700">{profile.occupation}</p>
                   </div>
                 </div>
               )}
@@ -321,8 +321,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <HeartIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Marital Status</p>
-                    <p className="font-medium">{profile.maritalStatus}</p>
+                    <p className="text-sm text-gray-500 mb-0">Marital Status</p>
+                    <p className="font-medium text-gray-700">{profile.maritalStatus}</p>
                   </div>
                 </div>
               )}
@@ -331,8 +331,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <GlobeAltIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Languages</p>
-                    <p className="font-medium">{profile.languages.join(', ')}</p>
+                    <p className="text-sm text-gray-500 mb-0">Languages</p>
+                    <p className="font-medium text-gray-700">{profile.languages.join(', ')}</p>
                   </div>
                 </div>
               )}
@@ -341,8 +341,8 @@ export default function ProfilePage() {
                 <div className="flex items-center space-x-3">
                   <ClockIcon className="h-5 w-5 text-gray-400" />
                   <div>
-                    <p className="text-sm text-gray-500">Response Time</p>
-                    <p className="font-medium">{profile.responseTime}</p>
+                    <p className="text-sm text-gray-500 mb-0">Response Time</p>
+                    <p className="font-medium text-gray-700">{profile.responseTime}</p>
                   </div>
                 </div>
               )}

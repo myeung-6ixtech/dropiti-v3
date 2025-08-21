@@ -56,7 +56,7 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
           <div className={passportStyles.avatarContainer}>
             <div className={passportStyles.avatar}>
               <Image
-                src={user.avatar || '/src/assets/img/Portrait_Placeholder.png'}
+                src={user.avatar || '/images/Portrait_Placeholder.png'}
                 alt={user.name}
                 width={64}
                 height={64}

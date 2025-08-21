@@ -51,7 +51,7 @@ export default function SignUpForm() {
           firebase_uid: userCredential.user.uid,
           display_name: name,
           email: email,
-          photo_url: '/src/assets/img/Portrait_Placeholder.png', // Set default profile photo
+          photo_url: '/images/Portrait_Placeholder.png', // Set default profile photo
           auth_provider: 'firebase' as const,
           phone_number: undefined,
           location: undefined,

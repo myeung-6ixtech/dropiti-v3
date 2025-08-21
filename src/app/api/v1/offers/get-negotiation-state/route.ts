@@ -7,6 +7,7 @@ const GET_OFFER_QUERY = `
     real_estate_offer_by_pk(id: $offerId) {
       id
       offer_key
+      offer_uuid
       property_uuid
       initiator_firebase_uid
       recipient_firebase_uid
@@ -60,6 +61,7 @@ export async function GET(request: NextRequest) {
       real_estate_offer_by_pk: {
         id: string;
         offer_key: string;
+        offer_uuid: string;
         property_uuid: string;
         initiator_firebase_uid: string;
         recipient_firebase_uid: string;

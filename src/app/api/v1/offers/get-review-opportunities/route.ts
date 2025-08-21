@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_REVIEW_OPPORTUNITIES_QUERY = `
-  query GetReviewOpportunities($userId: String!) {
+  query GetReviewOpportunities($userId: String!, $minEnd: timestamp!) {
     real_estate_offer(
       where: {
         _and: [
@@ -12,24 +12,30 @@ const GET_REVIEW_OPPORTUNITIES_QUERY = `
               { recipient_firebase_uid: { _eq: $userId } }
             ]
           },
-          { offer_status: { _eq: "accepted" } }
+          { offer_status: { _eq: "accepted" } },
+          { review_window_end: { _gte: $minEnd } }
         ]
       }
       order_by: { created_at: desc }
     ) {
       id
       offer_key
+      offer_uuid
       property_uuid
       initiator_firebase_uid
       recipient_firebase_uid
       created_at
+      review_window_start
+      review_window_end
+      initiator_review_status
+      recipient_review_status
     }
   }
 `;
 
 const GET_PROPERTY_BY_UUID_QUERY = `
   query GetPropertyByUuid($propertyUuid: String!) {
-    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }) {
+    real_estate_property_listing(where: { uuid: { _eq: $propertyUuid } }) {
       title
       address
     }
@@ -59,14 +65,23 @@ export async function GET(request: NextRequest) {
 
     console.log('Get Review Opportunities API: Fetching for user:', userId);
 
-    const result = await executeQuery(GET_REVIEW_OPPORTUNITIES_QUERY, { userId }) as {
+    // Compute minimum allowed review_window_end: now - 5 days
+    const fiveDaysMs = 5 * 24 * 60 * 60 * 1000;
+    const minEndIso = new Date(Date.now() - fiveDaysMs).toISOString();
+
+    const result = await executeQuery(GET_REVIEW_OPPORTUNITIES_QUERY, { userId, minEnd: minEndIso }) as {
       real_estate_offer: Array<{
         id: string;
         offer_key: string;
+        offer_uuid: string;
         property_uuid: string;
         initiator_firebase_uid: string;
         recipient_firebase_uid: string;
         created_at: string;
+        review_window_start: string;
+        review_window_end: string;
+        initiator_review_status: string;
+        recipient_review_status: string;
       }>;
     };
 
@@ -132,17 +147,30 @@ export async function GET(request: NextRequest) {
       // Determine the other party (the one the current user needs to review)
       const otherParty = isInitiator ? recipient : initiator;
       
+      // Add debugging for review window dates
+      console.log('Get Review Opportunities API: Offer review window data:', {
+        offerId: offer.id,
+        reviewWindowStart: offer.review_window_start,
+        reviewWindowEnd: offer.review_window_end,
+        reviewWindowStartDate: offer.review_window_start ? new Date(offer.review_window_start).toDateString() : 'N/A',
+        reviewWindowEndDate: offer.review_window_end ? new Date(offer.review_window_end).toDateString() : 'N/A',
+        daysFromStart: offer.review_window_start ? Math.round((new Date().getTime() - new Date(offer.review_window_start).getTime()) / (1000 * 60 * 60 * 24)) : 'N/A',
+        daysUntilEnd: offer.review_window_end ? Math.round((new Date(offer.review_window_end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 'N/A'
+      });
+      
+      const statusForUser = isInitiator ? offer.initiator_review_status : offer.recipient_review_status;
+
       return {
         id: offer.id,
         offerId: offer.id,
-        offerUuid: offer.offer_key,
+        offerUuid: offer.offer_uuid,
         propertyUuid: offer.property_uuid,
         propertyTitle: property?.title || 'Property',
         otherPartyName: otherParty?.display_name || 'Unknown User',
         otherPartyId: isInitiator ? offer.recipient_firebase_uid : offer.initiator_firebase_uid,
         reviewType: isInitiator ? 'tenant_to_landlord' : 'landlord_to_tenant',
-        reviewWindowEnd: offer.created_at, // Assuming created_at is the review window end for now
-        status: 'pending' // Assuming status is 'pending' for now
+        reviewWindowEnd: offer.review_window_end, // Use the actual review window end date
+        status: statusForUser || 'pending'
       };
     });
 

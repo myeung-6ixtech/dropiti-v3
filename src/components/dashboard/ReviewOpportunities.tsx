@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { REVIEW_CONSTANTS, REVIEW_TYPES, REVIEW_STATUS } from '@/constants/review';
 import { offersAPI } from '@/lib/api-client';
 import CreateReviewModal from '@/components/common/CreateReviewModal';
@@ -26,6 +27,7 @@ export default function ReviewOpportunities() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<ReviewOpportunity | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const { user: authUser } = useAuth();
+  const { showToast } = useToast();
 
   const loadReviewOpportunities = useCallback(async () => {
     if (!authUser?.id) return;
@@ -67,7 +69,7 @@ export default function ReviewOpportunities() {
     try {
       const response = await offersAPI.createReview({
         offerId: selectedOpportunity.offerId,
-        offerUuid: selectedOpportunity.offerUuid,
+        offerUuid: selectedOpportunity.offerUuid, // now the real DB offer_uuid from API
         reviewType: selectedOpportunity.reviewType,
         rating: reviewData.rating,
         comment: reviewData.comment,
@@ -81,9 +83,12 @@ export default function ReviewOpportunities() {
         await loadReviewOpportunities();
         setIsReviewModalOpen(false);
         setSelectedOpportunity(null);
+        // Success toast
+        showToast('success', 'Your review has been submitted successfully.');
       }
     } catch (error) {
       console.error('Error creating review:', error);
+      showToast('error', 'Failed to submit review. Please try again.');
     }
   };
 
