@@ -63,36 +63,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
     }
   }, [authUser?.id, showToast]);
 
-  // Create sample chat data for testing
-  const createSampleChatData = useCallback(async () => {
-    if (!authUser?.id) return;
 
-    try {
-      // Create a sample room with another user (using a dummy ID for testing)
-      const dummyUserId = 'sample-user-123';
-      const response = await fetch('/api/v1/chat/create-sample-room', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          user1FirebaseUid: authUser.id,
-          user2FirebaseUid: dummyUserId
-        }),
-      });
-
-      if (response.ok) {
-        showToast('success', 'Sample chat room created! Refresh to see it.');
-        // Refresh the chat rooms
-        fetchChatRooms();
-      } else {
-        throw new Error('Failed to create sample room');
-      }
-    } catch (error) {
-      console.error('Error creating sample chat data:', error);
-      showToast('error', 'Failed to create sample chat data');
-    }
-  }, [authUser?.id, showToast, fetchChatRooms]);
 
   // Handle roomId from URL parameters
   useEffect(() => {
@@ -137,7 +108,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
       <div className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-bold text-gray-900">Chat</h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-0">Chat</h2>
             <div className="flex items-center space-x-2">
               <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-gray-400'}`}></div>
               <span className="text-sm text-gray-500">
@@ -157,7 +128,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="form-input-sm pl-8"
               />
-              <MagnifyingGlassIcon className="absolute left-2.5 top-2 h-4 w-4 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute right-2.5 top-3 h-4 w-4 text-gray-400" />
             </div>
             
             <Button
@@ -170,15 +141,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
               <span className="hidden sm:inline">Notifications</span>
             </Button>
 
-            {/* Sample Data Button - Remove in production */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2 text-sm text-orange-600 border-orange-200 hover:bg-orange-50"
-              onClick={createSampleChatData}
-            >
-              <span className="text-xs">Create Sample Chat</span>
-            </Button>
+
           </div>
         </div>
       </div>
@@ -196,12 +159,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
       {/* Real-time Status Bar */}
       {isConnected && (
         <div className="bg-white border-t border-gray-200 px-4 py-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <SignalIcon className="h-4 w-4 text-green-500" />
-              <span className="text-sm text-gray-600">Real-time messaging active</span>
-            </div>
-            
+          <div className="flex items-center justify-between">            
             {/* Typing Indicator */}
             {typingIndicator && (
               <div className="flex items-center space-x-2">

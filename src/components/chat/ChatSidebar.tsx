@@ -37,10 +37,10 @@ export default function ChatSidebar({ contacts, selectedContact, onContactSelect
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="border-b border-gray-200 px-4 py-3">
-        <h2 className="text-sm font-semibold text-gray-900">
+        <h2 className="text-sm mb-0 font-semibold text-gray-900">
           {userType === 'tenant' ? 'Landlords & Support' : 'Tenants & Support'}
         </h2>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs mb-0 text-gray-500">
           {contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}
         </p>
       </div>
@@ -92,7 +92,7 @@ export default function ChatSidebar({ contacts, selectedContact, onContactSelect
                   {/* Contact Info */}
                   <div className="ml-3 flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm mb-0 font-medium text-gray-900 truncate">
                         {contact.name}
                       </p>
                       {contact.unreadCount > 0 && (
@@ -101,10 +101,10 @@ export default function ChatSidebar({ contacts, selectedContact, onContactSelect
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">
+                    <p className="text-xs mb-0 text-gray-500 truncate mt-0.5">
                       {contact.lastMessage}
                     </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs mb-0 text-gray-400 mt-0.5">
                       {formatTime(contact.lastMessageTime)}
                     </p>
                   </div>

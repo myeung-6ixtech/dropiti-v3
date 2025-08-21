@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { PaperAirplaneIcon, PaperClipIcon, PhoneIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 import ChatMessage from './ChatMessage';
 import ChatSidebar from './ChatSidebar';
 import { useRealTimeChat } from '@/hooks/useRealTimeChat';
@@ -202,7 +202,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                           className="h-8 w-8 rounded-full object-cover"
                         />
                       ) : (
-                        <span className="text-white text-sm font-medium">
+                        <span className="text-white mb-0 text-sm font-medium">
                           {selectedContact.name.charAt(0).toUpperCase()}
                         </span>
                       )}
@@ -212,8 +212,8 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                     )}
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-gray-900">{selectedContact.name}</h3>
-                    <p className="text-xs text-gray-500">
+                    <h3 className="text-sm mb-0 font-medium text-gray-900">{selectedContact.name}</h3>
+                    <p className="text-xs mb-0 text-gray-500">
                       {selectedContact.isOnline ? (
                         <span className="flex items-center">
                           <span className="h-1.5 w-1.5 bg-green-400 rounded-full mr-1.5"></span>
@@ -227,14 +227,14 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                 </div>
                 
                 {/* Header Actions */}
-                <div className="flex items-center space-x-1">
+                {/* <div className="flex items-center space-x-1">
                   <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
                     <PhoneIcon className="h-4 w-4" />
                   </button>
                   <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
                     <VideoCameraIcon className="h-4 w-4" />
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -296,7 +296,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
             {/* Message Input */}
             <div className="border-t border-gray-200 px-4 py-3 bg-white">
               <div className="flex items-end space-x-3">
-                <button className="flex-shrink-0 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
+                <button className="flex-shrink-0 p-1.5 mb-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
                   <PaperClipIcon className="h-4 w-4" />
                 </button>
                 <div className="flex-1">
