@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { propertiesAPI, offersAPI } from '@/lib/api-client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { chatAPI } from '@/lib/chat-api';
 import { 
   StarIcon,
   HeartIcon,
@@ -262,10 +263,44 @@ export default function PropertyDetailPage() {
     setIsCreateOfferModalOpen(true);
   };
 
-  const handleChatWithLandlord = () => {
-    if (propertyData?.landlord) {
-      // Navigate to chat page with landlord firebase_uid
-      router.push(`/dashboard/chat?landlord=${propertyData.landlord.firebase_uid}`);
+  const handleChatWithLandlord = async () => {
+    if (!authUser?.id) {
+      showToast('error', 'You must be logged in to chat with the landlord');
+      return;
+    }
+
+    if (!propertyData?.landlord?.firebase_uid) {
+      showToast('error', 'Landlord information not available');
+      return;
+    }
+
+    // Check if user is trying to chat with themselves
+    if (authUser.id === propertyData.landlord.firebase_uid) {
+      showToast('error', 'You cannot chat with yourself');
+      return;
+    }
+
+    try {
+      // Show loading state
+      showToast('info', 'Creating chat room...');
+
+      // Get or create a direct chat room between user and landlord
+      const roomResponse = await chatAPI.getOrCreateRoom(
+        authUser.id, // current user (tenant)
+        propertyData.landlord.firebase_uid, // landlord
+        'tenant', // current user role
+        'landlord' // landlord role
+      );
+
+      if (roomResponse.roomId) {
+        // Navigate to chat page with the specific room
+        router.push(`/dashboard/chat?roomId=${roomResponse.roomId}`);
+      } else {
+        showToast('error', 'Failed to create chat room');
+      }
+    } catch (error) {
+      console.error('Error creating chat room:', error);
+      showToast('error', 'Failed to start chat. Please try again.');
     }
   };
 

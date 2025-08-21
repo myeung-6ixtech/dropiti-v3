@@ -8,8 +8,6 @@ export const REVIEW_TYPES = {
   LANDLORD_TO_TENANT: 'landlord_to_tenant',
 } as const;
 
-export type ReviewType = typeof REVIEW_TYPES[keyof typeof REVIEW_TYPES];
-
 // Review status for tracking
 export const REVIEW_STATUS = {
   PENDING: 'pending',
@@ -17,5 +15,3 @@ export const REVIEW_STATUS = {
   EXPIRED: 'expired',
   MISSED: 'missed',
 } as const;
-
-export type ReviewStatus = typeof REVIEW_STATUS[keyof typeof REVIEW_STATUS];

@@ -3,20 +3,7 @@
 import { useState } from 'react';
 import { REVIEW_TYPES } from '@/constants/review';
 import { StarIcon } from '@heroicons/react/24/solid';
-
-interface CreateReviewModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (reviewData: ReviewData) => void;
-  reviewType: string;
-  otherPartyName: string;
-  propertyTitle: string;
-}
-
-interface ReviewData {
-  rating: number;
-  comment: string;
-}
+import { CreateReviewModalProps } from '@/types/review';
 
 export default function CreateReviewModal({
   isOpen,

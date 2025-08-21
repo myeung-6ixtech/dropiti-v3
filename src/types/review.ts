@@ -32,7 +32,38 @@ export interface Review {
 // REVIEW TYPES
 // ========================================
 
-export type ReviewType = 'offer_review' | 'tenant_review' | 'landlord_review';
+export type ReviewType = 'offer_review' | 'tenant_to_landlord' | 'landlord_to_tenant';
+
+// ========================================
+// REVIEW OPPORTUNITY INTERFACE
+// ========================================
+
+export interface ReviewOpportunity {
+  id: string;
+  propertyTitle: string;
+  otherPartyName: string;
+  reviewType: ReviewType;
+  reviewWindowEnd: string;
+  status: string;
+  offerId: string;
+  offerUuid: string;
+  propertyUuid: string;
+  otherPartyId: string;
+}
+
+// ========================================
+// REVIEW TAB TYPES
+// ========================================
+
+export type ReviewTabType = 'upcoming' | 'given' | 'received';
+
+export interface ReviewTab {
+  id: ReviewTabType;
+  name: string;
+  count: number;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
 
 // ========================================
 // RELATED USER INTERFACE
@@ -139,8 +170,8 @@ export interface ReviewStats {
   };
   reviewTypeBreakdown: {
     offer_review: number;
-    tenant_review: number;
-    landlord_review: number;
+    tenant_to_landlord: number;
+    landlord_to_tenant: number;
   };
   verifiedReviews: number;
   helpfulReviews: number;
@@ -157,6 +188,25 @@ export interface ReviewCardProps {
   onEdit?: (review: Review) => void;
   onDelete?: (reviewUuid: string) => void;
   onMarkHelpful?: (reviewUuid: string) => void;
+}
+
+export interface ReviewOpportunityCardProps {
+  opportunity: ReviewOpportunity;
+  onCreateReview: () => void;
+}
+
+export interface CreateReviewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (reviewData: ReviewData) => void;
+  reviewType: string;
+  otherPartyName: string;
+  propertyTitle: string;
+}
+
+export interface ReviewData {
+  rating: number;
+  comment: string;
 }
 
 export interface ReviewFormProps {
@@ -202,12 +252,12 @@ export const REVIEW_RATING_OPTIONS: ReviewRatingOption[] = [
 
 export const REVIEW_TYPE_LABELS: Record<ReviewType, string> = {
   offer_review: 'Offer Review',
-  tenant_review: 'Tenant Review',
-  landlord_review: 'Landlord Review',
+  tenant_to_landlord: 'Tenant Review',
+  landlord_to_tenant: 'Landlord Review',
 };
 
 export const REVIEW_TYPE_DESCRIPTIONS: Record<ReviewType, string> = {
   offer_review: 'Review of a rental offer or application',
-  tenant_review: 'Review of a tenant by a landlord',
-  landlord_review: 'Review of a landlord by a tenant',
+  tenant_to_landlord: 'Review of a tenant by a landlord',
+  landlord_to_tenant: 'Review of a landlord by a tenant',
 };

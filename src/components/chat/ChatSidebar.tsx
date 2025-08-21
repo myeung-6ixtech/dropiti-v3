@@ -19,9 +19,10 @@ interface ChatSidebarProps {
   selectedContact: ChatContact | null;
   onContactSelect: (contact: ChatContact) => void;
   userType: 'tenant' | 'landlord';
+  isLoading?: boolean;
 }
 
-export default function ChatSidebar({ contacts, selectedContact, onContactSelect, userType }: ChatSidebarProps) {
+export default function ChatSidebar({ contacts, selectedContact, onContactSelect, userType, isLoading = false }: ChatSidebarProps) {
   const formatTime = (date: Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
@@ -46,7 +47,11 @@ export default function ChatSidebar({ contacts, selectedContact, onContactSelect
 
       {/* Contacts List */}
       <div className="flex-1 overflow-y-auto">
-        {contacts.length === 0 ? (
+        {isLoading ? (
+          <div className="px-4 py-6 text-center text-gray-500">
+            <p className="text-sm">Loading contacts...</p>
+          </div>
+        ) : contacts.length === 0 ? (
           <div className="px-4 py-6 text-center text-gray-500">
             <p className="text-sm">No contacts available</p>
           </div>

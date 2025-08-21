@@ -5,6 +5,9 @@ import Image from 'next/image';
 import { PaperAirplaneIcon, PaperClipIcon, PhoneIcon, VideoCameraIcon } from '@heroicons/react/24/outline';
 import ChatMessage from './ChatMessage';
 import ChatSidebar from './ChatSidebar';
+import { useRealTimeChat } from '@/hooks/useRealTimeChat';
+import { convertMessageToUIMessage } from '@/lib/chat-api';
+import { useAuth } from '@/context/AuthContext';
 
 interface Message {
   id: string;
@@ -25,26 +28,55 @@ interface ChatContact {
   unreadCount: number;
   isOnline: boolean;
   role?: 'landlord' | 'tenant' | 'support';
+  firebaseUid: string;
+}
+
+interface ChatSidebarContact {
+  id: string;
+  name: string;
+  avatar?: string;
+  lastMessage: string;
+  lastMessageTime: Date;
+  unreadCount: number;
+  isOnline: boolean;
+  role?: 'landlord' | 'tenant' | 'support';
 }
 
 interface ChatInterfaceProps {
   contacts: ChatContact[];
-  initialMessages?: Message[];
   userType: 'tenant' | 'landlord';
+  isLoadingContacts?: boolean;
+  selectedRoomId?: string | null;
 }
 
-export default function ChatInterface({ contacts, initialMessages = [], userType }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+export default function ChatInterface({ contacts, userType, isLoadingContacts = false, selectedRoomId }: ChatInterfaceProps) {
+  const { user: authUser } = useAuth();
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(contacts[0] || null);
   const [newMessage, setNewMessage] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Use real-time chat hook - use selectedRoomId if provided, otherwise use selectedContact
+  const activeRoomId = selectedRoomId || selectedContact?.id;
+  const { 
+    messages: realTimeMessages, 
+    sendMessage: sendRealTimeMessage, 
+    isLoading: isLoadingMessages,
+    error: messageError 
+  } = useRealTimeChat({ 
+    roomId: activeRoomId,
+    pollingInterval: 3000 // Poll every 3 seconds
+  });
+
+  // Convert real-time messages to UI format
+  const uiMessages: Message[] = realTimeMessages.map(msg => 
+    convertMessageToUIMessage(msg, authUser?.id || '', selectedContact?.name || 'Unknown')
+  );
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [uiMessages]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -54,75 +86,72 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
     }
   }, [newMessage]);
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedContact) return;
+  // Convert contacts to sidebar format (without firebaseUid)
+  const sidebarContacts: ChatSidebarContact[] = contacts.map(contact => ({
+    id: contact.id,
+    name: contact.name,
+    avatar: contact.avatar,
+    lastMessage: contact.lastMessage,
+    lastMessageTime: contact.lastMessageTime,
+    unreadCount: contact.unreadCount,
+    isOnline: contact.isOnline,
+    role: contact.role
+  }));
 
-    const message: Message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      sender: 'user',
-      timestamp: new Date(),
-      senderName: 'You',
-      status: 'sent',
-    };
-
-    setMessages(prev => [...prev, message]);
-    setNewMessage('');
-
-    // Simulate message delivery and read status
-    setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === message.id 
-            ? { ...msg, status: 'delivered' as const }
-            : msg
-        )
-      );
-    }, 1000);
-
-    setTimeout(() => {
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === message.id 
-            ? { ...msg, status: 'read' as const }
-            : msg
-        )
-      );
-    }, 2000);
-
-    // Simulate typing indicator
-    setIsTyping(true);
-
-    // Simulate reply after 2-4 seconds
-    setTimeout(() => {
-      setIsTyping(false);
-      const reply: Message = {
-        id: (Date.now() + 1).toString(),
-        content: generateReply(),
-        sender: 'other',
-        timestamp: new Date(),
-        senderName: selectedContact.name,
-        avatar: selectedContact.avatar,
-        status: 'read',
-      };
-      setMessages(prev => [...prev, reply]);
-    }, 2000 + Math.random() * 2000);
+  // Handle contact selection
+  const handleContactSelect = (contact: ChatSidebarContact) => {
+    const fullContact = contacts.find(c => c.id === contact.id);
+    if (fullContact) {
+      setSelectedContact(fullContact);
+    }
   };
 
-  const generateReply = (): string => {
-    const replies = [
-      "Thanks for your message! I'll get back to you soon.",
-      "That's a great question. Let me check on that for you.",
-      "I understand your concern. Can you provide more details?",
-      "I'll look into this right away and update you.",
-      "Thanks for reaching out. I appreciate your patience.",
-      "That sounds good! I'll process this request now.",
-      "I'm here to help. What else can I assist you with?",
-      "Got it! I'll handle this for you right away.",
-      "Perfect! I've noted that down for you.",
-      "I can help you with that. Let me gather the information.",
-    ];
-    return replies[Math.floor(Math.random() * replies.length)];
+  // Handle selectedRoomId prop - find corresponding contact or create a placeholder
+  useEffect(() => {
+    if (selectedRoomId) {
+      // Find the contact that matches the selected room ID
+      const matchingContact = contacts.find(contact => contact.id === selectedRoomId);
+      if (matchingContact) {
+        setSelectedContact(matchingContact);
+      } else if (contacts.length === 0) {
+        // If no contacts loaded yet but we have a roomId, create a placeholder contact
+        setSelectedContact({
+          id: selectedRoomId,
+          name: 'Loading...',
+          lastMessage: '',
+          lastMessageTime: new Date(),
+          unreadCount: 0,
+          isOnline: false,
+          role: 'landlord',
+          firebaseUid: selectedRoomId
+        });
+      }
+    }
+  }, [selectedRoomId, contacts]);
+
+  // Update selected contact when contacts change (but only if no selectedRoomId is provided)
+  useEffect(() => {
+    if (!selectedRoomId && contacts.length > 0 && !selectedContact) {
+      setSelectedContact(contacts[0]);
+    }
+  }, [contacts, selectedContact, selectedRoomId]);
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedContact) return;
+
+    const messageContent = newMessage.trim();
+    setNewMessage('');
+
+    // Send message using real-time chat
+    const sentMessage = await sendRealTimeMessage(messageContent);
+    
+    if (sentMessage) {
+      // Message was sent successfully
+      console.log('Message sent:', sentMessage);
+    } else {
+      // Handle error - could show a toast notification
+      console.error('Failed to send message');
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -137,10 +166,20 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
       {/* Chat Sidebar */}
       <div className="w-72 border-r border-gray-200 flex-shrink-0">
         <ChatSidebar
-          contacts={contacts}
-          selectedContact={selectedContact}
-          onContactSelect={setSelectedContact}
+          contacts={sidebarContacts}
+          selectedContact={selectedContact ? {
+            id: selectedContact.id,
+            name: selectedContact.name,
+            avatar: selectedContact.avatar,
+            lastMessage: selectedContact.lastMessage,
+            lastMessageTime: selectedContact.lastMessageTime,
+            unreadCount: selectedContact.unreadCount,
+            isOnline: selectedContact.isOnline,
+            role: selectedContact.role
+          } : null}
+          onContactSelect={handleContactSelect}
           userType={userType}
+          isLoading={isLoadingContacts}
         />
       </div>
 
@@ -201,13 +240,17 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50 min-h-0">
-              {messages.length === 0 ? (
+              {isLoadingMessages ? (
+                <div className="text-center text-gray-500 mt-8">
+                  <p className="text-sm">Loading messages...</p>
+                </div>
+              ) : uiMessages.length === 0 ? (
                 <div className="text-center text-gray-500 mt-8">
                   <p className="text-sm">No messages yet. Start a conversation!</p>
                 </div>
               ) : (
                 <>
-                  {messages.map((message) => (
+                  {uiMessages.map((message) => (
                     <ChatMessage
                       key={message.id}
                       message={message}
@@ -216,7 +259,7 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
                   ))}
                   
                   {/* Typing Indicator */}
-                  {isTyping && (
+                  {/* isTyping && (
                     <div className="flex justify-start">
                       <div className="flex max-w-xs lg:max-w-md">
                         <div className="flex-shrink-0">
@@ -237,9 +280,16 @@ export default function ChatInterface({ contacts, initialMessages = [], userType
                         </div>
                       </div>
                     </div>
-                  )}
+                  ) */}
                   <div ref={messagesEndRef} />
                 </>
+              )}
+
+              {/* Error Display */}
+              {messageError && (
+                <div className="text-center text-red-500 mt-4">
+                  <p className="text-sm">Error: {messageError}</p>
+                </div>
               )}
             </div>
 

@@ -35,7 +35,7 @@ const GET_REVIEW_OPPORTUNITIES_QUERY = `
 
 const GET_PROPERTY_BY_UUID_QUERY = `
   query GetPropertyByUuid($propertyUuid: String!) {
-    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }) {
+    real_estate_property_listing(where: { uuid: { _eq: $propertyUuid } }) {
       title
       address
     }
