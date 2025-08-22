@@ -5,10 +5,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { 
   StarIcon, 
-  CheckCircleIcon,
-  CalendarIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
-import { Sofa } from '@/assets/icons';
 
 interface Landlord {
   id: string;
@@ -26,13 +24,7 @@ interface Landlord {
 interface PropertyPricingCardProps {
   price: number;
   availableDate: string | null;
-  minimumLease: number;
   landlord: Landlord;
-  details: {
-    type: string;
-    furnished: string;
-    petsAllowed: boolean;
-  };
   onCreateOffer: () => void;
   onChatWithLandlord: () => void;
   // New props for button state management
@@ -44,9 +36,7 @@ interface PropertyPricingCardProps {
 export default function PropertyPricingCard({
   price,
   availableDate,
-  minimumLease,
   landlord,
-  details,
   onCreateOffer,
   onChatWithLandlord,
   isOwner,
@@ -142,119 +132,95 @@ export default function PropertyPricingCard({
           </div>
         </div>
 
-        {/* Landlord Highlight Card - Airbnb Inspired */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-start space-x-4 mb-4">
-            <div className="relative">
-              <Image
-                src={landlordAvatar}
-                alt={`${landlord.name}'s profile picture`}
-                width={64}
-                height={64}
-                className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                onError={(e) => {
-                  // Fallback to default avatar if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.src = fallbackAvatar;
-                }}
-                priority={false}
-              />
-              {landlord.verified && (
-                <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
-                  <CheckCircleIcon className="h-3 w-3 text-white" />
-                </div>
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-1">
-                <Link 
-                  href={`/user/${landlord.uuid}`}
-                  className="font-semibold text-gray-900 text-lg hover:text-black transition-colors cursor-pointer"
-                >
-                  {landlord.name}
-                </Link>
+        {/* Landlord Highlight Card - Airbnb Inspired - Hidden for owners */}
+        {!isOwner && (
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="flex items-start space-x-4 mb-4">
+              <div className="relative">
+                <Image
+                  src={landlordAvatar}
+                  alt={`${landlord.name}'s profile picture`}
+                  width={64}
+                  height={64}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                  onError={(e) => {
+                    // Fallback to default avatar if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.src = fallbackAvatar;
+                  }}
+                  priority={false}
+                />
                 {landlord.verified && (
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
-                    Verified
-                  </span>
+                  <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
+                    <CheckCircleIcon className="h-3 w-3 text-white" />
+                  </div>
                 )}
               </div>
-              <div className="flex items-center space-x-1 mb-2">
-                <StarIcon className="h-4 w-4 text-yellow-400" />
-                <span className="font-medium text-gray-900">{landlord.rating}</span>
-                <span className="text-gray-500">•</span>
-                <span className="text-gray-600">{landlord.reviewCount} reviews</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center space-x-2 mb-1">
+                  <Link 
+                    href={`/user/${landlord.uuid}`}
+                    className="font-semibold text-gray-900 text-lg hover:text-black transition-colors cursor-pointer"
+                  >
+                    {landlord.name}
+                  </Link>
+                  {landlord.verified && (
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
+                      Verified
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center space-x-1 mb-2">
+                  <StarIcon className="h-4 w-4 text-yellow-400" />
+                  <span className="font-medium text-gray-900">{landlord.rating}</span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-600">{landlord.reviewCount} reviews</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Contact Actions */}
-          <div className="flex flex-col space-y-2 mb-4">
-            <button
-              onClick={onChatWithLandlord}
-              className="w-full btn-secondary py-3 px-4 font-semibold"
-            >
-              Chat with Landlord
-            </button>
-            {/* <button 
-              onClick={() => setShowContactInfo(!showContactInfo)}
-              className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
-            >
-              <PhoneIcon className="h-4 w-4" />
-              <span>Contact</span>
-            </button>
-            <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
-              <EnvelopeIcon className="h-4 w-4" />
-              <span>Message</span>
-            </button> */}
-          </div>
+            {/* Contact Actions */}
+            <div className="flex flex-col space-y-2 mb-4">
+              <button
+                onClick={onChatWithLandlord}
+                className="w-full btn-secondary py-3 px-4 font-semibold"
+              >
+                Chat with Landlord
+              </button>
+              {/* <button 
+                onClick={() => setShowContactInfo(!showContactInfo)}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
+              >
+                <PhoneIcon className="h-4 w-4" />
+                <span>Contact</span>
+              </button>
+              <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
+              >
+                <EnvelopeIcon className="h-4 w-4" />
+                <span>Message</span>
+              </button> */}
+            </div>
 
-          {/* Host Stats */}
-          <div className="pt-4 border-t border-gray-200">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-lg font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
-                <div className="text-xs text-gray-500">Response rate</div>
-              </div>
-              <div>
-                <div className="text-lg font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
-                <div className="text-xs text-gray-500">Avg. response</div>
-              </div>
-              <div>
-                <div className="text-lg font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
-                <div className="text-xs text-gray-500">Properties</div>
+            {/* Host Stats */}
+            <div className="pt-4 border-t border-gray-200">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
+                  <div className="text-xs text-gray-500">Response rate</div>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
+                  <div className="text-xs text-gray-500">Avg. response</div>
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
+                  <div className="text-xs text-gray-500">Properties</div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* Quick Info */}
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
-          <h3 className="font-semibold text-gray-900 mb-3">Quick facts</h3>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <CalendarIcon className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-600">Minimum lease:</span>
-              </div>
-              <span className="font-medium">{minimumLease} months</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Sofa className="h-4 w-4 text-gray-400" />
-                <span className="text-gray-600">Furnished:</span>
-              </div>
-              <span className="font-medium">{details.furnished}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="h-4 w-4 text-gray-400">🐾</div>
-                <span className="text-gray-600">Pets:</span>
-              </div>
-              <span className="font-medium">{details.petsAllowed ? 'Allowed' : 'Not allowed'}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

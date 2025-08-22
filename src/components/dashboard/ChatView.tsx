@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   MagnifyingGlassIcon,
-  BellIcon,
-  SignalIcon
+  BellIcon
 } from '@heroicons/react/24/outline';
 import ChatInterface from '@/components/chat/ChatInterface';
 import Button from '@/components/ui/button/Button';

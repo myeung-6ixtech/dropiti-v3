@@ -147,7 +147,7 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
               
               return languagesArray.length > 0 ? (
                 languagesArray.map((language) => (
-                  <span key={language} className="bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs">
+                  <span key={language} className="passport-language-tag">
                     {language}
                   </span>
                 ))
