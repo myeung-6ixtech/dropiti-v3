@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   MagnifyingGlassIcon,
-  BellIcon,
-  SignalIcon
+  BellIcon
 } from '@heroicons/react/24/outline';
 import ChatInterface from '@/components/chat/ChatInterface';
 import Button from '@/components/ui/button/Button';
@@ -50,9 +49,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
       const chatRooms = await chatAPI.getUserChatRooms(authUser.id);
       
       // Convert chat rooms to contacts format
-      const contactsList = chatRooms.map(room => 
-        convertChatRoomToContact(room, authUser.id)
-      );
+      const contactsList = chatRooms.map(room => convertChatRoomToContact(room));
       
       setContacts(contactsList);
     } catch (error) {

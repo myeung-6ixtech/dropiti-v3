@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { chatAPI } from '@/lib/chat-api';
 import { 
-  StarIcon,
   HeartIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
@@ -25,6 +24,8 @@ interface PropertyData {
   title: string;
   description: string;
   location: string;
+  address?: Record<string, unknown>; // Raw address data
+  show_specific_location?: boolean; // Whether to show full address or just district/country
   price: number;
   bedrooms: number;
   bathrooms: number;
@@ -74,6 +75,20 @@ export default function PropertyDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
   const { user: authUser } = useAuth(); // Get user from context
+
+  // Function to format address based on show_specific_location flag
+  const formatAddressDisplay = (address: Record<string, unknown> | undefined, showSpecificLocation: boolean | undefined) => {
+    if (!address || !showSpecificLocation) {
+      // If show_specific_location is false or undefined, only show district and country
+      const district = address?.district || 'Unknown District';
+      const country = address?.country || 'Unknown Country';
+      return `${district}, ${country}`;
+    }
+    
+    // If show_specific_location is true, show full formatted address
+    // This will use the existing location field which is already formatted
+    return null; // Return null to use the existing location field
+  };
 
   // Function to check if the current user has existing offers for this property
   const checkExistingOffer = useCallback(async (propertyUuid: string, userId: string) => {
@@ -417,13 +432,13 @@ export default function PropertyDetailPage() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 text-gray-600 rounded-full transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-lg font-semibold text-gray-900">{property.title}</h1>
+              <h1 className="text-lg font-semibold text-gray-900 mb-0">{property.title}</h1>
             </div>
             <div className="flex items-center space-x-2">
               <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -505,40 +520,45 @@ export default function PropertyDetailPage() {
                 <div>
                   <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h1>
                   <div className="flex items-center text-gray-600">
-                    <span>{property.location}</span>
+                    <span>
+                      {(() => {
+                        const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
+                        return formattedAddress || property.location;
+                      })()}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <div className="flex items-center">
                     <StarIcon className="h-4 w-4 text-yellow-400" />
                     <span className="ml-1 text-sm font-medium">4.8</span>
                     <span className="text-gray-500 text-sm">(127 reviews)</span>
                   </div>
-                </div>
+                </div> */}
               </div>
 
-              {/* Property Stats */}
-              <div className="grid grid-cols-3 gap-4 py-4 border-t border-gray-200">
+              {/* Property Stats - Key Details */}
+              <div className="grid grid-cols-3 gap-6 py-6 border-t border-gray-200">
                 <div className="text-center">
-                  <div className="flex items-center justify-center space-x-1">
-                    <Bed className="h-4 w-4 text-gray-400" />
-                    <span className="font-semibold">{property.bedrooms}</span>
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <Bed className="h-10 w-10 text-gray-600" />
+                    <span className="text-xl font-bold text-gray-900">{property.bedrooms}</span>
+                    <p className="text-sm text-gray-600">Bedrooms</p>
                   </div>
-                  <p className="text-sm text-gray-500">Bedrooms</p>
                 </div>
                 <div className="text-center">
-                  <div className="flex items-center justify-center space-x-1">
-                    <Bathtub className="h-4 w-4 text-gray-400" />
-                    <span className="font-semibold">{property.bathrooms}</span>
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <Bathtub className="h-10 w-10 text-gray-600" />
+                    <span className="text-xl font-bold text-gray-900">{property.bathrooms}</span>
+                    <p className="text-sm text-gray-600">Bathrooms</p>
                   </div>
-                  <p className="text-sm text-gray-500">Bathrooms</p>
                 </div>
                 <div className="text-center">
-                  <div className="flex items-center justify-center space-x-1">
-                    <Clock className="h-4 w-4 text-gray-400" />
-                    <span className="font-semibold">{property.minimum_lease}</span>
+                  <div className="flex flex-col items-center justify-center space-y-2">
+                    <Clock className="h-10 w-10 text-gray-600" />
+                    <span className="text-xl font-bold text-gray-900">{property.minimum_lease}</span>
+                    <p className="text-sm text-gray-600">Min. Lease (months)</p>
                   </div>
-                  <p className="text-sm text-gray-500">Min. Lease (months)</p>
                 </div>
               </div>
             </div>
@@ -559,8 +579,8 @@ export default function PropertyDetailPage() {
                     const displayName = getAmenityDisplayName(amenityId);
                     return (
                       <div key={amenityId} className="flex items-center space-x-3">
-                        <AmenityIcon className="h-6 w-6 text-blue-600 flex-shrink-0" />
-                        <span className="text-gray-700">{displayName}</span>
+                        <AmenityIcon className="h-6 w-6 text-gray-600 flex-shrink-0" />
+                        <span className="text-gray-600">{displayName}</span>
                       </div>
                     );
                   })
@@ -575,20 +595,20 @@ export default function PropertyDetailPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Property Details</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-gray-500 text-sm">Property Type</span>
-                  <p className="text-gray-500 font-medium">{String(property.details?.type || 'Unknown')}</p>
+                  <span className="text-gray-600 text-sm">Property Type</span>
+                  <p className="text-gray-600 capitalize font-medium">{String(property.details?.type || 'Unknown')}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500 text-sm">Furnished</span>
-                  <p className="text-gray-500 font-medium">{String(property.details?.furnished || 'Unknown')}</p>
+                  <span className="text-gray-600 text-sm">Furnished</span>
+                  <p className="text-gray-600 capitalize font-medium">{String(property.details?.furnished || 'Unknown')}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500 text-sm">Pets Allowed</span>
-                  <p className="text-gray-500 font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
+                  <span className="text-gray-600 text-sm">Pets Allowed</span>
+                  <p className="text-gray-600 capitalize font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500 text-sm">Parking</span>
-                  <p className="text-gray-500 font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
+                  <span className="text-gray-600 text-sm">Parking</span>
+                  <p className="text-gray-600 capitalize font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
                 </div>
               </div>
             </div>
@@ -605,7 +625,6 @@ export default function PropertyDetailPage() {
               <PropertyPricingCard
                 price={property.price}
                 availableDate={property.available_date || null}
-                minimumLease={property.minimum_lease || 12}
                 landlord={{
                   id: landlord?.id || '',
                   uuid: landlord?.uuid || '', // Add uuid for navigation
@@ -617,11 +636,6 @@ export default function PropertyDetailPage() {
                   verified: landlord?.verified || false,
                   responseRate: landlord?.response_rate || 98,
                   totalProperties: landlord?.total_properties || 5,
-                }}
-                details={{
-                  type: (property.details?.type as string) || 'Unknown',
-                  furnished: (property.details?.furnished as string) || 'Unknown',
-                  petsAllowed: (property.details?.petsAllowed as boolean) || false
                 }}
                 onCreateOffer={handleCreateOffer}
                 onChatWithLandlord={handleChatWithLandlord}

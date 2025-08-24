@@ -32,7 +32,7 @@ export interface ChatMessage {
   status: 'sent' | 'delivered' | 'read';
   created_at: string;
   message_type: string;
-  metadata: any;
+  metadata: Record<string, unknown> | null;
 }
 
 export interface ChatContact {
@@ -111,7 +111,7 @@ export const chatAPI = {
     user2FirebaseUid: string, 
     user1Role: string = 'tenant', 
     user2Role: string = 'landlord'
-  ): Promise<{ roomId: string; room: any; isNew: boolean }> => {
+  ): Promise<{ roomId: string; room: ChatRoom['room']; isNew: boolean }> => {
     try {
       const response = await apiClient.post('/chat/get-or-create-room', {
         user1FirebaseUid,
@@ -133,7 +133,7 @@ export const chatAPI = {
 };
 
 // Helper function to convert database chat room to UI contact format
-export const convertChatRoomToContact = (chatRoom: ChatRoom, currentUserId: string): ChatContact => {
+export const convertChatRoomToContact = (chatRoom: ChatRoom): ChatContact => {
   return {
     id: chatRoom.room_id,
     name: chatRoom.room?.title || 'Direct Chat',
@@ -149,11 +149,20 @@ export const convertChatRoomToContact = (chatRoom: ChatRoom, currentUserId: stri
 };
 
 // Helper function to convert database message to UI message format
+export interface UIMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'other';
+  timestamp: Date;
+  senderName: string;
+  status: ChatMessage['status'];
+}
+
 export const convertMessageToUIMessage = (
   message: ChatMessage, 
   currentUserId: string, 
   otherUserName: string
-): any => {
+): UIMessage => {
   return {
     id: message.id,
     content: message.content,

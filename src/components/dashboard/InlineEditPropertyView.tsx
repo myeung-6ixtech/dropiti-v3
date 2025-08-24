@@ -144,42 +144,27 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     try {      
       // If this is the photos section, skip API call (PhotosSection handles it)
       if (section === 'photos') {
-        console.log('InlineEditPropertyView: Photos section - skipping API call (handled by PhotosSection)');
         setEditingSection(null);
         setErrors({});
         return;
       }
       
       setIsSaving(true);
-      
-      console.log('InlineEditPropertyView: saveSection - Current propertyData:', propertyData);
-      console.log('InlineEditPropertyView: saveSection - Current tempData:', tempData);
-      
       // Small delay to ensure all state updates have been processed
       await new Promise(resolve => setTimeout(resolve, 50));
       
       // Use ref to ensure we have the latest data
       const currentPropertyData = propertyDataRef.current;
       const updatedData = { ...currentPropertyData, ...tempData };
-      console.log('InlineEditPropertyView: Updated data:', updatedData);
-      console.log('InlineEditPropertyView: Updated data.uploadedImages:', updatedData.uploadedImages);
-      console.log('InlineEditPropertyView: Updated data.displayImage:', updatedData.displayImage);
       setPropertyData(updatedData);
       
       // Transform back to API format and save
       const apiData = transformPropertyDataToApi(updatedData);
-      console.log('InlineEditPropertyView: API data to send:', apiData);
-      console.log('InlineEditPropertyView: API data.uploaded_images:', apiData.uploaded_images);
-      console.log('InlineEditPropertyView: API data.display_image:', apiData.display_image);
-      
       const response = await propertiesAPI.updateProperty(propertyId, apiData);
-      console.log('InlineEditPropertyView: API response:', response);
       
       if (response.success) {
         // IMPORTANT: Update propertyData BEFORE changing editing state
-        console.log('InlineEditPropertyView: Setting propertyData to:', updatedData);
         setPropertyData(updatedData);  // Keep this one
-        console.log('InlineEditPropertyView: Setting editingSection to null');
         setEditingSection(null);
         setErrors({});
         setOriginalData(updatedData);
@@ -196,10 +181,6 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
   };
 
   const transformPropertyDataToApi = (propertyData: PropertyData) => {
-    console.log('InlineEditPropertyView: transformPropertyDataToApi input:', propertyData);
-    console.log('InlineEditPropertyView: transformPropertyDataToApi input.uploadedImages:', propertyData.uploadedImages);
-    console.log('InlineEditPropertyView: transformPropertyDataToApi input.displayImage:', propertyData.displayImage);
-    
     // Transform PropertyData back to API format
     const apiData = {
       title: propertyData.rentalDetails?.listingName || 'Property Listing',
@@ -225,18 +206,14 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       // Also include photos field for backward compatibility
       photos: propertyData.uploadedImages || [],
     };
-    
-    console.log('InlineEditPropertyView: transformPropertyDataToApi output:', apiData);
     return apiData;
   };
 
 
 
   const updateTempField = (section: string, field: string, value: unknown) => {
-    console.log('InlineEditPropertyView: updateTempField called with:', { section, field, value });
-    
+
     setTempData(prev => {
-      console.log('InlineEditPropertyView: setTempData prev state:', prev);
       // If section is empty, this is a top-level field update
       if (!section) {
         const newState = {
@@ -258,19 +235,16 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
           [field]: value
         }
       };
-      console.log('InlineEditPropertyView: setTempData new state (section):', newState);
       return newState;
     });
     
     // ALSO update the main propertyData for immediate persistence
     if (!section) {
-      console.log('InlineEditPropertyView: Updating main propertyData for field:', field, 'with value:', value);
       setPropertyData(prev => {
         const newState = {
           ...prev,
           [field]: value
         };
-        console.log('InlineEditPropertyView: setPropertyData new state:', newState);
         // Also update the ref to keep it in sync
         propertyDataRef.current = newState;
         return newState;

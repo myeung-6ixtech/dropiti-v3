@@ -2,6 +2,8 @@
 
 import { notFound } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import MarkdownRenderer from '@/components/common/MarkdownRenderer';
+import Footer from '@/components/common/Footer';
 
 const SLUG_TO_FILE: Record<string, string> = {
   faq: '/terms-and-conditions/faq.md',
@@ -33,13 +35,21 @@ export default function PolicyPage({ params }: { params: Promise<{ slug: string 
   if (error === 'Not Found') return notFound();
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-10 text-gray-900">
+    <>
+    <div className="policy-container">
       {content ? (
-        <div className="whitespace-pre-wrap break-words text-base leading-7">{content}</div>
+        <>
+          <MarkdownRenderer content={content} />
+        </>
       ) : (
-        <div>Loading...</div>
+        <div className="policy-loading">
+          <div className="policy-loading-spinner"></div>
+          <span className="policy-loading-text">Loading...</span>
+        </div>
       )}
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
 

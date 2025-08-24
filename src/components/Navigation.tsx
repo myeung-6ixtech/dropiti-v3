@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, MagnifyingGlassIcon, UserIcon, BuildingOfficeIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { HomeIcon, MagnifyingGlassIcon, UserIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
@@ -68,8 +68,14 @@ export default function Navigation() {
           <div className={navigationStyles.header}>
             <div className={navigationStyles.brand}>
               <Link href="/" className={navigationStyles.brandLink}>
-                <BuildingOfficeIcon className={navigationStyles.brandIcon} />
-                <span className={navigationStyles.brandText}>dropiti</span>
+                <Image
+                  src="/images/dropiti_logo.png"
+                  alt="Dropiti"
+                  width={160}
+                  height={32}
+                  priority
+                  className="hidden sm:block h-11 w-auto"
+                />
               </Link>
             </div>
             
@@ -139,8 +145,14 @@ export default function Navigation() {
             )}
             
             <Link href="/" className={navigationStyles.brandLink}>
-              <BuildingOfficeIcon className={navigationStyles.brandIcon} />
-              <span className={navigationStyles.brandText}>dropiti</span>
+              <Image
+                src="/images/dropiti_logo.png"
+                alt="Dropiti"
+                width={160}
+                height={32}
+                priority
+                className="hidden sm:block h-11 w-auto"
+              />
             </Link>
           </div>
           
@@ -253,7 +265,7 @@ export default function Navigation() {
                 href="/auth/signin"
                 className={navigationStyles.authButton}
               >
-                <span className={navigationStyles.authText}>Sign In</span>
+                <span className={navigationStyles.authText}>Login / Sign Up</span>
                 <span className={navigationStyles.authTextMobile}>Login</span>
               </Link>
             )}

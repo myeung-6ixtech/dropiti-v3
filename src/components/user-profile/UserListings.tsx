@@ -1,36 +1,41 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { HomeIcon, StarIcon } from '@heroicons/react/24/outline';
+import { HomeIcon } from '@heroicons/react/24/outline';
 import { propertiesAPI } from '@/lib/api-client';
-import CreateOfferModal from '@/components/common/CreateOfferModal';
+import PropertyCard from '@/components/PropertyCard';
+import { Property } from '@/types';
 
 interface UserListingsProps {
   userFirebaseUid: string;
 }
 
-interface Property {
+interface ApiProperty {
   id: string;
   property_uuid: string;
   title: string;
   description: string;
   location: string;
-  rental_price?: number;
-  rental_price_currency?: string;
+  price?: number;
   bedrooms?: number;
   bathrooms?: number;
-  photos?: string[];
-  rating?: number;
-  review_count?: number;
+  imageUrl?: string;
+  details?: {
+    type: string;
+    furnished: string;
+    petsAllowed: boolean;
+    parking: boolean;
+  };
+  amenities?: string[];
+  availableDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function UserListings({ userFirebaseUid }: UserListingsProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
 
   useEffect(() => {
     const fetchUserProperties = async () => {
@@ -45,7 +50,37 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
         });
         
         if (response.success && response.data) {
-          setProperties(response.data);
+          console.log('API Response data:', response.data);
+          
+          // Transform API property data to match Property interface
+          const transformedProperties: Property[] = (response.data as ApiProperty[]).map((apiProperty) => {
+            console.log('Processing API property:', apiProperty);
+            
+            const transformed = {
+              id: apiProperty.id,
+              property_uuid: apiProperty.property_uuid,
+              title: apiProperty.title,
+              description: apiProperty.description,
+              location: apiProperty.location,
+              price: apiProperty.price || 0,
+              bedrooms: apiProperty.bedrooms || 0,
+              bathrooms: apiProperty.bathrooms || 0,
+              imageUrl: apiProperty.imageUrl || '',
+              details: apiProperty.details || {},
+              rules: [],
+              amenities: apiProperty.amenities || [],
+              minimumLease: 12,
+              availableDate: apiProperty.availableDate || null,
+              createdAt: apiProperty.createdAt || '',
+              updatedAt: apiProperty.updatedAt || '',
+              ownerId: userFirebaseUid
+            };
+            
+            console.log('Transformed property:', transformed);
+            return transformed;
+          });
+          
+          setProperties(transformedProperties);
         } else {
           setError(response.error || 'Failed to load properties');
         }
@@ -62,14 +97,27 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
     }
   }, [userFirebaseUid]);
 
-  const handleCreateOffer = (propertyId: string) => {
-    setSelectedPropertyId(propertyId);
-    setIsOfferModalOpen(true);
-  };
-
-  const handleCloseOfferModal = () => {
-    setIsOfferModalOpen(false);
-    setSelectedPropertyId('');
+  // Transform property data for PropertyCard component
+  const transformPropertyForCard = (property: Property) => {
+    const transformed = {
+      ...property,
+      // PropertyCard expects these specific field names
+      rental_price: property.price,
+      num_bedroom: property.bedrooms,
+      num_bathroom: property.bathrooms,
+      display_image: property.imageUrl,
+      // Add property_type if available
+      property_type: typeof property.details?.type === 'string' 
+        ? property.details?.type 
+        : 'residential'
+    };
+    
+    console.log('PropertyCard transformation:', {
+      original: property,
+      transformed: transformed
+    });
+    
+    return transformed;
   };
 
   if (isLoading) {
@@ -77,7 +125,7 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center space-x-2 mb-6">
           <HomeIcon className="h-6 w-6 text-blue-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Current Listings</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
         </div>
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -113,46 +161,13 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
         </div>
         
         {properties.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map((property) => (
-              <div key={property.id} className="bg-gray-50 rounded-xl overflow-hidden hover:shadow-md transition-all duration-200 group">
-                <div className="relative">
-                  <Image
-                    src={property.photos && property.photos.length > 0 ? property.photos[0] : '/images/placeholder.png'}
-                    alt={property.title}
-                    width={400}
-                    height={400}
-                    className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-200"
-                  />
-                  {property.rating && (
-                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-lg px-2 py-1 flex items-center space-x-1">
-                      <StarIcon className="h-3 w-3 text-yellow-400" />
-                      <span className="text-xs font-medium">{property.rating.toFixed(1)}</span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="p-3">
-                  <h3 className="font-medium text-gray-900 text-sm line-clamp-1 mb-1">
-                    {property.title}
-                  </h3>
-                  <p className="text-xs text-gray-600 mb-2">{property.location}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                    <span>{property.bedrooms || 0} bed • {property.bathrooms || 0} bath</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-gray-900">
-                      {property.rental_price_currency || '$'} {property.rental_price ? property.rental_price.toLocaleString() : 'N/A'}/month
-                    </span>
-                    <button
-                      onClick={() => handleCreateOffer(property.property_uuid)}
-                      className="text-xs btn-primary px-3 py-1 rounded-lg"
-                    >
-                      Create Offer
-                    </button>
-                  </div>
-                </div>
-              </div>
+              <PropertyCard
+                key={property.id}
+                property={transformPropertyForCard(property)}
+                isDashboard={false}
+              />
             ))}
           </div>
         ) : (
@@ -163,15 +178,6 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
           </div>
         )}
       </div>
-
-      {/* Create Offer Modal */}
-      {isOfferModalOpen && (
-        <CreateOfferModal
-          isOpen={isOfferModalOpen}
-          onClose={handleCloseOfferModal}
-          propertyId={selectedPropertyId}
-        />
-      )}
     </>
   );
 }

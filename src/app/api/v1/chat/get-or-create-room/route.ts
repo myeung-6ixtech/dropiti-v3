@@ -71,7 +71,17 @@ export async function POST(request: NextRequest) {
     // First, check if a direct room already exists between these users
     const existingRoomData = await executeQuery(GET_EXISTING_ROOM_QUERY, {
       user1FirebaseUid
-    });
+    }) as {
+      real_estate_chat_room_participant?: Array<{
+        id: string;
+        room_id: string;
+        user_firebase_uid: string;
+        role: string;
+        joined_at: string;
+        last_read_at: string | null;
+        is_active: boolean;
+      }>;
+    };
     
     console.log('Existing room query result:', existingRoomData);
 
@@ -98,7 +108,17 @@ export async function POST(request: NextRequest) {
           }
         `, {
           roomId: participant.room_id
-        });
+        }) as {
+          real_estate_chat_room?: Array<{
+            id: string;
+            title: string | null;
+            room_type: 'direct' | 'group' | 'support';
+            created_at: string;
+            updated_at: string;
+            last_message_at: string;
+            is_active: boolean;
+          }>;
+        };
         
         const room = roomDetails.real_estate_chat_room?.[0];
         if (room && room.room_type === 'direct') {
@@ -120,7 +140,14 @@ export async function POST(request: NextRequest) {
           `, {
             roomId: participant.room_id,
             user2FirebaseUid: user2FirebaseUid
-          });
+          }) as {
+            real_estate_chat_room_participant?: Array<{
+              id: string;
+              room_id: string;
+              user_firebase_uid: string;
+              role: string;
+            }>;
+          };
           
           if (user2ParticipantData.real_estate_chat_room_participant && 
               user2ParticipantData.real_estate_chat_room_participant.length > 0) {
@@ -148,7 +175,14 @@ export async function POST(request: NextRequest) {
     // Create the room
     const roomData = await executeMutation(CREATE_ROOM_MUTATION, {
       roomId: newRoomId
-    });
+    }) as {
+      insert_real_estate_chat_room_one?: {
+        id: string;
+        room_type: 'direct' | 'group' | 'support';
+        created_at: string;
+        updated_at: string;
+      };
+    };
     
     console.log('Room creation result:', roomData);
 
@@ -165,14 +199,14 @@ export async function POST(request: NextRequest) {
       roomId: newRoomId,
       userFirebaseUid: user1FirebaseUid,
       role: user1Role
-    });
+    }) as unknown;
     console.log('Participant 1 added:', participant1Result);
 
     const participant2Result = await executeMutation(ADD_PARTICIPANT_MUTATION, {
       roomId: newRoomId,
       userFirebaseUid: user2FirebaseUid,
       role: user2Role
-    });
+    }) as unknown;
     console.log('Participant 2 added:', participant2Result);
 
     return NextResponse.json({

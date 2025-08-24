@@ -106,7 +106,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center space-x-2 mb-6">
           <StarIcon className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         </div>
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"></div>
@@ -121,7 +121,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center space-x-2 mb-6">
           <StarIcon className="h-6 w-6 text-yellow-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         </div>
         <div className="text-center py-8 text-red-500">
           <StarIcon className="h-12 w-12 mx-auto mb-4 text-red-300" />
@@ -136,7 +136,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center space-x-2 mb-6">
         <StarIcon className="h-6 w-6 text-yellow-500" />
-        <h2 className="text-xl font-semibold text-gray-900">Reviews</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         <span className="text-sm text-gray-500">({reviews.length})</span>
       </div>
       

@@ -34,7 +34,16 @@ export async function POST(request: NextRequest) {
       roomId,
       senderFirebaseUid,
       content
-    });
+    }) as {
+      insert_real_estate_chat_message_one?: {
+        id: string;
+        content: string;
+        sender_firebase_uid: string;
+        status: string;
+        created_at: string;
+        message_type: string;
+      };
+    };
 
     if (!data.insert_real_estate_chat_message_one) {
       return NextResponse.json(

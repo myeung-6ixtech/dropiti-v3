@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PencilIcon} from '@heroicons/react/24/outline';
+import { PencilIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 import { propertiesAPI } from '@/lib/api-client';
 import { formatAddressForDatabase } from '@/utils/addressFormatter';
@@ -126,7 +126,7 @@ export function LocationSection({
     if (propertyId) {
       fetchAddressData();
     }
-  }, [propertyId, showToast, onUpdateField]); // Added onUpdateField back to dependencies
+  }, [propertyId, showToast]);
 
   // Internal edit functions
   const handleStartEdit = () => {    
@@ -324,17 +324,39 @@ export function LocationSection({
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
-            <input
-              type="checkbox"
-              id="showSpecificLocation"
-              checked={localAddress?.showSpecificLocation || false}
-              onChange={(e) => setLocalAddress({ ...localAddress, showSpecificLocation: e.target.checked })}
-              className="form-checkbox"
-            />
-            <label htmlFor="showSpecificLocation" className="text-sm text-gray-700">
-              Show specific location to potential tenants
-            </label>
+          {/* Show Specific Location Toggle */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                {localAddress?.showSpecificLocation ? (
+                  <EyeIcon className="h-5 w-5 text-blue-600" />
+                ) : (
+                  <EyeSlashIcon className="h-5 w-5 text-gray-400" />
+                )}
+                <div>
+                  <h4 className="font-medium text-sm text-gray-900 mb-0">Show Specific Location</h4>
+                  <p className="text-sm text-gray-600 mb-0">
+                    {localAddress?.showSpecificLocation 
+                      ? 'Tenants will see the exact address details' 
+                      : 'Tenants will only see the general area/district'
+                    }
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLocalAddress({ ...localAddress, showSpecificLocation: !localAddress?.showSpecificLocation })}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                  localAddress?.showSpecificLocation ? 'bg-blue-600' : 'bg-gray-200'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    localAddress?.showSpecificLocation ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
         </div>
       ) : (
