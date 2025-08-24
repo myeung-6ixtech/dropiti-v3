@@ -208,7 +208,7 @@ export default function SearchPageContent() {
             {/* Results Header with Filter Button */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-xl font-semibold text-gray-900 mb-0">
                   {filteredProperties.length} Properties Found
                 </h2>
                 <p className="text-gray-600">

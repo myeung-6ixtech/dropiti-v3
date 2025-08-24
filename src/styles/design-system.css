@@ -2072,3 +2072,54 @@
   /* ========================================
      QUICK ACTIONS COMPONENTS
      ======================================== */
+
+  /* ========================================
+     POLICY PAGES STYLES
+     ======================================== */
+  
+  /* Main Container */
+  .policy-container {
+    @apply max-w-4xl mx-auto px-4 py-10 text-gray-900;
+  }
+  
+  /* Content Wrapper */
+  .policy-content {
+    @apply mb-12;
+  }
+  
+  /* Loading State */
+  .policy-loading {
+    @apply flex items-center justify-center py-12;
+  }
+  
+  .policy-loading-spinner {
+    @apply animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600;
+  }
+  
+  .policy-loading-text {
+    @apply ml-3 text-gray-600;
+  }
+  
+  /* Error State */
+  .policy-error {
+    @apply text-center py-12;
+  }
+  
+  .policy-error-icon {
+    @apply mx-auto h-12 w-12 text-red-500 mb-4;
+  }
+  
+  .policy-error-title {
+    @apply text-lg font-semibold text-gray-900 mb-2;
+  }
+  
+  .policy-error-message {
+    @apply text-gray-600;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .policy-container {
+      @apply px-6 py-8;
+    }
+  }

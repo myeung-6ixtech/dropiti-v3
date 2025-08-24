@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { chatAPI } from '@/lib/chat-api';
 import { 
-  StarIcon,
   HeartIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
@@ -433,13 +432,13 @@ export default function PropertyDetailPage() {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 text-gray-600 rounded-full transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-lg font-semibold text-gray-900">{property.title}</h1>
+              <h1 className="text-lg font-semibold text-gray-900 mb-0">{property.title}</h1>
             </div>
             <div className="flex items-center space-x-2">
               <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -529,13 +528,13 @@ export default function PropertyDetailPage() {
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                {/* <div className="flex items-center space-x-2">
                   <div className="flex items-center">
                     <StarIcon className="h-4 w-4 text-yellow-400" />
                     <span className="ml-1 text-sm font-medium">4.8</span>
                     <span className="text-gray-500 text-sm">(127 reviews)</span>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               {/* Property Stats - Key Details */}
@@ -597,19 +596,19 @@ export default function PropertyDetailPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-gray-600 text-sm">Property Type</span>
-                  <p className="text-gray-600 font-medium">{String(property.details?.type || 'Unknown')}</p>
+                  <p className="text-gray-600 capitalize font-medium">{String(property.details?.type || 'Unknown')}</p>
                 </div>
                 <div>
                   <span className="text-gray-600 text-sm">Furnished</span>
-                  <p className="text-gray-600 font-medium">{String(property.details?.furnished || 'Unknown')}</p>
+                  <p className="text-gray-600 capitalize font-medium">{String(property.details?.furnished || 'Unknown')}</p>
                 </div>
                 <div>
                   <span className="text-gray-600 text-sm">Pets Allowed</span>
-                  <p className="text-gray-600 font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
+                  <p className="text-gray-600 capitalize font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
                 </div>
                 <div>
                   <span className="text-gray-600 text-sm">Parking</span>
-                  <p className="text-gray-600 font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
+                  <p className="text-gray-600 capitalize font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
                 </div>
               </div>
             </div>

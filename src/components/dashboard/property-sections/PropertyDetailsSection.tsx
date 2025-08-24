@@ -107,7 +107,7 @@ export function PropertyDetailsSection({
     if (propertyId) {
       fetchPropertyDetails();
     }
-  }, [propertyId, showToast, onUpdateField]);
+  }, [propertyId, showToast]);
   
   // Internal edit functions
   const handleStartEdit = () => {

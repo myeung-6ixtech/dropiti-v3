@@ -38,7 +38,17 @@ export async function GET(request: NextRequest) {
       roomId, 
       limit, 
       offset 
-    });
+    }) as {
+      real_estate_chat_message?: Array<{
+        id: string;
+        content: string;
+        sender_firebase_uid: string;
+        status: string;
+        created_at: string;
+        message_type: string;
+        metadata: Record<string, unknown> | null;
+      }>;
+    };
 
     if (!data.real_estate_chat_message) {
       return NextResponse.json({

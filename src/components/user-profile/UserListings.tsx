@@ -107,7 +107,9 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
       num_bathroom: property.bathrooms,
       display_image: property.imageUrl,
       // Add property_type if available
-      property_type: property.details?.type || 'residential'
+      property_type: typeof property.details?.type === 'string' 
+        ? property.details?.type 
+        : 'residential'
     };
     
     console.log('PropertyCard transformation:', {
@@ -123,7 +125,7 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center space-x-2 mb-6">
           <HomeIcon className="h-6 w-6 text-blue-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Current Listings</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
         </div>
         <div className="text-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>

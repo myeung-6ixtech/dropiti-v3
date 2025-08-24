@@ -93,6 +93,18 @@ export const passportStyles = {
   responsiveText: 'passport-responsive-text',
 };
 
+export const policyStyles = {
+  container: 'policy-container',
+  content: 'policy-content',
+  loading: 'policy-loading',
+  loadingSpinner: 'policy-loading-spinner',
+  loadingText: 'policy-loading-text',
+  error: 'policy-error',
+  errorIcon: 'policy-error-icon',
+  errorTitle: 'policy-error-title',
+  errorMessage: 'policy-error-message',
+};
+
 export const headerDropdownStyles = {
   userDropdown: {
     container: 'user-dropdown-container',

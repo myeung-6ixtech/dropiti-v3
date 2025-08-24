@@ -49,9 +49,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
       const chatRooms = await chatAPI.getUserChatRooms(authUser.id);
       
       // Convert chat rooms to contacts format
-      const contactsList = chatRooms.map(room => 
-        convertChatRoomToContact(room, authUser.id)
-      );
+      const contactsList = chatRooms.map(room => convertChatRoomToContact(room));
       
       setContacts(contactsList);
     } catch (error) {

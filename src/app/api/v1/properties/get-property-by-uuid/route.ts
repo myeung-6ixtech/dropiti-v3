@@ -135,7 +135,7 @@ export async function GET(request: NextRequest) {
         const testQuery = `
           query TestRealEstateUserTable {
             real_estate_user(limit: 5) {
-              id
+              uuid
               firebase_uid
               display_name
               email

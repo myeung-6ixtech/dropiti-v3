@@ -7,6 +7,8 @@ import {
   StarIcon, 
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 interface Landlord {
   id: string;
@@ -43,6 +45,9 @@ export default function PropertyPricingCard({
   hasExistingOffer,
   onEditListing
 }: PropertyPricingCardProps) {
+
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   // Fallback image URL for when no landlord avatar is available
   const fallbackAvatar = "/images/Portrait_Placeholder.png";
@@ -90,8 +95,8 @@ export default function PropertyPricingCard({
           {/* Additional Costs */}
           <div className="space-y-2 py-4 border-t border-gray-200">
             <div className="flex justify-between">
-              <span className="text-gray-600">Utilities</span>
-              <span className="font-medium">Not Included</span>
+              <span className="text-gray-600 mb-0">Utilities</span>
+              <span className="font-medium text-gray-600">Not Included</span>
             </div>
           </div>
 
@@ -104,6 +109,14 @@ export default function PropertyPricingCard({
                 className="w-full btn-secondary py-3 px-4 font-semibold"
               >
                 Edit Your Listing
+              </button>
+            ) : !isAuthenticated ? (
+              // Not logged in - prompt to sign in
+              <button
+                onClick={() => router.push('/auth/signin')}
+                className="w-full btn-primary py-3 px-4 font-semibold"
+              >
+                Sign In to Make an Offer
               </button>
             ) : hasExistingOffer ? (
               // User has already made an offer

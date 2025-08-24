@@ -77,7 +77,7 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
         {/* Profile Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center space-x-3 mb-4">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">{user.displayName}</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-0">{user.displayName}</h1>
             {user.verified && (
               <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
                 Verified
@@ -89,15 +89,15 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
           <div className="flex items-center space-x-8 mb-4 text-sm">
             <div className="flex items-center space-x-1">
               <span className="font-semibold text-gray-900">{user.stats.totalProperties}</span>
-              <span className="text-gray-500">properties</span>
+              <span className="text-gray-500">Properties</span>
             </div>
             <div className="flex items-center space-x-1">
               <span className="font-semibold text-gray-900">{user.stats.totalGuests}</span>
-              <span className="text-gray-500">tenants</span>
+              <span className="text-gray-500">Tenants</span>
             </div>
             <div className="flex items-center space-x-1">
               <span className="font-semibold text-gray-900">{user.stats.responseRate}%</span>
-              <span className="text-gray-500">response rate</span>
+              <span className="text-gray-500">Response rate</span>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
 
           {/* Languages */}
           <div className="flex items-center space-x-2 mb-4">
-            <span className="text-sm text-gray-600">Languages:</span>
+            <span className="text-sm text-gray-600">Languages Spoken:</span>
             {(() => {
               // Handle languages field - it might be a JSON string, array, or null
               let languagesArray: string[] = [];

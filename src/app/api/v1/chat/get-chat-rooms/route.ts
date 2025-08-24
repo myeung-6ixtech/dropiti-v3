@@ -31,7 +31,17 @@ export async function GET(request: NextRequest) {
     }
 
     // First, get the user's chat room participants
-    const participantData = await executeQuery(GET_USER_CHAT_ROOMS_QUERY, { userFirebaseUid });
+    const participantData = await executeQuery(GET_USER_CHAT_ROOMS_QUERY, { userFirebaseUid }) as {
+      real_estate_chat_room_participant?: Array<{
+        id: string;
+        room_id: string;
+        user_firebase_uid: string;
+        role: string;
+        joined_at: string;
+        last_read_at: string | null;
+        is_active: boolean;
+      }>;
+    };
 
     if (!participantData.real_estate_chat_room_participant || 
         participantData.real_estate_chat_room_participant.length === 0) {
@@ -63,7 +73,17 @@ export async function GET(request: NextRequest) {
       }
     `;
 
-    const roomData = await executeQuery(GET_ROOM_DETAILS_QUERY, { roomIds });
+    const roomData = await executeQuery(GET_ROOM_DETAILS_QUERY, { roomIds }) as {
+      real_estate_chat_room?: Array<{
+        id: string;
+        title: string | null;
+        room_type: 'direct' | 'group' | 'support';
+        created_at: string;
+        updated_at: string;
+        last_message_at: string;
+        is_active: boolean;
+      }>;
+    };
 
     // Get last messages for each room
     const GET_LAST_MESSAGES_QUERY = `
@@ -80,7 +100,14 @@ export async function GET(request: NextRequest) {
       }
     `;
 
-    const messageData = await executeQuery(GET_LAST_MESSAGES_QUERY, { roomIds });
+    const messageData = await executeQuery(GET_LAST_MESSAGES_QUERY, { roomIds }) as {
+      real_estate_chat_message?: Array<{
+        room_id: string;
+        content: string;
+        sender_firebase_uid: string;
+        created_at: string;
+      }>;
+    };
 
     // Combine the data
     const combinedData = participantData.real_estate_chat_room_participant.map(participant => {

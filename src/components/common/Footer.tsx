@@ -30,17 +30,16 @@ const footerSections: FooterSection[] = [
     links: [
       { name: 'Search Properties', href: '/search' },
       { name: 'Rent Properties', href: '/search?type=rent' },
-      { name: 'Buy Properties', href: '/search?type=buy' },
+      // { name: 'Buy Properties', href: '/search?type=buy' },
       { name: 'New Listings', href: '/search?sort=newest' },
       { name: 'Featured Properties', href: '/search?featured=true' },
     ]
   },
   {
-    title: 'Company',
+    title: 'Our Community',
     links: [
-      { name: 'About Us', href: '/about' },
-      { name: 'Contact', href: '/contact' },
-      { name: 'Careers', href: '/careers' },
+      { name: 'Listing Guidelines', href: '/listing-guidelines' },
+      { name: 'Help Center', href: '/help' },
       { name: 'Press', href: '/press' },
       { name: 'Blog', href: '/blog' },
     ]
@@ -48,12 +47,10 @@ const footerSections: FooterSection[] = [
   {
     title: 'Support',
     links: [
-      { name: 'Help Center', href: '/help' },
       { name: 'FAQ', href: '/faq' },
       { name: 'Terms of Service', href: '/terms' },
       { name: 'Privacy Policy', href: '/privacy' },
       { name: 'Cookie Policy', href: '/cookies' },
-      { name: 'Listing Guidelines', href: '/listing-guidelines' },
     ]
   }
 ];
