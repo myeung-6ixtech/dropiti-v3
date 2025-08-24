@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MapPinIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { COUNTRIES, getDistrictsByCountry, DEFAULT_COUNTRY } from '@/constants/locations';
 
 interface Step3AddressProps {
   data?: {
@@ -44,7 +45,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
     addressLine2: '',
     district: '',
     state: '',
-    country: '',
+    country: DEFAULT_COUNTRY, // Set default country to Hong Kong
   });
   
   const [showSpecificLocation, setShowSpecificLocation] = useState(data?.showSpecificLocation ?? false);
@@ -60,26 +61,8 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
     onUpdate({ address, showSpecificLocation: value });
   };
 
-  const districts = [
-    'Central and Western',
-    'Eastern',
-    'Southern',
-    'Wan Chai',
-    'Sham Shui Po',
-    'Kowloon City',
-    'Kwun Tong',
-    'Wong Tai Sin',
-    'Yau Tsim Mong',
-    'Islands',
-    'Kwai Tsing',
-    'North',
-    'Sai Kung',
-    'Sha Tin',
-    'Tai Po',
-    'Tsuen Wan',
-    'Tuen Mun',
-    'Yuen Long',
-  ];
+  // Get districts based on selected country
+  const districts = getDistrictsByCountry(address.country || DEFAULT_COUNTRY);
 
   return (
     <div className="space-y-8">
@@ -213,8 +196,8 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
               >
                 <option value="">Select a district</option>
                 {districts.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
+                  <option key={district.code} value={district.name}>
+                    {district.name}
                   </option>
                 ))}
               </select>
@@ -235,15 +218,20 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
 
             <div className="space-y-2">
               <label className="form-label">
-                Country
+                Country *
               </label>
-              <input
-                type="text"
-                value={address.country || ''}
+              <select
+                value={address.country || DEFAULT_COUNTRY}
                 onChange={(e) => handleInputChange('country', e.target.value)}
-                placeholder="e.g., Hong Kong"
-                className="form-input"
-              />
+                className="form-select"
+                required
+              >
+                {COUNTRIES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
         </div>

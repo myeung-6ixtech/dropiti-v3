@@ -6,6 +6,7 @@ import { PropertyData } from '@/types/property';
 import { propertiesAPI } from '@/lib/api-client';
 import { formatAddressForDatabase } from '@/utils/addressFormatter';
 import { useToast } from '@/context/ToastContext';
+import { COUNTRIES, getDistrictsByCountry, DEFAULT_COUNTRY } from '@/constants/locations';
 
 interface LocationSectionProps {
   propertyId: string;
@@ -26,6 +27,9 @@ export function LocationSection({
   const [localAddress, setLocalAddress] = useState<PropertyData['address']>({});
   const [originalAddress, setOriginalAddress] = useState<PropertyData['address']>({}); // Store original data
   const [isSavingLocally, setIsSavingLocally] = useState(false);
+
+  // Get districts based on selected country
+  const districts = getDistrictsByCountry(localAddress?.country || DEFAULT_COUNTRY);
 
 
 
@@ -293,14 +297,33 @@ export function LocationSection({
 
           <div className="grid grid-cols-3 gap-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+              <select
+                value={localAddress?.country || DEFAULT_COUNTRY}
+                onChange={(e) => setLocalAddress({ ...localAddress, country: e.target.value })}
+                className="form-select w-full"
+              >
+                {COUNTRIES.map((country) => (
+                  <option key={country.code} value={country.code}>
+                    {country.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
-              <input
-                type="text"
+              <select
                 value={localAddress?.district || ''}
                 onChange={(e) => setLocalAddress({ ...localAddress, district: e.target.value })}
-                className="form-input w-full"
-                placeholder="District"
-              />
+                className="form-select w-full"
+              >
+                <option value="">Select a district</option>
+                {districts.map((district) => (
+                  <option key={district.code} value={district.name}>
+                    {district.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
@@ -310,16 +333,6 @@ export function LocationSection({
                 onChange={(e) => setLocalAddress({ ...localAddress, state: e.target.value })}
                 className="form-input w-full"
                 placeholder="State"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-              <input
-                type="text"
-                value={localAddress?.country || ''}
-                onChange={(e) => setLocalAddress({ ...localAddress, country: e.target.value })}
-                className="form-input w-full"
-                placeholder="Country"
               />
             </div>
           </div>
