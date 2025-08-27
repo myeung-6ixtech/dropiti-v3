@@ -2,31 +2,27 @@ export const AMENITIES = {
   // Internet & Technology
   WIFI: { id: 'wifi', name: 'WiFi', icon: 'Wifi', category: 'Internet & Technology' },
   
-  // Climate Control
-  AIR_CONDITIONING: { id: 'air-conditioning', name: 'Air Conditioning', icon: 'AirConditioner', category: 'Climate Control' },
-  HEATING: { id: 'heating', name: 'Heating', icon: 'Lightning', category: 'Climate Control' },
+  // Appliances
+  AIR_CONDITIONING: { id: 'air-conditioning', name: 'Air Conditioning', icon: 'AirConditioner', category: 'Appliances' },
+  HEATING: { id: 'heating', name: 'Heating', icon: 'Lightning', category: 'Appliances' },
+  DISHWASHER: { id: 'dishwasher', name: 'Dishwasher', icon: 'Oven', category: 'Appliances' },
+  FRIDGE: { id: 'fridge', name: 'Fridge', icon: 'Fridge', category: 'Appliances' },
+  MICROWAVE: { id: 'microwave', name: 'Microwave', icon: 'Microwave', category: 'Appliances' },
+  OVEN: { id: 'oven', name: 'Oven', icon: 'Oven', category: 'Appliances' },
+  GAS_STOVE: { id: 'gas-stove', name: 'Gas Stove', icon: 'GasStove', category: 'Appliances' },
+  INDUCTION_STOVE: { id: 'induction-stove', name: 'Induction Stove', icon: 'InductionStove', category: 'Appliances' },
+  WASHING_MACHINE: { id: 'washer', name: 'Washing Machine', icon: 'WashingMachine', category: 'Appliances' },
+  DRYER: { id: 'dryer', name: 'Dryer', icon: 'WashingMachine', category: 'Appliances' },
   
   // Entertainment
   TV: { id: 'tv', name: 'TV', icon: 'TV', category: 'Entertainment' },
-  
-  // Kitchen
-  DISHWASHER: { id: 'dishwasher', name: 'Dishwasher', icon: 'Oven', category: 'Kitchen' },
-  FRIDGE: { id: 'fridge', name: 'Fridge', icon: 'Fridge', category: 'Kitchen' },
-  MICROWAVE: { id: 'microwave', name: 'Microwave', icon: 'Microwave', category: 'Kitchen' },
-  OVEN: { id: 'oven', name: 'Oven', icon: 'Oven', category: 'Kitchen' },
-  GAS_STOVE: { id: 'gas-stove', name: 'Gas Stove', icon: 'GasStove', category: 'Kitchen' },
-  INDUCTION_STOVE: { id: 'induction-stove', name: 'Induction Stove', icon: 'InductionStove', category: 'Kitchen' },
-  
-  // Laundry
-  WASHING_MACHINE: { id: 'washer', name: 'Washing Machine', icon: 'WashingMachine', category: 'Laundry' },
-  DRYER: { id: 'dryer', name: 'Dryer', icon: 'WashingMachine', category: 'Laundry' },
   
   // Transportation
   PARKING: { id: 'parking', name: 'Parking', icon: 'CarPark', category: 'Transportation' },
   
   // Fitness & Recreation
-  GYM: { id: 'gym', name: 'Gym', icon: 'Gym', category: 'Fitness' },
-  POOL: { id: 'pool', name: 'Swimming Pool', icon: 'SwimmingPool', category: 'Recreation' },
+  GYM: { id: 'gym', name: 'Gym', icon: 'Gym', category: 'Fitness & Recreation' },
+  POOL: { id: 'pool', name: 'Swimming Pool', icon: 'SwimmingPool', category: 'Fitness & Recreation' },
   
   // Safety & Security
   SECURITY_SYSTEM: { id: 'security', name: 'Security System', icon: 'SecurityGuard', category: 'Safety' },
@@ -70,13 +66,10 @@ export const AMENITIES = {
 
 export const AMENITY_CATEGORIES = {
   'Internet & Technology': ['wifi'],
-  'Climate Control': ['air-conditioning', 'heating'],
+  'Appliances': ['air-conditioning', 'heating', 'dishwasher', 'fridge', 'microwave', 'oven', 'gas-stove', 'induction-stove', 'washer', 'dryer'],
   'Entertainment': ['tv'],
-  'Kitchen': ['dishwasher', 'fridge', 'microwave', 'oven', 'gas-stove', 'induction-stove'],
-  'Laundry': ['washer', 'dryer'],
   'Transportation': ['parking'],
-  'Fitness': ['gym'],
-  'Recreation': ['pool'],
+  'Fitness & Recreation': ['gym', 'pool'],
   'Safety': ['security', 'smoke-alarm'],
   'Accessibility': ['elevator'],
   'Outdoor': ['balcony', 'trees', 'walk'],

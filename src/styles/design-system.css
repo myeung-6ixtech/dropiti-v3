@@ -274,8 +274,10 @@
 }
 
 .nav-auth-button {
-  @apply bg-gray-900 text-white px-6 py-3 rounded-lg text-sm font-bold hover:bg-gray-800 transition-all duration-200 ml-4;
-  /* Improved styling to match the overall design */
+  @apply bg-gray-900 text-white text-sm font-bold hover:bg-gray-800 transition-all duration-200 ml-4;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.75rem;
+  /* Custom padding and border radius as requested */
 }
 
 .nav-auth-text {
@@ -859,11 +861,20 @@
   }
 
   .auth-content-section {
-    @apply hidden lg:block flex-1 bg-gray-100;
+    @apply hidden lg:block flex-1 bg-gray-100 relative;
+    background-image: url('/images/dropiti-login-image.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .auth-content-section::before {
+    content: '';
+    @apply absolute inset-0 bg-black bg-opacity-40;
   }
 
   .auth-content-wrapper {
-    @apply flex items-center justify-center h-full px-8;
+    @apply flex items-center justify-center h-full px-8 relative z-10;
   }
 
   .auth-form-wrapper {
@@ -883,8 +894,16 @@
     @apply text-3xl font-bold text-gray-900 mb-4;
   }
 
+  .auth-heading-white {
+    @apply text-3xl font-bold text-white mb-4;
+  }
+
   .auth-description {
     @apply text-lg text-gray-600 mb-8;
+  }
+
+  .auth-description-white {
+    @apply text-lg text-white mb-8;
   }
 
   .auth-text-center {
@@ -969,8 +988,16 @@
     @apply w-3 h-3 bg-blue-600 rounded-full;
   }
 
+  .auth-feature-dot-white {
+    @apply w-3 h-3 bg-white rounded-full;
+  }
+
   .auth-feature-text {
     @apply text-gray-700;
+  }
+
+  .auth-feature-text-white {
+    @apply text-white;
   }
 
   /* Responsive Utilities */

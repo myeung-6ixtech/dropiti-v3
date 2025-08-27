@@ -52,24 +52,24 @@ export default function SignInPage() {
       <div className={authClasses.contentSection}>
         <div className={authClasses.contentWrapper}>
           <div className="max-w-md">
-            <h2 className={authClasses.heading}>
+            <h2 className={authClasses.headingWhite}>
               Welcome to Dropiti
             </h2>
-            <p className={authClasses.description}>
+            <p className={authClasses.descriptionWhite}>
               Find your perfect property or list your space with our comprehensive real estate platform.
             </p>
             <div className={authClasses.contentSpacing}>
               <div className={authClasses.featureItem}>
-                <div className={authClasses.featureDot}></div>
-                <span className={authClasses.featureText}>Search thousands of properties</span>
+                <div className={authClasses.featureDotWhite}></div>
+                <span className={authClasses.featureTextWhite}>Search thousands of properties</span>
               </div>
               <div className={authClasses.featureItem}>
-                <div className={authClasses.featureDot}></div>
-                <span className={authClasses.featureText}>Secure authentication</span>
+                <div className={authClasses.featureDotWhite}></div>
+                <span className={authClasses.featureTextWhite}>Secure authentication</span>
               </div>
               <div className={authClasses.featureItem}>
-                <div className={authClasses.featureDot}></div>
-                <span className={authClasses.featureText}>Manage your properties</span>
+                <div className={authClasses.featureDotWhite}></div>
+                <span className={authClasses.featureTextWhite}>Manage your properties</span>
               </div>
             </div>
           </div>

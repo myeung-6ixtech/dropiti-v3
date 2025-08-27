@@ -25,7 +25,9 @@ export const authClasses = {
   title: 'auth-title',
   subtitle: 'auth-subtitle',
   heading: 'auth-heading',
+  headingWhite: 'auth-heading-white',
   description: 'auth-description',
+  descriptionWhite: 'auth-description-white',
   textCenter: 'auth-text-center',
   
   // Buttons
@@ -57,7 +59,9 @@ export const authClasses = {
   // Content Features
   featureItem: 'auth-feature-item',
   featureDot: 'auth-feature-dot',
+  featureDotWhite: 'auth-feature-dot-white',
   featureText: 'auth-feature-text',
+  featureTextWhite: 'auth-feature-text-white',
   
   // Responsive Utilities
   responsive: 'auth-responsive',

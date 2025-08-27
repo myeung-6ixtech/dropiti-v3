@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
@@ -115,6 +116,26 @@ export default function Footer({ className = '' }: FooterProps) {
               Your trusted partner in finding the perfect property. We connect tenants with landlords 
               and help everyone find their ideal space.
             </p>
+            
+            {/* Company Credentials */}
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center space-x-4 mb-10">
+                <Image
+                  src="/images/6ixtechlogo_full_white.png"
+                  alt="6ixTech Logo"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                />
+                <Image
+                  src="/images/cyberport_logo.png"
+                  alt="Cyberport Logo"
+                  width={100}
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
+            </div>
             
             {/* Social Links */}
             <div className={footerStyles.socialLinks}>

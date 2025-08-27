@@ -63,10 +63,10 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
             )}
           </div>
           <div>
-            <h3 className="font-medium text-md text-gray-900 mb-0">
+            <h3 className="font-medium text-sm text-gray-900 mb-0">
               {userToShow.displayName || `Unknown ${userLabel}`}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 mb-0">
               dropiti user since {formatDate(offer.createdAt)}
             </p>
           </div>
