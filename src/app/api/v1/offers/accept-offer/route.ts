@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
-import { validateOfferAction, calculateNewOfferStatus, createOfferAction } from '@/lib/offer-negotiation';
+import { validateOfferAction, createOfferAction } from '@/lib/offer-negotiation';
 import { REVIEW_CONSTANTS } from '@/constants/review';
 
 const ACCEPT_OFFER_MUTATION = `
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
       numLeasingMonths: offer.num_leasing_months,
       paymentFrequency: offer.payment_frequency,
       moveInDate: offer.move_in_date,
-      offerStatus: offer.offer_status as 'pending' | 'accepted' | 'rejected' | 'countered' | 'withdrawn' | 'expired' | 'completed',
+      offerStatus: offer.offer_status as 'pending' | 'tentatively_accepted' | 'accepted' | 'rejected' | 'countered' | 'withdrawn' | 'expired' | 'completed',
       isActive: offer.is_active,
       currentRentPrice: offer.current_rent_price,
       currentRentPriceCurrency: offer.current_rent_price_currency,
@@ -229,9 +229,23 @@ export async function POST(request: NextRequest) {
       updatedAt: offer.updated_at
     };
 
-    // Determine the action type based on who is accepting
+    // Determine the action type based on who is accepting and current status
     const isInitiator = offer.initiator_firebase_uid === currentUserId;
-    const actionType = isInitiator ? 'INITIATOR_ACCEPTED' : 'RECIPIENT_ACCEPTED';
+    let actionType: string;
+    
+    if (isInitiator) {
+      // Tenant/Initiator acceptance → Tentative acceptance (awaiting landlord confirmation)
+      actionType = 'INITIATOR_TENTATIVELY_ACCEPTED';
+    } else {
+      // Landlord/Recipient acceptance
+      if (offer.offer_status === 'tentatively_accepted') {
+        // Confirming tentative acceptance → Final acceptance
+        actionType = 'RECIPIENT_CONFIRMED_ACCEPTANCE';
+      } else {
+        // Direct acceptance of pending/countered offer
+        actionType = 'RECIPIENT_ACCEPTED';
+      }
+    }
 
     // Validate the action
     const validation = validateOfferAction(transformedOffer, actionType, currentUserId);
@@ -242,8 +256,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate new offer status
-    const newStatus = calculateNewOfferStatus(transformedOffer.offerStatus, actionType);
+    // Calculate new offer status based on two-stage acceptance logic
+    let newStatus: string;
+    let shouldTriggerBulkRejection = false;
+    
+    if (isInitiator) {
+      // Tenant acceptance → Tentative acceptance (no bulk rejection yet)
+      newStatus = 'tentatively_accepted';
+      shouldTriggerBulkRejection = false;
+    } else {
+      // Landlord acceptance → Always triggers bulk rejection
+      newStatus = 'accepted';
+      shouldTriggerBulkRejection = true;
+    }
 
     // Determine the final accepted terms
     // If there are counter offer terms, use those; otherwise use the original proposing terms
@@ -275,28 +300,34 @@ export async function POST(request: NextRequest) {
       differenceInDays: Math.round((reviewWindowEnd.getTime() - reviewWindowStart.getTime()) / (1000 * 60 * 60 * 24))
     });
 
-    // Prepare the updates
-    const updates = {
+    // Prepare the updates based on acceptance type
+    const updates: Record<string, unknown> = {
       offer_status: newStatus,
-      is_active: false, // Deactivate the offer since it's accepted
       last_action_by: isInitiator ? 'initiator' : 'recipient',
       last_action_at: new Date().toISOString(),
       last_action_type: actionType,
       updated_at: new Date().toISOString(),
-      // Save the final accepted terms
-      final_rent_price: finalTerms.finalRentPrice,
-      final_rent_price_currency: finalTerms.finalRentPriceCurrency,
-      final_num_leasing_months: finalTerms.finalNumLeasingMonths,
-      final_payment_frequency: finalTerms.finalPaymentFrequency,
-      final_move_in_date: finalTerms.finalMoveInDate,
-      final_accepted_at: finalTerms.finalAcceptedAt,
-      final_accepted_by: finalTerms.finalAcceptedBy,
-      // Set review window timestamps and status
-      review_window_start: reviewWindowStart.toISOString(),
-      review_window_end: reviewWindowEnd.toISOString(),
-      initiator_review_status: 'pending',
-      recipient_review_status: 'pending'
     };
+
+    if (isInitiator) {
+      // Tentative acceptance - keep offer active, don't set final terms yet
+      updates.is_active = true;
+    } else {
+      // Final acceptance by landlord - deactivate offer and set final terms
+      updates.is_active = false;
+      updates.final_rent_price = finalTerms.finalRentPrice;
+      updates.final_rent_price_currency = finalTerms.finalRentPriceCurrency;
+      updates.final_num_leasing_months = finalTerms.finalNumLeasingMonths;
+      updates.final_payment_frequency = finalTerms.finalPaymentFrequency;
+      updates.final_move_in_date = finalTerms.finalMoveInDate;
+      updates.final_accepted_at = finalTerms.finalAcceptedAt;
+      updates.final_accepted_by = finalTerms.finalAcceptedBy;
+      // Set review window timestamps and status
+      updates.review_window_start = reviewWindowStart.toISOString();
+      updates.review_window_end = reviewWindowEnd.toISOString();
+      updates.initiator_review_status = 'pending';
+      updates.recipient_review_status = 'pending';
+    }
 
     // Update the offer
     const updateResult = await executeMutation(ACCEPT_OFFER_MUTATION, { 
@@ -337,9 +368,11 @@ export async function POST(request: NextRequest) {
       // Don't fail the whole request if action record creation fails
     }
 
-    // Step 2: Reject all other pending offers for the same property
+    // Step 2: Reject all other pending offers for the same property (only if final acceptance)
     let rejectedOffersCount = 0;
     let rejectedOffers: Array<{ id: string; offerKey: string }> = [];
+
+    if (shouldTriggerBulkRejection) {
 
     try {
       // First, get all pending offers for the same property
@@ -414,6 +447,8 @@ export async function POST(request: NextRequest) {
       // The main offer acceptance was successful
     }
 
+    } // End of shouldTriggerBulkRejection condition
+
     const updatedOffer = updateResult.update_real_estate_offer.returning[0];
 
     return NextResponse.json({
@@ -429,7 +464,13 @@ export async function POST(request: NextRequest) {
           rejectedOffers
         }
       },
-      message: 'Offer accepted successfully',
+      message: isInitiator 
+        ? 'Offer tentatively accepted. Awaiting landlord confirmation.'
+        : shouldTriggerBulkRejection && rejectedOffersCount > 0
+          ? `Offer accepted and deal finalized! ${rejectedOffersCount} other offers automatically rejected.`
+          : 'Offer accepted and deal finalized!',
+      requiresConfirmation: isInitiator,
+      isFinalized: !isInitiator,
     });
 
   } catch (error) {

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { HomeIcon, MagnifyingGlassIcon, UserIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { UserIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
@@ -88,8 +88,7 @@ export default function Navigation() {
                     : navigationStyles.linkInactive
                 }`}
               >
-                <HomeIcon className={navigationStyles.linkIcon} />
-                <span className={navigationStyles.linkText}>Home</span>
+                <span>Home</span>
               </Link>
               
               <Link
@@ -100,8 +99,7 @@ export default function Navigation() {
                     : navigationStyles.linkInactive
                 }`}
               >
-                <MagnifyingGlassIcon className={navigationStyles.linkIcon} />
-                <span className={navigationStyles.linkText}>Search</span>
+                <span>Search</span>
               </Link>
               
               <Link
@@ -112,8 +110,7 @@ export default function Navigation() {
                     : navigationStyles.linkInactive
                 }`}
               >
-                <UserIcon className={navigationStyles.linkIcon} />
-                <span className={navigationStyles.linkText}>Dashboard</span>
+                <span>Dashboard</span>
               </Link>
               
               {/* Loading state for auth button - simplified skeleton */}
@@ -165,8 +162,7 @@ export default function Navigation() {
                   : navigationStyles.linkInactive
               }`}
             >
-              <HomeIcon className={navigationStyles.linkIcon} />
-              <span className={navigationStyles.linkText}>Home</span>
+              <span>Home</span>
             </Link>
             
             <Link
@@ -177,8 +173,7 @@ export default function Navigation() {
                   : navigationStyles.linkInactive
               }`}
             >
-              <MagnifyingGlassIcon className={navigationStyles.linkIcon} />
-              <span className={navigationStyles.linkText}>Search</span>
+              <span>Search</span>
             </Link>
             
             <Link
@@ -189,8 +184,7 @@ export default function Navigation() {
                   : navigationStyles.linkInactive
               }`}
             >
-              <UserIcon className={navigationStyles.linkIcon} />
-              <span className={navigationStyles.linkText}>Dashboard</span>
+              <span>Dashboard</span>
             </Link>
             
             {isAuthenticated ? (

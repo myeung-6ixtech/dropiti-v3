@@ -64,6 +64,11 @@ function determineNextActionBy(offer: Offer): 'initiator' | 'recipient' | 'none'
     return 'none';
   }
   
+  // If offer is tentatively accepted, only recipient (landlord) can confirm
+  if (offer.offerStatus === 'tentatively_accepted') {
+    return 'recipient';
+  }
+  
   // If offer is pending and no action taken yet, it's recipient's turn
   if (offer.offerStatus === 'pending' && offer.negotiationRound === INITIAL_ROUND) {
     return 'recipient';
@@ -136,6 +141,12 @@ function canAcceptOffer(offer: Offer, isInitiator: boolean): boolean {
       offer.offerStatus === 'rejected' || 
       offer.offerStatus === 'withdrawn') {
     return false;
+  }
+  
+  // Special handling for tentative acceptance
+  if (offer.offerStatus === 'tentatively_accepted') {
+    // Only recipient (landlord) can confirm tentative acceptance
+    return !isInitiator;
   }
   
   // Can accept if it's your turn

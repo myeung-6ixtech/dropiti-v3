@@ -52,7 +52,8 @@ export interface Offer {
 
 export type OfferStatus = 
   | 'pending'           // Initial offer created
-  | 'accepted'          // Offer accepted by either party
+  | 'tentatively_accepted' // Offer tentatively accepted by initiator (awaiting recipient confirmation)
+  | 'accepted'          // Offer accepted and finalized
   | 'rejected'          // Offer rejected by either party
   | 'countered'         // Offer countered (waiting for response)
   | 'withdrawn'         // Offer withdrawn by initiator
@@ -67,12 +68,14 @@ export type OfferActionType =
   | 'INITIATOR_CREATED'
   | 'INITIATOR_EDITED'
   | 'INITIATOR_CANCELLED'
+  | 'INITIATOR_TENTATIVELY_ACCEPTED'  // New action type for tentative acceptance
   | 'INITIATOR_ACCEPTED'
   | 'INITIATOR_COUNTERED'
   | 'INITIATOR_REJECTED'
   | 'RECIPIENT_CREATED'
   | 'RECIPIENT_EDITED'
   | 'RECIPIENT_CANCELLED'
+  | 'RECIPIENT_CONFIRMED_ACCEPTANCE'  // New action type for confirming tentative acceptance
   | 'RECIPIENT_ACCEPTED'
   | 'RECIPIENT_COUNTERED'
   | 'RECIPIENT_REJECTED'

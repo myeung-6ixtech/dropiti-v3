@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { XMarkIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckIcon, ClockIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import FinalCounterOfferModal2 from './FinalCounterOfferModal2';
@@ -95,32 +95,36 @@ export default function OutgoingOfferCardActions({
         moveInDate: offer.finalMoveInDate || offer.moveInDate
       };
 
-      // Check if there were bulk rejections
-      const bulkRejection = response?.data?.bulkRejection;
-      let message = '';
+      // Handle different response types based on two-stage acceptance
+      if (response.requiresConfirmation) {
+        // Tenant tentative acceptance
+        showToast('success', 'Offer tentatively accepted! Awaiting landlord confirmation.');
+        setIsAccepted(true);
+        onOfferStatusChange?.();
+      } else if (response.isFinalized) {
+        // This shouldn't happen for tenant/initiator, but handle gracefully
+        const bulkRejection = response?.data?.bulkRejection;
+        let message = '';
 
-      if (bulkRejection && bulkRejection.rejectedOffersCount > 0) {
-        // Show comprehensive message about acceptance and bulk rejection
-        const baseMessage = offer.lastActionType === 'RECIPIENT_COUNTERED' 
-          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
-          : 'Offer accepted successfully!';
-        
-        const rejectionMessage = ` ${bulkRejection.rejectedOffersCount} other pending offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected.`;
-        
-        message = baseMessage + rejectionMessage;
-        
-        // Show additional info toast about bulk rejection
-        showToast('info', `${bulkRejection.rejectedOffersCount} other offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected for this property.`);
-      } else {
-        // Show standard success message
-        message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
-          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
-          : 'Offer accepted successfully!';
+        if (bulkRejection && bulkRejection.rejectedOffersCount > 0) {
+          const baseMessage = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+            ? `Deal confirmed! Final terms: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+            : 'Deal confirmed and finalized!';
+          
+          const rejectionMessage = ` ${bulkRejection.rejectedOffersCount} other pending offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected.`;
+          message = baseMessage + rejectionMessage;
+          
+          showToast('info', `${bulkRejection.rejectedOffersCount} other offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected for this property.`);
+        } else {
+          message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+            ? `Deal confirmed! Final terms: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+            : 'Deal confirmed and finalized!';
+        }
+
+        showToast('success', message);
+        setIsAccepted(true);
+        onOfferStatusChange?.();
       }
-      
-      showToast('success', message);
-      setIsAccepted(true);
-      onOfferStatusChange?.();
     } catch (error) {
       console.error('Error accepting offer:', error);
       showToast('error', 'Failed to accept offer. Please try again.');
@@ -209,6 +213,23 @@ export default function OutgoingOfferCardActions({
               <span>View Property</span>
             </Link>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // New Rule: For tentatively accepted offers, show status to initiator (tenant)
+  if (offer.offerStatus === 'tentatively_accepted') {
+    return (
+      <div className="pt-4 border-t border-gray-200">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+          <div className="flex items-center">
+            <ClockIcon className="h-5 w-5 text-yellow-500 mr-2" />
+            <span className="text-yellow-800 font-medium">Tentatively Accepted</span>
+          </div>
+          <p className="text-yellow-700 text-sm mt-1">
+            Your acceptance is pending landlord confirmation. The landlord will review and finalize the deal.
+          </p>
         </div>
       </div>
     );

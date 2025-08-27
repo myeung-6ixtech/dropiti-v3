@@ -173,26 +173,6 @@ export default function Footer({ className = '' }: FooterProps) {
             </div>
           ))}
         </div>
-
-        {/* Contact Information */}
-        <div className={footerStyles.contactSection}>
-          <div className={footerStyles.contactGrid}>
-            {contactInfo.map((contact, index) => {
-              const Icon = contact.icon;
-              return (
-                <div key={index} className={footerStyles.contactItem}>
-                  <Icon className={footerStyles.contactIcon} />
-                  <a
-                    href={contact.href}
-                    className={footerStyles.contactLink}
-                  >
-                    {contact.text}
-                  </a>
-                </div>
-              );
-            })}
-          </div>
-        </div>
       </div>
 
       {/* Bottom Bar */}
