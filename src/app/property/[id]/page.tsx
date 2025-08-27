@@ -15,7 +15,8 @@ import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import PropertyPricingCard from '@/components/common/PropertyPricingCard';
 import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
-import { getAmenityIcon, getAmenityDisplayName } from '@/constants/amenity-icons';
+import { getAmenityIcon } from '@/constants/amenity-icons';
+import { groupAmenitiesByCategory } from '@/constants/amenities';
 import { Bed, Bathtub, Clock } from '@/assets/icons';
 
 interface PropertyData {
@@ -571,23 +572,42 @@ export default function PropertyDetailPage() {
 
             {/* Amenities */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
-              <div className="grid grid-cols-2 gap-4">
-                {Array.isArray(property.amenities) && property.amenities.length > 0 ? (
-                  property.amenities.map((amenityId) => {
-                    const AmenityIcon = getAmenityIcon(amenityId);
-                    const displayName = getAmenityDisplayName(amenityId);
-                    return (
-                      <div key={amenityId} className="flex items-center space-x-3">
-                        <AmenityIcon className="h-6 w-6 text-gray-600 flex-shrink-0" />
-                        <span className="text-gray-600">{displayName}</span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p className="text-gray-500 text-sm">No amenities listed.</p>
-                )}
-              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">What this place offers</h2>
+              {Array.isArray(property.amenities) && property.amenities.length > 0 ? (
+                (() => {
+                  const categorizedAmenities = groupAmenitiesByCategory(property.amenities);
+                  const categoryKeys = Object.keys(categorizedAmenities);
+                  
+                  if (categoryKeys.length === 0) {
+                    return <p className="text-gray-500 text-sm">No amenities listed.</p>;
+                  }
+                  
+                  return (
+                    <div className="space-y-6">
+                      {categoryKeys.map((category) => (
+                        <div key={category} className="space-y-3">
+                          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
+                            {category}
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3">
+                            {categorizedAmenities[category].map((amenity) => {
+                              const AmenityIcon = getAmenityIcon(amenity.id);
+                              return (
+                                <div key={amenity.id} className="flex items-center space-x-3">
+                                  <AmenityIcon className="h-5 w-5 text-gray-600 flex-shrink-0" />
+                                  <span className="text-gray-600 text-sm">{amenity.name}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()
+              ) : (
+                <p className="text-gray-500 text-sm">No amenities listed.</p>
+              )}
             </div>
 
             {/* Property Details */}

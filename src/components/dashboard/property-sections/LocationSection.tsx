@@ -130,7 +130,7 @@ export function LocationSection({
     if (propertyId) {
       fetchAddressData();
     }
-  }, [propertyId, showToast]);
+  }, [propertyId, showToast, onUpdateField]);
 
   // Internal edit functions
   const handleStartEdit = () => {    

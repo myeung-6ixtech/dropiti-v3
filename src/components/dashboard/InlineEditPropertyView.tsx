@@ -211,7 +211,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
 
 
 
-  const updateTempField = (section: string, field: string, value: unknown) => {
+  const updateTempField = useCallback((section: string, field: string, value: unknown) => {
 
     setTempData(prev => {
       // If section is empty, this is a top-level field update
@@ -250,7 +250,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
         return newState;
       });
     }
-  };
+  }, []);
 
   if (isLoading) {
     return (
