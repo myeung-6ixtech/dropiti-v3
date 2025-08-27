@@ -105,3 +105,21 @@ export const getAmenitiesByCategory = (category: AmenityCategory) => {
 export const getAmenityById = (id: string) => {
   return Object.values(AMENITIES).find(amenity => amenity.id === id);
 };
+
+// Helper function to group amenities by category
+export const groupAmenitiesByCategory = (amenityIds: string[]) => {
+  const categorizedAmenities: Record<string, typeof AMENITIES[keyof typeof AMENITIES][]> = {};
+  
+  amenityIds.forEach(id => {
+    const amenity = getAmenityById(id);
+    if (amenity) {
+      const category = amenity.category;
+      if (!categorizedAmenities[category]) {
+        categorizedAmenities[category] = [];
+      }
+      categorizedAmenities[category].push(amenity);
+    }
+  });
+  
+  return categorizedAmenities;
+};

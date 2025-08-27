@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 import { validateOfferAction, createOfferAction } from '@/lib/offer-negotiation';
 import { REVIEW_CONSTANTS } from '@/constants/review';
+import { OfferActionType } from '@/types/offer';
 
 const ACCEPT_OFFER_MUTATION = `
   mutation AcceptOffer($offerId: Int!, $updates: real_estate_offer_set_input!) {
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
 
     // Determine the action type based on who is accepting and current status
     const isInitiator = offer.initiator_firebase_uid === currentUserId;
-    let actionType: string;
+    let actionType: OfferActionType;
     
     if (isInitiator) {
       // Tenant/Initiator acceptance → Tentative acceptance (awaiting landlord confirmation)

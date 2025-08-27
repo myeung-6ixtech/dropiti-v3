@@ -110,11 +110,11 @@ export const useRealTimeChat = ({ roomId, pollingInterval = 3000 }: UseRealTimeC
 
   // Cleanup on unmount
   useEffect(() => {
+    const currentAbortController = abortControllerRef.current;
     return () => {
       stopPolling();
-      const abortController = abortControllerRef.current;
-      if (abortController) {
-        abortController.abort();
+      if (currentAbortController) {
+        currentAbortController.abort();
       }
     };
   }, [stopPolling]);

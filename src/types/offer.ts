@@ -220,6 +220,7 @@ export interface OfferNegotiationState {
 
 export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
   pending: 'Pending Review',
+  tentatively_accepted: 'Tentatively Accepted',
   accepted: 'Accepted',
   rejected: 'Rejected',
   countered: 'Counter Offer',
@@ -230,6 +231,7 @@ export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
 
 export const OFFER_STATUS_COLORS: Record<OfferStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-800',
+  tentatively_accepted: 'bg-orange-100 text-orange-800',
   accepted: 'bg-green-100 text-green-800',
   rejected: 'bg-red-100 text-red-800',
   countered: 'bg-blue-100 text-blue-800',
@@ -242,12 +244,14 @@ export const OFFER_ACTION_LABELS: Record<OfferActionType, string> = {
   INITIATOR_CREATED: 'Offer Created',
   INITIATOR_EDITED: 'Offer Edited',
   INITIATOR_CANCELLED: 'Offer Cancelled',
+  INITIATOR_TENTATIVELY_ACCEPTED: 'Offer Tentatively Accepted',
   INITIATOR_ACCEPTED: 'Offer Accepted',
   INITIATOR_COUNTERED: 'Counter Offer Sent',
   INITIATOR_REJECTED: 'Offer Rejected',
   RECIPIENT_CREATED: 'Offer Created',
   RECIPIENT_EDITED: 'Offer Edited',
   RECIPIENT_CANCELLED: 'Offer Cancelled',
+  RECIPIENT_CONFIRMED_ACCEPTANCE: 'Acceptance Confirmed',
   RECIPIENT_ACCEPTED: 'Offer Accepted',
   RECIPIENT_COUNTERED: 'Counter Offer Sent',
   RECIPIENT_REJECTED: 'Offer Rejected',

@@ -2,10 +2,7 @@
 
 import Link from 'next/link';
 import { 
-  BuildingOfficeIcon,
-  PhoneIcon,
-  EnvelopeIcon,
-  MapPinIcon
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import { footerStyles } from '@/styles/index';
 
@@ -98,23 +95,7 @@ const socialLinks = [
   },
 ];
 
-const contactInfo = [
-  {
-    icon: PhoneIcon,
-    text: '+1 (555) 123-4567',
-    href: 'tel:+15551234567'
-  },
-  {
-    icon: EnvelopeIcon,
-    text: 'info@dropiti.com',
-    href: 'mailto:info@dropiti.com'
-  },
-  {
-    icon: MapPinIcon,
-    text: '123 Property Street, City, Country',
-    href: '#'
-  }
-];
+
 
 export default function Footer({ className = '' }: FooterProps) {
   const currentYear = new Date().getFullYear();
