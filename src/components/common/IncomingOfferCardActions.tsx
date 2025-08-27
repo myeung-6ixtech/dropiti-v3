@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
 import { useToast } from '@/context/ToastContext';
 import FinalDealDisplay from './FinalDealDisplay';
@@ -81,32 +81,40 @@ export default function IncomingOfferCardActions({
         moveInDate: offer.finalMoveInDate || offer.moveInDate
       };
 
-      // Check if there were bulk rejections
-      const bulkRejection = response?.data?.bulkRejection;
-      let message = '';
+      // Handle different response types based on two-stage acceptance
+      if (response.requiresConfirmation) {
+        // Tenant tentative acceptance
+        showToast('success', 'Offer tentatively accepted! Awaiting landlord confirmation.');
+        setIsAccepted(true);
+        onOfferStatusChange?.();
+      } else if (response.isFinalized) {
+        // Landlord confirmation - deal finalized
+        const bulkRejection = response?.data?.bulkRejection;
+        let message = '';
 
-      if (bulkRejection && bulkRejection.rejectedOffersCount > 0) {
-        // Show comprehensive message about acceptance and bulk rejection
-        const baseMessage = offer.lastActionType === 'RECIPIENT_COUNTERED' 
-          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
-          : 'Offer accepted successfully!';
-        
-        const rejectionMessage = ` ${bulkRejection.rejectedOffersCount} other pending offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected.`;
-        
-        message = baseMessage + rejectionMessage;
-        
-        // Show additional info toast about bulk rejection
-        showToast('info', `${bulkRejection.rejectedOffersCount} other offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected for this property.`);
-      } else {
-        // Show standard success message
-        message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
-          ? `Offer accepted! Final deal: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
-          : 'Offer accepted successfully!';
+        if (bulkRejection && bulkRejection.rejectedOffersCount > 0) {
+          // Show comprehensive message about acceptance and bulk rejection
+          const baseMessage = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+            ? `Deal confirmed! Final terms: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+            : 'Deal confirmed and finalized!';
+          
+          const rejectionMessage = ` ${bulkRejection.rejectedOffersCount} other pending offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected.`;
+          
+          message = baseMessage + rejectionMessage;
+          
+          // Show additional info toast about bulk rejection
+          showToast('info', `${bulkRejection.rejectedOffersCount} other offer${bulkRejection.rejectedOffersCount === 1 ? '' : 's'} automatically rejected for this property.`);
+        } else {
+          // Show standard success message
+          message = offer.lastActionType === 'RECIPIENT_COUNTERED' 
+            ? `Deal confirmed! Final terms: ${formatCurrency(finalTerms.rentPrice, finalTerms.currency)}/month, ${finalTerms.leasingMonths} months, ${finalTerms.paymentFrequency} payments, move-in ${formatDate(finalTerms.moveInDate)}`
+            : 'Deal confirmed and finalized!';
+        }
+
+        showToast('success', message);
+        setIsAccepted(true);
+        onOfferStatusChange?.();
       }
-      
-      showToast('success', message);
-      setIsAccepted(true);
-      onOfferStatusChange?.();
     } catch (error) {
       console.error('Error accepting offer:', error);
       showToast('error', 'Failed to accept offer. Please try again.');
@@ -162,6 +170,41 @@ export default function IncomingOfferCardActions({
               Counter Offer
             </button>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // New Rule: If offer is tentatively accepted, only recipient (landlord) can confirm
+  if (offer.offerStatus === 'tentatively_accepted') {
+    return (
+      <div className="pt-4 border-t border-gray-200">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
+          <div className="flex items-center">
+            <ClockIcon className="h-5 w-5 text-yellow-500 mr-2" />
+            <span className="text-yellow-800 font-medium">Tenant has tentatively accepted your offer</span>
+          </div>
+          <p className="text-yellow-700 text-sm mt-1">
+            Please confirm to finalize the deal and reject other pending offers.
+          </p>
+        </div>
+        <div className="flex space-x-3">
+          <button
+            onClick={handleAcceptOffer}
+            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+            disabled={isAccepting}
+          >
+            <CheckIcon className="h-4 w-4 mr-2" />
+            {isAccepting ? 'Confirming...' : 'Confirm & Finalize Deal'}
+          </button>
+          <button
+            onClick={handleRejectOffer}
+            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+            disabled={isRejecting}
+          >
+            <XMarkIcon className="h-4 w-4 mr-2" />
+            Decline
+          </button>
         </div>
       </div>
     );

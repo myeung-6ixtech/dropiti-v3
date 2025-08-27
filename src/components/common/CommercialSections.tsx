@@ -1,10 +1,7 @@
 'use client';
 
+import Image from 'next/image';
 import { 
-  MagnifyingGlassIcon, 
-  HomeIcon, 
-  CogIcon, 
-  UserGroupIcon,
   ArrowRightIcon,
   CalendarIcon,
   DocumentTextIcon
@@ -31,22 +28,27 @@ export default function CommercialSections() {
       {/* Services Section */}
       <div className="py-16 bg-gray-50">
         <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 justify-center">
             
             {/* Real Estate Service */}
-            <div className="group cursor-pointer">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
-                <div className="flex items-center mb-5">
-                  <div className="p-2 bg-blue-100 rounded-full mr-3">
-                    <MagnifyingGlassIcon className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">Real Estate Service</h3>
+            <div className="group cursor-pointer text-center flex flex-col items-center">
+              <div className="mb-4">
+                <div className="relative w-80 h-80 mx-auto">
+                  <Image
+                    src="/images/dropiti-homepage-001.webp"
+                    alt="Real Estate Service"
+                    fill
+                    className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
+                  />
                 </div>
-                <p className="text-gray-600 text-base mb-5 leading-relaxed">
+              </div>
+              <div className="space-y-3 max-w-sm">
+                <h3 className="text-lg font-bold text-gray-900">Real Estate Service</h3>
+                <p className="text-gray-600 text-base leading-relaxed">
                   From Hong Kong's premier property search platform to providing seamless real-time property discovery, 
                   virtual property tours, and AI-powered matching, Dropiti continues to revolutionize the real estate market.
                 </p>
-                <div className="flex items-center text-blue-600 font-semibold group-hover:text-blue-800 transition-colors">
+                <div className="flex items-center justify-center text-blue-600 font-semibold group-hover:text-blue-800 transition-colors">
                   <span className="text-sm">View more</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -54,20 +56,25 @@ export default function CommercialSections() {
             </div>
 
             {/* My Home Service */}
-            <div className="group cursor-pointer">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
-                <div className="flex items-center mb-5">
-                  <div className="p-2 bg-green-100 rounded-full mr-3">
-                    <HomeIcon className="h-6 w-6 text-green-600" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">My Home Service</h3>
+            <div className="group cursor-pointer text-center flex flex-col items-center">
+              <div className="mb-4">
+                <div className="relative w-80 h-80 mx-auto">
+                  <Image
+                    src="/images/dropiti-homepage-002.webp"
+                    alt="My Home Service"
+                    fill
+                    className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
+                  />
                 </div>
-                <p className="text-gray-600 text-base mb-5 leading-relaxed">
+              </div>
+              <div className="space-y-3 max-w-sm">
+                <h3 className="text-lg font-bold text-gray-900">My Home Service</h3>
+                <p className="text-gray-600 text-base leading-relaxed">
                   Enjoy a convenient lifestyle with Mobile Home Management by Dropiti. 
                   Manage your property portfolio, track maintenance, handle tenant communications, 
                   and access financial insights all from your mobile device.
                 </p>
-                <div className="flex items-center text-green-600 font-semibold group-hover:text-green-800 transition-colors">
+                <div className="flex items-center justify-center text-green-600 font-semibold group-hover:text-green-800 transition-colors">
                   <span className="text-sm">View more</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -75,20 +82,25 @@ export default function CommercialSections() {
             </div>
 
             {/* Smart Home */}
-            <div className="group cursor-pointer">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
-                <div className="flex items-center mb-5">
-                  <div className="p-2 bg-purple-100 rounded-full mr-3">
-                    <CogIcon className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">Smart Home</h3>
+            <div className="group cursor-pointer text-center flex flex-col items-center">
+              <div className="mb-4">
+                <div className="relative w-80 h-80 mx-auto">
+                  <Image
+                    src="/images/dropiti-homepage-001.webp"
+                    alt="Smart Home"
+                    fill
+                    className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
+                  />
                 </div>
-                <p className="text-gray-600 text-base mb-5 leading-relaxed">
+              </div>
+              <div className="space-y-3 max-w-sm">
+                <h3 className="text-lg font-bold text-gray-900">Smart Home</h3>
+                <p className="text-gray-600 text-base leading-relaxed">
                   Easier and safer through digital integration and smart home technology. 
                   A connected residential experience created by Dropiti with IoT devices, 
                   automated systems, and intelligent property management.
                 </p>
-                <div className="flex items-center text-purple-600 font-semibold group-hover:text-purple-800 transition-colors">
+                <div className="flex items-center justify-center text-purple-600 font-semibold group-hover:text-purple-800 transition-colors">
                   <span className="text-sm">View more</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
@@ -96,19 +108,24 @@ export default function CommercialSections() {
             </div>
 
             {/* Dropiti Connect */}
-            <div className="group cursor-pointer">
-              <div className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full">
-                <div className="flex items-center mb-5">
-                  <div className="p-2 bg-orange-100 rounded-full mr-3">
-                    <UserGroupIcon className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900">Dropiti Connect</h3>
+            <div className="group cursor-pointer text-center flex flex-col items-center">
+              <div className="mb-4">
+                <div className="relative w-80 h-80 mx-auto">
+                  <Image
+                    src="/images/dropiti-homepage-002.webp"
+                    alt="Dropiti Connect"
+                    fill
+                    className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
+                  />
                 </div>
-                <p className="text-gray-600 text-base mb-5 leading-relaxed">
+              </div>
+              <div className="space-y-3 max-w-sm">
+                <h3 className="text-lg font-bold text-gray-900">Dropiti Connect</h3>
+                <p className="text-gray-600 text-base leading-relaxed">
                   The Future of Property Networking. A revolutionary platform that connects landlords, 
                   tenants, and property professionals in ways that go beyond traditional property management.
                 </p>
-                <div className="flex items-center text-orange-600 font-semibold group-hover:text-orange-800 transition-colors">
+                <div className="flex items-center justify-center text-orange-600 font-semibold group-hover:text-orange-800 transition-colors">
                   <span className="text-sm">View more</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
