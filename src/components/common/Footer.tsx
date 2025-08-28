@@ -2,9 +2,6 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  BuildingOfficeIcon
-} from '@heroicons/react/24/outline';
 import { footerStyles } from '@/styles/index';
 
 interface FooterProps {
@@ -109,8 +106,7 @@ export default function Footer({ className = '' }: FooterProps) {
           {/* Company Info */}
           <div className={footerStyles.companyInfo}>
             <div className={footerStyles.companyHeader}>
-              <BuildingOfficeIcon className={footerStyles.companyIcon} />
-              <span className={footerStyles.companyName}>Dropiti</span>
+              <span className={footerStyles.companyName}>dropiti</span>
             </div>
             <p className={footerStyles.companyDescription}>
               Your trusted partner in finding the perfect property. We connect tenants with landlords 

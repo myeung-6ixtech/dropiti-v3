@@ -51,11 +51,11 @@ export default function ModernFilter({
         />
         
         {/* Filter Panel - Slides in from right */}
-        <div className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
+        <div className={`absolute right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
             <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
             <button
               onClick={onToggle}
@@ -66,7 +66,7 @@ export default function ModernFilter({
           </div>
 
           {/* Filter Content */}
-          <div className="p-6 space-y-6 overflow-y-auto h-[calc(100vh-140px)]">
+          <div className="p-6 space-y-6 overflow-y-auto flex-1">
             {/* Location Filter */}
             <div>
               <label className="form-label">
@@ -129,7 +129,7 @@ export default function ModernFilter({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex space-x-3 pt-6 border-t border-gray-200 flex-shrink-0">
             <button
               onClick={handleClear}
               className="btn-outline flex-1"
