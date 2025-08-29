@@ -916,7 +916,7 @@
   }
 
   .auth-button-secondary {
-    @apply bg-white text-black border-2 border-black px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm w-full;
+    @apply bg-white text-black border border-black px-4 py-3 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors shadow-sm w-full;
   }
 
   /* Form Elements */
@@ -2001,11 +2001,11 @@
   }
 
   .dashboard-review-reviewer {
-    @apply font-medium text-gray-900;
+    @apply font-semibold text-sm text-gray-900 mb-0;
   }
 
   .dashboard-review-property {
-    @apply text-sm text-gray-500;
+    @apply text-sm text-gray-500 mb-0;
   }
 
   .dashboard-review-rating {

@@ -231,7 +231,7 @@ export default function CommercialSections() {
             and unparalleled service.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button className="px-6 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 text-sm">
+            <button className="px-6 py-3 border border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-all duration-300 transform hover:scale-105 text-sm">
               Explore Properties
             </button>
           </div>

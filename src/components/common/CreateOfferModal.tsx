@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { 
-  CurrencyDollarIcon, 
-  CalendarIcon, 
   XMarkIcon
 } from '@heroicons/react/24/outline';
 

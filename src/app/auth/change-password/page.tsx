@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { auth, confirmPasswordReset, verifyPasswordResetCode } from '@/lib/firebase';
 import { authClasses, authFormPatterns } from '@/styles/auth';
 
-export default function ChangePasswordPage() {
+function ChangePasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -424,5 +424,20 @@ export default function ChangePasswordPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChangePasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <ChangePasswordForm />
+    </Suspense>
   );
 }
