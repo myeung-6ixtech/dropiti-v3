@@ -4,14 +4,13 @@ import { useAuth } from '@/context/AuthContext';
 import DropitiPassport from '@/components/common/DropitiPassport';
 import { 
   StarIcon, 
-  CalendarIcon,
   UserIcon,
   BuildingOfficeIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
+import ReviewItem from '@/components/reviews/ReviewItem';
 import { reviewsAPI } from '@/lib/api-client';
 import { useState, useEffect } from 'react';
 import { Review } from '@/types/review';
@@ -118,13 +117,7 @@ export default function DashboardPage() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -245,35 +238,7 @@ export default function DashboardPage() {
             <div className="dashboard-card-content">
               {reviews.length > 0 ? (
                 reviews.map((review) => (
-                  <div key={review.id} className="dashboard-review-item">
-                    <div className="dashboard-review-content">
-                      <div className="dashboard-review-avatar">
-                        <Image
-                          src={getSafeProfileImage(review.reviewer?.photoUrl, '/images/Portrait_Placeholder.png')}
-                          alt={review.reviewer?.displayName || 'Reviewer'}
-                          width={40}
-                          height={40}
-                          className="dashboard-review-avatar-image"
-                        />
-                      </div>
-                      <div className="dashboard-review-details">
-                        <div className="dashboard-review-header">
-                          <div>
-                            <h4 className="dashboard-review-reviewer">{review.reviewer?.displayName || 'Unknown Reviewer'}</h4>
-                            <p className="dashboard-review-property">{review.property?.title || 'Property not specified'}</p>
-                          </div>
-                          <div className="dashboard-review-rating">
-                            {renderStars(review.rating)}
-                          </div>
-                        </div>
-                        <p className="dashboard-review-comment">{review.comment || 'No comment provided'}</p>
-                        <div className="dashboard-review-date">
-                          <CalendarIcon className="dashboard-review-date-icon" />
-                          {formatDate(review.createdAt)}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <ReviewItem key={review.id} review={review} renderStars={renderStars} />
                 ))
               ) : (
                 <div className="dashboard-review-empty">

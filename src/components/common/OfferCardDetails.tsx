@@ -28,12 +28,12 @@ export default function OfferCardDetails({ offer, showPropertyInfo = true }: Off
       {/* Property Info (if enabled) */}
       {showPropertyInfo && offer.property && (
         <div className="mb-4 p-3 bg-gray-50 rounded-md">
-          <h4 className="font-medium text-gray-900 mb-1">{offer.property.title}</h4>
+          <h4 className="font-medium text-sm text-gray-900 mb-1">{offer.property.title}</h4>
           <p className="text-sm text-gray-600">{offer.property.location}</p>
           <p className="text-sm text-gray-600 mb-0">
             Listed at {formatCurrency(offer.property.rentalPrice, offer.property.rentalPriceCurrency)}/month
           </p>
-          <p className="text-sm text-gray-600 mb-0">
+          <p className="text-sm text-gray-600 mb-0 capitalize">
             {offer.property.bedrooms} bed{offer.property.bedrooms !== 1 ? 's' : ''} • {offer.property.bathrooms} bath{offer.property.bathrooms !== 1 ? 's' : ''} • {offer.property.propertyType}
           </p>
         </div>

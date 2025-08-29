@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { 
-  CurrencyDollarIcon, 
-  CalendarIcon, 
   XMarkIcon
 } from '@heroicons/react/24/outline';
 
@@ -138,7 +136,6 @@ export default function CreateOfferModal({
               {/* Rental Price */}
               <div>
                 <label className="form-label flex items-center text-sm font-medium text-gray-700">
-                  <CurrencyDollarIcon className="h-4 w-4 mr-2 text-gray-500" />
                   Rental Price
                 </label>
                 <div className="relative mt-1">
@@ -151,7 +148,6 @@ export default function CreateOfferModal({
                     placeholder="Enter your offer amount"
                     className={`form-input pl-8 text-sm ${errors.rentalPrice ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}`}
                   />
-                  <CurrencyDollarIcon className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 </div>
                 {errors.rentalPrice && (
                   <p className="mt-1 text-xs text-red-600">{errors.rentalPrice}</p>
@@ -166,7 +162,6 @@ export default function CreateOfferModal({
               {/* Lease Duration */}
               <div>
                 <label className="form-label flex items-center text-sm font-medium text-gray-700">
-                  <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
                   Lease Duration (months)
                 </label>
                 <input
@@ -186,7 +181,6 @@ export default function CreateOfferModal({
               {/* Move-in Date */}
               <div>
                 <label className="form-label flex items-center text-sm font-medium text-gray-700">
-                  <CalendarIcon className="h-4 w-4 mr-2 text-gray-500" />
                   Move-in Date
                 </label>
                 <input

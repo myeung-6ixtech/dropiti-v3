@@ -52,24 +52,24 @@ export default function SignUpPage() {
       <div className={authClasses.contentSection}>
         <div className={authClasses.contentWrapper}>
           <div className="max-w-md">
-            <h2 className={authClasses.heading}>
+            <h2 className={authClasses.headingWhite}>
               Join Dropiti
             </h2>
-            <p className={authClasses.description}>
+            <p className={authClasses.descriptionWhite}>
               Create your account and start managing your properties with our comprehensive real estate platform.
             </p>
             <div className={authClasses.contentSpacing}>
               <div className={authClasses.featureItem}>
-                <div className={authClasses.featureDot}></div>
-                <span className={authClasses.featureText}>List your properties</span>
+                <div className={authClasses.featureDotWhite}></div>
+                <span className={authClasses.featureTextWhite}>List your properties</span>
               </div>
               <div className={authClasses.featureItem}>
-                <div className={authClasses.featureDot}></div>
-                <span className={authClasses.featureText}>Connect with tenants</span>
+                <div className={authClasses.featureDotWhite}></div>
+                <span className={authClasses.featureTextWhite}>Connect with tenants</span>
               </div>
               <div className={authClasses.featureItem}>
-                <div className={authClasses.featureDot}></div>
-                <span className={authClasses.featureText}>Manage applications</span>
+                <div className={authClasses.featureDotWhite}></div>
+                <span className={authClasses.featureTextWhite}>Manage applications</span>
               </div>
             </div>
           </div>

@@ -1,9 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  BuildingOfficeIcon
-} from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { footerStyles } from '@/styles/index';
 
 interface FooterProps {
@@ -108,13 +106,32 @@ export default function Footer({ className = '' }: FooterProps) {
           {/* Company Info */}
           <div className={footerStyles.companyInfo}>
             <div className={footerStyles.companyHeader}>
-              <BuildingOfficeIcon className={footerStyles.companyIcon} />
-              <span className={footerStyles.companyName}>Dropiti</span>
+              <span className={footerStyles.companyName}>dropiti</span>
             </div>
             <p className={footerStyles.companyDescription}>
               Your trusted partner in finding the perfect property. We connect tenants with landlords 
               and help everyone find their ideal space.
             </p>
+            
+            {/* Company Credentials */}
+            <div className="mt-6 space-y-4">
+              <div className="flex items-center space-x-4 mb-10">
+                <Image
+                  src="/images/6ixtechlogo_full_white.png"
+                  alt="6ixTech Logo"
+                  width={120}
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                />
+                <Image
+                  src="/images/cyberport_logo.png"
+                  alt="Cyberport Logo"
+                  width={100}
+                  height={40}
+                  className="h-8 w-auto object-contain"
+                />
+              </div>
+            </div>
             
             {/* Social Links */}
             <div className={footerStyles.socialLinks}>

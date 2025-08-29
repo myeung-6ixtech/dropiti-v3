@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useSession, signOut, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { usersAPI } from "@/lib/api-client";
@@ -38,8 +38,9 @@ interface AuthContextType {
     createdAt?: string;
     updatedAt?: string;
   } | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  isRememberMeEnabled: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,6 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { data: session, status } = useSession();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isRememberMeEnabled, setIsRememberMeEnabled] = useState(false);
   const [user, setUser] = useState<{
     id: string;
     email: string;
@@ -109,6 +111,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return [];
   };
 
+  // Utility function to check if session is about to expire
+  const checkSessionExpiry = useCallback(() => {
+    if (!isAuthenticated || !isRememberMeEnabled) return;
+    
+    // Check if session will expire in the next 24 hours
+    // This is a simplified check - in a real app you might want to check the actual JWT expiration
+    // const sessionWarningThreshold = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    
+    // For now, we'll just log this - you could integrate with a toast notification system
+    console.log('Session expiry check - Remember me enabled:', isRememberMeEnabled);
+  }, [isAuthenticated, isRememberMeEnabled]);
+
   // Fetch user profile data from database when session changes
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -117,6 +131,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (session?.user?.id) {
         try {
           console.log('AuthContext: Fetching user profile for:', session.user.id);
+          
+          // Check if remember me is enabled from localStorage
+          const savedRememberMe = localStorage.getItem('dropiti_remember_me');
+          setIsRememberMeEnabled(savedRememberMe === 'true');
           
           // Fetch user data from our database using the Firebase UID
           const response = await usersAPI.getUserByFirebaseUid(session.user.id);
@@ -233,23 +251,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } else {
         setIsAuthenticated(false);
         setUser(null);
+        setIsRememberMeEnabled(false);
       }
     };
 
     fetchUserProfile();
   }, [session, status]);
 
-  const login = async (email: string, password: string) => {
+  // Periodically check session expiry for remember me users
+  useEffect(() => {
+    if (!isAuthenticated || !isRememberMeEnabled) return;
+    
+    const interval = setInterval(() => {
+      checkSessionExpiry();
+    }, 60 * 60 * 1000); // Check every hour
+    
+    return () => clearInterval(interval);
+  }, [isAuthenticated, isRememberMeEnabled, checkSessionExpiry]);
+
+  const login = async (email: string, password: string, rememberMe: boolean = false) => {
     try {
       const result = await signIn('credentials', {
         email,
         password,
+        rememberMe, // Pass remember me preference to NextAuth
         redirect: false,
       });
 
       if (result?.error) {
         return { success: false, error: result.error };
       }
+
+      // If remember me is enabled, we'll handle the session duration in the NextAuth config
+      // The actual session duration is controlled by the NextAuth session.maxAge setting
+      console.log('Login successful, remember me:', rememberMe);
 
       return { success: true };
     } catch (error) {
@@ -260,6 +295,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
+      // Clear remember me preference on logout
+      localStorage.removeItem('dropiti_remember_me');
+      setIsRememberMeEnabled(false);
+      
       await signOut({ redirect: false });
       router.push("/");
     } catch (error) {
@@ -275,6 +314,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         user,
         login,
         logout,
+        isRememberMeEnabled,
       }}
     >
       {children}

@@ -52,7 +52,7 @@ export default function HeroSection() {
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/images/dropiti-header.jpg')"
+          backgroundImage: "url('/images/dropiti-header-image-003.webp')"
         }}
       >
         {/* Dark overlay for better text readability */}
@@ -65,9 +65,9 @@ export default function HeroSection() {
           <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
             <div className="sm:text-center lg:text-left">
               {/* Hero Title - Now White */}
-              <h1 className="text-4xl tracking-tight font-extrabold text-white sm:text-5xl md:text-6xl">
+              <h1 className="text-4xl tracking-tight font-bold text-white sm:text-5xl md:text-6xl">
                 <span className="block xl:inline">Find Your Perfect</span>{' '}
-                <span className="block text-blue-400 xl:inline">Property</span>
+                <span className="block text-blue-400 xl:inline">Home</span>
               </h1>
               
               {/* Hero Description - Now White */}

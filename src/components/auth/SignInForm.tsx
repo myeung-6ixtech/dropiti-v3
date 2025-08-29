@@ -9,6 +9,7 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -16,7 +17,7 @@ export default function SignInForm() {
   const router = useRouter();
   const { login } = useAuth();
 
-  // Check for success message from URL params
+  // Check for success message from URL params and load remember me preference
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
@@ -25,6 +26,12 @@ export default function SignInForm() {
         setSuccessMessage(message);
         // Clear the message from URL
         window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      // Load remember me preference from localStorage
+      const savedRememberMe = localStorage.getItem('dropiti_remember_me');
+      if (savedRememberMe === 'true') {
+        setRememberMe(true);
       }
     }
   }, []);
@@ -35,7 +42,10 @@ export default function SignInForm() {
     setIsLoading(true);
 
     try {
-      const result = await login(email, password);
+      // Save remember me preference to localStorage
+      localStorage.setItem('dropiti_remember_me', rememberMe.toString());
+      
+      const result = await login(email, password, rememberMe);
       
       if (result.success) {
         router.push("/dashboard");
@@ -123,6 +133,8 @@ export default function SignInForm() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 className={authFormPatterns.checkbox.input}
               />
               <label htmlFor="remember-me" className={authFormPatterns.checkbox.label}>
