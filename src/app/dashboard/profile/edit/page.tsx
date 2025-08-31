@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
+
 import { 
   UserIcon,
   GlobeAltIcon,
@@ -16,6 +17,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages } from '@/types';
 import { User } from '@/types/user';
+import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
 
 interface UserProfile {
   displayName: string;
@@ -67,6 +69,7 @@ export default function EditProfilePage() {
   });
 
   const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -184,10 +187,51 @@ export default function EditProfilePage() {
       setIsLoading(true);
       setSaveMessage(null);
 
+      let finalPhotoUrl = tempProfile.avatar;
+
+      // If there's a selected image file, upload it to S3 first
+      if (selectedImageFile) {
+        try {
+          console.log('Profile Edit: Starting S3 upload for image:', selectedImageFile.name);
+          
+          // Create FormData for the API request
+          const formData = new FormData();
+          formData.append('file', selectedImageFile);
+          formData.append('category', 'images');
+          
+          // Upload to our S3 API route
+          const uploadResponse = await fetch('/api/v1/upload/s3', {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (!uploadResponse.ok) {
+            const errorData = await uploadResponse.json();
+            throw new Error(errorData.error || 'Upload failed');
+          }
+          
+          const uploadResult = await uploadResponse.json();
+          
+          if (uploadResult.success && uploadResult.data) {
+            finalPhotoUrl = uploadResult.data.url;
+            console.log('Profile Edit: Image uploaded successfully to:', finalPhotoUrl);
+          } else {
+            throw new Error(uploadResult.error || 'Failed to upload image');
+          }
+        } catch (uploadError) {
+          console.error('Profile Edit: Image upload error:', uploadError);
+          setSaveMessage({
+            type: 'error',
+            message: `Failed to upload profile image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}. Please try again.`
+          });
+          return;
+        }
+      }
+
       // Prepare updates for the API
       const updates: Partial<User> = {
         display_name: tempProfile.displayName,
-        photo_url: tempProfile.avatar,
+        photo_url: finalPhotoUrl,
         location: tempProfile.location,
         about: tempProfile.about,
         languages: tempProfile.languages,
@@ -207,7 +251,15 @@ export default function EditProfilePage() {
       const updateResponse = await usersAPI.updateUser(authUser.id, updates);
 
       if (updateResponse.success) {
-        setProfile(tempProfile);
+        // Update the profile with the final photo URL
+        const updatedProfile = {
+          ...tempProfile,
+          avatar: finalPhotoUrl
+        };
+        
+        setProfile(updatedProfile);
+        setSelectedImageFile(null); // Clear the selected file
+        
         setSaveMessage({
           type: 'success',
           message: 'Profile updated successfully!'
@@ -232,6 +284,7 @@ export default function EditProfilePage() {
   };
 
   const handleCancel = () => {
+    setSelectedImageFile(null);
     router.push('/dashboard/profile');
   };
 
@@ -296,6 +349,18 @@ export default function EditProfilePage() {
       {/* Profile Form */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
+        
+        {/* Profile Image Upload */}
+        <div className="flex justify-center mb-8">
+          <ProfileImageUpload
+            currentImageUrl={tempProfile.avatar}
+            onImageUpdate={(newImageUrl, file) => {
+              handleInputChange('avatar', newImageUrl);
+              setSelectedImageFile(file || null);
+            }}
+            disabled={isLoading}
+          />
+        </div>
         
         <div className="space-y-6">
           {/* Display Name */}

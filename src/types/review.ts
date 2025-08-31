@@ -44,6 +44,7 @@ export interface ReviewOpportunity {
   otherPartyName: string;
   reviewType: ReviewType;
   reviewWindowEnd: string;
+  daysRemaining?: number; // Optional since it's calculated on the frontend
   status: string;
   offerId: string;
   offerUuid: string;

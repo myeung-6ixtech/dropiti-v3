@@ -7,20 +7,7 @@ import { REVIEW_CONSTANTS } from '@/constants/review';
 import { offersAPI } from '@/lib/api-client';
 import CreateReviewModal from '@/components/common/CreateReviewModal';
 import ReviewOpportunityItem from '@/components/reviews/ReviewOpportunityItem';
-
-interface ReviewOpportunity {
-  id: string;
-  propertyTitle: string;
-  otherPartyName: string;
-  reviewType: string;
-  reviewWindowEnd: string;
-  daysRemaining: number;
-  status: string;
-  offerId: string;
-  offerUuid: string;
-  propertyUuid: string;
-  otherPartyId: string;
-}
+import { ReviewOpportunity } from '@/types/review';
 
 export default function ReviewOpportunities() {
   const [opportunities, setOpportunities] = useState<ReviewOpportunity[]>([]);
@@ -141,13 +128,6 @@ export default function ReviewOpportunities() {
               return (
                 <div 
                   key={opportunity.id} 
-                  className={`dashboard-review-opportunity-item ${
-                    isExpired 
-                      ? 'dashboard-review-opportunity-item-expired' 
-                      : isUrgent 
-                        ? 'dashboard-review-opportunity-item-urgent' 
-                        : 'dashboard-review-opportunity-item-normal'
-                  }`}
                 >
                   <ReviewOpportunityItem
                     opportunity={opportunity}

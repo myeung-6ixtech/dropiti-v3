@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Step1PropertyType from '@/components/add-property/Step1PropertyType';
@@ -40,6 +40,9 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
   const [propertyData, setPropertyData] = useState<PropertyData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [draftSaved, setDraftSaved] = useState(false);
   const router = useRouter();
 
   const updatePropertyData = (data: Partial<PropertyData>) => {
@@ -57,6 +60,116 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const saveDraft = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Check if user is authenticated
+      if (!isAuthenticated || !authUser?.id) {
+        setSubmitError('You must be logged in to save a draft.');
+        return;
+      }
+
+      // For drafts, we only need minimal data (at least a title)
+      const hasMinimalData = propertyData.rentalDetails?.listingName || 
+                             propertyData.propertyType || 
+                             propertyData.address?.addressLine1;
+      
+      if (!hasMinimalData) {
+        setSubmitError('Please add at least a property name, type, or address to save a draft.');
+        return;
+      }
+
+      // Use the actual authenticated user's ID
+      const ownerId = authUser.id;
+      
+      // Prepare property data for draft
+      const draftData: PropertyDataForAPI = {
+        ...propertyData,
+        photos: [], // Drafts don't need photos initially
+      };
+      
+      console.log('Saving draft data:', draftData);
+      console.log('Using owner ID:', ownerId);
+      
+      // Call the API to create the draft
+      const response = await propertiesAPI.createProperty(draftData, ownerId, true);
+      
+      if (response.success) {
+        console.log('Draft saved successfully:', response.data);
+        setDraftId(response.data.property_uuid);
+        setDraftSaved(true);
+        
+        // Show success message
+        alert('Draft saved successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to save draft');
+      }
+      
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      
+      // Handle different types of errors
+      if (error instanceof Error) {
+        setSubmitError(error.message);
+      } else if (typeof error === 'string') {
+        setSubmitError(error);
+      } else {
+        setSubmitError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const publishDraft = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Check if user is authenticated
+      if (!isAuthenticated || !authUser?.id) {
+        setSubmitError('You must be logged in to publish a property.');
+        return;
+      }
+
+      // Validate required data
+      if (!isFormComplete()) {
+        setSubmitError('Please complete all required fields before publishing.');
+        return;
+      }
+
+      if (draftId) {
+        // Publish existing draft
+        const response = await propertiesAPI.publishDraft(draftId);
+        if (response.success) {
+          alert('Property published successfully!');
+          router.push('/dashboard/properties');
+          return;
+        } else {
+          throw new Error(response.error || 'Failed to publish draft');
+        }
+      } else {
+        // Create and publish new property
+        await handleSubmit();
+      }
+      
+    } catch (error) {
+      console.error('Error publishing property:', error);
+      
+      if (error instanceof Error) {
+        setSubmitError(error.message);
+      } else if (typeof error === 'string') {
+        setSubmitError(error);
+      } else {
+        setSubmitError('An unexpected error occurred. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -110,7 +223,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
       console.log('Using owner ID:', ownerId);
       
       // Call the API to create the property
-      const response = await propertiesAPI.createProperty(propertyDataWithPhotos, ownerId);
+      const response = await propertiesAPI.createProperty(propertyDataWithPhotos, ownerId, false);
       
       if (response.success) {
         console.log('Property created successfully:', response.data);
@@ -210,8 +323,17 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Add Property</h2>
-              <p className="text-sm text-gray-500">Step {currentStep} of {steps.length}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-0">
+                {draftId ? 'Edit Draft' : 'Add Property'}
+              </h2>
+              <p className="text-sm text-gray-500 mb-0">
+                {draftId ? `Draft: ${propertyData.rentalDetails?.listingName || 'Untitled'}` : `Step ${currentStep} of ${steps.length}`}
+              </p>
+              {draftId && (
+                <p className="text-xs text-blue-600 mt-1">
+                  Working on saved draft
+                </p>
+              )}
             </div>
           </div>
           
@@ -265,10 +387,10 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             {/* Step Header */}
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-gray-900 mb-0">
                 {steps[currentStep - 1].title}
               </h3>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 mb-0">
                 {steps[currentStep - 1].description}
               </p>
             </div>
@@ -278,9 +400,41 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
               {renderStep()}
             </div>
 
-            {/* Step Navigation */}
-            {currentStep !== 8 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+            {/* Draft Actions */}
+            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={saveDraft}
+                    disabled={isSubmitting}
+                    className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <DocumentIcon className="h-4 w-4" />
+                    {draftId ? 'Update Draft' : 'Save Draft'}
+                  </button>
+                  
+                  {draftId && (
+                    <button
+                      onClick={publishDraft}
+                      disabled={isSubmitting || !isFormComplete()}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <CheckIcon className="h-4 w-4" />
+                      Publish Draft
+                    </button>
+                  )}
+                </div>
+                
+                {/* Draft Status */}
+                {draftSaved && (
+                  <div className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                    ✓ Draft saved
+                  </div>
+                )}
+              </div>
+
+              {/* Step Navigation */}
+              {currentStep !== 8 && (
                 <div className="flex items-center justify-between">
                   <button
                     onClick={prevStep}
@@ -300,8 +454,8 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                     <ArrowRightIcon className="h-4 w-4" />
                   </button>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

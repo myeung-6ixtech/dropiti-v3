@@ -2,35 +2,32 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Bed } from '@/assets/icons';
 
 interface SearchData {
   location: string;
   bedrooms: string;
-  maxPrice: string;
 }
 
 export default function HeroSection() {
   const router = useRouter();
   const [searchData, setSearchData] = useState<SearchData>({
     location: '',
-    bedrooms: '',
-    maxPrice: ''
+    bedrooms: ''
   });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Only proceed if at least one search criteria is provided
-    if (!searchData.location && !searchData.bedrooms && !searchData.maxPrice) {
+    if (!searchData.location && !searchData.bedrooms) {
       return;
     }
     
     const params = new URLSearchParams();
     if (searchData.location) params.append('location', searchData.location.trim());
     if (searchData.bedrooms) params.append('bedrooms', searchData.bedrooms);
-    if (searchData.maxPrice) params.append('maxPrice', searchData.maxPrice);
     
     const searchUrl = `/search?${params.toString()}`;
     console.log('Homepage search: Navigating to:', searchUrl, 'with params:', Object.fromEntries(params));
@@ -42,7 +39,6 @@ export default function HeroSection() {
     const parts: string[] = [];
     if (searchData.location) parts.push(`${searchData.location} property`);
     if (searchData.bedrooms) parts.push(`${searchData.bedrooms} bedroom`);
-    if (searchData.maxPrice) parts.push(`max price HKD ${searchData.maxPrice}`);
     return parts.join(' ');
   };
 
@@ -113,23 +109,13 @@ export default function HeroSection() {
                       </div>
                     </div>
 
-                    {/* Max Price */}
-                    <div className="flex-1 relative">
-                      <CurrencyDollarIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                      <input
-                        type="number"
-                        value={searchData.maxPrice}
-                        onChange={(e) => setSearchData({ ...searchData, maxPrice: e.target.value })}
-                        placeholder="Max Price (HKD)"
-                        className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl"
-                      />
-                    </div>
+
 
                     {/* Search Button - Full width on mobile, fixed width on desktop */}
                     <button
                       type="submit"
                       className="flex-shrink-0 w-full sm:w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-                      disabled={!searchData.location && !searchData.bedrooms && !searchData.maxPrice}
+                      disabled={!searchData.location && !searchData.bedrooms}
                     >
                       <MagnifyingGlassIcon className="h-6 w-6 text-white" />
                       <span className="sm:hidden ml-2 text-white font-medium">Search Properties</span>
@@ -138,7 +124,7 @@ export default function HeroSection() {
                   
                   {/* Search Hint - Now White */}
                   <p className="mt-3 text-sm text-white text-center lg:text-left opacity-80">
-                    {searchData.location || searchData.bedrooms || searchData.maxPrice 
+                    {searchData.location || searchData.bedrooms 
                       ? `Searching for: ${getSearchSummary()}`
                       : 'Enter your preferences above to start searching'
                     }

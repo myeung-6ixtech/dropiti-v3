@@ -1,8 +1,86 @@
 // Property Types for Add Property Flow
+
+// Centralized Property Type Definitions
+export interface PropertySubType {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+export interface PropertyType {
+  id: string;
+  title: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+  subTypes: PropertySubType[];
+  disabled?: boolean;
+}
+
+// Property Type Constants
+export const PROPERTY_TYPE = {
+  RESIDENTIAL: 'residential',
+  COMMERCIAL: 'commercial',
+} as const;
+
+export const RESIDENTIAL_TYPE = {
+  SERVICED_APARTMENT: 'serviced-apartment',
+  VILLAGE_HOUSE: 'village-house',
+  APARTMENT: 'apartment',
+  CONDO: 'condo',
+} as const;
+
+export type PropertyTypeValue = typeof PROPERTY_TYPE[keyof typeof PROPERTY_TYPE];
+export type ResidentialTypeValue = typeof RESIDENTIAL_TYPE[keyof typeof RESIDENTIAL_TYPE];
+
+// Centralized property types array
+export const PROPERTY_TYPES: PropertyType[] = [
+  {
+    id: PROPERTY_TYPE.RESIDENTIAL,
+    title: 'Residential',
+    description: 'Homes and apartments for living',
+    icon: () => null, // Will be imported in components
+    subTypes: [
+      {
+        id: RESIDENTIAL_TYPE.SERVICED_APARTMENT,
+        title: 'Serviced Apartment',
+        description: 'Fully furnished with hotel-like amenities',
+        icon: () => null, // Will be imported in components
+      },
+      {
+        id: RESIDENTIAL_TYPE.VILLAGE_HOUSE,
+        title: 'Village House',
+        description: 'Traditional village-style houses',
+        icon: () => null, // Will be imported in components
+      },
+      {
+        id: RESIDENTIAL_TYPE.APARTMENT,
+        title: 'Apartment',
+        description: 'Standard residential apartments',
+        icon: () => null, // Will be imported in components
+      },
+      {
+        id: RESIDENTIAL_TYPE.CONDO,
+        title: 'Condominium',
+        description: 'Condominium units',
+        icon: () => null, // Will be imported in components
+      },
+    ],
+  },
+  {
+    id: PROPERTY_TYPE.COMMERCIAL,
+    title: 'Commercial',
+    description: 'Business and office spaces',
+    icon: () => null, // Will be imported in components
+    subTypes: [],
+    disabled: true,
+  },
+];
+
 export interface PropertyData {
   // Step 1
-  propertyType?: 'residential' | 'commercial';
-  residentialType?: 'serviced-apartment' | 'village-house' | 'apartment' | 'condo';
+  propertyType?: PropertyTypeValue;
+  residentialType?: ResidentialTypeValue;
   
   // Step 2
   rentalSpace?: 'entire-apartment' | 'partial-apartment' | 'shared-space' | 'private-room';

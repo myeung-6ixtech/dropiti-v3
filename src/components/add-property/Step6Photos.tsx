@@ -80,7 +80,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
               isDragOver
-                ? 'border-blue-400 bg-blue-50'
+                ? 'border-purple-400 bg-purple-50'
                 : 'border-gray-300 hover:border-gray-400'
             }`}
             onDrop={handleDrop}
@@ -98,7 +98,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
             </div>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               Choose Files
             </button>
@@ -122,7 +122,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
               </h4>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700"
+                className="flex items-center px-3 py-1 text-sm font-medium text-purple-600 hover:text-purple-700"
               >
                 <PhotoIcon className="h-4 w-4 mr-1" />
                 Add More Photos
@@ -191,12 +191,12 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
 
             {/* Upload Summary */}
             {photos.length > 0 && (
-              <div className="bg-blue-50 rounded-lg p-4">
+              <div className="bg-purple-50 rounded-lg p-4">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-blue-700">
+                  <span className="text-purple-700">
                     {photos.length} photos ready for upload
                   </span>
-                  <span className="text-blue-600 font-medium">
+                  <span className="text-purple-600 font-medium">
                     Photos will be uploaded automatically when you create the listing
                   </span>
                 </div>
@@ -206,9 +206,9 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
         )}
 
         {/* Photo Guidelines */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-medium text-blue-900 mb-2">Photo Guidelines</h4>
-          <ul className="text-sm text-blue-700 space-y-1">
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <h4 className="font-medium text-purple-900 mb-2">Photo Guidelines</h4>
+          <ul className="text-sm text-purple-700 space-y-1">
             <li>• Upload high-quality photos (minimum 1024x768 pixels)</li>
             <li>• Include photos of all major rooms and areas</li>
             <li>• Make sure photos are well-lit and clean</li>

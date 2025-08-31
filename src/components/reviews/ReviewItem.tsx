@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { getSafeProfileImage } from '@/lib/utils';
 import type { Review } from '@/types/review';
+import { REVIEW_TYPE_LABELS } from '@/types/review';
 
 interface ReviewItemProps {
   review: Review;
@@ -35,7 +36,7 @@ export default function ReviewItem({ review, renderStars }: ReviewItemProps) {
           <div className="dashboard-review-header">
             <div>
               <h4 className="dashboard-review-reviewer">{review.reviewer?.displayName || 'Unknown Reviewer'}</h4>
-              <p className="dashboard-review-property">{review.property?.title || 'Property not specified'}</p>
+              <p className="dashboard-review-type">{REVIEW_TYPE_LABELS[review.reviewType]}</p>
             </div>
             <div className="dashboard-review-rating">
               {renderStars(review.rating)}

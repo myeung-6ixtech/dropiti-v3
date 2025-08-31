@@ -147,9 +147,9 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
               <div className="flex space-x-4">
                 <button
                   onClick={() => handleInputChange('petsAllowed', true)}
-                  className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
                     unitDetails.petsAllowed === true
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      ? 'border-purple-600 bg-purple-50 text-purple-700'
                       : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -157,9 +157,9 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                 </button>
                 <button
                   onClick={() => handleInputChange('petsAllowed', false)}
-                  className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg border transition-all duration-200 ${
                     unitDetails.petsAllowed === false
-                      ? 'border-blue-600 bg-blue-50 text-blue-700'
+                      ? 'border-purple-600 bg-purple-50 text-purple-700'
                       : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -187,14 +187,14 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                 onClick={() => handleInputChange('furnished', option.value)}
                 className={`relative p-4 border-2 rounded-lg text-left transition-all duration-200 ${
                   unitDetails.furnished === option.value
-                    ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600 ring-opacity-20'
+                    ? 'border-purple-600 bg-purple-50 ring-2 ring-purple-600 ring-opacity-20'
                     : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
                 }`}
               >
                 <div className="flex items-start">
                   <div className={`p-2 rounded-lg flex-shrink-0 ${
                     unitDetails.furnished === option.value
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-purple-600 text-white'
                       : 'bg-gray-100 text-gray-600'
                   }`}>
                     <HomeIcon className="h-4 w-4" />
@@ -207,7 +207,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                 
                 {unitDetails.furnished === option.value && (
                   <div className="absolute top-2 right-2">
-                    <div className="w-4 h-4 bg-blue-600 rounded-full flex items-center justify-center">
+                    <div className="w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center">
                       <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>

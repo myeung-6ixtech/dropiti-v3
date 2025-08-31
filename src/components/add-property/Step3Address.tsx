@@ -74,14 +74,14 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           Enter the complete address of your property. This information will help potential tenants find and evaluate your listing.
         </p>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
           <div className="flex">
-            <MapPinIcon className="h-5 w-5 text-blue-400 mt-0.5" />
+            <MapPinIcon className="h-5 w-5 text-purple-400 mt-0.5" />
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800 mb-0">
+              <h3 className="text-sm font-medium text-purple-800 mb-0">
                 Address &amp; Location Guidelines
               </h3>
-              <div className="mt-2 text-sm text-blue-700 mb-0">
+              <div className="mt-2 text-sm text-purple-700 mb-0">
                 <p className="text-sm font-medium text-gray-600 mb-0">
                   Please provide as much detail as possible. This helps tenants understand the exact location and accessibility of your property.
                 </p>
@@ -241,7 +241,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {showSpecificLocation ? (
-                <EyeIcon className="h-5 w-5 text-blue-600" />
+                <EyeIcon className="h-5 w-5 text-purple-600" />
               ) : (
                 <EyeSlashIcon className="h-5 w-5 text-gray-400" />
               )}
@@ -258,8 +258,8 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
             <button
               type="button"
               onClick={() => handleToggleSpecificLocation(!showSpecificLocation)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                showSpecificLocation ? 'bg-blue-600' : 'bg-gray-200'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
+                showSpecificLocation ? 'bg-purple-600' : 'bg-gray-200'
               }`}
             >
               <span
