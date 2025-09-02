@@ -87,7 +87,7 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
                 : 'bg-white text-black border border-gray-200'
             }`}
           >
-            <p className="text-sm mb-0">{message.content}</p>
+            <div className="text-sm mb-0 whitespace-pre-wrap break-words">{message.content}</div>
           </div>
           <div className={`mt-1 flex items-center space-x-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
             <span className="text-xs text-gray-500">

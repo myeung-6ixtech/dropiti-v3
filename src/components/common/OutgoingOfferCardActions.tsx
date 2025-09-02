@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { XMarkIcon, CheckIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckIcon, ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import FinalCounterOfferModal2 from './FinalCounterOfferModal2';
@@ -222,14 +222,20 @@ export default function OutgoingOfferCardActions({
   if (offer.offerStatus === 'tentatively_accepted') {
     return (
       <div className="pt-4 border-t border-gray-200">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-          <div className="flex items-center">
-            <ClockIcon className="h-5 w-5 text-yellow-500 mr-2" />
-            <span className="text-yellow-800 font-medium">Tentatively Accepted</span>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-purple-800 mb-0">Tentatively Accepted</h3>
+              <div className="mt-2 text-sm mb-0">
+                <p className="text-sm text-gray-600 mb-0">
+                  Your acceptance is pending landlord confirmation. The landlord will review and finalize the deal.
+                </p>
+              </div>
+            </div>
           </div>
-          <p className="text-yellow-700 text-sm mt-1">
-            Your acceptance is pending landlord confirmation. The landlord will review and finalize the deal.
-          </p>
         </div>
       </div>
     );
@@ -242,22 +248,22 @@ export default function OutgoingOfferCardActions({
         <div className="pt-4 border-t border-gray-200">
           <div className="space-y-4">
             {/* Show counter offer details */}
-            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-              <h4 className="font-medium text-blue-900 mb-3 text-sm">Landlord's Counter Offer</h4>
+            <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <h4 className="font-medium text-purple-800 mb-3 text-sm">Landlord's Counter Offer</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <div className="flex items-center text-sm text-blue-700">
+                  <div className="flex items-center text-sm text-purple-700">
                     <span className="font-medium">New Rent:</span> {formatCurrency(offer.currentRentPrice || offer.proposingRentPrice, offer.currentRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD')}/month
                   </div>
-                  <div className="flex items-center text-sm text-blue-700">
+                  <div className="flex items-center text-sm text-purple-700">
                     <span className="font-medium">New Lease:</span> {offer.currentNumLeasingMonths || offer.numLeasingMonths} month{(offer.currentNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex items-center text-sm text-blue-700">
+                  <div className="flex items-center text-sm text-purple-700">
                     <span className="font-medium">New Move-in:</span> {formatDate(offer.currentMoveInDate || offer.moveInDate)}
                   </div>
-                  <div className="text-sm text-blue-700">
+                  <div className="text-sm text-purple-700">
                     <span className="font-medium">New Payment:</span> {offer.currentPaymentFrequency || offer.paymentFrequency}
                   </div>
                 </div>

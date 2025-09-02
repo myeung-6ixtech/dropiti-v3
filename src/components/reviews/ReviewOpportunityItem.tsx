@@ -30,7 +30,7 @@ export default function ReviewOpportunityItem({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+    <div className="dashboard-review-item">
       {/* Review Header - Focus on the other party being reviewed */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">

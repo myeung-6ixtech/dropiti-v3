@@ -1696,11 +1696,11 @@
 }
 
 .offer-status-pending-text {
-  @apply text-blue-800 text-sm font-medium;
+  @apply text-blue-800 text-sm font-medium mb-0;
 }
 
 .offer-status-pending-subtext {
-  @apply text-blue-700 text-xs mt-1;
+  @apply text-blue-700 text-xs mt-1 mb-0;
 }
 
 /* Counter Offer Status Variants */
@@ -1994,6 +1994,8 @@
      DASHBOARD REVIEW COMPONENTS
      ======================================== */
 
+  /* Standard container styling for all review-related components */
+  /* This is the project standard for review item containers */
   .dashboard-review-item {
     @apply border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow;
   }
@@ -2065,22 +2067,7 @@
   /* ========================================
      DASHBOARD REVIEW OPPORTUNITIES COMPONENTS
      ======================================== */
-
-  .dashboard-review-opportunity-item {
-    @apply border rounded-lg p-4;
-  }
-
-  .dashboard-review-opportunity-item-expired {
-    @apply border-red-200 bg-red-50;
-  }
-
-  .dashboard-review-opportunity-item-urgent {
-    @apply border-yellow-200 bg-yellow-50;
-  }
-
-  .dashboard-review-opportunity-item-normal {
-    @apply border-gray-200 bg-white;
-  }
+  /* Note: Review opportunity components now use the standard dashboard-review-item class */
 
   .dashboard-review-opportunity-content {
     @apply flex items-center justify-between;
