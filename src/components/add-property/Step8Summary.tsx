@@ -90,7 +90,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
           {/* Property Type */}
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-3">
-              <HomeIcon className="h-5 w-5 text-blue-600" />
+              <HomeIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Property Type</h4>
             </div>
             <p className="text-gray-600">{getPropertyTypeDisplay()}</p>
@@ -102,7 +102,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
           {/* Address */}
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-3">
-              <MapPinIcon className="h-5 w-5 text-blue-600" />
+              <MapPinIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Address</h4>
             </div>
             {data?.address ? (
@@ -121,7 +121,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
           {/* Unit Details */}
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-3">
-              <HomeIcon className="h-5 w-5 text-blue-600" />
+              <HomeIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Unit Details</h4>
             </div>
             {data?.unitDetails ? (
@@ -146,14 +146,14 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
           {/* Rental Details */}
           <div className="bg-white border border-gray-200 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-3">
-              <CurrencyDollarIcon className="h-5 w-5 text-blue-600" />
+              <CurrencyDollarIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Rental Details</h4>
             </div>
             {data?.rentalDetails ? (
               <div className="text-gray-600 text-sm space-y-1">
                 {data.rentalDetails.listingName && <p className="font-medium">{data.rentalDetails.listingName}</p>}
                 {data.rentalDetails.rentalPrice && (
-                  <p className="text-lg font-semibold text-blue-600">
+                  <p className="text-lg font-semibold text-purple-600">
                     {formatCurrency(data.rentalDetails.rentalPrice)}/month
                   </p>
                 )}
@@ -179,14 +179,14 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
         {data?.amenities && data.amenities.length > 0 && (
           <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <div className="flex items-center space-x-3 mb-3">
-              <WifiIcon className="h-5 w-5 text-blue-600" />
+              <WifiIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Amenities ({data.amenities.length})</h4>
             </div>
             <div className="flex flex-wrap gap-2">
               {data.amenities.map((amenityId: string) => (
                 <span
                   key={amenityId}
-                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800"
                 >
                   {amenityId.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </span>
@@ -199,7 +199,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
         {data?.photos && data.photos.length > 0 && (
           <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <div className="flex items-center space-x-3 mb-3">
-              <PhotoIcon className="h-5 w-5 text-blue-600" />
+              <PhotoIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Photos ({data.photos.length})</h4>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -235,14 +235,14 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
       </div>
 
       {/* Submission */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
         <div className="flex items-start space-x-3">
-          <CheckCircleIcon className="h-6 w-6 text-blue-600 mt-0.5" />
+          <CheckCircleIcon className="h-6 w-6 text-purple-600 mt-0.5" />
           <div>
-            <h4 className="font-medium text-blue-900 mb-2">
+            <h4 className="font-medium text-purple-900 mb-2">
               Ready to submit your listing?
             </h4>
-            <p className="text-blue-700 text-sm">
+            <p className="text-purple-700 text-sm">
               By submitting this listing, you agree to our terms of service and confirm that all information provided is accurate and truthful.
             </p>
           </div>
@@ -251,7 +251,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
         <button
           onClick={onSubmit}
           disabled={isSubmitting}
-          className="mt-4 w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="mt-4 w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {isSubmitting ? (
             <div className="flex items-center justify-center space-x-2">

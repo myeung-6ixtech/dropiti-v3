@@ -1,5 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
+import { checkRateLimit } from '@/lib/rate-limiter';
+
+// Basic message validation
+const validateMessage = (content: string): { valid: boolean; error?: string } => {
+  if (typeof content !== 'string') return { valid: false, error: 'Invalid message' };
+
+  // Preserve intented whitespace/newlines but trim excessive outer whitespace
+  const trimmed = content.replace(/\s+$/g, '');
+  if (trimmed.length === 0) return { valid: false, error: 'Message cannot be empty' };
+
+  if (content.length > 2000) return { valid: false, error: 'Message too long (max 2000 characters)' };
+
+  // Basic XSS guard (we store plain text; UI renders as text)
+  if (/<\s*script/i.test(content)) return { valid: false, error: 'Invalid content' };
+
+  return { valid: true };
+};
 
 const SEND_MESSAGE_MUTATION = `
   mutation SendMessage($roomId: uuid!, $senderFirebaseUid: String!, $content: String!) {
@@ -27,6 +44,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'roomId, senderFirebaseUid, and content are required' },
         { status: 400 }
+      );
+    }
+
+    // Validate message content
+    const validation = validateMessage(content);
+    if (!validation.valid) {
+      return NextResponse.json(
+        { error: validation.error },
+        { status: 400 }
+      );
+    }
+
+    // Rate limit per sender
+    const rate = checkRateLimit(`msg:${senderFirebaseUid}`, 20, 60_000); // 20 msgs/min
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Please wait a moment before sending more messages.' },
+        { status: 429 }
       );
     }
 

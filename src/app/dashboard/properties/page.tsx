@@ -4,22 +4,47 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
-import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import DraftCard from '@/components/dashboard/DraftCard';
+import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 
+interface Draft {
+  id: string;
+  property_uuid: string;
+  title: string;
+  description: string;
+  created_at: string;
+  updated_at: string;
+  last_saved_at: string;
+  status: string;
+  property_type: string;
+  rental_space: string;
+  address: string;
+  num_bedroom: number;
+  num_bathroom: number;
+  rental_price: number;
+  amenities: string[];
+  display_image: string;
+  completion_percentage: number;
+}
+
 export default function PropertiesPage() {
   const { user: authUser, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
 
-  // Fetch user's properties
+  // Fetch user's properties and drafts
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchData = async () => {
       if (!isAuthenticated || !authUser?.id) {
         setIsLoading(false);
         return;
@@ -29,39 +54,55 @@ export default function PropertiesPage() {
         setIsLoading(true);
         setError(null);
         
-        console.log('Fetching properties for user:', authUser.id);
+        console.log('Fetching properties and drafts for user:', authUser.id);
         
-        // Fetch properties for the current user
-        const response = await propertiesAPI.getListings({
-          limit: 50, // Get up to 50 properties
-          landlord_firebase_uid: authUser.id, // Filter by current user's Firebase UID
-        });
+        // Fetch both properties and drafts in parallel
+        const [propertiesResponse, draftsResponse] = await Promise.all([
+          propertiesAPI.getListings({
+            limit: 50, // Get up to 50 properties
+            landlord_firebase_uid: authUser.id, // Filter by current user's Firebase UID
+          }),
+          propertiesAPI.getDrafts(authUser.id)
+        ]);
 
-        console.log('Properties API response:', response);
+        console.log('Properties API response:', propertiesResponse);
+        console.log('Drafts API response:', draftsResponse);
 
-        if (response.success && response.data) {
-          // The API already transforms the data to match the Property interface
-          setProperties(response.data);
-          console.log('Properties set:', response.data);
-        } else {
-          throw new Error(response.error || 'Failed to fetch properties');
+        if (propertiesResponse.success && propertiesResponse.data) {
+          setProperties(propertiesResponse.data);
+          console.log('Properties set:', propertiesResponse.data);
+        }
+
+        if (draftsResponse.success && draftsResponse.data) {
+          setDrafts(draftsResponse.data);
+          console.log('Drafts set:', draftsResponse.data);
+        }
+
+        if (!propertiesResponse.success && !draftsResponse.success) {
+          throw new Error('Failed to fetch data');
         }
       } catch (err) {
-        console.error('Error fetching properties:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch properties');
+        console.error('Error fetching data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProperties();
+    fetchData();
   }, [isAuthenticated, authUser?.id]);
 
-  // Filter properties based on search term
+  // Filter properties and drafts based on search term and active tab
   const filteredProperties = properties.filter(property =>
     property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (property.details?.type as string)?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredDrafts = drafts.filter(draft =>
+    draft.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (draft.address || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (draft.property_type || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (!isAuthenticated) {
@@ -104,6 +145,42 @@ export default function PropertiesPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="bg-white border-b border-gray-200 px-6">
+        <div className="flex space-x-8">
+          <button
+            onClick={() => setActiveTab('published')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'published'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Published Properties
+            {properties.length > 0 && (
+              <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                {properties.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('drafts')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+              activeTab === 'drafts'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Drafts
+            {drafts.length > 0 && (
+              <span className="ml-2 bg-blue-100 text-blue-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+                {drafts.length}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
       {/* Loading State */}
       {isLoading && (
         <CenteredLoadingSpinner />
@@ -128,13 +205,13 @@ export default function PropertiesPage() {
       )}
 
       {/* Empty State */}
-      {!isLoading && !error && filteredProperties.length === 0 && (
+      {!isLoading && !error && activeTab === 'published' && filteredProperties.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md">
-              <h3 className="text-lg font-medium text-gray-800 mb-2">No Properties Found</h3>
+              <h3 className="text-lg font-medium text-gray-800 mb-2">No Published Properties</h3>
               <p className="text-gray-600 mb-4">
-                {searchTerm ? 'No properties match your search criteria.' : "You haven't added any properties yet."}
+                {searchTerm ? 'No published properties match your search criteria.' : "You haven't published any properties yet."}
               </p>
               {!searchTerm && (
                 <Link
@@ -150,8 +227,30 @@ export default function PropertiesPage() {
         </div>
       )}
 
-      {/* Properties Grid */}
-      {!isLoading && !error && filteredProperties.length > 0 && (
+      {!isLoading && !error && activeTab === 'drafts' && filteredDrafts.length === 0 && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md">
+              <h3 className="text-lg font-medium text-gray-800 mb-2">No Drafts</h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm ? 'No drafts match your search criteria.' : "You haven't created any drafts yet."}
+              </p>
+              {!searchTerm && (
+                <Link
+                  href="/dashboard/add-property"
+                  className="btn-primary inline-flex items-center"
+                >
+                  <DocumentIcon className="h-4 w-4 mr-2" />
+                  Create Your First Draft
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Published Properties Grid */}
+      {!isLoading && !error && activeTab === 'published' && filteredProperties.length > 0 && (
         <div className="flex-1 overflow-auto p-6">
           <div className={propertyCardClasses.grid.default}>
             {filteredProperties.map((property) => (
@@ -159,6 +258,31 @@ export default function PropertiesPage() {
                 key={property.id}
                 property={property}
                 isDashboard={true}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Drafts Grid */}
+      {!isLoading && !error && activeTab === 'drafts' && filteredDrafts.length > 0 && (
+        <div className="flex-1 overflow-auto p-6">
+          <div className={propertyCardClasses.grid.default}>
+            {filteredDrafts.map((draft) => (
+              <DraftCard
+                key={draft.property_uuid}
+                draft={draft}
+                onContinue={(draftId: string) => router.push(`/dashboard/add-property?draft=${draftId}`)}
+                onDelete={async (draftId: string) => {
+                  try {
+                    const response = await propertiesAPI.deleteDraft(draftId);
+                    if (response.success) {
+                      setDrafts(prev => prev.filter(d => d.property_uuid !== draftId));
+                    }
+                  } catch (error) {
+                    console.error('Failed to delete draft:', error);
+                  }
+                }}
               />
             ))}
           </div>

@@ -6,50 +6,41 @@ import {
   CubeIcon 
 } from '@heroicons/react/24/outline';
 import { Residential, EntireApartment, VillageHouse } from '@/assets/icons';
-import { Step1PropertyTypeProps } from '@/types';
+import { Step1PropertyTypeProps, PROPERTY_TYPES, PropertyType } from '@/types';
 
-const propertyTypes = [
-  {
-    id: 'residential',
-    title: 'Residential',
-    description: 'Homes and apartments for living',
-    icon: Residential,
-    subTypes: [
-      {
-        id: 'serviced-apartment',
-        title: 'Serviced Apartment',
-        description: 'Fully furnished with hotel-like amenities',
-        icon: EntireApartment,
-      },
-      {
-        id: 'village-house',
-        title: 'Village House',
-        description: 'Traditional village-style houses',
-        icon: VillageHouse,
-      },
-      {
-        id: 'apartment',
-        title: 'Apartment',
-        description: 'Standard residential apartments',
-        icon: EntireApartment,
-      },
-      {
-        id: 'condo',
-        title: 'Condominium',
-        description: 'Condominium units',
-        icon: CubeIcon,
-      },
-    ],
-  },
-  {
-    id: 'commercial',
-    title: 'Commercial',
-    description: 'Business and office spaces',
-    icon: BuildingOfficeIcon,
-    subTypes: [],
-    disabled: true,
-  },
-];
+// Create property types with actual icons
+const propertyTypesWithIcons: PropertyType[] = PROPERTY_TYPES.map(type => {
+  if (type.id === 'residential') {
+    return {
+      ...type,
+      icon: Residential,
+      subTypes: type.subTypes.map(subType => {
+        let icon;
+        switch (subType.id) {
+          case 'serviced-apartment':
+          case 'apartment':
+            icon = EntireApartment;
+            break;
+          case 'village-house':
+            icon = VillageHouse;
+            break;
+          case 'condo':
+            icon = CubeIcon;
+            break;
+          default:
+            icon = EntireApartment;
+        }
+        return { ...subType, icon };
+      })
+    };
+  } else if (type.id === 'commercial') {
+    return {
+      ...type,
+      icon: BuildingOfficeIcon
+    };
+  }
+  return type;
+});
 
 export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeProps) {
   const [selectedPropertyType, setSelectedPropertyType] = useState(data?.propertyType || '');
@@ -81,26 +72,26 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
           What type of property are you listing?
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {propertyTypes.map((type) => (
+          {propertyTypesWithIcons.map((type) => (
             <button
               key={type.id}
               onClick={() => handlePropertyTypeSelect(type.id)}
               disabled={type.disabled}
-              className={`relative p-6 border-2 rounded-xl text-left transition-all duration-200 ${
+              className={`property-type-button ${
                 selectedPropertyType === type.id
-                  ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600 ring-opacity-20'
+                  ? 'property-type-button--selected'
                   : type.disabled
-                  ? 'border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  ? 'property-type-button--disabled'
+                  : 'property-type-button--default'
               }`}
             >
               <div className="flex items-center space-x-4">
-                <div className={`p-3 rounded-lg ${
+                <div className={`property-type-icon ${
                   selectedPropertyType === type.id
-                    ? 'bg-blue-600 text-white'
+                    ? 'property-type-icon--selected'
                     : type.disabled
-                    ? 'bg-gray-300 text-gray-500'
-                    : 'bg-gray-100 text-gray-600'
+                    ? 'property-type-icon--disabled'
+                    : 'property-type-icon--default'
                 }`}>
                   <type.icon className="h-6 w-6" />
                 </div>
@@ -129,21 +120,21 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
             What type of residential property?
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {propertyTypes.find(t => t.id === 'residential')?.subTypes.map((subType) => (
+            {propertyTypesWithIcons.find(t => t.id === 'residential')?.subTypes.map((subType) => (
               <button
                 key={subType.id}
                 onClick={() => handleResidentialTypeSelect(subType.id)}
-                className={`relative p-6 border-2 rounded-xl text-center transition-all duration-200 ${
+                className={`property-type-sub-button ${
                   selectedResidentialType === subType.id
-                    ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-600 ring-opacity-20'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                    ? 'property-type-sub-button--selected'
+                    : 'property-type-sub-button--default'
                 }`}
               >
                 <div className="flex flex-col items-center space-y-3">
-                  <div className={`p-3 rounded-lg ${
+                  <div className={`property-type-sub-icon ${
                     selectedResidentialType === subType.id
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-600'
+                      ? 'property-type-sub-icon--selected'
+                      : 'property-type-sub-icon--default'
                   }`}>
                     <subType.icon className="h-6 w-6" />
                   </div>
@@ -159,15 +150,15 @@ export default function Step1PropertyType({ data, onUpdate }: Step1PropertyTypeP
       )}
 
       {/* Help Text */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-0">
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-0">
         <div className="flex">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
           </div>
           <div className="ml-3">
-            <h3 className="text-sm font-medium text-blue-800 mb-0">
+            <h3 className="text-sm font-medium text-purple-800 mb-0">
               Property Type Help
             </h3>
             <div className="mt-2 text-sm mb-0">

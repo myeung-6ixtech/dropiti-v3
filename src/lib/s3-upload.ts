@@ -17,6 +17,24 @@ const s3Client = new S3Client({
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || 'your-bucket-name';
 const DOMAIN_URL = process.env.S3_BUCKET_DOMAIN_URL || 'https://your-domain.com';
 
+// Validate environment variables
+const validateEnvironment = () => {
+  const missingVars = [];
+  
+  if (!process.env.S3_BUCKET_ACCESS_KEY) missingVars.push('S3_BUCKET_ACCESS_KEY');
+  if (!process.env.S3_BUCKET_SECRET_KEY) missingVars.push('S3_BUCKET_SECRET_KEY');
+  if (!process.env.S3_BUCKET_NAME) missingVars.push('S3_BUCKET_NAME');
+  if (!process.env.S3_BUCKET_AWS_REGION) missingVars.push('S3_BUCKET_AWS_REGION');
+  if (!process.env.S3_BUCKET_DOMAIN_URL) missingVars.push('S3_BUCKET_DOMAIN_URL');
+  
+  if (missingVars.length > 0) {
+    console.error('S3 Upload: Missing environment variables:', missingVars);
+    return false;
+  }
+  
+  return true;
+};
+
 // File type categories
 export type FileCategory = 'images' | 'documents' | 'videos' | 'audio' | 'other';
 
@@ -80,6 +98,14 @@ export class S3UploadService {
     category: FileCategory = 'images'
   ): Promise<S3UploadResponse> {
     try {
+      // Validate environment variables first
+      if (!validateEnvironment()) {
+        return {
+          success: false,
+          error: 'S3 configuration is incomplete. Please check environment variables.',
+        };
+      }
+
       const filePath = this.generateFilePath(category, file.name);
       
       console.log('S3 Upload: Starting upload for file:', file.name);
@@ -87,6 +113,7 @@ export class S3UploadService {
       console.log('S3 Upload: Key:', filePath);
       console.log('S3 Upload: File size:', file.size);
       console.log('S3 Upload: File type:', file.type);
+      console.log('S3 Upload: Region:', process.env.S3_BUCKET_AWS_REGION);
       
       // Convert File to Buffer for S3 upload
       const arrayBuffer = await file.arrayBuffer();
@@ -145,6 +172,8 @@ export class S3UploadService {
           errorMessage = 'Invalid AWS access key. Please check credentials.';
         } else if (error.name === 'SignatureDoesNotMatch') {
           errorMessage = 'Invalid AWS secret key. Please check credentials.';
+        } else if (error.name === 'NetworkError' || error.message.includes('fetch')) {
+          errorMessage = 'Network error: Unable to connect to S3. Please check your internet connection and AWS region.';
         }
       }
       
@@ -183,6 +212,70 @@ export class S3UploadService {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Delete failed',
+      };
+    }
+  }
+
+  /**
+   * Test S3 connection and configuration
+   */
+  async testConnection(): Promise<{ success: boolean; error?: string; details?: unknown }> {
+    try {
+      if (!validateEnvironment()) {
+        return {
+          success: false,
+          error: 'S3 configuration is incomplete. Please check environment variables.',
+        };
+      }
+
+      console.log('S3 Test: Testing connection...');
+      console.log('S3 Test: Bucket:', BUCKET_NAME);
+      console.log('S3 Test: Region:', process.env.S3_BUCKET_AWS_REGION);
+      console.log('S3 Test: Access Key:', process.env.S3_BUCKET_ACCESS_KEY ? '✅ Set' : '❌ Missing');
+      console.log('S3 Test: Secret Key:', process.env.S3_BUCKET_SECRET_KEY ? '✅ Set' : '❌ Missing');
+      console.log('S3 Test: Domain URL:', process.env.S3_BUCKET_DOMAIN_URL);
+
+      // Try to list objects in the bucket (this will test credentials and permissions)
+      const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+      const listCommand = new ListObjectsV2Command({
+        Bucket: BUCKET_NAME,
+        MaxKeys: 1, // Just get 1 object to test
+      });
+
+      await s3Client.send(listCommand);
+      
+      return {
+        success: true,
+        details: {
+          bucket: BUCKET_NAME,
+          region: process.env.S3_BUCKET_AWS_REGION,
+          domain: process.env.S3_BUCKET_DOMAIN_URL,
+        }
+      };
+    } catch (error) {
+      console.error('S3 Test: Connection failed:', error);
+      
+      let errorMessage = 'Connection test failed';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        if (error.name === 'AccessDenied') {
+          errorMessage = 'Access denied: Check IAM permissions for S3 bucket access';
+        } else if (error.name === 'NoSuchBucket') {
+          errorMessage = 'Bucket not found: Check bucket name and region';
+        } else if (error.name === 'InvalidAccessKeyId') {
+          errorMessage = 'Invalid access key: Check AWS credentials';
+        } else if (error.name === 'SignatureDoesNotMatch') {
+          errorMessage = 'Invalid secret key: Check AWS credentials';
+        } else if (error.name === 'NetworkError' || error.message.includes('fetch')) {
+          errorMessage = 'Network error: Check internet connection and AWS region';
+        }
+      }
+      
+      return {
+        success: false,
+        error: errorMessage,
+        details: error,
       };
     }
   }

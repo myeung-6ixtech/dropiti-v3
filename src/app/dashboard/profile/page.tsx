@@ -15,6 +15,7 @@ import {
   PencilIcon
 } from '@heroicons/react/24/outline';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
+// import ProfileStatusBanner from '@/components/profile/ProfileStatusBanner';
 
 interface UserProfile {
   displayName: string;
@@ -206,29 +207,10 @@ export default function ProfilePage() {
       )}
 
       {/* Profile Status Banner */}
-      <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className={`w-3 h-3 rounded-full ${profile.verified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-            <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-0">
-                Profile Status: {profile.verified ? 'Verified' : 'Unverified'}
-              </h3>
-              <p className="text-xs text-gray-500 mb-0">
-                {profile.verified 
-                  ? 'Your profile is verified and visible to all users' 
-                  : 'Complete your profile to increase visibility and trust'
-                }
-              </p>
-            </div>
-          </div>
-          {!profile.verified && (
-            <button className="text-sm text-black hover:text-gray-700 font-medium">
-              Learn More
-            </button>
-          )}
-        </div>
-      </div>
+      {/*<ProfileStatusBanner
+        verified={profile.verified}
+        className="mb-6"
+      />*/}
 
       {/* Dropiti Passport Display */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">

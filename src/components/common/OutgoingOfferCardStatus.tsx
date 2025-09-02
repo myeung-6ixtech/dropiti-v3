@@ -1,7 +1,7 @@
 'use client';
 
 import { Offer } from '@/types/offer';
-import { offerStatusClasses } from '@/styles/offer-card-status';
+import { InformationCircleIcon } from '@heroicons/react/24/outline';
 
 interface OutgoingOfferCardStatusProps {
   offer: Offer;
@@ -33,115 +33,140 @@ export default function OutgoingOfferCardStatus({
   // For outgoing offers (tenant perspective)
   if (offer.offerStatus === 'accepted') {
     return (
-      <div className={offerStatusClasses.statusContainer}>
+      <div className="space-y-4">
         {/* Final Accepted Terms Display */}
-        <div className={offerStatusClasses.finalTermsContainer}>
-          <h4 className={offerStatusClasses.finalTermsHeader}>
-            🎯 Final Accepted Terms
-          </h4>
-          
-          <div className={offerStatusClasses.finalTermsGrid}>
-            {/* Rent and Lease Duration */}
-            <div className={offerStatusClasses.finalTermsColumn}>
-              <div className={offerStatusClasses.finalTermsRow}>
-                <span className={offerStatusClasses.finalTermsLabel}>Monthly Rent:</span>
-                <span className={offerStatusClasses.finalTermsValue}>
-                  {formatCurrency(
-                    offer.finalRentPrice || offer.proposingRentPrice, 
-                    offer.finalRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD'
-                  )}
-                </span>
-              </div>
-              
-              <div className={offerStatusClasses.finalTermsRow}>
-                <span className={offerStatusClasses.finalTermsLabel}>Lease Duration:</span>
-                <span className={offerStatusClasses.finalTermsValue}>
-                  {offer.finalNumLeasingMonths || offer.numLeasingMonths} month{(offer.finalNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
-                </span>
-              </div>
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <InformationCircleIcon className="h-5 w-5 text-purple-400" />
             </div>
-            
-            {/* Payment Frequency and Move-in Date */}
-            <div className={offerStatusClasses.finalTermsColumn}>
-              <div className={offerStatusClasses.finalTermsRow}>
-                <span className={offerStatusClasses.finalTermsLabel}>Payment Frequency:</span>
-                <span className={offerStatusClasses.finalTermsValue}>
-                  {offer.finalPaymentFrequency || offer.paymentFrequency}
-                </span>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-purple-800 mb-0">
+                🎯 Final Accepted Terms
+              </h3>
+              <div className="mt-2 text-sm mb-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Rent and Lease Duration */}
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-purple-700">
+                      <span className="font-medium">Monthly Rent:</span> {formatCurrency(
+                        offer.finalRentPrice || offer.proposingRentPrice, 
+                        offer.finalRentPriceCurrency || offer.proposingRentPriceCurrency || 'HKD'
+                      )}
+                    </div>
+                    <div className="flex items-center text-sm text-purple-700">
+                      <span className="font-medium">Lease Duration:</span> {offer.finalNumLeasingMonths || offer.numLeasingMonths} month{(offer.finalNumLeasingMonths || offer.numLeasingMonths) !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  
+                  {/* Payment Frequency and Move-in Date */}
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-purple-700">
+                      <span className="font-medium">Payment Frequency:</span> {offer.finalPaymentFrequency || offer.paymentFrequency}
+                    </div>
+                    <div className="flex items-center text-sm text-purple-700">
+                      <span className="font-medium">Move-in Date:</span> {formatDate(offer.finalMoveInDate || offer.moveInDate)}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Deal Completion Status */}
+                <div className="mt-3 pt-3 border-t border-purple-200">
+                  <div className="flex items-center justify-between">
+                    <span className="text-purple-800 text-xs font-medium">Deal Status:</span>
+                    <span className="text-purple-900 text-xs font-semibold bg-purple-200 px-2 py-1 rounded">
+                      ✅ Deal Completed
+                    </span>
+                  </div>
+                </div>
               </div>
-              
-              <div className={offerStatusClasses.finalTermsRow}>
-                <span className={offerStatusClasses.finalTermsLabel}>Move-in Date:</span>
-                <span className={offerStatusClasses.finalTermsValue}>
-                  {formatDate(offer.finalMoveInDate || offer.moveInDate)}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Deal Completion Status */}
-          <div className={offerStatusClasses.finalTermsDivider}>
-            <div className={offerStatusClasses.finalTermsStatus}>
-              <span className={offerStatusClasses.finalTermsStatusLabel}>Deal Status:</span>
-              <span className={offerStatusClasses.finalTermsStatusBadge}>
-                ✅ Deal Completed
-              </span>
             </div>
           </div>
-          
-          {/* Bulk Rejection Information */}
-          {bulkRejectionInfo && bulkRejectionInfo.rejectedOffersCount > 0 && (
-            <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <div className="flex items-center">
-                <span className="text-orange-600 mr-2">⚠️</span>
-                <span className="text-sm font-medium text-orange-800">
-                  Property Deal Finalized
-                </span>
-              </div>
-              <p className="text-xs text-orange-700 mt-1">
-                {bulkRejectionInfo.rejectedOffersCount} other pending offer{bulkRejectionInfo.rejectedOffersCount === 1 ? '' : 's'} automatically rejected when your offer was accepted.
-              </p>
-            </div>
-          )}
         </div>
         
         {/* Status Message */}
-        <div className={offerStatusClasses.statusMessage}>
-          <p className={offerStatusClasses.statusMessageText}>
-            🎉 Great news! The landlord accepted your offer
-          </p>
-          <p className={offerStatusClasses.statusMessageSubtext}>
-            Contact the landlord to proceed with the rental agreement
-          </p>
-          {offer.finalAcceptedAt && (
-            <p className={offerStatusClasses.statusMessageSubtext}>
-              Accepted on {formatDate(offer.finalAcceptedAt)}
-            </p>
-          )}
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+            </div>
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-purple-800 mb-0">
+                🎉 Great news! The landlord accepted your offer
+              </h3>
+              <div className="mt-2 text-sm mb-0">
+                <p className="text-sm text-gray-600 mb-0">
+                  Contact the landlord to proceed with the rental agreement
+                </p>
+                {offer.finalAcceptedAt && (
+                  <p className="text-sm text-gray-600 mb-0 mt-1">
+                    Accepted on {formatDate(offer.finalAcceptedAt)}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
+        
+        {/* Bulk Rejection Information */}
+        {bulkRejectionInfo && bulkRejectionInfo.rejectedOffersCount > 0 && (
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-purple-800 mb-0">
+                  ⚠️ Property Deal Finalized
+                </h3>
+                <div className="mt-2 text-sm mb-0">
+                  <p className="text-sm text-gray-600 mb-0">
+                    {bulkRejectionInfo.rejectedOffersCount} other pending offer{bulkRejectionInfo.rejectedOffersCount === 1 ? '' : 's'} automatically rejected when your offer was accepted.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
   if (offer.offerStatus === 'rejected') {
     return (
-      <div className={offerStatusClasses.rejected.container}>
-        <p className={offerStatusClasses.rejected.text}>
-          😔 The landlord rejected your offer
-        </p>
-        <p className={offerStatusClasses.rejected.subtext}>
-          You can search for other properties or try a different offer
-        </p>
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-purple-800 mb-0">
+              😔 The landlord rejected your offer
+            </h3>
+            <div className="mt-2 text-sm mb-0">
+              <p className="text-sm text-gray-600 mb-0">
+                You can search for other properties or try a different offer
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (offer.offerStatus === 'withdrawn') {
     return (
-      <div className={offerStatusClasses.withdrawn.container}>
-        <p className={offerStatusClasses.withdrawn.text}>
-          You withdrew this offer
-        </p>
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-purple-800 mb-0">
+              You withdrew this offer
+            </h3>
+          </div>
+        </div>
       </div>
     );
   }
@@ -150,14 +175,21 @@ export default function OutgoingOfferCardStatus({
     if (offer.lastActionType === 'RECIPIENT_COUNTERED') {
       if (offer.negotiationRound === 1) {
         return (
-          <div className={offerStatusClasses.counterContainer}>
-            <div className={offerStatusClasses.counterRecipient.container}>
-              <p className={offerStatusClasses.counterRecipient.text}>
-                The landlord sent you a counter offer
-              </p>     
-              <p className={offerStatusClasses.counterRecipient.subtext}>
-                Review the terms and decide whether to accept, reject, or counter
-              </p>             
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-purple-800 mb-0">
+                  The landlord sent you a counter offer
+                </h3>
+                <div className="mt-2 text-sm mb-0">
+                  <p className="text-sm text-gray-600 mb-0">
+                    Review the terms and decide whether to accept, reject, or counter
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -165,13 +197,22 @@ export default function OutgoingOfferCardStatus({
     } else if (offer.lastActionType === 'INITIATOR_COUNTERED') {
       if (offer.negotiationRound === 2) {
         return (
-          <div className={offerStatusClasses.counterInitiator.container}>
-            <p className={offerStatusClasses.counterInitiator.text}>
-              🔄 You sent a final counter offer to the landlord
-            </p>
-            <p className={offerStatusClasses.counterInitiator.subtext}>
-              Waiting for landlord's final decision...
-            </p>
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-purple-800 mb-0">
+                  🔄 You sent a final counter offer to the landlord
+                </h3>
+                <div className="mt-2 text-sm mb-0">
+                  <p className="text-sm text-gray-600 mb-0">
+                    Waiting for landlord's final decision...
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         );
       }
@@ -181,13 +222,22 @@ export default function OutgoingOfferCardStatus({
   // Default case for pending offers
   if (offer.offerStatus === 'pending') {
     return (
-      <div className={offerStatusClasses.pending.container}>
-        <p className={offerStatusClasses.pending.text}>
-          📋 Your offer is pending landlord review
-        </p>
-        <p className={offerStatusClasses.pending.subtext}>
-          The landlord will review your offer and respond soon
-        </p>
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="h-5 w-5 text-purple-400" />
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-purple-800 mb-0">
+              📋 Your offer is pending landlord review
+            </h3>
+            <div className="mt-2 text-sm mb-0">
+              <p className="text-sm text-gray-600 mb-0">
+                The landlord will review your offer and respond soon
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }

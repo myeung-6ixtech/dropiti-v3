@@ -43,9 +43,6 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
     <div className={passportStyles.container}>
       {/* Dropiti Passport Header */}
       <div className={passportStyles.header}>
-        <div className={passportStyles.logo}>
-          <span className={passportStyles.logoText}>D</span>
-        </div>
         <h2 className={passportStyles.title}>Dropiti Passport</h2>
         <p className={passportStyles.subtitle}>Your Digital Identity</p>
       </div>

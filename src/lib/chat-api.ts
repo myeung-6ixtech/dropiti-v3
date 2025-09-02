@@ -23,6 +23,17 @@ export interface ChatRoom {
     sender_firebase_uid: string;
     created_at: string;
   } | null;
+  other_participant: {
+    room_id: string;
+    user_firebase_uid: string;
+    role: string;
+    user_details: {
+      firebase_uid: string;
+      display_name: string | null;
+      photo_url: string | null;
+      email: string | null;
+    } | null;
+  } | null;
 }
 
 export interface ChatMessage {
@@ -134,17 +145,34 @@ export const chatAPI = {
 
 // Helper function to convert database chat room to UI contact format
 export const convertChatRoomToContact = (chatRoom: ChatRoom): ChatContact => {
+  // Use the other participant's information if available
+  const otherParticipant = chatRoom.other_participant;
+  const otherUserDetails = otherParticipant?.user_details;
+  
+  // Determine the display name and avatar
+  let displayName = 'Direct Chat'; // fallback
+  let avatar: string | undefined = undefined;
+  
+  if (otherUserDetails) {
+    displayName = otherUserDetails.display_name || otherUserDetails.email || 'Unknown User';
+    avatar = otherUserDetails.photo_url || undefined;
+  } else if (otherParticipant) {
+    // If we have the participant but no user details, use a generic name
+    displayName = `User (${otherParticipant.role})`;
+  }
+  
   return {
     id: chatRoom.room_id,
-    name: chatRoom.room?.title || 'Direct Chat',
+    name: displayName,
+    avatar: avatar,
     lastMessage: chatRoom.last_message?.content || 'No messages yet',
     lastMessageTime: chatRoom.last_message 
       ? new Date(chatRoom.last_message.created_at) 
       : (chatRoom.room ? new Date(chatRoom.room.created_at) : new Date()),
     unreadCount: 0, // We'll need to calculate this separately for now
     isOnline: false, // This would need to be implemented with presence tracking
-    role: chatRoom.role as 'landlord' | 'tenant' | 'support',
-    firebaseUid: chatRoom.user_firebase_uid // This is the current user's ID in this room
+    role: otherParticipant?.role as 'landlord' | 'tenant' | 'support' || chatRoom.role as 'landlord' | 'tenant' | 'support',
+    firebaseUid: otherParticipant?.user_firebase_uid || chatRoom.user_firebase_uid
   };
 };
 

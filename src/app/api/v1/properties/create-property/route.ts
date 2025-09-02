@@ -28,6 +28,9 @@ const CREATE_PROPERTY_MUTATION = `
       rental_price_currency
       availability_date
       is_public
+      status
+      last_saved_at
+      completion_percentage
     }
   }
 `;
@@ -38,29 +41,43 @@ export async function POST(request: NextRequest) {
 
     console.log('Create Property API: Received data:', propertyData);
 
-    // Validate required fields
-    const requiredFields = ['title', 'description', 'location', 'price', 'bedrooms', 'bathrooms'];
-    for (const field of requiredFields) {
-      if (!propertyData[field]) {
-        console.log(`Create Property API: Missing required field: ${field}`);
+    // Check if this is a draft
+    const isDraft = propertyData.isDraft || false;
+    
+    // For drafts, only validate title (minimal requirement)
+    if (isDraft) {
+      if (!propertyData.title || propertyData.title.trim().length < 3) {
+        console.log('Create Property API: Draft requires at least a title (3+ characters)');
         return NextResponse.json(
-          { error: `${field} is required` },
+          { error: 'Draft requires at least a title (3+ characters)' },
           { status: 400 }
         );
+      }
+    } else {
+      // For published properties, validate all required fields
+      const requiredFields = ['title', 'description', 'location', 'price', 'bedrooms', 'bathrooms'];
+      for (const field of requiredFields) {
+        if (!propertyData[field]) {
+          console.log(`Create Property API: Missing required field: ${field}`);
+          return NextResponse.json(
+            { error: `${field} is required` },
+            { status: 400 }
+          );
+        }
       }
     }
 
     // Prepare the property object for Hasura using the correct field names
     const property = {
       property_uuid: uuidv4(), // Generate a Version 4 UUID
-      title: propertyData.title,
-      description: propertyData.description,
+      title: propertyData.title || 'Untitled Draft',
+      description: propertyData.description || '',
       // Store address as a structured JSON object for better searchability
-      address: propertyData.address || propertyData.location, // Use address object if available, fallback to location
-      rental_price: parseFloat(propertyData.price),
+      address: propertyData.address || propertyData.location || 'Address not specified', // Use address object if available, fallback to location
+      rental_price: propertyData.price ? parseFloat(propertyData.price) : 0, // Use 0 instead of null for drafts
       rental_price_currency: 'HKD', // Set default currency to HKD
-      num_bedroom: parseInt(propertyData.bedrooms),
-      num_bathroom: parseInt(propertyData.bathrooms),
+      num_bedroom: propertyData.bedrooms ? parseInt(propertyData.bedrooms) : 0, // Use 0 instead of null for drafts
+      num_bathroom: propertyData.bathrooms ? parseInt(propertyData.bathrooms) : 0, // Use 0 instead of null for drafts
       display_image: propertyData.photos?.[0] || propertyData.imageUrl || '',
       uploaded_images: propertyData.photos || (propertyData.imageUrl ? [propertyData.imageUrl] : []),
       property_type: propertyData.details?.propertyType || 'residential',
@@ -68,12 +85,14 @@ export async function POST(request: NextRequest) {
       furnished: propertyData.details?.furnished || 'non-furnished',
       pets_allowed: propertyData.details?.petsAllowed || false,
       amenities: propertyData.amenities || [],
-      gross_area_size: propertyData.details?.grossArea || null,
+      gross_area_size: propertyData.details?.grossArea || 0, // Use 0 instead of null for drafts
       gross_area_size_unit: 'sqft', // Default unit
-      availability_date: propertyData.availableDate || null,
-      is_public: true, // Default to public
+      availability_date: propertyData.availableDate || new Date().toISOString(), // Use current date as default for drafts
+      is_public: !isDraft, // Drafts are private, published properties are public
       landlord_firebase_uid: propertyData.ownerId, // Use the authenticated user's Firebase UID
       show_specific_location: propertyData.address?.showSpecificLocation ?? false, // Add the show specific location boolean
+      last_saved_at: new Date().toISOString(), // Set current timestamp
+      completion_percentage: isDraft ? 0 : 100, // Drafts start at 0%, published at 100%
     };
 
     console.log('Create Property API: Generated property_uuid:', property.property_uuid);

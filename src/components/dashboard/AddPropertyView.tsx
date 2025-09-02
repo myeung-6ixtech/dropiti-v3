@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import Step1PropertyType from '@/components/add-property/Step1PropertyType';
 import Step2RentalSpace from '@/components/add-property/Step2RentalSpace';
 import Step3Address from '@/components/add-property/Step3Address';
@@ -40,7 +41,10 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
   const [propertyData, setPropertyData] = useState<PropertyData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [draftId, setDraftId] = useState<string | null>(null);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const updatePropertyData = (data: Partial<PropertyData>) => {
     setPropertyData(prev => ({ ...prev, ...data }));
@@ -57,6 +61,60 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const saveDraft = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+    
+    try {
+      // Check if user is authenticated
+      if (!isAuthenticated || !authUser?.id) {
+        showToast('error', 'You must be logged in to save a draft.');
+        return;
+      }
+
+      // For drafts, we only need minimal data (at least a title)
+      const hasMinimalData = propertyData.rentalDetails?.listingName || 
+                             propertyData.propertyType || 
+                             propertyData.address?.addressLine1;
+      
+      if (!hasMinimalData) {
+        showToast('error', 'Please add at least a property name, type, or address to save a draft.');
+        return;
+      }
+
+      // Use the actual authenticated user's ID
+      const ownerId = authUser.id;
+      
+      // Prepare property data for draft
+      const draftData: PropertyDataForAPI = {
+        ...propertyData,
+        photos: [], // Drafts don't need photos initially
+      };
+      
+      console.log('Saving draft data:', draftData);
+      console.log('Using owner ID:', ownerId);
+      
+      // Call the API to create the draft
+      const response = await propertiesAPI.createProperty(draftData, ownerId, true);
+      
+      if (response.success && response.data) {
+        console.log('Draft saved successfully:', response.data);
+        setDraftId(response.data.property_uuid);
+        
+        // Show success message
+        showToast('success', 'Draft saved successfully!');
+      } else {
+        throw new Error(response.error || 'Failed to save draft');
+      }
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save draft';
+      showToast('error', errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -110,13 +168,13 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
       console.log('Using owner ID:', ownerId);
       
       // Call the API to create the property
-      const response = await propertiesAPI.createProperty(propertyDataWithPhotos, ownerId);
+      const response = await propertiesAPI.createProperty(propertyDataWithPhotos, ownerId, false);
       
       if (response.success) {
         console.log('Property created successfully:', response.data);
         
         // Show success message
-        alert('Property added successfully!');
+        showToast('success', 'Property added successfully!');
         
         // Redirect to properties list or dashboard
         router.push('/dashboard/properties');
@@ -210,8 +268,17 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Add Property</h2>
-              <p className="text-sm text-gray-500">Step {currentStep} of {steps.length}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-0">
+                {draftId ? 'Edit Draft' : 'Add Property'}
+              </h2>
+              <p className="text-sm text-gray-500 mb-0">
+                {draftId ? `Draft: ${propertyData.rentalDetails?.listingName || 'Untitled'}` : `Step ${currentStep} of ${steps.length}`}
+              </p>
+              {draftId && (
+                <p className="text-xs text-blue-600 mt-1">
+                  Working on saved draft
+                </p>
+              )}
             </div>
           </div>
           
@@ -265,10 +332,10 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
           <div className="bg-white rounded-xl shadow-sm border border-gray-200">
             {/* Step Header */}
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl font-bold text-gray-900 mb-0">
                 {steps[currentStep - 1].title}
               </h3>
-              <p className="text-gray-600 mt-1">
+              <p className="text-gray-600 mt-1 mb-0">
                 {steps[currentStep - 1].description}
               </p>
             </div>
@@ -280,16 +347,30 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
 
             {/* Step Navigation */}
             {currentStep !== 8 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <button
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ArrowLeftIcon className="h-4 w-4" />
-                    <span>Previous</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={prevStep}
+                      disabled={currentStep === 1}
+                      className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeftIcon className="h-4 w-4" />
+                      <span>Previous</span>
+                    </button>
+
+                    {/* Save Draft Button - Only show after Step 2 */}
+                    {currentStep > 2 && (
+                      <button
+                        onClick={saveDraft}
+                        disabled={isSubmitting}
+                        className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <DocumentIcon className="h-4 w-4" />
+                        <span>Save Draft</span>
+                      </button>
+                    )}
+                  </div>
 
                   <button
                     onClick={nextStep}

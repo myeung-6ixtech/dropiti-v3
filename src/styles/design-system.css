@@ -23,6 +23,24 @@
   --color-primary-800: #262626;
   --color-primary-900: #171717;
 
+  /* Brand Colors - Dropiti Purple Theme */
+  --color-brand-50: rgb(250 245 255);
+  --color-brand-100: rgb(243 232 255);
+  --color-brand-200: rgb(233 213 255);
+  --color-brand-300: rgb(216 180 254);
+  --color-brand-400: rgb(196 181 253);
+  --color-brand-500: rgb(168 85 247);
+  --color-brand-600: rgb(147 51 234);
+  --color-brand-700: rgb(126 34 206);
+  --color-brand-800: rgb(107 33 168);
+  --color-brand-900: rgb(88 28 135);
+  --color-brand-950: rgb(59 7 100);
+
+  /* Specific Brand Colors for Property Type Selection */
+  --color-brand-icon-bg: rgb(133 91 251 / 16%);
+  --color-brand-icon-text: rgb(43 20 99);
+  --color-brand-border: rgb(43 20 99);
+
   --color-secondary-50: #f8fafc;
   --color-secondary-100: #f1f5f9;
   --color-secondary-200: #e2e8f0;
@@ -1678,11 +1696,11 @@
 }
 
 .offer-status-pending-text {
-  @apply text-blue-800 text-sm font-medium;
+  @apply text-blue-800 text-sm font-medium mb-0;
 }
 
 .offer-status-pending-subtext {
-  @apply text-blue-700 text-xs mt-1;
+  @apply text-blue-700 text-xs mt-1 mb-0;
 }
 
 /* Counter Offer Status Variants */
@@ -1976,6 +1994,8 @@
      DASHBOARD REVIEW COMPONENTS
      ======================================== */
 
+  /* Standard container styling for all review-related components */
+  /* This is the project standard for review item containers */
   .dashboard-review-item {
     @apply border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow;
   }
@@ -2002,6 +2022,10 @@
 
   .dashboard-review-reviewer {
     @apply font-semibold text-sm text-gray-900 mb-0;
+  }
+
+  .dashboard-review-type {
+    @apply text-xs text-gray-600 mb-1 font-medium;
   }
 
   .dashboard-review-property {
@@ -2043,22 +2067,7 @@
   /* ========================================
      DASHBOARD REVIEW OPPORTUNITIES COMPONENTS
      ======================================== */
-
-  .dashboard-review-opportunity-item {
-    @apply border rounded-lg p-4;
-  }
-
-  .dashboard-review-opportunity-item-expired {
-    @apply border-red-200 bg-red-50;
-  }
-
-  .dashboard-review-opportunity-item-urgent {
-    @apply border-yellow-200 bg-yellow-50;
-  }
-
-  .dashboard-review-opportunity-item-normal {
-    @apply border-gray-200 bg-white;
-  }
+  /* Note: Review opportunity components now use the standard dashboard-review-item class */
 
   .dashboard-review-opportunity-content {
     @apply flex items-center justify-between;
@@ -2069,7 +2078,7 @@
   }
 
   .dashboard-review-opportunity-title {
-    @apply font-medium text-gray-900;
+    @apply font-semibold text-sm text-gray-900 mb-0;
   }
 
   .dashboard-review-opportunity-description {
@@ -2166,3 +2175,69 @@
       @apply px-6 py-8;
     }
   }
+
+/* ========================================
+   PROPERTY TYPE SELECTION BUTTONS
+   ======================================== */
+
+.property-type-button {
+  @apply relative p-6 border rounded-xl text-left transition-all duration-200;
+}
+
+.property-type-button--default {
+  @apply border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm;
+}
+
+.property-type-button--selected {
+  border-color: var(--color-brand-border);
+  background-color: white;
+  box-shadow: 0 0 0 1px var(--color-brand-border);
+}
+
+.property-type-button--disabled {
+  @apply border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed;
+}
+
+.property-type-icon {
+  @apply p-3 rounded-lg;
+}
+
+.property-type-icon--default {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.property-type-icon--selected {
+  background-color: var(--color-brand-icon-bg);
+  color: var(--color-brand-icon-text);
+}
+
+.property-type-icon--disabled {
+  @apply bg-gray-300 text-gray-500;
+}
+
+.property-type-sub-button {
+  @apply relative p-6 border rounded-xl text-center transition-all duration-200;
+}
+
+.property-type-sub-button--default {
+  @apply border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm;
+}
+
+.property-type-sub-button--selected {
+  border-color: var(--color-brand-border);
+  background-color: white;
+  box-shadow: 0 0 0 1px var(--color-brand-border);
+}
+
+.property-type-sub-icon {
+  @apply p-3 rounded-lg;
+}
+
+.property-type-sub-icon--default {
+  @apply bg-gray-100 text-gray-600;
+}
+
+.property-type-sub-icon--selected {
+  background-color: var(--color-brand-icon-bg);
+  color: var(--color-brand-icon-text);
+}

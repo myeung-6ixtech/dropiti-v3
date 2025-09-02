@@ -29,6 +29,7 @@ const UPDATE_PROPERTY_MUTATION = `
         rental_price_currency
         availability_date
         is_public
+        status
         created_at
         updated_at
       }
@@ -39,6 +40,9 @@ const UPDATE_PROPERTY_MUTATION = `
 export async function PUT(request: NextRequest) {
   try {
     const { id, updates } = await request.json();
+    
+    // Debug logging
+    console.log('Update Property API: Received request:', { id, updates });
 
     if (!id) {
       return NextResponse.json(
@@ -74,6 +78,7 @@ export async function PUT(request: NextRequest) {
       rental_price_currency?: string;
       availability_date?: string | null;
       is_public?: boolean;
+      status?: string;
       updated_at?: string;
     } = {};
     
@@ -95,6 +100,20 @@ export async function PUT(request: NextRequest) {
     if (updates.rental_price_currency) preparedUpdates.rental_price_currency = updates.rental_price_currency;
     if (updates.availability_date) preparedUpdates.availability_date = updates.availability_date;
     if (updates.is_public !== undefined) preparedUpdates.is_public = updates.is_public;
+    
+    // Validate and set status
+    if (updates.status) {
+      const validStatuses = ['draft', 'published', 'archived', 'expired'];
+      if (validStatuses.includes(updates.status)) {
+        preparedUpdates.status = updates.status;
+      } else {
+        console.error('Invalid status value:', updates.status);
+        return NextResponse.json(
+          { error: `Invalid status value. Must be one of: ${validStatuses.join(', ')}` },
+          { status: 400 }
+        );
+      }
+    }
     
     // Always update the updated_at timestamp
     preparedUpdates.updated_at = new Date().toISOString();
@@ -129,6 +148,7 @@ export async function PUT(request: NextRequest) {
           rental_price_currency: string;
           availability_date: string | null;
           is_public: boolean;
+          status: string;
           created_at: string;
           updated_at: string;
         }[];

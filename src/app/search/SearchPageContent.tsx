@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { propertiesAPI } from '@/lib/api-client';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MagnifyingGlassIcon, MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
-import { Bed } from '@/assets/icons';
+
 import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
+import FilterTags from '@/components/search/FilterTags';
 import Footer from '@/components/common/Footer';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
@@ -133,6 +133,15 @@ export default function SearchPageContent() {
     updateURL(newFilters);
   };
 
+  const removeFilter = (key: string) => {
+    const newFilters = {
+      ...filters,
+      [key]: '',
+    };
+    setFilters(newFilters);
+    updateURL(newFilters);
+  };
+
   const applyFilters = () => {
     // The filtering is now handled by the API call, so this function is no longer needed
     // filterProperties(); 
@@ -161,45 +170,12 @@ export default function SearchPageContent() {
           </p>
         </div>
 
-        {/* Search Summary - Show current search criteria */}
-        {(filters.location || filters.bedrooms || filters.maxPrice) && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-blue-700">
-                  <MagnifyingGlassIcon className="h-5 w-5" />
-                  <span className="font-medium">Search Results for:</span>
-                </div>
-                <div className="flex items-center space-x-4 text-sm text-blue-600">
-                  {filters.location && (
-                    <div className="flex items-center space-x-1">
-                      <MapPinIcon className="h-4 w-4" />
-                      <span>{filters.location}</span>
-                    </div>
-                  )}
-                  {filters.bedrooms && (
-                    <div className="flex items-center space-x-1">
-                      <Bed className="h-4 w-4" />
-                      <span>{filters.bedrooms}+ bedrooms</span>
-                    </div>
-                  )}
-                  {filters.maxPrice && (
-                    <div className="flex items-center space-x-1">
-                      <CurrencyDollarIcon className="h-4 w-4" />
-                      <span>Under {parseInt(filters.maxPrice).toLocaleString()} HKD</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <button
-                onClick={clearFilters}
-                className="text-blue-600 hover:text-blue-800 text-sm font-medium underline"
-              >
-                Clear all
-              </button>
-            </div>
-          </div>
-        )}
+        {/* Filter Tags - Modern filter display */}
+        <FilterTags
+          filters={filters}
+          onRemoveFilter={removeFilter}
+          onClearAll={clearFilters}
+        />
 
         {/* Filters and Results */}
         <div className="w-full">

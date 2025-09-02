@@ -160,14 +160,6 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
           {/* About */}
           <p className="text-gray-700 leading-relaxed text-sm">{user.about}</p>
         </div>
-
-        {/* Contact Actions */}
-        <div className="flex flex-col space-y-3 min-w-0">
-          <button className="flex items-center justify-center px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
-            <ChatBubbleLeftRightIcon className="h-4 w-4 mr-2" />
-            Contact
-          </button>
-        </div>
       </div>
     </div>
   );

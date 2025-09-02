@@ -48,7 +48,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                 onClick={() => setSelectedCategory(category === 'All' ? null : category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   selectedCategory === category || (category === 'All' && selectedCategory === null)
-                    ? 'bg-blue-600 text-white shadow-md'
+                    ? 'bg-purple-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -66,7 +66,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                 key={amenity.id}
                 className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                   selectedAmenities.includes(amenity.id)
-                    ? 'border-blue-500 bg-blue-50'
+                    ? 'border-purple-500 bg-purple-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
                 onClick={() => handleAmenityToggle(amenity.id)}
@@ -81,7 +81,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                 <div className="flex flex-col items-center space-y-3">
                   <div className={`p-3 rounded-full ${
                     selectedAmenities.includes(amenity.id)
-                      ? 'bg-blue-100'
+                      ? 'bg-purple-100'
                       : 'bg-gray-100'
                   }`}>
                     {(() => {
@@ -98,7 +98,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
 
                 {selectedAmenities.includes(amenity.id) && (
                   <div className="absolute top-2 right-2">
-                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                    <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
                       <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
@@ -112,8 +112,8 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
 
         {/* Selected Amenities Summary */}
         {selectedAmenities.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-3">
+          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+            <h4 className="font-medium text-purple-900 mb-3">
               Selected Amenities ({selectedAmenities.length})
             </h4>
             <div className="flex flex-wrap gap-2">
@@ -122,16 +122,16 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                 return (
                   <div
                     key={amenityId}
-                    className="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-blue-200"
+                    className="flex items-center space-x-2 bg-white px-3 py-1 rounded-full border border-purple-200"
                   >
                     {(() => {
                       const IconComponent = amenity ? getAmenityIconByName(amenity.name) : null;
-                      return IconComponent ? <IconComponent className="h-4 w-4 text-blue-600" /> : null;
+                      return IconComponent ? <IconComponent className="h-4 w-4 text-purple-600" /> : null;
                     })()}
-                    <span className="text-sm text-blue-900">{amenity?.name}</span>
+                    <span className="text-sm text-purple-900">{amenity?.name}</span>
                     <button
                       onClick={() => handleAmenityToggle(amenityId)}
-                      className="text-blue-400 hover:text-blue-600"
+                      className="text-purple-400 hover:text-purple-600"
                     >
                       ×
                     </button>

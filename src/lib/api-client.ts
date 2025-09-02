@@ -40,7 +40,7 @@ apiClient.interceptors.response.use(
 );
 
 // Helper function to transform PropertyData to API format
-const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: string) => {
+const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: string, isDraft: boolean = false) => {
   // Use the utility function to ensure consistent address structure
   const addressObject = formatAddressForDatabase(propertyData.address);
 
@@ -97,6 +97,7 @@ const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: 
       ? new Date(propertyData.rentalDetails.availableDate).toISOString()
       : null,
     ownerId,
+    isDraft, // Include draft flag
   };
 };
 
@@ -133,9 +134,11 @@ export const propertiesAPI = {
     return response.data;
   },
 
-  // Create a new property
-  createProperty: async (propertyData: PropertyDataForAPI, ownerId: string) => {
+  // Create a new property (supports drafts)
+  createProperty: async (propertyData: PropertyDataForAPI, ownerId: string, isDraft: boolean = false) => {
     const transformedData = await transformPropertyData(propertyData, ownerId);
+    transformedData.isDraft = isDraft;
+    
     const response = await apiClient.post('/properties/create-property', transformedData);
     return response.data;
   },
@@ -164,6 +167,52 @@ export const propertiesAPI = {
   }) => {
     const response = await apiClient.put('/properties/update-property', { id, updates });
     return response.data;
+  },
+
+  // Get user's drafts
+  getDrafts: async (landlordId: string) => {
+    const response = await apiClient.get('/properties/get-drafts', {
+      params: { landlord_id: landlordId }
+    });
+    return response.data;
+  },
+
+  // Publish draft
+  publishDraft: async (propertyUuid: string) => {
+    const response = await apiClient.post('/properties/publish-draft', {
+      property_uuid: propertyUuid
+    });
+    return response.data;
+  },
+
+  // Delete draft
+  deleteDraft: async (propertyUuid: string) => {
+    const response = await apiClient.delete('/properties/delete-draft', {
+      params: { property_uuid: propertyUuid }
+    });
+    return response.data;
+  },
+
+  // Update property status
+  updatePropertyStatus: async (propertyUuid: string, status: 'draft' | 'published' | 'archived' | 'expired') => {
+    const response = await apiClient.put('/properties/update-property', {
+      id: propertyUuid,
+      updates: {
+        status: status,
+        is_public: status === 'published'
+      }
+    });
+    return response.data;
+  },
+
+  // Publish property (set to published status)
+  publishProperty: async (propertyUuid: string) => {
+    return propertiesAPI.updatePropertyStatus(propertyUuid, 'published');
+  },
+
+  // Unpublish property (set to draft status)
+  unpublishProperty: async (propertyUuid: string) => {
+    return propertiesAPI.updatePropertyStatus(propertyUuid, 'draft');
   },
 };
 
