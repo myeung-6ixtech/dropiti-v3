@@ -141,6 +141,32 @@ export function BasicInfoSection({
               placeholder="Describe your property"
             />
           </div>
+
+          {/* Listing Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Listing Status
+            </label>
+            <select
+              value={tempData.status || (tempData.isPublic ? 'published' : 'draft')}
+              onChange={(e) => {
+                const newStatus = e.target.value as 'draft' | 'published' | 'archived' | 'expired';
+                onUpdateField('', 'status', newStatus);
+                onUpdateField('', 'isPublic', newStatus === 'published');
+              }}
+              className="form-select w-full"
+            >
+              <option value="draft">Draft (Not Published)</option>
+              <option value="published">Published (Active)</option>
+              <option value="archived">Archived</option>
+              <option value="expired">Expired</option>
+            </select>
+            <p className="mt-1 text-sm text-gray-500">
+              {tempData.status === 'published' || tempData.isPublic 
+                ? 'Your listing is visible to the public' 
+                : 'Your listing is saved as a draft and not visible to the public'}
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -161,6 +187,18 @@ export function BasicInfoSection({
             <div>
               <span className="text-sm text-gray-500">Listing Name</span>
               <p className="font-medium capitalize text-gray-700">{data.rentalDetails?.listingName || 'Not specified'}</p>
+            </div>
+            <div>
+              <span className="text-sm text-gray-500">Status</span>
+              <div className="flex items-center space-x-2">
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  data.status === 'published' || data.isPublic
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-yellow-100 text-yellow-800'
+                }`}>
+                  {data.status === 'published' || data.isPublic ? 'Published' : 'Draft'}
+                </span>
+              </div>
             </div>
           </div>
           

@@ -14,8 +14,58 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Properties App - Find Your Perfect Home",
-  description: "Search and discover properties for rent or sale",
+  title: "dropiti - real estate platform",
+  description: "Find your perfect home with dropiti - the leading real estate platform for property rentals and sales. Discover amazing properties with detailed listings, photos, and direct communication with landlords.",
+  keywords: ["real estate", "property rental", "apartments", "houses", "rent", "property search", "real estate platform"],
+  authors: [{ name: "dropiti" }],
+  creator: "dropiti",
+  publisher: "dropiti",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://dropiti.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "dropiti - real estate platform",
+    description: "Find your perfect home with dropiti - the leading real estate platform for property rentals and sales.",
+    url: '/',
+    siteName: 'dropiti',
+    images: [
+      {
+        url: '/images/dropiti_logo.png',
+        width: 1200,
+        height: 630,
+        alt: 'dropiti - real estate platform',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "dropiti - real estate platform",
+    description: "Find your perfect home with dropiti - the leading real estate platform for property rentals and sales.",
+    images: ['/images/dropiti_logo.png'],
+    creator: '@dropiti',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: process.env.GOOGLE_VERIFICATION_ID,
+  },
 };
 
 export default function RootLayout({

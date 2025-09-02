@@ -192,6 +192,28 @@ export const propertiesAPI = {
     });
     return response.data;
   },
+
+  // Update property status
+  updatePropertyStatus: async (propertyUuid: string, status: 'draft' | 'published' | 'archived' | 'expired') => {
+    const response = await apiClient.put('/properties/update-property', {
+      id: propertyUuid,
+      updates: {
+        status: status,
+        is_public: status === 'published'
+      }
+    });
+    return response.data;
+  },
+
+  // Publish property (set to published status)
+  publishProperty: async (propertyUuid: string) => {
+    return propertiesAPI.updatePropertyStatus(propertyUuid, 'published');
+  },
+
+  // Unpublish property (set to draft status)
+  unpublishProperty: async (propertyUuid: string) => {
+    return propertiesAPI.updatePropertyStatus(propertyUuid, 'draft');
+  },
 };
 
 // Users API

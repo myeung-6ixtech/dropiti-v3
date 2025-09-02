@@ -126,6 +126,10 @@ export interface PropertyData {
     rentalPrice?: number;
     availableDate?: Date | string | null;
   };
+  
+  // Status
+  status?: 'draft' | 'published' | 'archived' | 'expired';
+  isPublic?: boolean;
 }
 
 // Property data for API submission (with photo URLs instead of File objects)

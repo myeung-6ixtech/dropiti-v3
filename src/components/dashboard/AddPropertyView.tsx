@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DocumentIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import Step1PropertyType from '@/components/add-property/Step1PropertyType';
 import Step2RentalSpace from '@/components/add-property/Step2RentalSpace';
 import Step3Address from '@/components/add-property/Step3Address';
@@ -42,8 +43,8 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [draftSaved, setDraftSaved] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const updatePropertyData = (data: Partial<PropertyData>) => {
     setPropertyData(prev => ({ ...prev, ...data }));
@@ -70,7 +71,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
     try {
       // Check if user is authenticated
       if (!isAuthenticated || !authUser?.id) {
-        setSubmitError('You must be logged in to save a draft.');
+        showToast('error', 'You must be logged in to save a draft.');
         return;
       }
 
@@ -80,7 +81,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                              propertyData.address?.addressLine1;
       
       if (!hasMinimalData) {
-        setSubmitError('Please add at least a property name, type, or address to save a draft.');
+        showToast('error', 'Please add at least a property name, type, or address to save a draft.');
         return;
       }
 
@@ -99,75 +100,19 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
       // Call the API to create the draft
       const response = await propertiesAPI.createProperty(draftData, ownerId, true);
       
-      if (response.success) {
+      if (response.success && response.data) {
         console.log('Draft saved successfully:', response.data);
         setDraftId(response.data.property_uuid);
-        setDraftSaved(true);
         
         // Show success message
-        alert('Draft saved successfully!');
+        showToast('success', 'Draft saved successfully!');
       } else {
         throw new Error(response.error || 'Failed to save draft');
       }
-      
     } catch (error) {
       console.error('Error saving draft:', error);
-      
-      // Handle different types of errors
-      if (error instanceof Error) {
-        setSubmitError(error.message);
-      } else if (typeof error === 'string') {
-        setSubmitError(error);
-      } else {
-        setSubmitError('An unexpected error occurred. Please try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const publishDraft = async () => {
-    setIsSubmitting(true);
-    setSubmitError(null);
-    
-    try {
-      // Check if user is authenticated
-      if (!isAuthenticated || !authUser?.id) {
-        setSubmitError('You must be logged in to publish a property.');
-        return;
-      }
-
-      // Validate required data
-      if (!isFormComplete()) {
-        setSubmitError('Please complete all required fields before publishing.');
-        return;
-      }
-
-      if (draftId) {
-        // Publish existing draft
-        const response = await propertiesAPI.publishDraft(draftId);
-        if (response.success) {
-          alert('Property published successfully!');
-          router.push('/dashboard/properties');
-          return;
-        } else {
-          throw new Error(response.error || 'Failed to publish draft');
-        }
-      } else {
-        // Create and publish new property
-        await handleSubmit();
-      }
-      
-    } catch (error) {
-      console.error('Error publishing property:', error);
-      
-      if (error instanceof Error) {
-        setSubmitError(error.message);
-      } else if (typeof error === 'string') {
-        setSubmitError(error);
-      } else {
-        setSubmitError('An unexpected error occurred. Please try again.');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save draft';
+      showToast('error', errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -229,7 +174,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
         console.log('Property created successfully:', response.data);
         
         // Show success message
-        alert('Property added successfully!');
+        showToast('success', 'Property added successfully!');
         
         // Redirect to properties list or dashboard
         router.push('/dashboard/properties');
@@ -400,50 +345,32 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
               {renderStep()}
             </div>
 
-            {/* Draft Actions */}
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={saveDraft}
-                    disabled={isSubmitting}
-                    className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <DocumentIcon className="h-4 w-4" />
-                    {draftId ? 'Update Draft' : 'Save Draft'}
-                  </button>
-                  
-                  {draftId && (
-                    <button
-                      onClick={publishDraft}
-                      disabled={isSubmitting || !isFormComplete()}
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <CheckIcon className="h-4 w-4" />
-                      Publish Draft
-                    </button>
-                  )}
-                </div>
-                
-                {/* Draft Status */}
-                {draftSaved && (
-                  <div className="text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                    ✓ Draft saved
-                  </div>
-                )}
-              </div>
-
-              {/* Step Navigation */}
-              {currentStep !== 8 && (
+            {/* Step Navigation */}
+            {currentStep !== 8 && (
+              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <button
-                    onClick={prevStep}
-                    disabled={currentStep === 1}
-                    className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <ArrowLeftIcon className="h-4 w-4" />
-                    <span>Previous</span>
-                  </button>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={prevStep}
+                      disabled={currentStep === 1}
+                      className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeftIcon className="h-4 w-4" />
+                      <span>Previous</span>
+                    </button>
+
+                    {/* Save Draft Button - Only show after Step 2 */}
+                    {currentStep > 2 && (
+                      <button
+                        onClick={saveDraft}
+                        disabled={isSubmitting}
+                        className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <DocumentIcon className="h-4 w-4" />
+                        <span>Save Draft</span>
+                      </button>
+                    )}
+                  </div>
 
                   <button
                     onClick={nextStep}
@@ -454,8 +381,8 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                     <ArrowRightIcon className="h-4 w-4" />
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

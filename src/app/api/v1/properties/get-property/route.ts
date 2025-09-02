@@ -25,6 +25,7 @@ const GET_PROPERTY_QUERY = `
       rental_price_currency
       availability_date
       is_public
+      status
       created_at
       updated_at
       landlord_firebase_uid
@@ -69,6 +70,7 @@ export async function GET(request: NextRequest) {
         rental_price_currency: string;
         availability_date: string | null;
         is_public: boolean;
+        status: string;
         created_at: string;
         updated_at: string;
         landlord_firebase_uid: string;
