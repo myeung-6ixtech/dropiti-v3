@@ -26,7 +26,7 @@ interface DropitiPassportProps {
       responseRate: number;
       avgResponseTime: string;
       totalProperties: number;
-      totalGuests: number;
+      publishedProperties: number;
     };
   };
 }
@@ -86,8 +86,8 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
             <div className={passportStyles.statLabel}>Properties</div>
           </div>
           <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{user.stats.totalGuests}</div>
-            <div className={passportStyles.statLabel}>Tenants</div>
+            <div className={passportStyles.statValue}>{user.stats.publishedProperties}</div>
+            <div className={passportStyles.statLabel}>Published</div>
           </div>
           <div className={passportStyles.statItem}>
             <div className={passportStyles.statValue}>{user.stats.responseRate}%</div>

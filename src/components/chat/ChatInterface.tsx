@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
 import ChatMessage from './ChatMessage';
@@ -27,24 +27,13 @@ interface ChatContact {
   lastMessageTime: Date;
   unreadCount: number;
   isOnline: boolean;
-  role?: 'landlord' | 'tenant' | 'support';
+  role: 'landlord' | 'tenant' | 'support';
   firebaseUid: string;
-}
-
-interface ChatSidebarContact {
-  id: string;
-  name: string;
-  avatar?: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  unreadCount: number;
-  isOnline: boolean;
-  role?: 'landlord' | 'tenant' | 'support';
 }
 
 interface ChatInterfaceProps {
   contacts: ChatContact[];
-  userType: 'tenant' | 'landlord';
+  userType: 'landlord' | 'tenant' | 'support';
   isLoadingContacts?: boolean;
   selectedRoomId?: string | null;
 }
@@ -55,28 +44,36 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastMessageCountRef = useRef<number>(0);
 
   // Use real-time chat hook - use selectedRoomId if provided, otherwise use selectedContact
   const activeRoomId = selectedRoomId || selectedContact?.id;
   const { 
     messages: realTimeMessages, 
     sendMessage: sendRealTimeMessage, 
-    isLoading: isLoadingMessages,
-    error: messageError 
+    isLoading: isLoadingMessages
   } = useRealTimeChat({ 
     roomId: activeRoomId,
-    pollingInterval: 3000 // Poll every 3 seconds
+    pollingInterval: 2000 // Reduced polling interval for better responsiveness
   });
 
-  // Convert real-time messages to UI format
-  const uiMessages: Message[] = realTimeMessages.map(msg => 
-    convertMessageToUIMessage(msg, authUser?.id || '', selectedContact?.name || 'Unknown')
-  );
+  // Memoize UI messages conversion to prevent unnecessary re-renders
+  const uiMessages: Message[] = useMemo(() => {
+    return realTimeMessages.map(msg => 
+      convertMessageToUIMessage(msg, authUser?.id || '', selectedContact?.name || 'Unknown')
+    );
+  }, [realTimeMessages, authUser?.id, selectedContact?.name]);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Optimized auto-scroll - only scroll when new messages are added
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [uiMessages]);
+    if (uiMessages.length > lastMessageCountRef.current) {
+      // Use requestAnimationFrame for smoother scrolling
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      });
+      lastMessageCountRef.current = uiMessages.length;
+    }
+  }, [uiMessages.length]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -86,25 +83,27 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
     }
   }, [newMessage]);
 
-  // Convert contacts to sidebar format (without firebaseUid)
-  const sidebarContacts: ChatSidebarContact[] = contacts.map(contact => ({
-    id: contact.id,
-    name: contact.name,
-    avatar: contact.avatar,
-    lastMessage: contact.lastMessage,
-    lastMessageTime: contact.lastMessageTime,
-    unreadCount: contact.unreadCount,
-    isOnline: contact.isOnline,
-    role: contact.role
-  }));
+  // Memoize sidebar contacts to prevent unnecessary re-renders
+  const sidebarContacts = useMemo(() => {
+    return contacts.map(contact => ({
+      id: contact.id,
+      name: contact.name,
+      avatar: contact.avatar,
+      lastMessage: contact.lastMessage,
+      lastMessageTime: contact.lastMessageTime,
+      unreadCount: contact.unreadCount,
+      isOnline: contact.isOnline,
+      role: contact.role
+    }));
+  }, [contacts]);
 
   // Handle contact selection
-  const handleContactSelect = (contact: ChatSidebarContact) => {
+  const handleContactSelect = useCallback((contact: ChatSidebarContact) => {
     const fullContact = contacts.find(c => c.id === contact.id);
     if (fullContact) {
       setSelectedContact(fullContact);
     }
-  };
+  }, [contacts]);
 
   // Handle selectedRoomId prop - find corresponding contact or create a placeholder
   useEffect(() => {
@@ -136,7 +135,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
     }
   }, [contacts, selectedContact, selectedRoomId]);
 
-  const handleSendMessage = async () => {
+  const handleSendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedContact) return;
 
     const messageContent = newMessage.trim();
@@ -152,101 +151,89 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
       // Handle error - could show a toast notification
       console.error('Failed to send message');
     }
-  };
+  }, [newMessage, selectedContact, sendRealTimeMessage]);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
     }
-  };
+  }, [handleSendMessage]);
+
+  if (isLoadingContacts) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading chat...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (contacts.length === 0) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-400 mb-4">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No conversations yet</h3>
+          <p className="text-gray-500">Start a conversation by selecting a contact or property.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex h-full bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200">
-      {/* Chat Sidebar */}
-      <div className="w-72 border-r border-gray-200 flex-shrink-0">
+    <div className="flex h-full bg-white">
+      {/* Sidebar */}
+      <div className="w-1/3 border-r border-gray-200 flex flex-col">
         <ChatSidebar
           contacts={sidebarContacts}
-          selectedContact={selectedContact ? {
-            id: selectedContact.id,
-            name: selectedContact.name,
-            avatar: selectedContact.avatar,
-            lastMessage: selectedContact.lastMessage,
-            lastMessageTime: selectedContact.lastMessageTime,
-            unreadCount: selectedContact.unreadCount,
-            isOnline: selectedContact.isOnline,
-            role: selectedContact.role
-          } : null}
+          selectedContact={selectedContact}
           onContactSelect={handleContactSelect}
-          userType={userType}
+          userType={userType as 'tenant' | 'landlord'}
           isLoading={isLoadingContacts}
         />
       </div>
 
-      {/* Chat Main Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* Chat Area */}
+      <div className="flex-1 flex flex-col">
         {selectedContact ? (
           <>
             {/* Chat Header */}
-            <div className="border-b border-gray-200 px-4 py-3 bg-white">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 relative">
-                    <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                      {selectedContact.avatar ? (
-                        <Image
-                          src={selectedContact.avatar}
-                          alt={selectedContact.name}
-                          width={32}
-                          height={32}
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-white mb-0 text-sm font-medium">
-                          {selectedContact.name.charAt(0).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    {selectedContact.isOnline && (
-                      <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 bg-green-400 border border-white rounded-full"></div>
-                    )}
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm mb-0 font-medium text-gray-900">{selectedContact.name}</h3>
-                    <p className="text-xs mb-0 text-gray-500">
-                      {selectedContact.isOnline ? (
-                        <span className="flex items-center">
-                          <span className="h-1.5 w-1.5 bg-green-400 rounded-full mr-1.5"></span>
-                          Online
-                        </span>
-                      ) : (
-                        'Offline'
-                      )}
-                    </p>
-                  </div>
+            <div className="border-b border-gray-200 p-4">
+              <div className="flex items-center space-x-3">
+                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
+                  {selectedContact.avatar ? (
+                    <Image
+                      src={selectedContact.avatar}
+                      alt={selectedContact.name}
+                      width={40}
+                      height={40}
+                      className="h-10 w-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-sm font-medium">
+                      {selectedContact.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
-                
-                {/* Header Actions */}
-                {/* <div className="flex items-center space-x-1">
-                  <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                    <PhoneIcon className="h-4 w-4" />
-                  </button>
-                  <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                    <VideoCameraIcon className="h-4 w-4" />
-                  </button>
-                </div> */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">{selectedContact.name}</h3>
+                  <p className="text-sm text-gray-500 capitalize">{selectedContact.role}</p>
+                </div>
               </div>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-gray-50 min-h-0">
-              {isLoadingMessages ? (
-                <div className="text-center text-gray-500 mt-8">
-                  <p className="text-sm">Loading messages...</p>
-                </div>
-              ) : uiMessages.length === 0 ? (
-                <div className="text-center text-gray-500 mt-8">
-                  <p className="text-sm">No messages yet. Start a conversation!</p>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {isLoadingMessages && uiMessages.length === 0 ? (
+                <div className="flex justify-center items-center h-full">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
               ) : (
                 <>
@@ -257,47 +244,16 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                       isOwnMessage={message.sender === 'user'}
                     />
                   ))}
-                  
-                  {/* Typing Indicator */}
-                  {/* isTyping && (
-                    <div className="flex justify-start">
-                      <div className="flex max-w-xs lg:max-w-md">
-                        <div className="flex-shrink-0">
-                          <div className="h-6 w-6 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-gray-600 text-xs font-medium">
-                              {selectedContact.name.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="ml-2">
-                          <div className="bg-white px-3 py-2 rounded-lg shadow-sm">
-                            <div className="flex space-x-1">
-                              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) */}
                   <div ref={messagesEndRef} />
                 </>
-              )}
-
-              {/* Error Display */}
-              {messageError && (
-                <div className="text-center text-red-500 mt-4">
-                  <p className="text-sm">Error: {messageError}</p>
-                </div>
               )}
             </div>
 
             {/* Message Input */}
-            <div className="border-t border-gray-200 px-4 py-3 bg-white">
-              <div className="flex items-end space-x-3">
-                <button className="flex-shrink-0 p-1.5 mb-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded">
-                  <PaperClipIcon className="h-4 w-4" />
+            <div className="border-t border-gray-200 p-4">
+              <div className="flex items-end space-x-2">
+                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                  <PaperClipIcon className="h-5 w-5" />
                 </button>
                 <div className="flex-1">
                   <textarea
@@ -305,31 +261,32 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Type your message..."
-                    className="form-textarea resize-none max-h-20 text-sm"
+                    placeholder="Type a message..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     rows={1}
+                    style={{ minHeight: '40px', maxHeight: '120px' }}
                   />
                 </div>
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim()}
-                  className="flex-shrink-0 p-2 btn-primary rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  <PaperAirplaneIcon className="h-4 w-4" />
+                  <PaperAirplaneIcon className="h-5 w-5" />
                 </button>
               </div>
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50">
-            <div className="text-center text-gray-500">
-              <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-gray-400 mb-4">
+                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
               </div>
-              <p className="text-sm font-medium">Select a contact to start chatting</p>
-              <p className="text-xs mt-1 text-gray-400">Choose someone from the sidebar to begin your conversation</p>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Select a conversation</h3>
+              <p className="text-gray-500">Choose a contact from the sidebar to start chatting.</p>
             </div>
           </div>
         )}

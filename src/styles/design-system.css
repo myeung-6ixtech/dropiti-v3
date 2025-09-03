@@ -1156,6 +1156,14 @@
     @apply bg-black text-white;
   }
 
+  .dashboard-nav-item-active:hover {
+    @apply bg-black text-white;
+  }
+
+  .dashboard-nav-item-active svg {
+    @apply text-white;
+  }
+
   .dashboard-nav-item-inactive {
     @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
   }

@@ -7,14 +7,15 @@ interface UseRealTimeChatProps {
   pollingInterval?: number; // in milliseconds
 }
 
-export const useRealTimeChat = ({ roomId, pollingInterval = 3000 }: UseRealTimeChatProps) => {
+export const useRealTimeChat = ({ roomId, pollingInterval = 2000 }: UseRealTimeChatProps) => {
   const { user: authUser } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [lastMessageId, setLastMessageId] = useState<string | null>(null);
+  const [lastMessageTimestamp, setLastMessageTimestamp] = useState<string | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const isSendingRef = useRef<boolean>(false);
 
   // Fetch initial messages
   const fetchMessages = useCallback(async () => {
@@ -27,9 +28,9 @@ export const useRealTimeChat = ({ roomId, pollingInterval = 3000 }: UseRealTimeC
       const fetchedMessages = await chatAPI.getRoomMessages(roomId, 50, 0);
       setMessages(fetchedMessages);
       
-      // Set the last message ID for polling
+      // Set the last message timestamp for polling
       if (fetchedMessages.length > 0) {
-        setLastMessageId(fetchedMessages[fetchedMessages.length - 1].id);
+        setLastMessageTimestamp(fetchedMessages[fetchedMessages.length - 1].created_at);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch messages');
@@ -38,44 +39,92 @@ export const useRealTimeChat = ({ roomId, pollingInterval = 3000 }: UseRealTimeC
     }
   }, [roomId, authUser?.id]);
 
-  // Poll for new messages
+  // Poll for new messages (only fetch messages newer than last known)
   const pollForNewMessages = useCallback(async () => {
-    if (!roomId || !authUser?.id || !lastMessageId) return;
+    if (!roomId || !authUser?.id || !lastMessageTimestamp || isSendingRef.current) return;
 
     try {
-      // Get messages after the last known message
-      const newMessages = await chatAPI.getRoomMessages(roomId, 50, 0);
+      // Get all messages and filter for new ones
+      const allMessages = await chatAPI.getRoomMessages(roomId, 50, 0);
       
-      // Find messages newer than the last known message
-      const lastMessageIndex = newMessages.findIndex(msg => msg.id === lastMessageId);
-      if (lastMessageIndex !== -1 && lastMessageIndex < newMessages.length - 1) {
-        const actualNewMessages = newMessages.slice(lastMessageIndex + 1);
-        setMessages(prev => [...prev, ...actualNewMessages]);
-        setLastMessageId(actualNewMessages[actualNewMessages.length - 1].id);
+      // Find messages newer than the last known timestamp
+      const newMessages = allMessages.filter(msg => 
+        new Date(msg.created_at) > new Date(lastMessageTimestamp)
+      );
+      
+      if (newMessages.length > 0) {
+        setMessages(prev => {
+          // Avoid duplicates by checking message IDs
+          const existingIds = new Set(prev.map(msg => msg.id));
+          const uniqueNewMessages = newMessages.filter(msg => !existingIds.has(msg.id));
+          
+          if (uniqueNewMessages.length > 0) {
+            const updatedMessages = [...prev, ...uniqueNewMessages].sort((a, b) => 
+              new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            );
+            
+            // Update last message timestamp
+            setLastMessageTimestamp(updatedMessages[updatedMessages.length - 1].created_at);
+            
+            return updatedMessages;
+          }
+          
+          return prev;
+        });
       }
     } catch (err) {
       console.error('Error polling for new messages:', err);
       // Don't set error for polling failures to avoid disrupting the UI
     }
-  }, [roomId, authUser?.id, lastMessageId]);
+  }, [roomId, authUser?.id, lastMessageTimestamp]);
 
-  // Send a message
+  // Send a message with optimistic updates
   const sendMessage = useCallback(async (content: string): Promise<ChatMessage | null> => {
     if (!roomId || !authUser?.id || !content.trim()) return null;
 
+    // Prevent polling while sending
+    isSendingRef.current = true;
+
     try {
-      const newMessage = await chatAPI.sendMessage(roomId, authUser.id, content);
+      // Create optimistic message
+      const optimisticMessage: ChatMessage = {
+        id: `temp-${Date.now()}`, // Temporary ID
+        room_id: roomId,
+        sender_firebase_uid: authUser.id,
+        content: content.trim(),
+        message_type: 'text',
+        status: 'sent',
+        created_at: new Date().toISOString(),
+        metadata: null
+      };
+
+      // Add optimistic message immediately
+      setMessages(prev => [...prev, optimisticMessage]);
+
+      // Send the actual message
+      const sentMessage = await chatAPI.sendMessage(roomId, authUser.id, content);
       
-      // Add the new message to the local state
-      setMessages(prev => [...prev, newMessage]);
+      // Replace optimistic message with real message
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.id === optimisticMessage.id ? sentMessage : msg
+        )
+      );
       
-      // Update the last message ID
-      setLastMessageId(newMessage.id);
+      // Update the last message timestamp
+      setLastMessageTimestamp(sentMessage.created_at);
       
-      return newMessage;
+      return sentMessage;
     } catch (err) {
+      // Remove optimistic message on error
+      setMessages(prev => prev.filter(msg => msg.id !== `temp-${Date.now()}`));
       setError(err instanceof Error ? err.message : 'Failed to send message');
       return null;
+    } finally {
+      // Re-enable polling after a short delay
+      setTimeout(() => {
+        isSendingRef.current = false;
+      }, 1000);
     }
   }, [roomId, authUser?.id]);
 

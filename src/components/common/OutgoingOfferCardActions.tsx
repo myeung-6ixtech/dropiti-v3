@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { XMarkIcon, CheckIcon, ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import FinalCounterOfferModal2 from './FinalCounterOfferModal2';

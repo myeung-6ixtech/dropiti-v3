@@ -1,15 +1,7 @@
 import { Metadata } from 'next';
 import { propertiesAPI } from '@/lib/api-client';
 
-interface PropertyMetadata {
-  title: string;
-  description: string;
-  image: string;
-  location: string;
-  price: number;
-  bedrooms: number;
-  bathrooms: number;
-}
+
 
 export async function generatePropertyMetadata(
   propertyId: string
