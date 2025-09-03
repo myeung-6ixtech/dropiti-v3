@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckIcon, XMarkIcon, ClockIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
 import { useToast } from '@/context/ToastContext';
 import FinalDealDisplay from './FinalDealDisplay';

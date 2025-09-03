@@ -128,10 +128,35 @@ export const propertiesAPI = {
 
   // Get a single property by UUID
   getPropertyByUuid: async (propertyUuid: string) => {
-    const response = await apiClient.get('/properties/get-property-by-uuid', { 
-      params: { property_uuid: propertyUuid } 
-    });
-    return response.data;
+    if (!propertyUuid) {
+      throw new Error('Property UUID is required');
+    }
+    
+    if (typeof propertyUuid !== 'string') {
+      throw new Error('Property UUID must be a string');
+    }
+    
+    console.log('Fetching property by UUID:', propertyUuid);
+    
+    try {
+      const url = '/properties/get-property-by-uuid';
+      const params = { property_uuid: propertyUuid };
+      
+      console.log('Making API request to:', url);
+      console.log('With params:', params);
+      
+      const response = await apiClient.get(url, { params });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching property by UUID:', error);
+      console.error('Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        response: (error as { response?: { data?: unknown; status?: number } })?.response?.data,
+        status: (error as { response?: { data?: unknown; status?: number } })?.response?.status,
+        config: (error as { config?: unknown })?.config
+      });
+      throw error;
+    }
   },
 
   // Create a new property (supports drafts)

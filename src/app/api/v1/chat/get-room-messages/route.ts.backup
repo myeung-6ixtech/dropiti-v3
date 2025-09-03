@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
-import { decryptMessage, isEncrypted } from '@/lib/encryption';
 
 const GET_ROOM_MESSAGES_QUERY = `
   query GetRoomMessages($roomId: uuid!, $limit: Int = 50, $offset: Int = 0) {
@@ -59,28 +58,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Decrypt messages before returning
-    const decryptedMessages = data.real_estate_chat_message.map(message => {
-      try {
-        return {
-          ...message,
-          content: isEncrypted(message.content) 
-            ? decryptMessage(message.content) 
-            : message.content // Fallback for unencrypted messages
-        };
-      } catch (error) {
-        console.error('Failed to decrypt message:', message.id, error);
-        // Return message with error indicator if decryption fails
-        return {
-          ...message,
-          content: '[Message could not be decrypted]'
-        };
-      }
-    });
-
     return NextResponse.json({
       success: true,
-      data: decryptedMessages,
+      data: data.real_estate_chat_message,
       message: 'Messages retrieved successfully'
     });
   } catch (error) {

@@ -272,7 +272,7 @@ export default function PropertiesPage() {
               <DraftCard
                 key={draft.property_uuid}
                 draft={draft}
-                onContinue={(draftId: string) => router.push(`/dashboard/add-property?draft=${draftId}`)}
+                onContinue={(draftId: string) => router.push(`/dashboard/properties/edit/${draftId}`)}
                 onDelete={async (draftId: string) => {
                   try {
                     const response = await propertiesAPI.deleteDraft(draftId);

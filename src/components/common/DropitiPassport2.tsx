@@ -6,8 +6,7 @@ import {
   StarIcon, 
   CheckCircleIcon,
   MapPinIcon,
-  CalendarIcon,
-  ChatBubbleLeftRightIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassport2Props {
@@ -26,7 +25,7 @@ interface DropitiPassport2Props {
       responseRate: number;
       avgResponseTime: string;
       totalProperties: number;
-      totalGuests: number;
+      publishedProperties: number;
     };
   };
 }
@@ -92,8 +91,8 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
               <span className="text-gray-500">Properties</span>
             </div>
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{user.stats.totalGuests}</span>
-              <span className="text-gray-500">Tenants</span>
+              <span className="font-semibold text-gray-900">{user.stats.publishedProperties}</span>
+              <span className="text-gray-500">Published</span>
             </div>
             <div className="flex items-center space-x-1">
               <span className="font-semibold text-gray-900">{user.stats.responseRate}%</span>

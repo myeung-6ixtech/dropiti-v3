@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeftIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, PencilIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import Link from 'next/link';
+import Script from 'next/script';
+import Image from 'next/image';
 
 interface Property {
   id: string;
@@ -14,7 +16,7 @@ interface Property {
   title: string;
   description: string;
   location: string;
-  address: string;
+  address: string | object;
   price: number;
   property_type: string;
   rental_space: string;
@@ -39,16 +41,24 @@ export default function PropertyDetailPage() {
   const router = useRouter();
   const { user: authUser } = useAuth();
   const propertyUuid = Array.isArray(params.id) ? params.id[0] : params.id;
+  
+  // Debug logging
+  console.log('Property page params:', params);
+  console.log('Extracted propertyUuid:', propertyUuid);
+  console.log('propertyUuid type:', typeof propertyUuid);
 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   // Fetch property details
   useEffect(() => {
     const fetchProperty = async () => {
-      if (!propertyUuid) {
-        setError('Property ID is required');
+      if (!propertyUuid || typeof propertyUuid !== 'string') {
+        console.error('Invalid propertyUuid:', propertyUuid);
+        setError('Property ID is required and must be a valid string');
         setLoading(false);
         return;
       }
@@ -71,7 +81,7 @@ export default function PropertyDetailPage() {
             location: propertyData.location,
             address: propertyData.address,
             price: propertyData.price,
-            property_type: propertyData.details?.type || propertyData.type || 'Unknown',
+            property_type: propertyData.details?.type || 'Unknown',
             rental_space: propertyData.rental_space || 'entire-apartment',
             bedrooms: propertyData.bedrooms,
             bathrooms: propertyData.bathrooms,
@@ -82,8 +92,8 @@ export default function PropertyDetailPage() {
             amenities: propertyData.amenities || [],
             display_image: propertyData.display_image || '',
             uploaded_images: propertyData.uploaded_images || [],
-            is_public: propertyData.is_public || false,
-            status: propertyData.status || (propertyData.is_public ? 'published' : 'draft'),
+            is_public: propertyData.available || false,
+            status: propertyData.status || (propertyData.available ? 'published' : 'draft'),
             created_at: propertyData.created_at,
             updated_at: propertyData.updated_at,
             owner_id: propertyData.owner_id,
@@ -102,6 +112,121 @@ export default function PropertyDetailPage() {
 
     fetchProperty();
   }, [propertyUuid]);
+
+  // Initialize Google Map
+  const initializeMap = useCallback(() => {
+    if (!property || !mapLoaded || typeof window === 'undefined') {
+      console.log('Map initialization skipped:', { property: !!property, mapLoaded, window: typeof window });
+      return;
+    }
+
+    try {
+      console.log('Initializing Google Map for property:', property.title);
+      
+      // Check if Google Maps API is loaded
+      if (!window.google || !window.google.maps) {
+        console.error('Google Maps API not loaded');
+        return;
+      }
+
+      // Handle address - could be string or object
+      let addressString = '';
+      if (typeof property.address === 'string') {
+        addressString = property.address;
+      } else if (property.address && typeof property.address === 'object') {
+        // If it's an object, try to construct address string
+        const addr = property.address as Record<string, string>;
+        const parts = [];
+        if (addr.street) parts.push(addr.street);
+        if (addr.district) parts.push(addr.district);
+        if (addr.city) parts.push(addr.city);
+        if (addr.country) parts.push(addr.country);
+        addressString = parts.join(', ');
+      }
+
+      if (!addressString) {
+        console.error('No address found for property');
+        return;
+      }
+
+      console.log('Geocoding address:', addressString);
+
+      // Geocode the address
+      const geocoder = new window.google.maps.Geocoder();
+      geocoder.geocode({ address: addressString }, (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+        if (status === 'OK' && results[0]) {
+          console.log('Geocoding successful:', results[0].formatted_address);
+          
+          const mapElement = document.getElementById('property-map');
+          if (!mapElement) {
+            console.error('Map element not found');
+            return;
+          }
+
+          // Create map
+          const map = new window.google.maps.Map(mapElement, {
+            zoom: 15,
+            center: results[0].geometry.location,
+            mapTypeControl: true,
+            streetViewControl: true,
+            fullscreenControl: true,
+            styles: [
+              {
+                featureType: 'poi',
+                elementType: 'labels',
+                stylers: [{ visibility: 'off' }]
+              }
+            ]
+          });
+
+          // Create custom marker
+          const marker = new window.google.maps.Marker({
+            position: results[0].geometry.location,
+            map: map,
+            title: property.title,
+            icon: {
+              url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                <svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="16" cy="16" r="12" fill="#3B82F6" stroke="#ffffff" stroke-width="2"/>
+                  <path d="M16 8c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#ffffff"/>
+                </svg>
+              `),
+              scaledSize: new window.google.maps.Size(32, 32),
+              anchor: new window.google.maps.Point(16, 16)
+            }
+          });
+
+          // Create info window
+          const infoWindow = new window.google.maps.InfoWindow({
+            content: `
+              <div style="padding: 8px;">
+                <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">${property.title}</h3>
+                <p style="margin: 0; font-size: 12px; color: #666;">${addressString}</p>
+              </div>
+            `
+          });
+
+          // Add click listener to marker
+          marker.addListener('click', () => {
+            infoWindow.open(map, marker);
+          });
+
+          console.log('Map initialized successfully');
+        } else {
+          console.error('Geocoding failed:', status);
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing map:', error);
+    }
+  }, [property, mapLoaded]);
+
+  // Initialize map when property and map are loaded
+  useEffect(() => {
+    if (property && mapLoaded) {
+      initializeMap();
+    }
+  }, [property, mapLoaded, initializeMap]);
 
   if (loading) {
     return <CenteredLoadingSpinner />;
@@ -131,8 +256,28 @@ export default function PropertyDetailPage() {
   // Check if user owns this property
   const isOwner = authUser.id === property.owner_id;
 
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <>
+      {/* Google Maps Script */}
+      {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+        <Script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+          onLoad={() => {
+            console.log('Google Maps script loaded successfully');
+            setMapLoaded(true);
+            setMapError(null);
+          }}
+          onError={(e) => {
+            console.error('Google Maps script failed to load:', e);
+            setMapLoaded(false);
+            setMapError('Failed to load Google Maps');
+          }}
+          strategy="afterInteractive"
+        />
+      )}
+      
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -188,9 +333,11 @@ export default function PropertyDetailPage() {
           {/* Images */}
           {property.display_image && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-              <img
+              <Image
                 src={property.display_image}
                 alt={property.title}
+                width={800}
+                height={256}
                 className="w-full h-64 object-cover"
               />
             </div>
@@ -293,6 +440,74 @@ export default function PropertyDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Location Map Section */}
+      <div className="mt-8">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center space-x-2 mb-4">
+            <MapPinIcon className="h-5 w-5 text-gray-600" />
+            <h2 className="text-xl font-semibold text-gray-900">Location</h2>
+          </div>
+          
+          {property.location && (
+            <div className="mb-4">
+              <p className="text-gray-600 text-sm">
+                <span className="font-medium">Address:</span> {property.location}
+              </p>
+            </div>
+          )}
+          
+          <div className="relative">
+            <div 
+              id="property-map" 
+              className="w-full h-96 rounded-lg border border-gray-200 bg-gray-100"
+              style={{ minHeight: '384px' }}
+            >
+              {!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <MapPinIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm">Google Maps API key not configured</p>
+                    <p className="text-gray-400 text-xs mt-1">Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your environment variables</p>
+                  </div>
+                </div>
+              ) : mapError ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <MapPinIcon className="h-12 w-12 text-red-400 mx-auto mb-2" />
+                    <p className="text-red-500 text-sm">Failed to load map</p>
+                    <p className="text-gray-400 text-xs mt-1">{mapError}</p>
+                  </div>
+                </div>
+              ) : !mapLoaded ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <p className="text-gray-500 text-sm">Loading map...</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <MapPinIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm">Map will appear here</p>
+                    <p className="text-gray-400 text-xs mt-1">Initializing Google Maps...</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {mapLoaded && process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
+              <div className="absolute top-2 right-2 bg-white rounded-lg shadow-sm border border-gray-200 p-2">
+                <p className="text-xs text-gray-500">
+                  Click marker for details
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
+    </>
   );
 }

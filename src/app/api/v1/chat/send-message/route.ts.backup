@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 import { checkRateLimit } from '@/lib/rate-limiter';
-import { encryptMessage } from '@/lib/encryption';
 
 // Basic message validation
 const validateMessage = (content: string): { valid: boolean; error?: string } => {
@@ -66,13 +65,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Encrypt the message content before storing
-    const encryptedContent = encryptMessage(content);
-
     const data = await executeMutation(SEND_MESSAGE_MUTATION, {
       roomId,
       senderFirebaseUid,
-      content: encryptedContent // Store encrypted content
+      content
     }) as {
       insert_real_estate_chat_message_one?: {
         id: string;
@@ -91,13 +87,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Return the original content to the client (not encrypted)
     return NextResponse.json({
       success: true,
-      data: {
-        ...data.insert_real_estate_chat_message_one,
-        content: content // Return original content to client
-      },
+      data: data.insert_real_estate_chat_message_one,
       message: 'Message sent successfully'
     });
   } catch (error) {
