@@ -124,7 +124,8 @@ export default function PropertyDetailPage() {
       console.log('Initializing Google Map for property:', property.title);
       
       // Check if Google Maps API is loaded
-      if (!window.google || !window.google.maps) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!(window as any).google || !(window as any).google.maps) {
         console.error('Google Maps API not loaded');
         return;
       }
@@ -152,8 +153,10 @@ export default function PropertyDetailPage() {
       console.log('Geocoding address:', addressString);
 
       // Geocode the address
-      const geocoder = new window.google.maps.Geocoder();
-      geocoder.geocode({ address: addressString }, (results: google.maps.GeocoderResult[] | null, status: google.maps.GeocoderStatus) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const geocoder = new (window as any).google.maps.Geocoder();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      geocoder.geocode({ address: addressString }, (results: any, status: any) => {
         if (status === 'OK' && results[0]) {
           console.log('Geocoding successful:', results[0].formatted_address);
           
@@ -164,7 +167,8 @@ export default function PropertyDetailPage() {
           }
 
           // Create map
-          const map = new window.google.maps.Map(mapElement, {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const map = new (window as any).google.maps.Map(mapElement, {
             zoom: 15,
             center: results[0].geometry.location,
             mapTypeControl: true,
@@ -180,7 +184,8 @@ export default function PropertyDetailPage() {
           });
 
           // Create custom marker
-          const marker = new window.google.maps.Marker({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const marker = new (window as any).google.maps.Marker({
             position: results[0].geometry.location,
             map: map,
             title: property.title,
@@ -191,13 +196,16 @@ export default function PropertyDetailPage() {
                   <path d="M16 8c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#ffffff"/>
                 </svg>
               `),
-              scaledSize: new window.google.maps.Size(32, 32),
-              anchor: new window.google.maps.Point(16, 16)
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              scaledSize: new (window as any).google.maps.Size(32, 32),
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              anchor: new (window as any).google.maps.Point(16, 16)
             }
           });
 
           // Create info window
-          const infoWindow = new window.google.maps.InfoWindow({
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const infoWindow = new (window as any).google.maps.InfoWindow({
             content: `
               <div style="padding: 8px;">
                 <h3 style="margin: 0 0 4px 0; font-size: 14px; font-weight: 600;">${property.title}</h3>

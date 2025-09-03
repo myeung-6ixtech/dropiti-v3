@@ -1,16 +1,124 @@
 import { Metadata } from 'next';
-import { propertiesAPI } from '@/lib/api-client';
+import { executeQuery } from '@/app/api/graphql/serverClient';
 
+const GET_PROPERTY_BY_UUID_QUERY = `
+  query GetPropertyByUuid($property_uuid: uuid!) {
+    real_estate_property_listing(where: { property_uuid: { _eq: $property_uuid } }, limit: 1) {
+      id
+      property_uuid
+      title
+      description
+      address
+      property_type
+      rental_space
+      num_bedroom
+      num_bathroom
+      gross_area_size
+      gross_area_size_unit
+      furnished
+      pets_allowed
+      amenities
+      display_image
+      uploaded_images
+      rental_price
+      rental_price_currency
+      availability_date
+      is_public
+      status
+      created_at
+      updated_at
+      landlord_firebase_uid
+    }
+  }
+`;
 
+// Server-side function to fetch property data directly from database
+async function fetchPropertyData(propertyId: string) {
+  try {
+    const data = await executeQuery(GET_PROPERTY_BY_UUID_QUERY, { property_uuid: propertyId });
+    
+    const typedData = data as {
+      real_estate_property_listing?: Array<{
+        id: string;
+        property_uuid: string;
+        title: string;
+        description: string;
+        address: string;
+        property_type: string;
+        rental_space: string;
+        num_bedroom: number;
+        num_bathroom: number;
+        gross_area_size: number;
+        gross_area_size_unit: string;
+        furnished: boolean;
+        pets_allowed: boolean;
+        amenities: string[];
+        display_image: string;
+        uploaded_images: string[];
+        rental_price: number;
+        rental_price_currency: string;
+        availability_date: string | null;
+        is_public: boolean;
+        status: string;
+        created_at: string;
+        updated_at: string;
+        landlord_firebase_uid: string;
+      }>;
+    };
+
+    if (!typedData.real_estate_property_listing || typedData.real_estate_property_listing.length === 0) {
+      return null;
+    }
+
+    const property = typedData.real_estate_property_listing[0];
+    
+    return {
+      success: true,
+      data: {
+        property: {
+          id: property.id,
+          property_uuid: property.property_uuid,
+          title: property.title,
+          description: property.description,
+          address: property.address,
+          property_type: property.property_type,
+          rental_space: property.rental_space,
+          bedrooms: property.num_bedroom,
+          bathrooms: property.num_bathroom,
+          gross_area_size: property.gross_area_size,
+          gross_area_size_unit: property.gross_area_size_unit,
+          furnished: property.furnished,
+          pets_allowed: property.pets_allowed,
+          amenities: property.amenities,
+          display_image: property.display_image,
+          uploaded_images: property.uploaded_images,
+          price: property.rental_price,
+          rental_price_currency: property.rental_price_currency,
+          availability_date: property.availability_date,
+          is_public: property.is_public,
+          status: property.status,
+          created_at: property.created_at,
+          updated_at: property.updated_at,
+          owner_id: property.landlord_firebase_uid,
+          // Add location field for compatibility
+          location: typeof property.address === 'string' ? property.address : 'Location not specified'
+        }
+      }
+    };
+  } catch (error) {
+    console.error('Error fetching property data for metadata:', error);
+    return null;
+  }
+}
 
 export async function generatePropertyMetadata(
   propertyId: string
 ): Promise<Metadata> {
   try {
-    // Fetch property data
-    const response = await propertiesAPI.getPropertyByUuid(propertyId);
+    // Fetch property data using server-side fetch
+    const response = await fetchPropertyData(propertyId);
     
-    if (!response.success || !response.data?.property) {
+    if (!response || !response.success || !response.data?.property) {
       // Fallback metadata if property not found
       return {
         title: 'Property Not Found - dropiti',
@@ -32,8 +140,7 @@ export async function generatePropertyMetadata(
     const property = response.data.property;
     
     // Get the main property image
-    const propertyImage = property.image_url || 
-                         property.display_image || 
+    const propertyImage = property.display_image || 
                          (property.uploaded_images && property.uploaded_images.length > 0 ? property.uploaded_images[0] : null) ||
                          '/images/dropiti_logo.png';
 

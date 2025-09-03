@@ -93,12 +93,13 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
       lastMessageTime: contact.lastMessageTime,
       unreadCount: contact.unreadCount,
       isOnline: contact.isOnline,
-      role: contact.role
+      role: contact.role,
+      firebaseUid: contact.firebaseUid
     }));
   }, [contacts]);
 
   // Handle contact selection
-  const handleContactSelect = useCallback((contact: ChatSidebarContact) => {
+  const handleContactSelect = useCallback((contact: ChatContact) => {
     const fullContact = contacts.find(c => c.id === contact.id);
     if (fullContact) {
       setSelectedContact(fullContact);

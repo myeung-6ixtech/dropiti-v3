@@ -113,7 +113,7 @@ export default function DashboardPage() {
       responseRate: authUser.responseRate || 0,
       avgResponseTime: authUser.avgResponseTime || 'Not specified',
       totalProperties: authUser.totalProperties || 0,
-      totalGuests: authUser.totalGuests || 0
+      publishedProperties: authUser.totalProperties || 0
     }
   };
 
@@ -167,8 +167,8 @@ export default function DashboardPage() {
               <div className="dashboard-stat-label">Properties</div>
             </div>
             <div className="dashboard-stat-item">
-              <div className="dashboard-stat-value">{userData.stats.totalGuests}</div>
-              <div className="dashboard-stat-label">Tenants</div>
+              <div className="dashboard-stat-value">{userData.stats.publishedProperties}</div>
+              <div className="dashboard-stat-label">Published</div>
             </div>
             <div className="dashboard-stat-item">
               <div className="dashboard-stat-value">{userData.stats.responseRate}%</div>

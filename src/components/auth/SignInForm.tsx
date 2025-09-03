@@ -141,7 +141,7 @@ export default function SignInForm() {
                 Remember me
               </label>
             </div>
-            <Link href="/reset-password" className={authClasses.linkSecondary}>
+            <Link href="/auth/reset-password" className={authClasses.linkSecondary}>
               Forgot password?
             </Link>
           </div>

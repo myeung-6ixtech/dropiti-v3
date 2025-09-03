@@ -65,7 +65,7 @@ export const decryptMessage = (encryptedData: string): string => {
     const decipher = crypto.createDecipheriv(ALGORITHM, key, iv);
     
     // Decrypt the message
-    let decrypted = decipher.update(encrypted, null, 'utf8');
+    let decrypted = decipher.update(encrypted, undefined, 'utf8');
     decrypted += decipher.final('utf8');
     
     return decrypted;
