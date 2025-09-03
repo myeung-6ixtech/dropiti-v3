@@ -89,7 +89,6 @@ export const useRealTimeChat = ({ roomId, pollingInterval = 2000 }: UseRealTimeC
       // Create optimistic message
       const optimisticMessage: ChatMessage = {
         id: `temp-${Date.now()}`, // Temporary ID
-        room_id: roomId,
         sender_firebase_uid: authUser.id,
         content: content.trim(),
         message_type: 'text',

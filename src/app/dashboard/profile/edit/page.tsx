@@ -38,7 +38,7 @@ interface UserProfile {
   stats: {
     responseRate: number;
     totalProperties: number;
-    totalGuests: number;
+    publishedProperties: number;
   };
 }
 
@@ -64,7 +64,7 @@ export default function EditProfilePage() {
     stats: {
       responseRate: 98,
       totalProperties: 5,
-      totalGuests: 47
+      publishedProperties: 5
     }
   });
 
@@ -119,7 +119,7 @@ export default function EditProfilePage() {
               stats: {
                 responseRate: userData.response_rate || 0,
                 totalProperties: 0,
-                totalGuests: 0
+                publishedProperties: 0
               }
             };
             

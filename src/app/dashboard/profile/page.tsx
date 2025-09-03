@@ -36,7 +36,7 @@ interface UserProfile {
   stats: {
     responseRate: number;
     totalProperties: number;
-    totalGuests: number;
+    publishedProperties: number;
   };
 }
 
@@ -62,7 +62,7 @@ export default function ProfilePage() {
     stats: {
       responseRate: 98,
       totalProperties: 5,
-      totalGuests: 47
+      publishedProperties: 5
     }
   });
 
@@ -111,7 +111,7 @@ export default function ProfilePage() {
               stats: {
                 responseRate: userData.response_rate || 0,
                 totalProperties: 0,
-                totalGuests: 0
+                publishedProperties: 0
               }
             };
             
@@ -152,7 +152,7 @@ export default function ProfilePage() {
       responseRate: profile.stats.responseRate,
       avgResponseTime: '1h',
       totalProperties: profile.stats.totalProperties,
-      totalGuests: profile.stats.totalGuests
+      publishedProperties: profile.stats.totalProperties
     }
   });
 

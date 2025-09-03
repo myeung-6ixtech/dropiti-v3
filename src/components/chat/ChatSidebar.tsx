@@ -11,7 +11,8 @@ interface ChatContact {
   lastMessageTime: Date;
   unreadCount: number;
   isOnline: boolean;
-  role?: 'landlord' | 'tenant' | 'support';
+  role: 'landlord' | 'tenant' | 'support';
+  firebaseUid: string;
 }
 
 interface ChatSidebarProps {

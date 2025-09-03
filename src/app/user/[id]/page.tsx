@@ -105,7 +105,7 @@ export default function UserProfilePage() {
       responseRate: user.response_rate,
       avgResponseTime: user.avg_response_time || 'Unknown',
       totalProperties: user.total_properties,
-      totalGuests: user.total_guests
+      publishedProperties: user.total_properties
     }
   });
 
