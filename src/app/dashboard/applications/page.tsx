@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import OutgoingOffers from '@/components/common/OutgoingOffers';
+import AllOutgoingOffers from '@/components/common/AllOutgoingOffers';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export default function ApplicationsPage() {
@@ -16,9 +16,19 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Outgoing Offers Component */}
-      <OutgoingOffers
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <div className="border-b border-gray-200 pb-4">
+          <h1 className="text-3xl font-bold text-gray-900">Your Applications</h1>
+          <p className="text-gray-600 mt-2">
+            Track and manage your rental applications
+          </p>
+        </div>
+      </div>
+
+      {/* All Outgoing Offers Component with Tabs */}
+      <AllOutgoingOffers
         initiatorFirebaseUid={authUser.id}
         title="Your Rental Applications"
         showPropertyInfo={true}

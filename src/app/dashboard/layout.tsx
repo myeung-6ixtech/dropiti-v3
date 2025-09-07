@@ -104,6 +104,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const landlordNavigation = [
     { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: 'Offers', icon: ClockIcon, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
     { name: 'Properties', icon: PropertyListings, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
     { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
     { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },

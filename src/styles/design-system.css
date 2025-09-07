@@ -772,6 +772,10 @@
     @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500 border-gray-300;
   }
 
+  .btn-tertiary {
+    @apply btn bg-purple-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500 border-gray-300;
+  }
+
   .btn-success {
     @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-sm hover:shadow-md;
   }
@@ -2249,3 +2253,5 @@
   background-color: var(--color-brand-icon-bg);
   color: var(--color-brand-icon-text);
 }
+/* Dashboard Tab Styles */
+@import './dashboard-tabs.css';

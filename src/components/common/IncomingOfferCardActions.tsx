@@ -140,12 +140,12 @@ export default function IncomingOfferCardActions({
   // Rule 2: For pending offers, recipient (landlord) can Accept, Reject, or Counter
   if (offer.offerStatus === 'pending') {
     return (
-      <div className="pt-4 border-t border-gray-200">
+      <div className="pt-4 border-t border-gray-200 mb-4">
         <div className="flex space-x-3">
           {onAcceptOffer && (
             <button
               onClick={handleAcceptOffer}
-              className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+              className="btn-primary flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
               disabled={isAccepting}
             >
               <CheckIcon className="h-4 w-4 mr-2" />
@@ -155,7 +155,7 @@ export default function IncomingOfferCardActions({
           {onRejectOffer && (
             <button
               onClick={handleRejectOffer}
-              className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+              className="flex-1 btn-secondary text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
               disabled={isRejecting}
             >
               <XMarkIcon className="h-4 w-4 mr-2" />
@@ -165,7 +165,7 @@ export default function IncomingOfferCardActions({
           {onCounterOffer && (
             <button
               onClick={() => onCounterOffer(offer.id)}
-              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="btn-secondary flex-1 text-white py-2 px-4 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Counter Offer
             </button>
@@ -219,7 +219,7 @@ export default function IncomingOfferCardActions({
   // Rule 6: If initiator made final counter, recipient can only Accept or Reject
   if (offer.offerStatus === 'countered' && offer.lastActionType === 'INITIATOR_COUNTERED') {
     return (
-      <div className="pt-4 border-t border-gray-200">
+      <div className="pt-4 border-t border-gray-200 mb-4">
         <div className="space-y-4">
           {/* Show final counter offer details */}
           <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
@@ -250,7 +250,7 @@ export default function IncomingOfferCardActions({
           </div>
           
           {/* Accept/Reject buttons */}
-          <div className="flex space-x-3">
+          <div className="flex space-x-3 mb-4">
             {onAcceptOffer && (
               <button
                 onClick={handleAcceptOffer}

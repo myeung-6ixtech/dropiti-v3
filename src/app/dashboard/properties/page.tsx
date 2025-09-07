@@ -152,7 +152,7 @@ export default function PropertiesPage() {
             onClick={() => setActiveTab('published')}
             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'published'
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -167,13 +167,13 @@ export default function PropertiesPage() {
             onClick={() => setActiveTab('drafts')}
             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'drafts'
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             Drafts
             {drafts.length > 0 && (
-              <span className="ml-2 bg-blue-100 text-blue-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+              <span className="ml-2 bg-purple-100 text-purple-700 py-0.5 px-2.5 rounded-full text-xs font-medium">
                 {drafts.length}
               </span>
             )}

@@ -45,18 +45,6 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-
-
   // Extract District and Country for simplified display (same logic as PropertyCard)
   const getSimplifiedLocation = () => {
     if (!draft.address) return 'No Location';
@@ -80,14 +68,23 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
 
   return (
     <div className={propertyCardClasses.container}>
-      {/* Draft Status Badge - Top Right */}
+      {/* Draft Status Badge - Top Left */}
       <div className="absolute top-3 left-3 z-10">
         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
           Draft
         </span>
       </div>
 
-
+      {/* Edit Icon - Top Right (matching PropertyCard design) */}
+      <div className={propertyCardClasses.editIcon.container}>
+        <button
+          onClick={() => onContinue(draft.property_uuid)}
+          className={propertyCardClasses.editIcon.link}
+          title="Edit Draft"
+        >
+          <PencilIcon className={propertyCardClasses.editIcon.svg} />
+        </button>
+      </div>
 
       {/* Property Image */}
       <div className={propertyCardClasses.image.container}>
@@ -135,13 +132,6 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
               </span>
             </div>
           </div>
-
-          {/* Property Type */}
-          {draft.property_type && (
-            <div className={propertyCardClasses.features.type}>
-              {draft.property_type}
-            </div>
-          )}
         </div>
 
         {/* Price */}
@@ -154,31 +144,15 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
           </div>
         </div>
 
-
-
-        {/* Last Saved Info */}
-        <div className="text-xs text-gray-500 mb-4">
-          Last saved: {formatDate(draft.last_saved_at)}
-        </div>
-
-        {/* Draft Actions */}
-        <div className={propertyCardClasses.actions.container}>
-          <button
-            onClick={() => onContinue(draft.property_uuid)}
-            className={`${propertyCardClasses.actions.button} ${propertyCardClasses.actions.buttonPrimary}`}
-          >
-            <PencilIcon className="h-4 w-4 mr-2" />
-            Edit
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className={`${propertyCardClasses.actions.button} bg-red-600 text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center`}
-          >
-            <TrashIcon className="h-4 w-4 mr-2" />
-            {isDeleting ? 'Deleting...' : 'Delete'}
-          </button>
-        </div>
+        {/* Delete Button - Secondary black-stroke button */}
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="w-full mt-4 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <TrashIcon className="h-4 w-4 mr-2" />
+          {isDeleting ? 'Deleting...' : 'Delete Draft'}
+        </button>
       </div>
     </div>
   );

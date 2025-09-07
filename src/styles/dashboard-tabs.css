@@ -1,0 +1,64 @@
+/* Dashboard Tab Styles - Standardized Purple Design */
+
+/* Tab Container */
+.dashboard-tabs-container {
+  @apply bg-white border-b border-gray-200;
+}
+
+.dashboard-tabs-nav {
+  @apply -mb-px flex space-x-8;
+}
+
+/* Tab Button Base Styles */
+.dashboard-tab-button {
+  @apply py-2 px-1 border-b-2 font-medium text-sm transition-colors;
+}
+
+/* Tab Button States */
+.dashboard-tab-button-active {
+  @apply border-purple-500 text-purple-600;
+}
+
+.dashboard-tab-button-inactive {
+  @apply border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+}
+
+/* Tab Button with Icons */
+.dashboard-tab-button-with-icon {
+  @apply flex items-center space-x-2;
+}
+
+/* Tab Count Badge */
+.dashboard-tab-count {
+  @apply bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium;
+}
+
+/* Tab Count Badge for Active Tab */
+.dashboard-tab-count-active {
+  @apply bg-purple-100 text-purple-700;
+}
+
+/* Large Tab Variant (for properties page) */
+.dashboard-tab-button-large {
+  @apply py-4 px-1 border-b-2 font-medium text-sm transition-colors;
+}
+
+/* Tab Content Container */
+.dashboard-tab-content {
+  @apply space-y-6;
+}
+
+/* Responsive Tab Navigation */
+@media (max-width: 640px) {
+  .dashboard-tabs-nav {
+    @apply flex-wrap space-x-4;
+  }
+  
+  .dashboard-tab-button {
+    @apply py-3 px-2 text-xs;
+  }
+  
+  .dashboard-tab-button-large {
+    @apply py-3 px-2 text-xs;
+  }
+}

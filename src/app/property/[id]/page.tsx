@@ -18,6 +18,7 @@ import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
 import { getAmenityIcon } from '@/constants/amenity-icons';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
 import { Bed, Bathtub, Clock } from '@/assets/icons';
+import PropertyMap from '@/components/common/PropertyMap';
 
 interface PropertyData {
   id: string;
@@ -481,38 +482,32 @@ export default function PropertyDetailPage() {
               </div>
               
               {/* Image Thumbnails Gallery */}
-              {allImages.length > 1 ? (
-                <div className="grid grid-cols-4 gap-2">
-                  {allImages.slice(0, 4).map((image, index) => (
-                    <div
-                      key={index}
-                      className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => openGallery(index)}
-                    >
-                      <Image
-                        src={image}
-                        alt={`${property.title} - Image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+              <div className="grid grid-cols-4 gap-2">
+                {allImages.slice(0, 4).map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => openGallery(index)}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${property.title} - Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
+                {allImages.length > 4 && (
+                  <div 
+                    className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity bg-gray-800"
+                    onClick={() => openGallery(4)}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center text-white">
+                      <span className="text-sm font-medium">+{allImages.length - 4}</span>
                     </div>
-                  ))}
-                  {allImages.length > 4 && (
-                    <div 
-                      className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity bg-gray-800"
-                      onClick={() => openGallery(4)}
-                    >
-                      <div className="absolute inset-0 flex items-center justify-center text-white">
-                        <span className="text-sm font-medium">+{allImages.length - 4}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <p className="text-gray-500 text-sm">No additional photos available</p>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Property Title and Basic Info */}
@@ -633,6 +628,40 @@ export default function PropertyDetailPage() {
               </div>
             </div>
 
+            {/* Location Section */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Location</h2>
+              <div className="space-y-4">
+                {/* Address Display */}
+                <div>
+                  <span className="text-gray-600 text-sm">Address</span>
+                  <p className="text-gray-900 font-medium">
+                    {(() => {
+                      const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
+                      return formattedAddress || property.location;
+                    })()}
+                  </p>
+                </div>
+                
+                {/* Map Component */}
+                <div className="rounded-lg overflow-hidden border border-gray-200">
+                  <PropertyMap 
+                    address={(() => {
+                      const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
+                      return formattedAddress || property.location;
+                    })()}
+                    location={property.location}
+                    className="w-full"
+                    disableGeocoding={false}
+                  />
+                </div>
+                
+                {/* Additional Location Info */}
+                <div className="text-sm text-gray-600">
+                  <p>📍 Click and drag to explore the area around this property</p>
+                </div>
+              </div>
+            </div>
 
           </div>
 
@@ -720,7 +749,7 @@ export default function PropertyDetailPage() {
                   e.stopPropagation();
                   nextImage();
                 }}
-                className=" absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-2"
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 z-10 text-white hover:text-gray-300 transition-colors bg-black bg-opacity-50 rounded-full p-2"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
