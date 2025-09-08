@@ -215,15 +215,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </>
                   )}
                 </div>
-                <div className="mt-1 text-xs text-gray-500">
-                  {isViewChanging 
-                    ? 'Switching view mode...' 
-                    : `Click to switch to ${activeView === 'tenant' ? 'Landlord' : 'Tenant'} View`
-                  }
-                </div>
-                <div className={`mt-2 w-2 h-2 rounded-full ${
-                  activeView === 'tenant' ? 'bg-blue-500' : 'bg-green-500'
-                }`} title={`Currently in ${activeView} mode`}></div>
               </button>
 
             </div>
@@ -254,7 +245,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="dashboard-sidebar-footer">
             <div className="dashboard-footer-links">
               <p className="text-xs text-gray-500 text-center">
-                © 2024 dropiti. All rights reserved.
+                © 2025 dropiti. All rights reserved.
               </p>
             </div>
           </div>
