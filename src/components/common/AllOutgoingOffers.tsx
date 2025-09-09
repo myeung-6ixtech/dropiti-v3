@@ -158,14 +158,6 @@ export default function AllOutgoingOffers({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <p className="text-gray-600 mt-1">
-          {offers.length} application{offers.length !== 1 ? 's' : ''} submitted
-        </p>
-      </div>
-
       {/* Filter Tabs */}
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">

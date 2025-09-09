@@ -36,7 +36,7 @@ export default function OfferCard({
   onOfferStatusChange
 }: OfferCardProps) {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
       {/* Offer Header */}
       <OfferUserDetails
         offer={offer}
