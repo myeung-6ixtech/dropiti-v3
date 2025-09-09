@@ -171,13 +171,8 @@ export default function OutgoingOfferCardStatus({
           </div>
           <div className="ml-3">
             <h3 className="text-sm font-medium text-purple-800 mb-0">
-              📋 Your offer is pending landlord review
+              Your offer is pending landlord review. The landlord will review your offer and respond soon.
             </h3>
-            <div className="mt-2 text-sm mb-0">
-              <p className="text-sm text-gray-600 mb-0">
-                The landlord will review your offer and respond soon
-              </p>
-            </div>
           </div>
         </div>
       </div>

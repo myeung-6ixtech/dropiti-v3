@@ -193,12 +193,12 @@ export default function OutgoingOfferCardActions({
   // Rule 1: For pending offers, initiator (tenant) can only withdraw or view property
   if (offer.offerStatus === 'pending') {
     return (
-      <div className="pt-4 border-t border-gray-200">
+      <div className="pt-4 border-t border-gray-200 mb-4">
         <div className="flex space-x-3">
           {onWithdrawOffer && (
             <button
               onClick={handleWithdrawOffer}
-              className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+              className="btn-primary flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
               disabled={isWithdrawing}
             >
               <XMarkIcon className="h-4 w-4 mr-2" />
@@ -208,7 +208,7 @@ export default function OutgoingOfferCardActions({
           {offer.property && (
             <Link
               href={`/property/${offer.propertyUuid}`}
-              className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center justify-center"
+              className="btn-secondary flex-1 bg-gray-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center justify-center"
             >
               <span>View Property</span>
             </Link>

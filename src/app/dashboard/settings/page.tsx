@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { usersAPI } from '@/lib/api-client';
 import { 
   UserIcon, 
@@ -29,9 +30,9 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const { user: authUser } = useAuth();
+  const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
   const [settings, setSettings] = useState<UserSettings>({
     firstName: 'John',
@@ -87,19 +88,13 @@ export default function SettingsPage() {
             setTempSettings(newSettings);
           } else {
             console.error('Failed to load user settings:', response.error);
-            setSaveMessage({
-              type: 'error',
-              message: response.error || 'Failed to load settings data'
-            });
+            showToast('error', response.error || 'Failed to load settings data');
             // Keep default settings if API fails
             console.log('Keeping default settings due to API failure');
           }
         } catch (error) {
           console.error('Failed to load user settings:', error);
-          setSaveMessage({
-            type: 'error',
-            message: 'Failed to load settings data'
-          });
+          showToast('error', 'Failed to load settings data');
           // Keep default settings if API fails
           console.log('Keeping default settings due to API error');
         } finally {
@@ -166,16 +161,12 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     if (!authUser?.id) {
-      setSaveMessage({
-        type: 'error',
-        message: 'You must be logged in to save changes'
-      });
+      showToast('error', 'You must be logged in to save changes');
       return;
     }
 
     try {
       setIsLoading(true);
-      setSaveMessage(null);
 
       console.log('Saving settings for Firebase UID:', authUser.id);
       
@@ -209,22 +200,13 @@ export default function SettingsPage() {
 
       if (updateResponse.success) {
         setSettings(tempSettings);
-        setSaveMessage({
-          type: 'success',
-          message: 'Settings updated successfully!'
-        });
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => setSaveMessage(null), 3000);
+        showToast('success', 'Settings updated successfully!');
       } else {
         throw new Error(updateResponse.error || 'Failed to update settings');
       }
     } catch (error) {
       console.error('Failed to save settings:', error);
-      setSaveMessage({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Failed to save settings'
-      });
+      showToast('error', error instanceof Error ? error.message : 'Failed to save settings');
     } finally {
       setIsLoading(false);
     }
@@ -232,7 +214,6 @@ export default function SettingsPage() {
 
   const handleCancel = () => {
     setTempSettings(settings);
-    setSaveMessage(null);
   };
 
   const tabs = [
@@ -251,7 +232,7 @@ export default function SettingsPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Personal Information</h2>
               <p className="text-gray-600">Update your personal details and contact information.</p>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div>
@@ -297,7 +278,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className={`px-4 py-2 rounded-md transition-colors font-medium ${
+                  className={`btn-secondary px-4 py-2 rounded-md transition-colors font-medium ${
                     isLoading 
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
@@ -308,7 +289,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSave}
                   disabled={isLoading}
-                  className={`px-4 py-2 text-white rounded-md transition-colors font-medium ${
+                  className={`btn-primary px-4 py-2 text-white rounded-md transition-colors font-medium ${
                     isLoading 
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-blue-600 hover:bg-blue-700'
@@ -335,7 +316,7 @@ export default function SettingsPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Notification Preferences</h2>
               <p className="text-gray-600">Choose how you want to be notified about important updates.</p>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -389,7 +370,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className={`px-4 py-2 rounded-md transition-colors font-medium ${
+                  className={`btn-secondary px-4 py-2 rounded-md transition-colors font-medium ${
                     isLoading 
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
@@ -400,7 +381,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSave}
                   disabled={isLoading}
-                  className={`px-4 py-2 text-white rounded-md transition-colors font-medium ${
+                  className={`btn-primary px-4 py-2 text-white rounded-md transition-colors font-medium ${
                     isLoading 
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-blue-600 hover:bg-blue-700'
@@ -427,7 +408,7 @@ export default function SettingsPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Security Settings</h2>
               <p className="text-gray-600">Manage your account security and privacy.</p>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="space-y-4">
                   <div>
@@ -456,7 +437,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="flex justify-end pt-6 border-t border-gray-200">
-                  <button className="px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors">
+                  <button className="btn-primary px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors">
                     Update Password
                   </button>
                 </div>
@@ -472,7 +453,7 @@ export default function SettingsPage() {
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Preferences</h2>
               <p className="text-gray-600">Customize your experience and app settings.</p>
             </div>
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="space-y-4">
                   <div>
@@ -513,7 +494,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
-                  className={`px-4 py-2 rounded-md transition-colors font-medium ${
+                  className={`btn-secondary px-4 py-2 rounded-md transition-colors font-medium ${
                     isLoading 
                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
@@ -524,7 +505,7 @@ export default function SettingsPage() {
                 <button
                   onClick={handleSave}
                   disabled={isLoading}
-                  className={`px-4 py-2 text-white rounded-md transition-colors font-medium ${
+                  className={`btn-primary px-4 py-2 text-white rounded-md transition-colors font-medium ${
                     isLoading 
                       ? 'bg-gray-400 cursor-not-allowed' 
                       : 'bg-blue-600 hover:bg-blue-700'
@@ -570,24 +551,6 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Save Message */}
-        {saveMessage && (
-          <div className={`mb-6 border rounded-lg p-4 ${
-            saveMessage.type === 'success' 
-              ? 'bg-green-50 border-green-200 text-green-800' 
-              : 'bg-red-50 border-red-200 text-red-800'
-          }`}>
-            <div className="flex items-center justify-between">
-              <span>{saveMessage.message}</span>
-              <button
-                onClick={() => setSaveMessage(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ×
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Tab Navigation */}
         <div className="border-b border-gray-200 mb-8">

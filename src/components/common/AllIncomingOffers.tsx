@@ -6,6 +6,7 @@ import { offersAPI, propertiesAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
+import EmptyState from '@/components/common/EmptyState';
 import { Offer } from '@/types/offer';
 
 interface AllIncomingOffersProps {
@@ -281,14 +282,11 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
 
   if (offers.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">No Offers Yet</h3>
-          <p className="text-gray-600 mb-4">
-            You haven&apos;t received any offers for your properties yet.
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        icon="📬"
+        title="No Offers Yet"
+        description="You haven't received any offers for your properties yet. When tenants are interested in your listings, their offers will appear here."
+      />
     );
   }
 

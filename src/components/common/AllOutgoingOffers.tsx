@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
+import EmptyState from '@/components/common/EmptyState';
 import Toast from '@/components/ui/Toast';
 import { Offer } from '@/types/offer';
 
@@ -134,25 +135,13 @@ export default function AllOutgoingOffers({
 
   if (offers.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
-          <div className="text-gray-400 mb-4">
-            <div className="mx-auto h-12 w-12 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-2xl">📋</span>
-            </div>
-          </div>
-          <h3 className="text-lg font-medium text-gray-800 mb-2">No Applications Yet</h3>
-          <p className="text-gray-600 mb-4">
-            You haven&apos;t submitted any rental applications yet.
-          </p>
-          <Link
-            href="/search"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Browse Properties
-          </Link>
-        </div>
-      </div>
+      <EmptyState
+        icon="📝"
+        title="No Applications Yet"
+        description="You haven't submitted any rental applications yet. Start by browsing available properties and submitting your first application."
+        actionText="Browse Properties"
+        actionHref="/search"
+      />
     );
   }
 
