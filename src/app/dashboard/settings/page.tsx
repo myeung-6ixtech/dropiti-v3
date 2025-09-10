@@ -51,7 +51,22 @@ export default function SettingsPage() {
     },
   });
 
-  const [tempSettings, setTempSettings] = useState<UserSettings>(settings);
+  const [tempSettings, setTempSettings] = useState<UserSettings>({
+    firstName: settings.firstName || '',
+    lastName: settings.lastName || '',
+    email: settings.email || '',
+    phone: settings.phone || '',
+    notifications: {
+      email: Boolean(settings.notifications.email),
+      push: Boolean(settings.notifications.push),
+      sms: Boolean(settings.notifications.sms),
+    },
+    preferences: {
+      language: settings.preferences.language || 'English',
+      timezone: settings.preferences.timezone || 'Asia/Hong_Kong (UTC+8)',
+      currency: settings.preferences.currency || 'HKD (Hong Kong Dollar)',
+    },
+  });
 
   // Load user settings from API when component mounts
   useEffect(() => {
@@ -109,26 +124,6 @@ export default function SettingsPage() {
     loadUserSettings();
   }, [authUser?.id]);
 
-  useEffect(() => {
-    // Ensure all values are defined before setting tempSettings
-    const safeSettings = {
-      firstName: String(settings.firstName || ''),
-      lastName: String(settings.lastName || ''),
-      email: String(settings.email || ''),
-      phone: String(settings.phone || ''),
-      notifications: {
-        email: Boolean(settings.notifications.email),
-        push: Boolean(settings.notifications.push),
-        sms: Boolean(settings.notifications.sms),
-      },
-      preferences: {
-        language: String(settings.preferences.language || ''),
-        timezone: String(settings.preferences.timezone || ''),
-        currency: String(settings.preferences.currency || ''),
-      },
-    };
-    setTempSettings(safeSettings);
-  }, [settings]);
 
   const handleInputChange = (field: keyof UserSettings, value: string | boolean | object) => {
     // Ensure the value is never undefined
@@ -235,41 +230,41 @@ export default function SettingsPage() {
             <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">First Name</label>
+                  <div className="space-y-2">
+                    <label className="form-label">First Name</label>
                     <input
                       type="text"
                       value={tempSettings.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-input"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Last Name</label>
+                  <div className="space-y-2">
+                    <label className="form-label">Last Name</label>
                     <input
                       type="text"
                       value={tempSettings.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 text-gray-700 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-input"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Email</label>
+                  <div className="space-y-2">
+                    <label className="form-label">Email</label>
                     <input
                       type="email"
                       value={tempSettings.email}
                       disabled
-                      className="mt-1 block w-full rounded-md text-gray-700 border-gray-300 bg-gray-50 text-gray-500 shadow-sm sm:text-sm cursor-not-allowed"
+                      className="form-input bg-gray-50 text-gray-500 cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Email cannot be changed as it's linked to your account</p>
+                    <p className="text-xs text-gray-500">Email cannot be changed as it's linked to your account</p>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Phone</label>
+                  <div className="space-y-2">
+                    <label className="form-label">Phone</label>
                     <input
                       type="tel"
                       value={tempSettings.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="mt-1 block w-full rounded-md text-gray-700 border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-input"
                     />
                   </div>
                 </div>
@@ -410,28 +405,28 @@ export default function SettingsPage() {
             </div>
             <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Current Password</label>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="form-label">Current Password</label>
                     <input
                       type="password"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-input"
                       placeholder="Enter current password"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">New Password</label>
+                  <div className="space-y-2">
+                    <label className="form-label">New Password</label>
                     <input
                       type="password"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-input"
                       placeholder="Enter new password"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                  <div className="space-y-2">
+                    <label className="form-label">Confirm New Password</label>
                     <input
                       type="password"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-input"
                       placeholder="Confirm new password"
                     />
                   </div>
@@ -455,42 +450,42 @@ export default function SettingsPage() {
             </div>
             <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Language</label>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="form-label">Language</label>
                     <select 
                       value={tempSettings.preferences.language}
                       onChange={(e) => handlePreferenceChange('language', e.target.value)}
-                      className="mt-1 block w-full rounded-md text-gray-700 border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-select"
                     >
                       <option value="English">English</option>
                       <option value="繁體中文">繁體中文</option>
                       <option value="简体中文">简体中文</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Time Zone</label>
+                  <div className="space-y-2">
+                    <label className="form-label">Time Zone</label>
                     <select 
                       value={tempSettings.preferences.timezone}
                       onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
-                      className="mt-1 block w-full rounded-md text-gray-700 border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-select"
                     >
                       <option value="Asia/Hong_Kong (UTC+8)">Asia/Hong_Kong (UTC+8)</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Currency</label>
+                  <div className="space-y-2">
+                    <label className="form-label">Currency</label>
                     <select 
                       value={tempSettings.preferences.currency}
                       onChange={(e) => handlePreferenceChange('currency', e.target.value)}
-                      className="mt-1 block w-full rounded-md text-gray-700 border-gray-300 shadow-sm focus:border-black focus:ring-black sm:text-sm"
+                      className="form-select"
                     >
                       <option value="HKD (Hong Kong Dollar)">HKD (Hong Kong Dollar)</option>
                     </select>
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 mt-6">
                 <button
                   onClick={handleCancel}
                   disabled={isLoading}
@@ -540,18 +535,6 @@ export default function SettingsPage() {
             Manage your account settings and preferences
           </p>
         </div>
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <div className="flex items-center">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-3"></div>
-              <span className="text-gray-800">Loading settings data...</span>
-            </div>
-          </div>
-        )}
-
-
         {/* Tab Navigation */}
         <div className="border-b border-gray-200 mb-8">
           <nav className="-mb-px flex space-x-8">
