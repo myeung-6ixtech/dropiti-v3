@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, sendPasswordResetEmail, confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth';
+import { getAuth, sendPasswordResetEmail, confirmPasswordReset, verifyPasswordResetCode, applyActionCode } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -29,5 +29,6 @@ export {
   auth, 
   sendPasswordResetEmail, 
   confirmPasswordReset, 
-  verifyPasswordResetCode 
+  verifyPasswordResetCode,
+  applyActionCode
 };

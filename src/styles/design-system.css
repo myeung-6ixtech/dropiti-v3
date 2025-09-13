@@ -930,6 +930,7 @@
 
   .auth-text-center {
     @apply text-gray-600;
+    font-size: 0.85rem;
   }
 
   /* Buttons */
@@ -985,7 +986,8 @@
   }
 
   .auth-link {
-    @apply text-black font-medium hover:text-gray-800 transition-colors;
+    @apply text-black font-medium hover:text-gray-800 transition-colors mt-8;
+    font-size: 0.85rem;
   }
 
   .auth-link-secondary {

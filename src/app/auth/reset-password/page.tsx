@@ -19,7 +19,13 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      await sendPasswordResetEmail(auth, email);
+      // Configure the action URL to redirect to your universal auth action page
+      const actionCodeSettings = {
+        url: `${window.location.origin}/auth/`,
+        handleCodeInApp: true,
+      };
+      
+      await sendPasswordResetEmail(auth, email, actionCodeSettings);
       setSuccess(true);
     } catch (error: unknown) {
       console.error('Password reset error:', error);
@@ -57,8 +63,8 @@ export default function ResetPasswordPage() {
             
             <div className="text-center">
               <div className="mb-6">
-                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                  <svg className="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-primary-100 mb-4">
+                  <svg className="h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
@@ -69,38 +75,21 @@ export default function ResetPasswordPage() {
                   We've sent a password reset link to <strong>{email}</strong>
                 </p>
               </div>
-              
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <div className="flex items-start space-x-3">
-                  <svg className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <div className="text-sm text-blue-700">
-                    <p className="font-medium">What happens next?</p>
-                    <ul className="mt-2 space-y-1 text-blue-600">
-                      <li>• Check your email inbox (and spam folder)</li>
-                      <li>• Click the reset link in the email</li>
-                      <li>• Create a new password</li>
-                      <li>• Sign in with your new password</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-              
               <div className="space-y-3">
                 <button
                   onClick={() => {
                     setSuccess(false);
                     setEmail('');
                   }}
-                  className="btn-outline w-full"
+                  className="btn-secondary  w-full justify-center items-center"
                 >
                   Send Another Reset Email
                 </button>
-                
+                <div className="space-y-3">
                 <Link href="/auth/signin" className={authClasses.link}>
                   Back to Sign In
                 </Link>
+                </div>
               </div>
             </div>
           </div>
