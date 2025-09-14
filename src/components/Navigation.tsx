@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { UserIcon, ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
