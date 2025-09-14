@@ -8,22 +8,21 @@ import EmptyState from '@/components/common/EmptyState';
 import Toast from '@/components/ui/Toast';
 import { Offer } from '@/types/offer';
 
-
-
-interface OutgoingOffersProps {
+interface AllOutgoingOffersProps {
   initiatorFirebaseUid: string;
-  title?: string;
   showPropertyInfo?: boolean;
 }
 
-export default function OutgoingOffers({ 
+type FilterStatus = 'all' | 'pending' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
+
+export default function AllOutgoingOffers({ 
   initiatorFirebaseUid, 
-  title = "Your Applications",
   showPropertyInfo = true 
-}: OutgoingOffersProps) {
+}: AllOutgoingOffersProps) {
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
 
   const [toast, setToast] = useState({
     message: '',
@@ -49,20 +48,17 @@ export default function OutgoingOffers({
       try {
         setLoading(true);
         setError(null);
-                
+        
         const response = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
 
         if (response.success && response.data) {
           setOffers(response.data);
-          console.log('Outgoing offers fetched successfully:', response.data);
         } else {
-          throw new Error(response.error || 'Failed to fetch offers');
+          throw new Error(response.error || 'Failed to fetch applications');
         }
       } catch (err) {
-        console.error('Error fetching outgoing offers:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch offers';
-        setError(errorMessage);
-        showToast(errorMessage, 'error');
+        console.error('Error fetching applications:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch applications');
       } finally {
         setLoading(false);
       }
@@ -72,6 +68,46 @@ export default function OutgoingOffers({
       fetchOffers();
     }
   }, [initiatorFirebaseUid]);
+
+  // Filter offers based on status
+  const filteredOffers = offers.filter(offer => {
+    if (filterStatus === 'all') return true;
+    return offer.offerStatus === filterStatus;
+  });
+
+  const handleWithdrawOffer = async (offerId: string) => {
+    try {
+      const response = await offersAPI.withdrawOffer(offerId, initiatorFirebaseUid);
+      if (response.success) {
+        setOffers(prev => 
+          prev.map(offer => 
+            offer.id === offerId 
+              ? { ...offer, offerStatus: 'withdrawn' }
+              : offer
+          )
+        );
+        showToast('Application withdrawn successfully', 'success');
+      } else {
+        showToast(response.error || 'Failed to withdraw application', 'error');
+      }
+    } catch (error) {
+      console.error('Error withdrawing offer:', error);
+      showToast('Failed to withdraw application', 'error');
+    }
+  };
+
+  const getStatusCounts = () => {
+    return {
+      all: offers.length,
+      pending: offers.filter(o => o.offerStatus === 'pending').length,
+      countered: offers.filter(o => o.offerStatus === 'countered').length,
+      accepted: offers.filter(o => o.offerStatus === 'accepted').length,
+      rejected: offers.filter(o => o.offerStatus === 'rejected').length,
+      withdrawn: offers.filter(o => o.offerStatus === 'withdrawn').length,
+    };
+  };
+
+  const statusCounts = getStatusCounts();
 
   if (loading) {
     return <CenteredLoadingSpinner />;
@@ -108,34 +144,41 @@ export default function OutgoingOffers({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl font-bold text-gray-900">{title}</h2>
-        <p className="text-gray-600 mt-1">
-          {offers.length} application{offers.length !== 1 ? 's' : ''} submitted
-        </p>
+      {/* Filter Tabs */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {[
+            { key: 'all', label: 'All Applications', count: statusCounts.all },
+            { key: 'pending', label: 'Pending', count: statusCounts.pending },
+            { key: 'countered', label: 'Countered', count: statusCounts.countered },
+            { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
+            { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },
+            { key: 'withdrawn', label: 'Withdrawn', count: statusCounts.withdrawn },
+          ].map(({ key, label, count }) => (
+            <button
+              key={key}
+              onClick={() => setFilterStatus(key as FilterStatus)}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                filterStatus === key
+                  ? 'border-purple-500 text-purple-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {label} ({count})
+            </button>
+          ))}
+        </nav>
       </div>
 
-      {/* Offers List */}
+      {/* Applications List */}
       <div className="space-y-4">
-        {offers.map((offer) => (
+        {filteredOffers.map((offer) => (
           <OfferCard
             key={offer.id}
             offer={offer}
             showPropertyInfo={showPropertyInfo}
-
-            onWithdrawOffer={() => {
-              // Handle withdrawing offer
-              setOffers(prev => 
-                prev.map(o => 
-                  o.id === offer.id 
-                    ? { ...o, offerStatus: 'withdrawn' }
-                    : o
-                )
-              );
-              // TODO: Make API call to withdraw the offer
-              console.log('Withdrawing offer:', offer.id);
-            }}
+            isIncomingOffer={false}
+            onWithdrawOffer={handleWithdrawOffer}
             currentUserId={initiatorFirebaseUid}
             onOfferStatusChange={() => {
               // Refresh the offers list when an offer status changes
@@ -156,48 +199,11 @@ export default function OutgoingOffers({
               console.log('Counter offer requested for:', offerId);
               // TODO: Implement counter offer modal/form
             }}
-            onAcceptOffer={async (offerId: string) => {
-              try {
-                const response = await offersAPI.acceptOffer(offerId, initiatorFirebaseUid);
-                if (response.success) {
-                  showToast('Offer accepted successfully!', 'success');
-                  // Refresh offers list
-                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
-                  if (refreshResponse.success && refreshResponse.data) {
-                    setOffers(refreshResponse.data);
-                  }
-                } else {
-                  showToast('Failed to accept offer', 'error');
-                }
-              } catch (error) {
-                console.error('Error accepting offer:', error);
-                showToast('Error accepting offer', 'error');
-              }
-            }}
-            onRejectOffer={async (offerId: string) => {
-              try {
-                const response = await offersAPI.rejectOffer(offerId, initiatorFirebaseUid);
-                if (response.success) {
-                  showToast('Offer rejected successfully!', 'success');
-                  // Refresh offers list
-                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
-                  if (refreshResponse.success && refreshResponse.data) {
-                    setOffers(refreshResponse.data);
-                  }
-                } else {
-                  showToast('Failed to reject offer', 'error');
-                }
-              } catch (error) {
-                console.error('Error rejecting offer:', error);
-                showToast('Error rejecting offer', 'error');
-              }
-            }}
-
           />
         ))}
       </div>
 
-      {/* Toast Notification */}
+      {/* Toast */}
       <Toast
         message={toast.message}
         type={toast.type}

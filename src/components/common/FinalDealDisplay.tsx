@@ -93,14 +93,14 @@ export default function FinalDealDisplay({ offer }: FinalDealDisplayProps) {
             <div className="flex items-center">
               <CurrencyDollarIcon className="h-4 w-4 text-green-600 mr-2" />
               <span className="text-sm text-green-700">
-                <span className="font-medium">Monthly Rent:</span> {formatCurrency(finalTerms.rentPrice, finalTerms.currency)}
+                <span className="font-medium">Monthly Rent: </span> {formatCurrency(finalTerms.rentPrice, finalTerms.currency)}
               </span>
             </div>
             
             <div className="flex items-center">
               <ClockIcon className="h-4 w-4 text-green-600 mr-2" />
               <span className="text-sm text-green-700">
-                <span className="font-medium">Lease Duration:</span> {finalTerms.leasingMonths} month{finalTerms.leasingMonths !== 1 ? 's' : ''}
+                <span className="font-medium">Lease Duration: </span> {finalTerms.leasingMonths} month{finalTerms.leasingMonths !== 1 ? 's' : ''}
               </span>
             </div>
           </div>
@@ -109,14 +109,14 @@ export default function FinalDealDisplay({ offer }: FinalDealDisplayProps) {
             <div className="flex items-center">
               <CalendarIcon className="h-4 w-4 text-green-600 mr-2" />
               <span className="text-sm text-green-700">
-                <span className="font-medium">Move-in Date:</span> {formatDate(finalTerms.moveInDate)}
+                <span className="font-medium">Move-in Date: </span> {formatDate(finalTerms.moveInDate)}
               </span>
             </div>
             
             <div className="flex items-center">
               <CurrencyDollarIcon className="h-4 w-4 text-green-600 mr-2" />
               <span className="text-sm text-green-700">
-                <span className="font-medium">Payment Frequency:</span> {finalTerms.paymentFrequency}
+                <span className="font-medium">Payment Frequency: </span> {finalTerms.paymentFrequency}
               </span>
             </div>
           </div>
@@ -135,7 +135,7 @@ export default function FinalDealDisplay({ offer }: FinalDealDisplayProps) {
             {/* Rent Price Comparison */}
             {offer.finalRentPrice !== offer.proposingRentPrice && (
               <div className="flex items-center justify-between bg-white p-3 rounded border border-blue-200">
-                <span className="text-sm font-medium text-blue-800">Monthly Rent:</span>
+                <span className="text-sm font-medium text-blue-800">Monthly Rent: </span>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600 line-through">
                     {formatCurrency(originalTerms.rentPrice, originalTerms.currency)}
@@ -151,7 +151,7 @@ export default function FinalDealDisplay({ offer }: FinalDealDisplayProps) {
             {/* Lease Duration Comparison */}
             {offer.finalNumLeasingMonths !== offer.numLeasingMonths && (
               <div className="flex items-center justify-between bg-white p-3 rounded border border-blue-200">
-                <span className="text-sm font-medium text-blue-800">Lease Duration:</span>
+                <span className="text-sm font-medium text-blue-800">Lease Duration: </span>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600 line-through">
                     {originalTerms.leasingMonths} month{originalTerms.leasingMonths !== 1 ? 's' : ''}
@@ -167,7 +167,7 @@ export default function FinalDealDisplay({ offer }: FinalDealDisplayProps) {
             {/* Payment Frequency Comparison */}
             {offer.finalPaymentFrequency !== offer.paymentFrequency && (
               <div className="flex items-center justify-between bg-white p-3 rounded border border-blue-200">
-                <span className="text-sm font-medium text-blue-800">Payment Frequency:</span>
+                <span className="text-sm font-medium text-blue-800">Payment Frequency: </span>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600 line-through">
                     {originalTerms.paymentFrequency}
@@ -183,7 +183,7 @@ export default function FinalDealDisplay({ offer }: FinalDealDisplayProps) {
             {/* Move-in Date Comparison */}
             {offer.finalMoveInDate !== offer.moveInDate && (
               <div className="flex items-center justify-between bg-white p-3 rounded border border-blue-200">
-                <span className="text-sm font-medium text-blue-800">Move-in Date:</span>
+                <span className="text-sm font-medium text-blue-800">Move-in Date: </span>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-gray-600 line-through">
                     {formatDate(originalTerms.moveInDate)}

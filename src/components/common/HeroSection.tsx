@@ -77,13 +77,13 @@ export default function HeroSection() {
                   <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
                     {/* Location - Made larger on desktop */}
                     <div className="flex-1 sm:flex-[2] relative">
-                      <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-900" />
                       <input
                         type="text"
                         value={searchData.location}
                         onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
                         placeholder="Enter city, neighborhood, or address..."
-                        className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl"
+                        className="w-full pl-10 pr-4 py-4 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl mb-0"
                       />
                     </div>
 
@@ -93,7 +93,7 @@ export default function HeroSection() {
                       <select
                         value={searchData.bedrooms}
                         onChange={(e) => setSearchData({ ...searchData, bedrooms: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 bg-transparent rounded-xl appearance-none cursor-pointer"
+                        className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 bg-transparent rounded-xl appearance-none cursor-pointer mb-0"
                       >
                         <option value="">Any Bedrooms</option>
                         <option value="1">1 Bedroom</option>
@@ -102,11 +102,6 @@ export default function HeroSection() {
                         <option value="4">4 Bedrooms</option>
                         <option value="5">5+ Bedrooms</option>
                       </select>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                        <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
                     </div>
 
 

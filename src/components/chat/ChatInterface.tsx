@@ -224,8 +224,8 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900">{selectedContact.name}</h3>
-                  <p className="text-sm text-gray-500 capitalize">{selectedContact.role}</p>
+                  <h3 className="text-sm font-medium text-gray-900 capitalize mb-0">{selectedContact.name}</h3>
+                  <p className="text-xs text-gray-500 capitalize mb-0">{selectedContact.role}</p>
                 </div>
               </div>
             </div>

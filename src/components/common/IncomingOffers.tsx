@@ -5,6 +5,7 @@ import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import OfferCard from '@/components/common/OfferCard';
+import EmptyState from '@/components/common/EmptyState';
 import { Offer } from '@/types/offer';
 
 
@@ -155,14 +156,11 @@ export default function IncomingOffers({
 
   if (offers.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md mx-auto">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">No Offers Yet</h3>
-          <p className="text-gray-600 mb-4">
-            {propertyUuid ? 'This property has no offers yet.' : 'You have no incoming offers yet.'}
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        icon="📬"
+        title="No Offers Yet"
+        description={propertyUuid ? 'This property has no offers yet. When tenants are interested, their offers will appear here.' : 'You have no incoming offers yet. When tenants are interested in your listings, their offers will appear here.'}
+      />
     );
   }
 

@@ -295,6 +295,7 @@
   @apply bg-gray-900 text-white text-sm font-bold hover:bg-gray-800 transition-all duration-200 ml-4;
   padding: 0.5rem 0.75rem;
   border-radius: 0.75rem;
+  margin-left: 1.5rem !important;
   /* Custom padding and border radius as requested */
 }
 
@@ -308,6 +309,8 @@
 
 .nav-user-dropdown {
   @apply relative;
+  margin-left: 1.5rem !important;
+
 }
 
 .nav-user-button {
@@ -772,6 +775,10 @@
     @apply btn bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500 border-gray-300;
   }
 
+  .btn-tertiary {
+    @apply btn bg-purple-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-500 border-gray-300;
+  }
+
   .btn-success {
     @apply btn bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-sm hover:shadow-md;
   }
@@ -926,6 +933,7 @@
 
   .auth-text-center {
     @apply text-gray-600;
+    font-size: 0.85rem;
   }
 
   /* Buttons */
@@ -981,7 +989,8 @@
   }
 
   .auth-link {
-    @apply text-black font-medium hover:text-gray-800 transition-colors;
+    @apply text-black font-medium hover:text-gray-800 transition-colors mt-8;
+    font-size: 0.85rem;
   }
 
   .auth-link-secondary {
@@ -1149,7 +1158,7 @@
   }
 
   .dashboard-nav-item {
-    @apply flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out;
+    @apply flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-all duration-200 ease-in-out;
   }
 
   .dashboard-nav-item-active {
@@ -1400,7 +1409,7 @@
   }
 
   .skeleton-image {
-    @apply skeleton h-48;
+    @apply skeleton h-44;
   }
 
   /* Divider */
@@ -1765,7 +1774,7 @@
 
 /* Property Card Image Container */
 .property-card-image {
-  @apply relative h-48 w-full;
+  @apply relative h-44 w-full;
 }
 
 .property-card-image-placeholder {
@@ -1774,17 +1783,17 @@
 
 /* Property Card Details Container */
 .property-card-details {
-  @apply p-4;
+  @apply p-3;
 }
 
 /* Property Card Title */
 .property-card-title {
-  @apply text-lg font-semibold text-gray-900 mb-2 line-clamp-1;
+  @apply text-base font-semibold text-gray-900 mb-2 line-clamp-1;
 }
 
 /* Property Card Features Section */
 .property-card-features {
-  @apply space-y-2 mb-4;
+  @apply space-y-1.5 mb-3;
 }
 
 .property-card-location {
@@ -1817,7 +1826,7 @@
 }
 
 .property-card-price-amount {
-  @apply text-xl font-bold text-gray-900;
+  @apply text-lg font-bold text-gray-900;
 }
 
 .property-card-price-unit {
@@ -1826,7 +1835,7 @@
 
 /* Property Card Actions */
 .property-card-actions {
-  @apply flex space-x-2 mt-4;
+  @apply flex space-x-2 mt-3;
 }
 
 .property-card-action-button {
@@ -1842,7 +1851,7 @@
 }
 
 .property-card-action-button-full {
-  @apply w-full mt-4 btn-primary py-2 px-4 text-sm font-medium;
+  @apply w-full mt-3 btn-primary py-2 px-4 text-sm font-medium;
 }
 
 /* Dashboard Edit Icon */
@@ -1864,7 +1873,7 @@
 }
 
 .property-card-grid-search {
-  @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6;
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
 }
 
 /* Property Card Hover Effects */
@@ -1878,11 +1887,11 @@
 }
 
 .property-card-skeleton-image {
-  @apply bg-gray-200 h-48 w-full;
+  @apply bg-gray-200 h-44 w-full;
 }
 
 .property-card-skeleton-content {
-  @apply p-4 space-y-3;
+  @apply p-3 space-y-2;
 }
 
 .property-card-skeleton-title {
@@ -2249,3 +2258,5 @@
   background-color: var(--color-brand-icon-bg);
   color: var(--color-brand-icon-text);
 }
+/* Dashboard Tab Styles */
+@import './dashboard-tabs.css';

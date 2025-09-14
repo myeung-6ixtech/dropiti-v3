@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { usersAPI } from '@/lib/api-client';
 import { authClasses, authFormPatterns } from "@/styles/auth";
@@ -45,7 +45,20 @@ export default function SignUpForm() {
         displayName: name
       });
 
-      // Step 3: Create user in Hasura database
+      // Step 3: Send email verification
+      try {
+        const actionCodeSettings = {
+          url: `${window.location.origin}/auth/`,
+          handleCodeInApp: true,
+        };
+        await sendEmailVerification(user, actionCodeSettings);
+        console.log('Email verification sent successfully');
+      } catch (emailError) {
+        console.warn('Failed to send email verification:', emailError);
+        // Don't fail the signup if email verification fails
+      }
+
+      // Step 4: Create user in Hasura database
       try {
         const user = {
           firebase_uid: userCredential.user.uid,
@@ -74,8 +87,8 @@ export default function SignUpForm() {
         // Don't fail the signup if database creation fails, but log it
       }
 
-      // Step 4: Redirect to sign in page
-      router.push("/auth/signin?message=Account created successfully! Please sign in.");
+      // Step 5: Redirect to sign in page with verification message
+      router.push("/auth/signin?message=Account created successfully! Please check your email to verify your account before signing in.");
     } catch (error: unknown) {
       console.error("Signup error:", error);
       if (error && typeof error === 'object' && 'code' in error) {

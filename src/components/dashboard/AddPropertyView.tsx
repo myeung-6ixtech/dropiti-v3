@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon} from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
@@ -347,13 +347,13 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
 
             {/* Step Navigation */}
             {currentStep !== 8 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+              <div className="px-6 py-4 border-t border-gray-200 bg-white">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <button
                       onClick={prevStep}
                       disabled={currentStep === 1}
-                      className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="btn-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <ArrowLeftIcon className="h-4 w-4" />
                       <span>Previous</span>
@@ -364,9 +364,8 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                       <button
                         onClick={saveDraft}
                         disabled={isSubmitting}
-                        className="form-button-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="btn-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <DocumentIcon className="h-4 w-4" />
                         <span>Save Draft</span>
                       </button>
                     )}

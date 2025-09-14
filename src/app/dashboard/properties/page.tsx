@@ -5,8 +5,9 @@ import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
 import DraftCard from '@/components/dashboard/DraftCard';
-import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
+import EmptyState from '@/components/common/EmptyState';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
@@ -152,7 +153,7 @@ export default function PropertiesPage() {
             onClick={() => setActiveTab('published')}
             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'published'
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
@@ -167,13 +168,13 @@ export default function PropertiesPage() {
             onClick={() => setActiveTab('drafts')}
             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'drafts'
-                ? 'border-blue-500 text-blue-600'
+                ? 'border-purple-500 text-purple-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             }`}
           >
             Drafts
             {drafts.length > 0 && (
-              <span className="ml-2 bg-blue-100 text-blue-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
+              <span className="ml-2 bg-purple-100 text-purple-700 py-0.5 px-2.5 rounded-full text-xs font-medium">
                 {drafts.length}
               </span>
             )}
@@ -189,63 +190,39 @@ export default function PropertiesPage() {
       {/* Error State */}
       {error && !isLoading && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md">
-              <h3 className="text-lg font-medium text-red-800 mb-2">Error Loading Properties</h3>
-              <p className="text-red-600 mb-4">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                Try Again
-              </button>
-            </div>
-          </div>
+          <EmptyState
+            icon="⚠️"
+            title="Error Loading Properties"
+            description={error}
+            actionText="Try Again"
+            onActionClick={() => window.location.reload()}
+            className="bg-red-50"
+          />
         </div>
       )}
 
       {/* Empty State */}
       {!isLoading && !error && activeTab === 'published' && filteredProperties.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md">
-              <h3 className="text-lg font-medium text-gray-800 mb-2">No Published Properties</h3>
-              <p className="text-gray-600 mb-4">
-                {searchTerm ? 'No published properties match your search criteria.' : "You haven't published any properties yet."}
-              </p>
-              {!searchTerm && (
-                <Link
-                  href="/dashboard/add-property"
-                  className="btn-primary inline-flex items-center"
-                >
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Add Your First Property
-                </Link>
-              )}
-            </div>
-          </div>
+          <EmptyState
+            icon="🏠"
+            title="No Published Properties"
+            description={searchTerm ? 'No published properties match your search criteria. Try adjusting your search terms.' : "You haven't published any properties yet. Start by creating your first property listing to attract potential tenants."}
+            actionText={!searchTerm ? "Add Your First Property" : undefined}
+            actionHref={!searchTerm ? "/dashboard/add-property" : undefined}
+          />
         </div>
       )}
 
       {!isLoading && !error && activeTab === 'drafts' && filteredDrafts.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md">
-              <h3 className="text-lg font-medium text-gray-800 mb-2">No Drafts</h3>
-              <p className="text-gray-600 mb-4">
-                {searchTerm ? 'No drafts match your search criteria.' : "You haven't created any drafts yet."}
-              </p>
-              {!searchTerm && (
-                <Link
-                  href="/dashboard/add-property"
-                  className="btn-primary inline-flex items-center"
-                >
-                  <DocumentIcon className="h-4 w-4 mr-2" />
-                  Create Your First Draft
-                </Link>
-              )}
-            </div>
-          </div>
+          <EmptyState
+            icon="📝"
+            title="No Drafts"
+            description={searchTerm ? 'No drafts match your search criteria. Try adjusting your search terms.' : "You haven't created any drafts yet. Start by creating your first property draft to work on your listing before publishing."}
+            actionText={!searchTerm ? "Create Your First Draft" : undefined}
+            actionHref={!searchTerm ? "/dashboard/add-property" : undefined}
+          />
         </div>
       )}
 

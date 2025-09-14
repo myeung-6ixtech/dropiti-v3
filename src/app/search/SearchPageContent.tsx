@@ -23,7 +23,21 @@ export default function SearchPageContent() {
     bedrooms: searchParams.get('bedrooms') || '',
     maxPrice: searchParams.get('maxPrice') || '',
   });
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
+  // Calculate pagination values
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedProperties = filteredProperties.slice(startIndex, endIndex);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters]);
 
   // Update URL when filters change
   const updateURL = useCallback((newFilters: typeof filters) => {
@@ -147,6 +161,23 @@ export default function SearchPageContent() {
     // filterProperties(); 
   };
 
+  // Pagination navigation functions
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      // Scroll to top of results when changing pages
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const goToNextPage = () => {
+    goToPage(currentPage + 1);
+  };
+
+  const goToPreviousPage = () => {
+    goToPage(currentPage - 1);
+  };
+
   // Get search summary for display
   const getSearchSummary = () => {
     const criteria = [];
@@ -190,6 +221,11 @@ export default function SearchPageContent() {
                 <p className="text-gray-600">
                   {getSearchSummary()}
                 </p>
+                {filteredProperties.length > 0 && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Showing {startIndex + 1}-{Math.min(endIndex, filteredProperties.length)} of {filteredProperties.length} properties
+                  </p>
+                )}
               </div>
               
               {/* Filter Button moved to top right */}
@@ -207,7 +243,7 @@ export default function SearchPageContent() {
             {/* Properties Grid */}
             {filteredProperties.length > 0 ? (
               <div className={propertyCardClasses.grid.search}>
-                {filteredProperties.map((property) => {    
+                {paginatedProperties.map((property) => {    
                   // The API already transforms the data, so we can use it directly
                   // Just ensure we have the property_uuid for navigation
                   const propertyForCard = {
@@ -245,6 +281,80 @@ export default function SearchPageContent() {
                 >
                   Clear all filters
                 </button>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {filteredProperties.length > itemsPerPage && (
+              <div className="mt-12 flex items-center justify-center">
+                <nav className="flex items-center space-x-2" aria-label="Pagination">
+                  {/* Previous Button */}
+                  <button
+                    onClick={goToPreviousPage}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === 1
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+
+                  {/* Page Numbers */}
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // Show first page, last page, current page, and pages around current page
+                      const shouldShow = 
+                        page === 1 || 
+                        page === totalPages || 
+                        (page >= currentPage - 1 && page <= currentPage + 1);
+                      
+                      if (!shouldShow) {
+                        // Show ellipsis for gaps
+                        if (page === currentPage - 2 || page === currentPage + 2) {
+                          return (
+                            <span key={page} className="px-3 py-2 text-gray-400">
+                              ...
+                            </span>
+                          );
+                        }
+                        return null;
+                      }
+
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => goToPage(page)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            page === currentPage
+                              ? 'bg-blue-600 text-white'
+                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Next Button */}
+                  <button
+                    onClick={goToNextPage}
+                    disabled={currentPage === totalPages}
+                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      currentPage === totalPages
+                        ? 'text-gray-400 cursor-not-allowed'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </nav>
               </div>
             )}
           </div>

@@ -48,8 +48,23 @@ interface GraphQLUser {
 }
 
 interface GraphQLProperty {
+  id: string;
+  property_uuid: string;
   title: string;
-  location: string;
+  address: {
+    unit?: string;
+    floor?: string;
+    block?: string;
+    buildingName?: string;
+    addressLine1?: string;
+    addressLine2?: string;
+    district?: string;
+    state?: string;
+    country?: string;
+    city?: string;
+    street?: string;
+    apartmentEstate?: string;
+  } | string;
   rental_price: number;
   rental_price_currency: string;
   property_type: string;
@@ -177,10 +192,12 @@ const GET_USER_BY_FIREBASE_UID_QUERY = `
 `;
 
 const GET_PROPERTY_BY_UUID_QUERY = `
-  query GetPropertyByUuid($propertyUuid: String!) {
-    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }, limit: 1) {
+  query GetPropertyByUuid($propertyUuid: uuid!) {
+    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }) {
+      id
+      property_uuid
       title
-      location
+      address
       rental_price
       rental_price_currency
       property_type
@@ -326,14 +343,24 @@ export async function GET(request: NextRequest) {
         } : null,
         // Include property details
         property: property ? {
+          propertyUuid: property.property_uuid,
           title: property.title,
-          location: property.location,
+          location: typeof property.address === 'string' ? property.address : 
+            (property.address && typeof property.address === 'object' ? 
+              [
+                property.address.buildingName,
+                property.address.addressLine1,
+                property.address.addressLine2,
+                property.address.district,
+                property.address.state,
+                property.address.country
+              ].filter(Boolean).join(', ') : 'Address not available'),
           rentalPrice: property.rental_price,
           rentalPriceCurrency: property.rental_price_currency,
           propertyType: property.property_type,
           bedrooms: property.num_bedroom,
           bathrooms: property.num_bathroom,
-          imageUrl: property.display_image,
+          imageUrl: property.display_image || null,
         } : null,
       };
     });
