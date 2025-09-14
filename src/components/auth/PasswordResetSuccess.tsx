@@ -31,10 +31,13 @@ export default function PasswordResetSuccess() {
               <Link href="/auth/signin" className={authClasses.button}>
                 Sign In with New Password
               </Link>
-              
-              <Link href="/" className={authClasses.link}>
-                Back to Homepage
-              </Link>
+              <div className={`${authClasses.sectionSpacing} text-center`}>
+                <p className={authClasses.textCenter}>
+                <Link href="/" className={authClasses.link}>
+                  Back to Homepage
+                </Link>
+                </p>
+              </div>
             </div>
           </div>
         </div>

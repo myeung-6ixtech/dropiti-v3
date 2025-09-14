@@ -30,7 +30,6 @@ export default function ApplicationsPage() {
       {/* All Outgoing Offers Component with Tabs */}
       <AllOutgoingOffers
         initiatorFirebaseUid={authUser.id}
-        title="Your Rental Applications"
         showPropertyInfo={true}
       />
     </div>

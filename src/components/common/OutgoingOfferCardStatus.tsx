@@ -15,12 +15,6 @@ export default function OutgoingOfferCardStatus({
   offer,
   bulkRejectionInfo
 }: OutgoingOfferCardStatusProps) {
-  const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency || 'USD',
-    }).format(amount);
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

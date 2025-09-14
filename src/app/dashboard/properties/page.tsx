@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
 import DraftCard from '@/components/dashboard/DraftCard';
-import { PlusIcon, MagnifyingGlassIcon, FunnelIcon, DocumentIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import Link from 'next/link';

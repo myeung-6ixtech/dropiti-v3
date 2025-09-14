@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { MapPinIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { COUNTRIES, getDistrictsByCountry, DEFAULT_COUNTRY } from '@/constants/locations';
 import PropertyMap from '@/components/common/PropertyMap';
 
@@ -56,7 +56,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
   const [isMapUpdating, setIsMapUpdating] = useState(false);
 
   // Function to format address based on showSpecificLocation flag
-  const formatAddressDisplay = (addressData: typeof address, showSpecificLocation: boolean) => {
+  const formatAddressDisplay = useCallback((addressData: typeof address, showSpecificLocation: boolean) => {
     if (!showSpecificLocation) {
       // If showSpecificLocation is false, show district with country for better geocoding
       const district = addressData.district || 'Unknown District';
@@ -74,7 +74,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
     }
     
     return '';
-  };
+  }, []);
 
   // Debounce address updates for map (2 second delay)
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
   // Memoized formatted address for the map (uses debounced address)
   const formattedAddress = useMemo(() => {
     return formatAddressDisplay(debouncedAddress, showSpecificLocation);
-  }, [debouncedAddress, showSpecificLocation]);
+  }, [debouncedAddress, showSpecificLocation, formatAddressDisplay]);
 
   // Key to force map refresh when showSpecificLocation or debounced address changes
   const mapKey = useMemo(() => {

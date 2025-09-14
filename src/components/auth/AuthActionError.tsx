@@ -42,10 +42,13 @@ export default function AuthActionError({ error, actionMode }: AuthActionErrorPr
                   Go to Homepage
                 </Link>
               )}
-              
+            <div className={`${authClasses.sectionSpacing} text-center`}>
+              <p className={authClasses.textCenter}>
               <Link href="/auth/signin" className={authClasses.link}>
                 Back to Sign In
               </Link>
+              </p>
+              </div>
             </div>
           </div>
         </div>

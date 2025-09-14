@@ -122,7 +122,7 @@ export default function SettingsPage() {
     };
 
     loadUserSettings();
-  }, [authUser?.id]);
+  }, [authUser?.id, showToast]);
 
 
   const handleInputChange = (field: keyof UserSettings, value: string | boolean | object) => {

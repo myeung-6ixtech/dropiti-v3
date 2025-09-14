@@ -227,7 +227,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
         {data?.rentalDetails?.listingDescription && (
           <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <h4 className="font-medium text-gray-900 mb-3">Description</h4>
-            <p className="text-gray-600 text-sm leading-relaxed">
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
               {data.rentalDetails.listingDescription}
             </p>
           </div>

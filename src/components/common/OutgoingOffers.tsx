@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';

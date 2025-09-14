@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
@@ -11,7 +10,6 @@ import { Offer } from '@/types/offer';
 
 interface AllOutgoingOffersProps {
   initiatorFirebaseUid: string;
-  title?: string;
   showPropertyInfo?: boolean;
 }
 
@@ -19,7 +17,6 @@ type FilterStatus = 'all' | 'pending' | 'countered' | 'accepted' | 'rejected' | 
 
 export default function AllOutgoingOffers({ 
   initiatorFirebaseUid, 
-  title = "Your Applications",
   showPropertyInfo = true 
 }: AllOutgoingOffersProps) {
   const [offers, setOffers] = useState<Offer[]>([]);

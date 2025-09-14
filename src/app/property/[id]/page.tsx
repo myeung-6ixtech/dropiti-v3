@@ -76,7 +76,14 @@ export default function PropertyDetailPage() {
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const { user: authUser } = useAuth(); // Get user from context
+
+  // Function to check if description needs truncation (500 characters)
+  const shouldTruncateDescription = (description: string) => {
+    if (!description) return false;
+    return description.length > 500;
+  };
 
   // Function to format address based on show_specific_location flag
   const formatAddressDisplay = (address: Record<string, unknown> | undefined, showSpecificLocation: boolean | undefined) => {
@@ -562,7 +569,23 @@ export default function PropertyDetailPage() {
             {/* Description */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">About this place</h2>
-              <p className="text-gray-600 leading-relaxed">{property.description}</p>
+              <div className="relative">
+                <p className={`text-gray-600 leading-relaxed whitespace-pre-wrap ${
+                  shouldTruncateDescription(property.description) && !isDescriptionExpanded 
+                    ? 'line-clamp-6' 
+                    : ''
+                }`}>
+                  {property.description}
+                </p>
+                {shouldTruncateDescription(property.description) && (
+                  <button
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    className="mt-2 text-gray-900 hover:text-gray-700 font-medium text-sm transition-colors"
+                  >
+                    {isDescriptionExpanded ? 'See Less' : 'See More'}
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Amenities */}

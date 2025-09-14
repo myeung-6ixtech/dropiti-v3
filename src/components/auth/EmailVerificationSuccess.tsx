@@ -31,10 +31,13 @@ export default function EmailVerificationSuccess() {
               <Link href="/auth/signin" className={authClasses.button}>
                 Sign In to Your Account
               </Link>
-              
+              <div className={`${authClasses.sectionSpacing} text-center`}>
+              <p className={authClasses.textCenter}>
               <Link href="/" className={authClasses.link}>
                 Back to Homepage
               </Link>
+              </p>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 
@@ -26,6 +27,13 @@ export function BasicInfoSection({
   errors,
   isSaving
 }: BasicInfoSectionProps) {
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  // Function to check if description needs truncation (500 characters)
+  const shouldTruncateDescription = (description: string) => {
+    if (!description) return false;
+    return description.length > 500;
+  };
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
@@ -205,7 +213,23 @@ export function BasicInfoSection({
           {data.rentalDetails?.listingDescription && (
             <div>
               <span className="text-sm text-gray-500">Description</span>
-              <p className="font-medium text-gray-700 mt-1">{data.rentalDetails.listingDescription}</p>
+              <div className="mt-1">
+                <p className={`font-medium text-gray-700 whitespace-pre-wrap ${
+                  shouldTruncateDescription(data.rentalDetails.listingDescription) && !isDescriptionExpanded 
+                    ? 'line-clamp-6' 
+                    : ''
+                }`}>
+                  {data.rentalDetails.listingDescription}
+                </p>
+                {shouldTruncateDescription(data.rentalDetails.listingDescription) && (
+                  <button
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    className="mt-2 text-gray-900 hover:text-gray-700 font-medium text-sm transition-colors"
+                  >
+                    {isDescriptionExpanded ? 'See Less' : 'See More'}
+                  </button>
+                )}
+              </div>
             </div>
           )}
         </div>
