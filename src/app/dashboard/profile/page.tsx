@@ -222,7 +222,7 @@ export default function ProfilePage() {
           This is how your Dropiti Passport appears to others. Click "Edit Profile" to make changes.
         </p>
         <div className="bg-gray-50 rounded-lg p-4">
-          <DropitiPassport2 user={mapToPassportFormat(profile)} />
+          <DropitiPassport2 user={mapToPassportFormat(profile)} firebaseUid={authUser?.id || ""} />
         </div>
       </div>
 

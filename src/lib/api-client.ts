@@ -239,7 +239,26 @@ export const propertiesAPI = {
   unpublishProperty: async (propertyUuid: string) => {
     return propertiesAPI.updatePropertyStatus(propertyUuid, 'draft');
   },
-};
+
+  // Get total count of published properties by user
+  getPropertyCountByUser: async (landlordFirebaseUid: string) => {
+    try {
+      console.log("API Client: Fetching property count for user:", landlordFirebaseUid);
+      const response = await apiClient.get("/properties/get-property-count-by-user", { 
+        params: { landlordFirebaseUid } 
+      });
+      console.log("API Client: Property count response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Get property count by user error:", error);
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as { response: { data: unknown; status: number } };
+        console.error("Error response:", axiosError.response.data);
+        console.error("Error status:", axiosError.response.status);
+      }
+      throw error;
+    }
+  },};
 
 // Users API
 export const usersAPI = {

@@ -1,36 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { HomeIcon } from '@heroicons/react/24/outline';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
-import { Property } from '@/types';
-
-interface UserListingsProps {
-  userFirebaseUid: string;
-}
-
-interface ApiProperty {
-  id: string;
-  property_uuid: string;
-  title: string;
-  description: string;
-  location: string;
-  price?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  imageUrl?: string;
-  details?: {
-    type: string;
-    furnished: string;
-    petsAllowed: boolean;
-    parking: boolean;
-  };
-  amenities?: string[];
-  availableDate?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { Property, UserListingsProps, ApiProperty, PropertyCardTransformation } from '@/types';
 
 export default function UserListings({ userFirebaseUid }: UserListingsProps) {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -98,8 +71,8 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
   }, [userFirebaseUid]);
 
   // Transform property data for PropertyCard component
-  const transformPropertyForCard = (property: Property) => {
-    const transformed = {
+  const transformPropertyForCard = (property: Property): PropertyCardTransformation => {
+    const transformed: PropertyCardTransformation = {
       ...property,
       // PropertyCard expects these specific field names
       rental_price: property.price,
@@ -124,7 +97,6 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center space-x-2 mb-6">
-          <HomeIcon className="h-6 w-6 text-blue-500" />
           <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
         </div>
         <div className="text-center py-8">
@@ -139,11 +111,9 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center space-x-2 mb-6">
-          <HomeIcon className="h-6 w-6 text-blue-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Current Listings</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
         </div>
         <div className="text-center py-8 text-red-500">
-          <HomeIcon className="h-12 w-12 mx-auto mb-4 text-red-300" />
           <p className="text-lg font-medium">Error loading properties</p>
           <p className="text-sm">{error}</p>
         </div>
@@ -155,8 +125,7 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center space-x-2 mb-6">
-          <HomeIcon className="h-6 w-6 text-blue-500" />
-          <h2 className="text-xl font-semibold text-gray-900">Current Listings</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
           <span className="text-sm text-gray-500">({properties.length})</span>
         </div>
         
@@ -172,7 +141,6 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
           </div>
         ) : (
           <div className="text-center py-8 text-gray-500">
-            <HomeIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
             <p className="text-lg font-medium">No properties listed yet</p>
             <p className="text-sm">This user hasn't listed any properties for rent.</p>
           </div>

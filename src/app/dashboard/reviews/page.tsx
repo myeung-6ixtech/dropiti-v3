@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { ClockIcon, ChatBubbleLeftRightIcon, UserIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { offersAPI } from '@/lib/api-client';
@@ -120,21 +119,18 @@ export default function ReviewsPage() {
       id: 'upcoming',
       name: 'Upcoming Reviews',
       count: reviewOpportunities.length,
-      icon: ClockIcon,
       description: 'Reviews you can submit after completing offers'
     },
     {
       id: 'given',
       name: 'Reviews Given',
       count: reviewsGiven.length,
-      icon: ChatBubbleLeftRightIcon,
       description: 'Reviews you have written for others'
     },
     {
       id: 'received',
       name: 'Reviews Received',
       count: reviewsReceived.length,
-      icon: UserIcon,
       description: 'Reviews others have written about you'
     }
   ];
@@ -168,7 +164,6 @@ export default function ReviewsPage() {
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <tab.icon className="h-5 w-5" />
                   <span>{tab.name}</span>
                   {tab.count > 0 && (
                     <span className="bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
@@ -196,7 +191,6 @@ export default function ReviewsPage() {
 
               {reviewOpportunities.length === 0 ? (
                 <div className="text-center py-12">
-                  <ClockIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No upcoming reviews</h3>
                   <p className="mt-1 text-sm text-gray-500">
                     You don't have any offers that are ready for review yet.
@@ -229,7 +223,6 @@ export default function ReviewsPage() {
 
               {reviewsGiven.length === 0 ? (
                 <div className="text-center py-12">
-                  <ChatBubbleLeftRightIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No reviews given</h3>
                   <p className="mt-1 text-sm text-gray-500">
                     You haven't written any reviews yet.
@@ -263,7 +256,6 @@ export default function ReviewsPage() {
 
               {reviewsReceived.length === 0 ? (
                 <div className="text-center py-12">
-                  <UserIcon className="mx-auto h-12 w-12 text-gray-400" />
                   <h3 className="mt-2 text-sm font-medium text-gray-900">No reviews received</h3>
                   <p className="mt-1 text-sm text-gray-500">
                     You haven't received any reviews yet.

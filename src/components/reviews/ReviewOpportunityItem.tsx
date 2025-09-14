@@ -36,7 +36,7 @@ export default function ReviewOpportunityItem({
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             <Image
-              src={getSafeProfileImage(undefined, '/images/Portrait_Placeholder.png')}
+              src={getSafeProfileImage(opportunity.otherPartyPhotoUrl, '/images/Portrait_Placeholder.png')}
               alt={opportunity.otherPartyName || 'Other Party'}
               width={40}
               height={40}

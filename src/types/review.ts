@@ -42,6 +42,7 @@ export interface ReviewOpportunity {
   id: string;
   propertyTitle: string;
   otherPartyName: string;
+  otherPartyPhotoUrl?: string; // Add photo URL field
   reviewType: ReviewType;
   reviewWindowEnd: string;
   daysRemaining?: number; // Optional since it's calculated on the frontend
@@ -62,7 +63,6 @@ export interface ReviewTab {
   id: ReviewTabType;
   name: string;
   count: number;
-  icon: React.ComponentType<{ className?: string }>;
   description: string;
 }
 

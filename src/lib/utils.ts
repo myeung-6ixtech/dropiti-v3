@@ -210,3 +210,25 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
     return imageUrl.startsWith('/') || imageUrl.startsWith('./');
   }
 };
+
+/**
+ * Get the total number of published properties for a user
+ * @param landlordFirebaseUid - The Firebase UID of the landlord
+ * @returns Promise<number> - The count of published properties
+ */
+export async function getPublishedPropertyCount(landlordFirebaseUid: string): Promise<number> {
+  try {
+    const { propertiesAPI } = await import('./api-client');
+    const response = await propertiesAPI.getPropertyCountByUser(landlordFirebaseUid);
+    
+    if (response.success && response.data) {
+      return response.data.count || 0;
+    }
+    
+    console.warn('Failed to get property count:', response.error);
+    return 0;
+  } catch (error) {
+    console.error('Error getting published property count:', error);
+    return 0;
+  }
+}

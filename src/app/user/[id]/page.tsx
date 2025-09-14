@@ -124,7 +124,7 @@ export default function UserProfilePage() {
   return (
     <div className="max-w-[1180px] mx-auto px-4 py-8">
       {/* Profile Header - Using DropitiPassport2 Component */}
-      <DropitiPassport2 user={mapToPassportFormat(user)} />
+      <DropitiPassport2 user={mapToPassportFormat(user)} firebaseUid={user.firebase_uid} />
 
       {/* User Listings Component */}
       <UserListings userFirebaseUid={user.firebase_uid} />

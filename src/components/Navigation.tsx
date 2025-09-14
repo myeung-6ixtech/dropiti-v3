@@ -102,17 +102,6 @@ export default function Navigation() {
                 <span>Explore</span>
               </Link>
               
-              <Link
-                href="/dashboard"
-                className={`${navigationStyles.link} ${
-                  isActive('/dashboard') 
-                    ? navigationStyles.linkActive
-                    : navigationStyles.linkInactive
-                }`}
-              >
-                <span>Dashboard</span>
-              </Link>
-              
               {/* Loading state for auth button - simplified skeleton */}
               <div className={navigationStyles.loadingSkeleton}>
                 {/* Skeleton profile photo */}
@@ -176,6 +165,16 @@ export default function Navigation() {
               <span>Explore</span>
             </Link>
             
+            <Link
+                href={user?.uuid ? `/user/${user.uuid}` : '/dashboard'}
+                className={`${navigationStyles.link} ${
+                  isActive('/dashboard') || (user?.uuid && isActive(`/user/${user.uuid}`))
+                    ? navigationStyles.linkActive
+                    : navigationStyles.linkInactive
+                }`}
+              >
+                <span>My Profile</span>
+            </Link>
 
             
             {isAuthenticated ? (

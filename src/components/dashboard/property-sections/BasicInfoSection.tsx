@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PencilIcon} from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 
 interface BasicInfoSectionProps {
@@ -50,18 +50,16 @@ export function BasicInfoSection({
           <div className="flex items-center space-x-2">
             <button
               onClick={onCancelEdit}
-              className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              className="btn-secondary flex items-center space-x-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
-              <XMarkIcon className="h-4 w-4" />
               <span>Cancel</span>
             </button>
             <button
               onClick={onSaveEdit}
               disabled={isSaving}
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              className="btn-primary flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
             >
-              <CheckIcon className="h-4 w-4" />
-              <span>{isSaving ? 'Saving...' : 'Save'}</span>
+              <span>{isSaving ? 'Saving...' : 'Save Information'}</span>
             </button>
           </div>
         )}

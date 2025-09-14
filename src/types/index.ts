@@ -10,6 +10,7 @@ export * from './api';
 export * from './assets';
 export * from './user';
 export * from './review';
+export * from './user-profile';
 
 // ========================================
 // LEGACY TYPES (Keeping for backward compatibility)
