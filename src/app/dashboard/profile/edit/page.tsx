@@ -191,9 +191,7 @@ export default function EditProfilePage() {
 
       // If there's a selected image file, upload it to S3 first
       if (selectedImageFile) {
-        try {
-          console.log('Profile Edit: Starting S3 upload for image:', selectedImageFile.name);
-          
+        try {          
           // Create FormData for the API request
           const formData = new FormData();
           formData.append('file', selectedImageFile);
@@ -305,14 +303,14 @@ export default function EditProfilePage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex items-center space-x-4 mb-4">
+        <div className="flex items-center space-x-4 mb-0">
           <button
             onClick={() => router.push('/dashboard/profile')}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ArrowLeftIcon className="w-5 h-5" />
+            <ArrowLeftIcon className="w-5 h-5 text-gray-900" />
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Profile</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-0">Edit Profile</h1>
         </div>
         <p className="text-gray-600">Update your profile information and preferences</p>
       </div>

@@ -186,7 +186,7 @@ export default function DashboardPage() {
       <div className="dashboard-content-grid">
         {/* Left Column - DropitiPassport */}
         <div className="dashboard-left-column">
-          <DropitiPassport user={userData} />
+          <DropitiPassport user={userData} firebaseUid={authUser?.id || ""} />
         </div>
 
         {/* Right Column - Content */}

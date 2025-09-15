@@ -1,5 +1,6 @@
 'use client';
-
+import { useState, useEffect } from "react";
+import { getPublishedPropertyCount } from "@/lib/utils";
 import Image from 'next/image';
 import { 
   StarIcon, 
@@ -8,6 +9,7 @@ import {
 import { passportStyles } from '@/styles/index';
 
 interface DropitiPassportProps {
+  firebaseUid: string;
   user: {
     name: string;
     avatar: string;
@@ -31,7 +33,27 @@ interface DropitiPassportProps {
   };
 }
 
-export default function DropitiPassport({ user }: DropitiPassportProps) {
+export default function DropitiPassport({ user, firebaseUid }: DropitiPassportProps) {
+  const [propertyCount, setPropertyCount] = useState<number>(0);
+  const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  useEffect(() => {
+    const fetchPropertyCount = async () => {
+      try {
+        setIsLoadingProperties(true);
+        const count = await getPublishedPropertyCount(firebaseUid);
+        setPropertyCount(count);
+      } catch (error) {
+        console.error("Error fetching property count:", error);
+        setPropertyCount(0);
+      } finally {
+        setIsLoadingProperties(false);
+      }
+    };
+
+    if (firebaseUid) {
+      fetchPropertyCount();
+    }
+  }, [firebaseUid]);
   const formatJoinDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -82,11 +104,11 @@ export default function DropitiPassport({ user }: DropitiPassportProps) {
       {user.stats && (
         <div className={passportStyles.stats}>
           <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{user.stats.totalProperties}</div>
+            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCount}</div>
             <div className={passportStyles.statLabel}>Properties</div>
           </div>
           <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{user.stats.publishedProperties}</div>
+            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCount}</div>
             <div className={passportStyles.statLabel}>Published</div>
           </div>
           <div className={passportStyles.statItem}>

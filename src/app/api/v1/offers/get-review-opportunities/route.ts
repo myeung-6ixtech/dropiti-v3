@@ -167,6 +167,7 @@ export async function GET(request: NextRequest) {
         propertyUuid: offer.property_uuid,
         propertyTitle: property?.title || 'Property',
         otherPartyName: otherParty?.display_name || 'Unknown User',
+        otherPartyPhotoUrl: otherParty?.photo_url || undefined, // Add photo URL
         otherPartyId: isInitiator ? offer.recipient_firebase_uid : offer.initiator_firebase_uid,
         reviewType: isInitiator ? 'tenant_to_landlord' : 'landlord_to_tenant',
         reviewWindowEnd: offer.review_window_end, // Use the actual review window end date

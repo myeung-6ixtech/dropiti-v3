@@ -4,48 +4,10 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { StarIcon } from '@heroicons/react/24/outline';
 import { reviewsAPI } from '@/lib/api-client';
-
-interface UserReviewsProps {
-  userFirebaseUid: string;
-}
-
-interface Review {
-  id: string;
-  reviewUuid: string;
-  reviewerFirebaseUid: string;
-  reviewedUserFirebaseUid: string;
-  reviewType: string;
-  rating: number;
-  title?: string;
-  comment?: string;
-  offerUuid?: string;
-  propertyUuid?: string;
-  isPublic: boolean;
-  isVerified: boolean;
-  helpfulCount: number;
-  createdAt: string;
-  updatedAt: string;
-  reviewer?: {
-    uuid: string;
-    displayName: string;
-    email: string;
-    photoUrl?: string;
-  };
-  property?: {
-    propertyUuid: string;
-    title: string;
-    location: string;
-    rentalPrice: number;
-    rentalPriceCurrency: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    photos: string[];
-  };
-}
+import { UserReviewsProps, ReviewDisplayData, USER_PROFILE_REVIEW_TYPE_LABELS } from '@/types';
 
 export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
-  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviews, setReviews] = useState<ReviewDisplayData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -89,23 +51,13 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
   };
 
   const getReviewTypeLabel = (reviewType: string) => {
-    switch (reviewType) {
-      case 'landlord_review':
-        return 'Landlord Review';
-      case 'tenant_review':
-        return 'Tenant Review';
-      case 'offer_review':
-        return 'Offer Review';
-      default:
-        return 'Review';
-    }
+    return USER_PROFILE_REVIEW_TYPE_LABELS[reviewType] || 'Review';
   };
 
   if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center space-x-2 mb-6">
-          <StarIcon className="h-6 w-6 text-yellow-500" />
           <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         </div>
         <div className="text-center py-8">
@@ -120,11 +72,9 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center space-x-2 mb-6">
-          <StarIcon className="h-6 w-6 text-yellow-500" />
           <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         </div>
         <div className="text-center py-8 text-red-500">
-          <StarIcon className="h-12 w-12 mx-auto mb-4 text-red-300" />
           <p className="text-lg font-medium">Error loading reviews</p>
           <p className="text-sm">{error}</p>
         </div>
@@ -135,7 +85,6 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center space-x-2 mb-6">
-        <StarIcon className="h-6 w-6 text-yellow-500" />
         <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         <span className="text-sm text-gray-500">({reviews.length})</span>
       </div>
@@ -228,7 +177,6 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
         </div>
       ) : (
         <div className="text-center py-8 text-gray-500">
-          <StarIcon className="h-12 w-12 mx-auto mb-4 text-gray-300" />
           <p className="text-lg font-medium">No reviews yet</p>
           <p className="text-sm">This user hasn't received any reviews yet.</p>
         </div>

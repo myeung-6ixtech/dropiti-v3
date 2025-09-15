@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { 
-  BuildingOfficeIcon, 
-  CubeIcon 
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
-import { Residential, EntireApartment, VillageHouse } from '@/assets/icons';
+import { Residential, ServiceApt, PublicHousing, RentedProperties, VillageHouse } from '@/assets/icons';
 import { Step1PropertyTypeProps, PROPERTY_TYPES, PropertyType } from '@/types';
 
 // Create property types with actual icons
@@ -18,17 +17,19 @@ const propertyTypesWithIcons: PropertyType[] = PROPERTY_TYPES.map(type => {
         let icon;
         switch (subType.id) {
           case 'serviced-apartment':
+            icon = ServiceApt;
+            break;
           case 'apartment':
-            icon = EntireApartment;
+            icon = PublicHousing;
             break;
           case 'village-house':
             icon = VillageHouse;
             break;
           case 'condo':
-            icon = CubeIcon;
+            icon = RentedProperties;
             break;
           default:
-            icon = EntireApartment;
+            icon = PublicHousing;
         }
         return { ...subType, icon };
       })

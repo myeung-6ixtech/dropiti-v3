@@ -183,13 +183,16 @@ export interface UIMessage {
   sender: 'user' | 'other';
   timestamp: Date;
   senderName: string;
+  avatar?: string;
   status: ChatMessage['status'];
 }
 
 export const convertMessageToUIMessage = (
   message: ChatMessage, 
   currentUserId: string, 
-  otherUserName: string
+  otherUserName: string,
+  otherUserAvatar?: string,
+  currentUserAvatar?: string
 ): UIMessage => {
   return {
     id: message.id,
@@ -197,6 +200,7 @@ export const convertMessageToUIMessage = (
     sender: message.sender_firebase_uid === currentUserId ? 'user' : 'other',
     timestamp: new Date(message.created_at),
     senderName: message.sender_firebase_uid === currentUserId ? 'You' : otherUserName,
+    avatar: message.sender_firebase_uid === currentUserId ? currentUserAvatar : otherUserAvatar,
     status: message.status,
   };
 };

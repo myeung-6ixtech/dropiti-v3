@@ -41,13 +41,13 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
         );
       case 'delivered':
         return (
-          <svg className="w-3 h-3 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-3 h-3 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
           </svg>
         );
       case 'read':
         return (
-          <svg className="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
           </svg>
         );
@@ -61,8 +61,8 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
       <div className={`flex max-w-xs lg:max-w-md ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className="h-6 w-6 rounded-full bg-blue-600 flex items-center justify-center">
-            {message.avatar ? (
+          {message.avatar ? (
+            <div className="h-6 w-6 rounded-full overflow-hidden">
               <Image
                 src={message.avatar}
                 alt={message.senderName}
@@ -70,12 +70,14 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
                 height={24}
                 className="h-6 w-6 rounded-full object-cover"
               />
-            ) : (
+            </div>
+          ) : (
+            <div className="h-6 w-6 rounded-full bg-purple-600 flex items-center justify-center">
               <span className="text-white text-xs font-medium">
                 {message.senderName.charAt(0).toUpperCase()}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Message Content */}
@@ -83,7 +85,7 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
           <div
             className={`px-3 py-2 rounded-lg shadow-sm ${
               isOwnMessage
-                ? 'bg-blue-600 text-white'
+                ? 'bg-purple-600 text-white'
                 : 'bg-white text-black border border-gray-200'
             }`}
           >

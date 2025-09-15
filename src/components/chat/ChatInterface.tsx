@@ -60,9 +60,9 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
   // Memoize UI messages conversion to prevent unnecessary re-renders
   const uiMessages: Message[] = useMemo(() => {
     return realTimeMessages.map(msg => 
-      convertMessageToUIMessage(msg, authUser?.id || '', selectedContact?.name || 'Unknown')
+      convertMessageToUIMessage(msg, authUser?.id || '', selectedContact?.name || 'Unknown', selectedContact?.avatar, authUser?.photoUrl)
     );
-  }, [realTimeMessages, authUser?.id, selectedContact?.name]);
+  }, [realTimeMessages, authUser?.id, authUser?.photoUrl, selectedContact?.name, selectedContact?.avatar]);
 
   // Optimized auto-scroll - only scroll when new messages are added
   useEffect(() => {
@@ -252,8 +252,8 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
 
             {/* Message Input */}
             <div className="border-t border-gray-200 p-4">
-              <div className="flex items-end space-x-2">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+              <div className="flex items-center space-x-2">
+                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
                   <PaperClipIcon className="h-5 w-5" />
                 </button>
                 <div className="flex-1">
@@ -263,7 +263,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
                     rows={1}
                     style={{ minHeight: '40px', maxHeight: '120px' }}
                   />
@@ -271,7 +271,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                 <button
                   onClick={handleSendMessage}
                   disabled={!newMessage.trim()}
-                  className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0 h-10"
                 >
                   <PaperAirplaneIcon className="h-5 w-5" />
                 </button>

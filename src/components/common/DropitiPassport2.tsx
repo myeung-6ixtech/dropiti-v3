@@ -1,5 +1,6 @@
 'use client';
-
+import { useState, useEffect } from "react";
+import { getPublishedPropertyCount } from "@/lib/utils";
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { 
@@ -10,6 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassport2Props {
+  firebaseUid: string;
   user: {
     displayName: string;
     avatar: string;
@@ -30,7 +32,27 @@ interface DropitiPassport2Props {
   };
 }
 
-export default function DropitiPassport2({ user }: DropitiPassport2Props) {
+export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2Props) {
+  const [propertyCount, setPropertyCount] = useState<number>(0);
+  const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  useEffect(() => {
+    const fetchPropertyCount = async () => {
+      try {
+        setIsLoadingProperties(true);
+        const count = await getPublishedPropertyCount(firebaseUid);
+        setPropertyCount(count);
+      } catch (error) {
+        console.error("Error fetching property count:", error);
+        setPropertyCount(0);
+      } finally {
+        setIsLoadingProperties(false);
+      }
+    };
+
+    if (firebaseUid) {
+      fetchPropertyCount();
+    }
+  }, [firebaseUid]);
   const formatJoinDate = (dateString?: string) => {
     if (!dateString) {
       return 'Unknown';
@@ -87,11 +109,11 @@ export default function DropitiPassport2({ user }: DropitiPassport2Props) {
           {/* Quick Stats Row */}
           <div className="flex items-center space-x-8 mb-4 text-sm">
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{user.stats.totalProperties}</span>
+              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCount}</span>
               <span className="text-gray-500">Properties</span>
             </div>
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{user.stats.publishedProperties}</span>
+              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCount}</span>
               <span className="text-gray-500">Published</span>
             </div>
             <div className="flex items-center space-x-1">
