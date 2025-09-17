@@ -8,6 +8,7 @@ import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import FilterTags from '@/components/search/FilterTags';
 import Footer from '@/components/common/Footer';
+import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkeleton';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 
@@ -17,6 +18,7 @@ export default function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // Add filter panel state
   const [filters, setFilters] = useState({
     location: searchParams.get('location') || '',
@@ -70,6 +72,7 @@ export default function SearchPageContent() {
   }, [searchParams]);
 
   const fetchProperties = useCallback(async () => {
+    setIsLoading(true);
     try {
       // Simple approach: fetch all listings and filter client-side
       const apiParams = {
@@ -115,6 +118,8 @@ export default function SearchPageContent() {
     } catch (error) {
       console.error('Search page: Failed to fetch properties:', error);
       setFilteredProperties([]);
+    } finally {
+      setIsLoading(false);
     }
   }, [filters]);
 
@@ -216,12 +221,16 @@ export default function SearchPageContent() {
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-0">
-                  {filteredProperties.length} Properties Found
+                  {isLoading ? (
+                    <div className="h-6 bg-gray-200 rounded w-48 animate-pulse"></div>
+                  ) : (
+                    `${filteredProperties.length} Properties Found`
+                  )}
                 </h2>
                 <p className="text-gray-600">
                   {getSearchSummary()}
                 </p>
-                {filteredProperties.length > 0 && (
+                {!isLoading && filteredProperties.length > 0 && (
                   <p className="text-sm text-gray-500 mt-1">
                     Showing {startIndex + 1}-{Math.min(endIndex, filteredProperties.length)} of {filteredProperties.length} properties
                   </p>
@@ -241,7 +250,9 @@ export default function SearchPageContent() {
             </div>
 
             {/* Properties Grid */}
-            {filteredProperties.length > 0 ? (
+            {isLoading ? (
+              <PropertyCardSkeletonGrid count={12} />
+            ) : filteredProperties.length > 0 ? (
               <div className={propertyCardClasses.grid.search}>
                 {paginatedProperties.map((property) => {    
                   // The API already transforms the data, so we can use it directly
