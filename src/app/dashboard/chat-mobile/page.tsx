@@ -64,7 +64,7 @@ export default function ChatMobilePage() {
             >
               <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
             </Link>
-            <h2 className="text-lg font-semibold text-gray-900">Messages</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-0">Messages</h2>
           </div>
         </div>
       </div>
@@ -107,8 +107,8 @@ export default function ChatMobilePage() {
                         className="h-12 w-12 rounded-full object-cover"
                       />
                     ) : (
-                      <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">
+                      <div className="h-12 w-12 rounded-full bg-gray-300 flex items-center justify-center mb-0">
+                        <span className="text-sm font-medium text-gray-700 mb-0">
                           {contact.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -118,17 +118,17 @@ export default function ChatMobilePage() {
                   {/* Contact Info */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 truncate mb-0">
                         {contact.name}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 mb-0">
                         {contact.lastMessageTime.toLocaleTimeString([], { 
                           hour: '2-digit', 
                           minute: '2-digit' 
                         })}
                       </p>
                     </div>
-                    <p className="text-sm text-gray-500 truncate">
+                    <p className="text-sm text-gray-500 truncate mb-0">
                       {contact.lastMessage}
                     </p>
                   </div>

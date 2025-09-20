@@ -99,7 +99,7 @@ export default function ChatRoomPage() {
             >
               <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
             </button>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-gray-900 mb-0">
               {selectedContact?.name || 'Chat'}
             </h2>
           </div>

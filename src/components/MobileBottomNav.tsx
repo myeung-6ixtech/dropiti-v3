@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getSafeProfileImage } from '@/lib/utils';
-import { Home, Search, Passport } from '@/assets/icons';
+import { Home, Search, Passport, ChartTreeMap } from '@/assets/icons';
 import { mobileBottomNavStyles } from '@/styles/index';
 
 interface MobileBottomNavProps {
@@ -40,6 +40,14 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
       icon: Search,
       isActive: () => isActive('/search')
     },
+    // Only show Dashboard for authenticated users
+    ...(isAuthenticated ? [{
+      id: 'dashboard',
+      label: 'Dashboard',
+      href: '/dashboard',
+      icon: ChartTreeMap,
+      isActive: () => isActive('/dashboard')
+    }] : []),
     {
       id: 'profile',
       label: 'Profile',

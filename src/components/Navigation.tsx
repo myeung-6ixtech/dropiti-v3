@@ -120,8 +120,16 @@ export default function Navigation() {
     );
   }
 
-  // Hide navigation completely on mobile for homepage, search, and property pages
-  if (isMobile && (pathname === '/' || pathname.startsWith('/search') || pathname.startsWith('/property/'))) {
+  // Hide navigation completely on mobile for homepage, search, property pages, user profile pages, and auth pages
+  if (isMobile && (
+    pathname === '/' || 
+    pathname.startsWith('/search') || 
+    pathname.startsWith('/property/') || 
+    pathname.startsWith('/app/') || 
+    pathname.startsWith('/profile') ||
+    pathname.startsWith('/user/') ||
+    pathname.startsWith('/auth/')
+  )) {
     return null;
   }
 
