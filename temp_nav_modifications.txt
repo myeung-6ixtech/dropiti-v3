@@ -1,0 +1,5 @@
+# Modifications needed for Navigation.tsx:
+# 1. Add imports after line 11
+# 2. Add state after line 19  
+# 3. Modify mobile header structure around line 133-153
+# 4. Add MobileChatModal before closing return around line 295

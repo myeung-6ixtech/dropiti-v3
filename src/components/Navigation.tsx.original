@@ -9,7 +9,6 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
 import { navigationStyles } from '@/styles/index';
-import { Chat } from '@/assets/icons';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -152,17 +151,6 @@ export default function Navigation() {
                 />
               </Link>
             </div>
-            
-            {/* Mobile Chat Icon */}
-            {isAuthenticated && (
-              <Link
-                href="/dashboard/chat-mobile"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Open chat"
-              >
-                <Chat className="h-6 w-6 text-gray-600" />
-              </Link>
-            )}
           </div>
         </div>
       </nav>

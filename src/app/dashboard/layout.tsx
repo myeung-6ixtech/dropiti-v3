@@ -93,7 +93,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const tenantNavigation = [
     { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
     { name: 'Applications', icon: ClockIcon, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
-    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
+    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
     { name: 'Reviews', icon: StarIcon, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
     // { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
@@ -107,7 +107,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: 'Offers', icon: ClockIcon, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
     { name: 'Properties', icon: PropertyListings, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
     { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
-    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: '/dashboard/chat', current: pathname === '/dashboard/chat' },
+    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
     { name: 'Reviews', icon: StarIcon, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
     { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
