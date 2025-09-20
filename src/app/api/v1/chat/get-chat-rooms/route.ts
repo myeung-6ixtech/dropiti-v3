@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
+import { decryptMessage, isEncrypted } from '@/lib/encryption';
 
 const GET_USER_CHAT_ROOMS_QUERY = `
   query GetUserChatRooms($userFirebaseUid: String!) {
@@ -176,10 +177,29 @@ export async function GET(request: NextRequest) {
       const otherUserDetails = otherParticipant ? 
         userDetailsData.real_estate_user?.find(u => u.firebase_uid === otherParticipant.user_firebase_uid) : null;
       
+      // Decrypt the last message if it exists and is encrypted
+      let decryptedLastMessage = lastMessage;
+      if (lastMessage?.content) {
+        try {
+          decryptedLastMessage = {
+            ...lastMessage,
+            content: isEncrypted(lastMessage.content) 
+              ? decryptMessage(lastMessage.content)
+              : lastMessage.content
+          };
+        } catch (error) {
+          console.error('Failed to decrypt last message:', error);
+          decryptedLastMessage = {
+            ...lastMessage,
+            content: '[Message could not be decrypted]'
+          };
+        }
+      }
+      
       return {
         ...participant,
         room: room || null,
-        last_message: lastMessage || null,
+        last_message: decryptedLastMessage || null,
         other_participant: otherParticipant ? {
           ...otherParticipant,
           user_details: otherUserDetails

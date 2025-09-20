@@ -62,6 +62,11 @@ export default function Navigation() {
 
   // Show loading state while determining authentication status
   if (isLoading) {
+    // Hide navigation on mobile during loading
+    if (isMobile) {
+      return null;
+    }
+    
     return (
       <nav className={navigationStyles.container}>
         <div className={navigationStyles.content}>
@@ -107,6 +112,44 @@ export default function Navigation() {
                 {/* Skeleton profile photo */}
                 <div className={navigationStyles.loadingAvatar}></div>
               </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  // Hide navigation completely on mobile for homepage, search, and property pages
+  if (isMobile && (pathname === '/' || pathname.startsWith('/search') || pathname.startsWith('/property/'))) {
+    return null;
+  }
+
+  // For mobile dashboard pages, show simplified header
+  if (isMobile && pathname.startsWith('/dashboard')) {
+    return (
+      <nav className={navigationStyles.container}>
+        <div className={navigationStyles.content}>
+          <div className={navigationStyles.header}>
+            <div className={navigationStyles.brand}>
+              {/* Mobile menu button */}
+              <button
+                onClick={toggleSidebar}
+                className={navigationStyles.menuButton}
+                aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+              >
+                <Bars3Icon className={navigationStyles.menuIcon} />
+              </button>
+              
+              <Link href="/" className={navigationStyles.brandLink}>
+                <Image
+                  src="/images/dropiti_logo.png"
+                  alt="Dropiti"
+                  width={160}
+                  height={32}
+                  priority
+                  className="h-8 w-auto"
+                />
+              </Link>
             </div>
           </div>
         </div>
@@ -165,7 +208,10 @@ export default function Navigation() {
               <span>Explore</span>
             </Link>
             
-            <Link
+            
+            {isAuthenticated ? (
+              <>
+               <Link
                 href={user?.uuid ? `/user/${user.uuid}` : '/dashboard'}
                 className={`${navigationStyles.link} ${
                   isActive('/dashboard') || (user?.uuid && isActive(`/user/${user.uuid}`))
@@ -175,10 +221,7 @@ export default function Navigation() {
               >
                 <span>My Profile</span>
             </Link>
-
-            
-            {isAuthenticated ? (
-              <div className={navigationStyles.userDropdown} ref={dropdownRef}>
+            <div className={navigationStyles.userDropdown} ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className={navigationStyles.userButton}
@@ -236,6 +279,7 @@ export default function Navigation() {
                   </div>
                 )}
               </div>
+              </>
             ) : (
               <Link
                 href="/auth/signin"

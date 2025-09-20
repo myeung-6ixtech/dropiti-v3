@@ -49,6 +49,23 @@ export const navigationStyles = {
   responsiveTextMobile: 'nav-responsive-text-mobile',
 };
 
+export const mobileBottomNavStyles = {
+  container: 'mobile-bottom-nav-container',
+  content: 'mobile-bottom-nav-content',
+  item: 'mobile-bottom-nav-item',
+  itemActive: 'mobile-bottom-nav-item-active',
+  itemInactive: 'mobile-bottom-nav-item-inactive',
+  itemContent: 'mobile-bottom-nav-item-content',
+  itemIcon: 'mobile-bottom-nav-item-icon',
+  icon: 'mobile-bottom-nav-icon',
+  iconActive: 'mobile-bottom-nav-icon-active',
+  iconInactive: 'mobile-bottom-nav-icon-inactive',
+  label: 'mobile-bottom-nav-label',
+  labelActive: 'mobile-bottom-nav-label-active',
+  labelInactive: 'mobile-bottom-nav-label-inactive',
+  avatar: 'mobile-bottom-nav-avatar',
+};
+
 export const passportStyles = {
   container: 'passport-container',
   header: 'passport-header',
@@ -259,6 +276,7 @@ export const footerStyles = {
 // Export all styles as a single object
 export const allStyles = {
   navigation: navigationStyles,
+  mobileBottomNav: mobileBottomNavStyles,
   passport: passportStyles,
   headerDropdowns: headerDropdownStyles,
   form: formStyles,

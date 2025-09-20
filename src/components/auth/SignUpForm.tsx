@@ -5,7 +5,9 @@ import Link from "next/link";
 import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { usersAPI } from '@/lib/api-client';
+import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
+import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,21 +17,20 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      showToast('error', AUTH_ERRORS.PASSWORDS_DO_NOT_MATCH);
       return;
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+      showToast('error', AUTH_ERRORS.PASSWORD_TOO_SHORT);
       return;
     }
 
@@ -88,19 +89,19 @@ export default function SignUpForm() {
       }
 
       // Step 5: Redirect to sign in page with verification message
-      router.push("/auth/signin?message=Account created successfully! Please check your email to verify your account before signing in.");
+      router.push(`/auth/signin?message=${SUCCESS_MESSAGES.ACCOUNT_CREATED}`);
     } catch (error: unknown) {
       console.error("Signup error:", error);
       if (error && typeof error === 'object' && 'code' in error) {
         if (error.code === 'auth/email-already-in-use') {
-          setError("An account with this email already exists");
+          showToast('error', AUTH_ERRORS.EMAIL_ALREADY_EXISTS);
         } else if (error.code === 'auth/weak-password') {
-          setError("Password is too weak");
+          showToast('error', AUTH_ERRORS.PASSWORD_TOO_WEAK);
         } else {
-          setError("An error occurred during signup");
+          showToast('error', AUTH_ERRORS.SIGNUP_ERROR);
         }
       } else {
-        setError("An error occurred during signup");
+        showToast('error', AUTH_ERRORS.SIGNUP_ERROR);
       }
     } finally {
       setIsLoading(false);
@@ -125,11 +126,6 @@ export default function SignUpForm() {
           </p>
         </div>
         
-        {error && (
-          <div className={authClasses.error}>
-            {error}
-          </div>
-        )}
         
         <form onSubmit={handleSubmit} className={authClasses.form}>
           <div className={authFormPatterns.field.container}>

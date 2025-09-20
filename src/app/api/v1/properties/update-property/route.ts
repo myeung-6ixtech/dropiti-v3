@@ -43,6 +43,8 @@ export async function PUT(request: NextRequest) {
     
     // Debug logging
     console.log('Update Property API: Received request:', { id, updates });
+    console.log('Update Property API: property_type value:', updates.property_type);
+    console.log('Update Property API: rental_space value:', updates.rental_space);
 
     if (!id) {
       return NextResponse.json(
@@ -69,7 +71,7 @@ export async function PUT(request: NextRequest) {
       num_bathroom?: number;
       gross_area_size?: number;
       gross_area_size_unit?: string;
-      furnished?: boolean;
+      furnished?: string;
       pets_allowed?: boolean;
       amenities?: string[];
       display_image?: string;
@@ -91,7 +93,10 @@ export async function PUT(request: NextRequest) {
     if (updates.num_bathroom) preparedUpdates.num_bathroom = parseInt(updates.num_bathroom);
     if (updates.gross_area_size) preparedUpdates.gross_area_size = parseFloat(updates.gross_area_size);
     if (updates.gross_area_size_unit) preparedUpdates.gross_area_size_unit = updates.gross_area_size_unit;
-    if (updates.furnished !== undefined) preparedUpdates.furnished = updates.furnished;
+    if (updates.furnished !== undefined) {
+      // Handle furnished field - it should be a string, not boolean
+      preparedUpdates.furnished = typeof updates.furnished === 'string' ? updates.furnished : 'non-furnished';
+    }
     if (updates.pets_allowed !== undefined) preparedUpdates.pets_allowed = updates.pets_allowed;
     if (updates.amenities !== undefined) preparedUpdates.amenities = updates.amenities;
     if (updates.display_image !== undefined) preparedUpdates.display_image = updates.display_image;
@@ -118,10 +123,14 @@ export async function PUT(request: NextRequest) {
     // Always update the updated_at timestamp
     preparedUpdates.updated_at = new Date().toISOString();
 
+    console.log('Update Property API: preparedUpdates before mutation:', preparedUpdates);
+
     const data = await executeMutation(UPDATE_PROPERTY_MUTATION, { 
       property_uuid: id, 
       updates: preparedUpdates 
     });
+
+    console.log('Update Property API: GraphQL mutation response:', data);
 
     // Type assertion for the response data
     const typedData = data as {
@@ -139,7 +148,7 @@ export async function PUT(request: NextRequest) {
           num_bathroom: number;
           gross_area_size: number;
           gross_area_size_unit: string;
-          furnished: boolean;
+          furnished: string;
           pets_allowed: boolean;
           amenities: string[];
           display_image: string;
@@ -155,6 +164,14 @@ export async function PUT(request: NextRequest) {
       };
     };
 
+    if (typedData.update_real_estate_property_listing.affected_rows === 0) {
+      console.error('Update Property API: No rows were affected by the update');
+      return NextResponse.json(
+        { error: 'Property not found or no changes made' },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
       data: typedData.update_real_estate_property_listing.returning[0],
@@ -162,9 +179,34 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Update property error:', error);
+    
+    // Provide more specific error information
+    let errorMessage = 'Failed to update property';
+    let statusCode = 500;
+    
+    if (error instanceof Error) {
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      // Check for specific GraphQL errors
+      if (error.message.includes('constraint')) {
+        errorMessage = 'Database constraint violation. Please check your input values.';
+        statusCode = 400;
+      } else if (error.message.includes('permission')) {
+        errorMessage = 'Permission denied. You may not have access to update this property.';
+        statusCode = 403;
+      } else if (error.message.includes('not found')) {
+        errorMessage = 'Property not found.';
+        statusCode = 404;
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to update property' },
-      { status: 500 }
+      { 
+        error: errorMessage,
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: statusCode }
     );
   }
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { propertiesAPI } from '@/lib/api-client';
-import { PropertyData } from '@/types/property';
+import { PropertyData, PROPERTY_TYPE, RESIDENTIAL_TYPE, PropertyTypeValue, ResidentialTypeValue } from '@/types/property';
 import { formatAddressForDatabase } from '@/utils/addressFormatter';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { BasicInfoSection } from './property-sections/BasicInfoSection';
@@ -43,10 +43,8 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
   const transformApiDataToPropertyData = useCallback((apiProperty: Record<string, unknown>): PropertyData => {
     // Transform API property data to PropertyData format
     return {
-      propertyType: ((apiProperty.details as Record<string, unknown>)?.propertyType as string) === 'residential' ? 'residential' : 'commercial',
-      residentialType: ((apiProperty.details as Record<string, unknown>)?.residentialType as string) === 'serviced-apartment' ? 'serviced-apartment' : 
-                      ((apiProperty.details as Record<string, unknown>)?.residentialType as string) === 'village-house' ? 'village-house' :
-                      ((apiProperty.details as Record<string, unknown>)?.residentialType as string) === 'condo' ? 'condo' : 'apartment',
+      propertyType: ((apiProperty.details as Record<string, unknown>)?.propertyType as PropertyTypeValue) || PROPERTY_TYPE.RESIDENTIAL,
+      residentialType: ((apiProperty.details as Record<string, unknown>)?.residentialType as ResidentialTypeValue) || RESIDENTIAL_TYPE.APARTMENT,
       rentalSpace: ((apiProperty.details as Record<string, unknown>)?.rentalSpace as string) === 'partial-apartment' ? 'partial-apartment' :
                    ((apiProperty.details as Record<string, unknown>)?.rentalSpace as string) === 'shared-space' ? 'shared-space' :
                    ((apiProperty.details as Record<string, unknown>)?.rentalSpace as string) === 'private-room' ? 'private-room' : 'entire-apartment',
@@ -114,9 +112,12 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     console.log('InlineEditPropertyView: startEditing called for section:', section);
     console.log('InlineEditPropertyView: propertyData before setting tempData:', propertyData);
     
-    // Ensure amenities is always an array when starting to edit
+    // Ensure amenities is always an array when starting to edit and set proper defaults
     const normalizedPropertyData = {
       ...propertyData,
+      propertyType: propertyData.propertyType || PROPERTY_TYPE.RESIDENTIAL,
+      residentialType: propertyData.residentialType || RESIDENTIAL_TYPE.APARTMENT,
+      rentalSpace: propertyData.rentalSpace || 'entire-apartment',
       amenities: normalizeAmenities(propertyData.amenities)
     };
     
@@ -130,9 +131,12 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     console.log('InlineEditPropertyView: cancelEditing called');
     console.log('InlineEditPropertyView: originalData before setting tempData:', originalData);
     
-    // Ensure amenities is always an array when canceling
+    // Ensure amenities is always an array when canceling and set proper defaults
     const normalizedOriginalData = {
       ...originalData,
+      propertyType: originalData.propertyType || PROPERTY_TYPE.RESIDENTIAL,
+      residentialType: originalData.residentialType || RESIDENTIAL_TYPE.APARTMENT,
+      rentalSpace: originalData.rentalSpace || 'entire-apartment',
       amenities: normalizeAmenities(originalData.amenities)
     };
     
@@ -162,7 +166,10 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       
       // Transform back to API format and save
       const apiData = transformPropertyDataToApi(updatedData);
+      console.log('InlineEditPropertyView: About to call updateProperty with:', { propertyId, apiData });
+      
       const response = await propertiesAPI.updateProperty(propertyId, apiData);
+      console.log('InlineEditPropertyView: updateProperty response:', response);
       
       if (response.success) {
         // IMPORTANT: Update propertyData BEFORE changing editing state
@@ -176,7 +183,25 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       }
     } catch (error) {
       console.error('Error updating property:', error);
-      setErrors({ [section]: 'Failed to update. Please try again.' });
+      
+      // Provide more specific error messages based on the error type
+      let errorMessage = 'Failed to update. Please try again.';
+      
+      if (error instanceof Error) {
+        if (error.message.includes('constraint')) {
+          errorMessage = 'Invalid property data. Please check your input values.';
+        } else if (error.message.includes('permission')) {
+          errorMessage = 'You do not have permission to update this property.';
+        } else if (error.message.includes('not found')) {
+          errorMessage = 'Property not found. Please refresh the page and try again.';
+        } else if (error.message.includes('500')) {
+          errorMessage = 'Server error. Please try again later.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setErrors({ [section]: errorMessage });
     } finally {
       setIsSaving(false);
     }
@@ -188,8 +213,8 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       title: propertyData.rentalDetails?.listingName || 'Property Listing',
       description: propertyData.rentalDetails?.listingDescription || 'Property description',
       address: formatAddressForDatabase(propertyData.address),
-      property_type: propertyData.propertyType,
-      rental_space: propertyData.rentalSpace,
+      property_type: propertyData.propertyType || 'residential', // Ensure property_type is always set
+      rental_space: propertyData.rentalSpace || 'entire', // Ensure rental_space is always set (match create API format)
       num_bedroom: propertyData.unitDetails?.bedrooms || 0,
       num_bathroom: propertyData.unitDetails?.bathrooms || 0,
       gross_area_size: propertyData.unitDetails?.grossArea || 0,
@@ -209,6 +234,12 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       // Also include photos field for backward compatibility
       photos: propertyData.uploadedImages || [],
     };
+    
+    // Debug logging to help identify the issue
+    console.log('InlineEditPropertyView: transformPropertyDataToApi - apiData:', apiData);
+    console.log('InlineEditPropertyView: propertyData.propertyType:', propertyData.propertyType);
+    console.log('InlineEditPropertyView: propertyData.rentalSpace:', propertyData.rentalSpace);
+    
     return apiData;
   };
 

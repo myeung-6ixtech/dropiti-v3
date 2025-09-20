@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { PencilIcon} from '@heroicons/react/24/outline';
-import { PropertyData } from '@/types/property';
+import { PropertyData, PROPERTY_TYPE, RESIDENTIAL_TYPE } from '@/types/property';
 
 interface BasicInfoSectionProps {
   data: PropertyData;
@@ -73,31 +73,30 @@ export function BasicInfoSection({
               Property Type
             </label>
             <select
-              value={tempData.propertyType || ''}
-              onChange={(e) => onUpdateField('propertyType', 'propertyType', e.target.value)}
+              value={tempData.propertyType || PROPERTY_TYPE.RESIDENTIAL}
+              onChange={(e) => onUpdateField('', 'propertyType', e.target.value)}
               className="form-select w-full"
             >
-              <option value="">Select property type</option>
-              <option value="residential">Residential</option>
+              <option value={PROPERTY_TYPE.RESIDENTIAL}>Residential</option>
             </select>
           </div>
 
           {/* Residential Type */}
-          {tempData.propertyType === 'residential' && (
+          {tempData.propertyType === PROPERTY_TYPE.RESIDENTIAL && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Residential Type
               </label>
               <select
-                value={tempData.residentialType || ''}
-                onChange={(e) => onUpdateField('residentialType', 'residentialType', e.target.value)}
+                value={tempData.residentialType || RESIDENTIAL_TYPE.APARTMENT}
+                onChange={(e) => onUpdateField('', 'residentialType', e.target.value)}
                 className="form-select w-full"
               >
                 <option value="">Select residential type</option>
-                <option value="serviced-apartment">Serviced Apartment</option>
-                <option value="village-house">Village House</option>
-                <option value="apartment">Apartment</option>
-                <option value="condo">Condominium</option>
+                <option value={RESIDENTIAL_TYPE.SERVICED_APARTMENT}>Serviced Apartment</option>
+                <option value={RESIDENTIAL_TYPE.VILLAGE_HOUSE}>Village House</option>
+                <option value={RESIDENTIAL_TYPE.APARTMENT}>Apartment</option>
+                <option value={RESIDENTIAL_TYPE.CONDO}>Condominium</option>
               </select>
             </div>
           )}
@@ -108,8 +107,8 @@ export function BasicInfoSection({
               Rental Space
             </label>
             <select
-              value={tempData.rentalSpace || ''}
-              onChange={(e) => onUpdateField('rentalSpace', 'rentalSpace', e.target.value)}
+              value={tempData.rentalSpace || 'entire-apartment'}
+              onChange={(e) => onUpdateField('', 'rentalSpace', e.target.value)}
               className="form-select w-full"
             >
               <option value="">Select rental space</option>

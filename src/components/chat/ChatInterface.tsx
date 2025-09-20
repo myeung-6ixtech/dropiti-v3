@@ -252,7 +252,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
 
             {/* Message Input */}
             <div className="border-t border-gray-200 p-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex space-x-2">
                 <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
                   <PaperClipIcon className="h-5 w-5" />
                 </button>
