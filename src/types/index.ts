@@ -11,6 +11,7 @@ export * from './assets';
 export * from './user';
 export * from './review';
 export * from './user-profile';
+export * from './error-messages';
 
 // ========================================
 // LEGACY TYPES (Keeping for backward compatibility)

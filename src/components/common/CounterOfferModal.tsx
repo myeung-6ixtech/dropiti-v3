@@ -3,6 +3,7 @@
 import { Modal } from '@/components/ui/modal';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Offer } from '@/types/offer';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 
 
@@ -54,6 +55,12 @@ export default function CounterOfferModal({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Counter Offer Details</h2>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <XMarkIcon className="h-4 w-4 text-gray-500" />
+          </button>
         </div>
         {/* Content */}
         <div className="p-4">

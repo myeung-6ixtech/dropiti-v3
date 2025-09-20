@@ -87,7 +87,7 @@ export default function SearchPageContent() {
       if (response.success && response.data) {
         let allProperties = Array.isArray(response.data) ? response.data : [response.data];
         
-        // Simple client-side filtering: check if location contains the search term
+        // Client-side filtering for location, bedrooms, and price
         if (filters.location && filters.location.trim()) {
           const searchTerm = filters.location.toLowerCase().trim();
           console.log('Search page: Filtering properties for location:', searchTerm);
@@ -107,7 +107,61 @@ export default function SearchPageContent() {
             return matches;
           });
           
-          console.log('Search page: After filtering, properties count:', allProperties.length);
+          console.log('Search page: After location filtering, properties count:', allProperties.length);
+        }
+
+        // Filter by exact bedrooms
+        if (filters.bedrooms && filters.bedrooms.trim()) {
+          const bedroomFilter = parseInt(filters.bedrooms);
+          console.log('Search page: Filtering properties for bedrooms:', bedroomFilter);
+          
+          allProperties = allProperties.filter((property: { bedrooms?: number; title?: string }) => {
+            const propertyBedrooms = property.bedrooms || 0;
+            let matches = false;
+            
+            if (bedroomFilter === 5) {
+              // 5+ bedrooms means 5 or more
+              matches = propertyBedrooms >= 5;
+            } else {
+              // Exact match for other bedroom counts
+              matches = propertyBedrooms === bedroomFilter;
+            }
+            
+            if (!matches) {
+              console.log('Search page: Filtered out property:', {
+                title: property.title,
+                bedrooms: property.bedrooms,
+                reason: `Bedrooms ${propertyBedrooms} does not match filter ${bedroomFilter}`
+              });
+            }
+            
+            return matches;
+          });
+          
+          console.log('Search page: After bedrooms filtering, properties count:', allProperties.length);
+        }
+
+        // Filter by maximum price
+        if (filters.maxPrice && filters.maxPrice.trim()) {
+          const maxPriceFilter = parseInt(filters.maxPrice);
+          console.log('Search page: Filtering properties for max price:', maxPriceFilter);
+          
+          allProperties = allProperties.filter((property: { price?: number; title?: string }) => {
+            const propertyPrice = property.price || 0;
+            const matches = propertyPrice <= maxPriceFilter;
+            
+            if (!matches) {
+              console.log('Search page: Filtered out property:', {
+                title: property.title,
+                price: property.price,
+                reason: `Price ${propertyPrice} exceeds max price ${maxPriceFilter}`
+              });
+            }
+            
+            return matches;
+          });
+          
+          console.log('Search page: After price filtering, properties count:', allProperties.length);
         }
         
         setFilteredProperties(allProperties);
@@ -187,7 +241,10 @@ export default function SearchPageContent() {
   const getSearchSummary = () => {
     const criteria = [];
     if (filters.location) criteria.push(filters.location);
-    if (filters.bedrooms) criteria.push(`${filters.bedrooms}+ bedrooms`);
+    if (filters.bedrooms) {
+      const bedroomText = filters.bedrooms === '5' ? '5+ bedrooms' : `${filters.bedrooms} bedroom${filters.bedrooms === '1' ? '' : 's'}`;
+      criteria.push(bedroomText);
+    }
     if (filters.maxPrice) criteria.push(`Under ${parseInt(filters.maxPrice).toLocaleString()} HKD`);
     
     return criteria.length > 0 ? criteria.join(' • ') : 'All properties';

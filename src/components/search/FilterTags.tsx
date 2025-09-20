@@ -27,9 +27,10 @@ export default function FilterTags({ filters, onRemoveFilter, onClearAll }: Filt
   }
 
   if (filters.bedrooms) {
+    const bedroomText = filters.bedrooms === '5' ? '5+ bedrooms' : `${filters.bedrooms} bedroom${filters.bedrooms === '1' ? '' : 's'}`;
     activeFilters.push({
       key: 'bedrooms',
-      label: `${filters.bedrooms}+ bedrooms`,
+      label: bedroomText,
       icon: Bed,
     });
   }

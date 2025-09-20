@@ -4,6 +4,7 @@ import "./globals.css";
 import "@/styles/design-system.css";
 import "@/styles/form-components.css";
 import Navigation from "@/components/Navigation";
+import MobileBottomNav from "@/components/MobileBottomNav";
 import Providers from "@/components/Providers";
 import ToastContainer from "@/components/ui/toast/ToastContainer";
 
@@ -79,9 +80,10 @@ export default function RootLayout({
         <Providers>
           <div className="min-h-screen flex flex-col bg-white">
             <Navigation />
-            <main className="flex-1">
+            <main className="flex-1 pb-16 md:pb-0">
               {children}
             </main>
+            <MobileBottomNav />
           </div>
           <ToastContainer />
         </Providers>

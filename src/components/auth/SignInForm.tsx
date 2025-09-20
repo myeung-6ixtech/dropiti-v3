@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
+import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -11,11 +13,11 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   
   const router = useRouter();
   const { login } = useAuth();
+  const { showToast } = useToast();
 
   // Check for success message from URL params and load remember me preference
   React.useEffect(() => {
@@ -38,7 +40,6 @@ export default function SignInForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     try {
@@ -48,12 +49,14 @@ export default function SignInForm() {
       const result = await login(email, password, rememberMe);
       
       if (result.success) {
+        showToast('success', SUCCESS_MESSAGES.SIGNED_IN);
         router.push("/dashboard");
       } else {
-        setError(result.error || "Invalid email or password");
+        showToast('error', result.error || AUTH_ERRORS.INVALID_CREDENTIALS);
       }
-    } catch {
-      setError("An unexpected error occurred");
+    } catch (error) {
+      console.error('Sign in error:', error);
+      showToast('error', AUTH_ERRORS.UNEXPECTED_ERROR);
     } finally {
       setIsLoading(false);
     }
@@ -80,12 +83,6 @@ export default function SignInForm() {
         {successMessage && (
           <div className={authClasses.success}>
             {successMessage}
-          </div>
-        )}
-        
-        {error && (
-          <div className={authClasses.error}>
-            {error}
           </div>
         )}
         

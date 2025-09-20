@@ -36,9 +36,10 @@ interface ChatInterfaceProps {
   userType: 'landlord' | 'tenant' | 'support';
   isLoadingContacts?: boolean;
   selectedRoomId?: string | null;
+  hideSidebar?: boolean;
 }
 
-export default function ChatInterface({ contacts, userType, isLoadingContacts = false, selectedRoomId }: ChatInterfaceProps) {
+export default function ChatInterface({ contacts, userType, isLoadingContacts = false, selectedRoomId, hideSidebar = false }: ChatInterfaceProps) {
   const { user: authUser } = useAuth();
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(contacts[0] || null);
   const [newMessage, setNewMessage] = useState('');
@@ -190,16 +191,18 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
 
   return (
     <div className="flex h-full bg-white">
-      {/* Sidebar */}
-      <div className="w-1/3 border-r border-gray-200 flex flex-col">
-        <ChatSidebar
-          contacts={sidebarContacts}
-          selectedContact={selectedContact}
-          onContactSelect={handleContactSelect}
-          userType={userType as 'tenant' | 'landlord'}
-          isLoading={isLoadingContacts}
-        />
-      </div>
+      {/* Sidebar - only show if not hidden */}
+      {!hideSidebar && (
+        <div className="w-1/3 border-r border-gray-200 flex flex-col">
+          <ChatSidebar
+            contacts={sidebarContacts}
+            selectedContact={selectedContact}
+            onContactSelect={handleContactSelect}
+            userType={userType as 'tenant' | 'landlord'}
+            isLoading={isLoadingContacts}
+          />
+        </div>
+      )}
 
       {/* Chat Area */}
       <div className="flex-1 flex flex-col">
@@ -252,7 +255,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
 
             {/* Message Input */}
             <div className="border-t border-gray-200 p-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex space-x-2">
                 <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
                   <PaperClipIcon className="h-5 w-5" />
                 </button>

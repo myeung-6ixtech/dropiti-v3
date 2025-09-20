@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { auth, confirmPasswordReset, verifyPasswordResetCode, applyActionCode } from '@/lib/firebase';
+import { useToast } from '@/context/ToastContext';
 import AuthActionLoading from '@/components/auth/AuthActionLoading';
 import EmailVerificationSuccess from '@/components/auth/EmailVerificationSuccess';
 import PasswordResetSuccess from '@/components/auth/PasswordResetSuccess';
@@ -20,11 +21,13 @@ function AuthActionForm() {
   const searchParams = useSearchParams();
   const oobCode = searchParams.get('oobCode');
   const mode = searchParams.get('mode');
+  const { showToast } = useToast();
 
   // Validate the action code and determine the mode
   useEffect(() => {
     const validateAction = async () => {
       if (!oobCode || !mode) {
+        showToast('error', 'Invalid action link. Please check your email for the correct link.');
         setError('Invalid action link. Please check your email for the correct link.');
         setIsValidating(false);
         return;
@@ -42,49 +45,60 @@ function AuthActionForm() {
           await applyActionCode(auth, oobCode);
           setSuccess(true);
         } else {
-          setError('Invalid action mode. Please check your email for the correct link.');
+          const errorMsg = 'Invalid action mode. Please check your email for the correct link.';
+          showToast('error', errorMsg);
+          setError(errorMsg);
         }
       } catch (error: unknown) {
         console.error('Action validation error:', error);
         
         const firebaseError = error as { code?: string };
+        let errorMsg = 'Invalid action link. Please check your email for the correct link.';
+        
         switch (firebaseError.code) {
           case 'auth/invalid-action-code':
-            setError('This action link has expired or is invalid. Please request a new one.');
+            errorMsg = 'This action link has expired or is invalid. Please request a new one.';
             break;
           case 'auth/expired-action-code':
-            setError('This action link has expired. Please request a new one.');
+            errorMsg = 'This action link has expired. Please request a new one.';
             break;
           case 'auth/user-disabled':
-            setError('This account has been disabled. Please contact support.');
+            errorMsg = 'This account has been disabled. Please contact support.';
             break;
-          default:
-            setError('Invalid action link. Please check your email for the correct link.');
         }
+        
+        showToast('error', errorMsg);
+        setError(errorMsg);
       } finally {
         setIsValidating(false);
       }
     };
 
     validateAction();
-  }, [oobCode, mode]);
+  }, [oobCode, mode, showToast]);
 
   const handlePasswordReset = async (password: string, confirmPassword: string) => {
     setError('');
 
     // Validation
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+      const errorMsg = 'Password must be at least 6 characters long.';
+      showToast('error', errorMsg);
+      setError(errorMsg);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      const errorMsg = 'Passwords do not match.';
+      showToast('error', errorMsg);
+      setError(errorMsg);
       return;
     }
 
     if (!oobCode) {
-      setError('Invalid reset link. Please request a new password reset.');
+      const errorMsg = 'Invalid reset link. Please request a new password reset.';
+      showToast('error', errorMsg);
+      setError(errorMsg);
       return;
     }
 
@@ -92,24 +106,28 @@ function AuthActionForm() {
 
     try {
       await confirmPasswordReset(auth, oobCode, password);
+      showToast('success', 'Password reset successfully! You can now sign in with your new password.');
       setSuccess(true);
     } catch (error: unknown) {
       console.error('Password reset error:', error);
       
       const firebaseError = error as { code?: string };
+      let errorMsg = 'Failed to reset password. Please try again.';
+      
       switch (firebaseError.code) {
         case 'auth/invalid-action-code':
-          setError('This reset link has expired or is invalid. Please request a new password reset.');
+          errorMsg = 'This reset link has expired or is invalid. Please request a new password reset.';
           break;
         case 'auth/expired-action-code':
-          setError('This reset link has expired. Please request a new password reset.');
+          errorMsg = 'This reset link has expired. Please request a new password reset.';
           break;
         case 'auth/weak-password':
-          setError('Password is too weak. Please choose a stronger password.');
+          errorMsg = 'Password is too weak. Please choose a stronger password.';
           break;
-        default:
-          setError('Failed to reset password. Please try again.');
       }
+      
+      showToast('error', errorMsg);
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }

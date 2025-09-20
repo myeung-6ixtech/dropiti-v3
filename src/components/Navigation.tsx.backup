@@ -9,7 +9,6 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
 import { navigationStyles } from '@/styles/index';
-import { Chat } from '@/assets/icons';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -120,16 +119,8 @@ export default function Navigation() {
     );
   }
 
-  // Hide navigation completely on mobile for homepage, search, property pages, user profile pages, and auth pages
-  if (isMobile && (
-    pathname === '/' || 
-    pathname.startsWith('/search') || 
-    pathname.startsWith('/property/') || 
-    pathname.startsWith('/app/') || 
-    pathname.startsWith('/profile') ||
-    pathname.startsWith('/user/') ||
-    pathname.startsWith('/auth/')
-  )) {
+  // Hide navigation completely on mobile for homepage, search, and property pages
+  if (isMobile && (pathname === '/' || pathname.startsWith('/search') || pathname.startsWith('/property/'))) {
     return null;
   }
 
@@ -160,17 +151,6 @@ export default function Navigation() {
                 />
               </Link>
             </div>
-            
-            {/* Mobile Chat Icon */}
-            {isAuthenticated && (
-              <Link
-                href="/dashboard/chat-mobile"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Open chat"
-              >
-                <Chat className="h-6 w-6 text-gray-600" />
-              </Link>
-            )}
           </div>
         </div>
       </nav>

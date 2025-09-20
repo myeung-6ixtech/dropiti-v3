@@ -87,7 +87,7 @@ export default function ModernFilter({
             <div>
               <label className="form-label">
                 <div className="flex items-center space-x-2">
-                  <span>Minimum Bedrooms</span>
+                  <span>Bedrooms</span>
                 </div>
               </label>
               <select

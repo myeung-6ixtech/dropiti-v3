@@ -57,47 +57,66 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
   };
 
   return (
-    <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'} mb-4`}>
       <div className={`flex max-w-xs lg:max-w-md ${isOwnMessage ? 'flex-row-reverse' : 'flex-row'}`}>
         {/* Avatar */}
-        <div className="flex-shrink-0">
-          {message.avatar ? (
-            <div className="h-6 w-6 rounded-full overflow-hidden">
+        {!isOwnMessage && (
+          <div className="flex-shrink-0 mr-3">
+            {message.avatar ? (
               <Image
                 src={message.avatar}
                 alt={message.senderName}
-                width={24}
-                height={24}
-                className="h-6 w-6 rounded-full object-cover"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full object-cover"
               />
-            </div>
-          ) : (
-            <div className="h-6 w-6 rounded-full bg-purple-600 flex items-center justify-center">
-              <span className="text-white text-xs font-medium">
-                {message.senderName.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          )}
-        </div>
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                <span className="text-white text-xs font-medium">
+                  {message.senderName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Message Content */}
-        <div className={`ml-2 ${isOwnMessage ? 'mr-2' : 'ml-2'}`}>
-          <div
-            className={`px-3 py-2 rounded-lg shadow-sm ${
-              isOwnMessage
-                ? 'bg-purple-600 text-white'
-                : 'bg-white text-black border border-gray-200'
-            }`}
-          >
-            <div className="text-sm mb-0 whitespace-pre-wrap break-words">{message.content}</div>
-          </div>
-          <div className={`mt-1 flex items-center space-x-1 ${isOwnMessage ? 'justify-end' : 'justify-start'}`}>
-            <span className="text-xs text-gray-500">
-              {formatTime(message.timestamp)}
-            </span>
+        <div className={`px-4 py-2 rounded-lg ${
+          isOwnMessage 
+            ? 'bg-purple-600 text-white' 
+            : 'bg-gray-100 text-gray-900'
+        }`}>
+          <div className="text-sm whitespace-pre-wrap break-words">{message.content}</div>
+          
+          {/* Message Status and Time */}
+          <div className={`flex items-center justify-between mt-1 text-xs ${
+            isOwnMessage ? 'text-purple-100' : 'text-gray-500'
+          }`}>
+            <span>{formatTime(message.timestamp)}</span>
             {isOwnMessage && getStatusIcon(message.status)}
           </div>
         </div>
+
+        {/* Avatar for own messages */}
+        {isOwnMessage && (
+          <div className="flex-shrink-0 ml-3">
+            {message.avatar ? (
+              <Image
+                src={message.avatar}
+                alt="You"
+                width={32}
+                height={32}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center">
+                <span className="text-white text-xs font-medium">
+                  You
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

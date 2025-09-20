@@ -2260,3 +2260,133 @@
 }
 /* Dashboard Tab Styles */
 @import './dashboard-tabs.css';
+
+/* ========================================
+   MOBILE BOTTOM NAVIGATION
+   ======================================== */
+
+.mobile-bottom-nav-container {
+  @apply fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200;
+  @apply md:hidden; /* Only show on mobile */
+  /* Safe area for devices with home indicator */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-bottom-nav-content {
+  @apply flex items-center justify-around h-16 px-2;
+}
+
+.mobile-bottom-nav-item {
+  @apply flex-1 flex items-center justify-center;
+  @apply transition-colors duration-200;
+  @apply min-w-0; /* Prevent flex item from growing */
+}
+
+.mobile-bottom-nav-item-active {
+  @apply text-gray-900;
+}
+
+.mobile-bottom-nav-item-inactive {
+  @apply text-gray-500;
+}
+
+.mobile-bottom-nav-item-content {
+  @apply flex flex-col items-center justify-center;
+  @apply min-w-0 w-full; /* Ensure proper centering */
+}
+
+.mobile-bottom-nav-item-icon {
+  @apply flex items-center justify-center mb-1;
+}
+
+.mobile-bottom-nav-icon {
+  @apply h-6 w-6;
+  @apply transition-colors duration-200;
+}
+
+.mobile-bottom-nav-icon-active {
+  @apply text-gray-900;
+}
+
+.mobile-bottom-nav-icon-inactive {
+  @apply text-gray-500;
+}
+
+.mobile-bottom-nav-label {
+  @apply text-xs font-medium;
+  @apply transition-colors duration-200;
+  @apply truncate; /* Prevent text overflow */
+}
+
+.mobile-bottom-nav-label-active {
+  @apply text-gray-900;
+}
+
+.mobile-bottom-nav-label-inactive {
+  @apply text-gray-500;
+}
+
+.mobile-bottom-nav-avatar {
+  @apply h-6 w-6 rounded-full object-cover;
+  @apply border border-gray-200;
+}
+
+/* Hover states for touch devices */
+@media (hover: hover) {
+  .mobile-bottom-nav-item:hover .mobile-bottom-nav-icon-inactive {
+    @apply text-gray-700;
+  }
+  
+  .mobile-bottom-nav-item:hover .mobile-bottom-nav-label-inactive {
+    @apply text-gray-700;
+  }
+}
+
+/* Active state animation */
+.mobile-bottom-nav-item-active .mobile-bottom-nav-icon {
+  @apply transform scale-110;
+}
+
+/* Focus states for accessibility */
+.mobile-bottom-nav-item:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+  @apply rounded-lg;
+}
+
+/* Ensure proper spacing on very small screens */
+@media (max-width: 320px) {
+  .mobile-bottom-nav-content {
+    @apply px-1;
+  }
+  
+  .mobile-bottom-nav-label {
+    @apply text-xs;
+  }
+}
+
+/* ========================================
+   MOBILE DASHBOARD HEADER
+   ======================================== */
+
+/* Mobile dashboard header styling */
+@media (max-width: 767px) {
+  .nav-container {
+    @apply h-14; /* Smaller height for mobile dashboard */
+  }
+  
+  .nav-header {
+    @apply h-14; /* Match container height */
+  }
+  
+  .nav-brand {
+    @apply justify-between; /* Space between hamburger and logo */
+  }
+  
+  .nav-menu-button {
+    @apply mr-2; /* Add margin to hamburger button */
+  }
+  
+  .nav-brand-link {
+    @apply flex-1 justify-center; /* Center the logo */
+  }
+}

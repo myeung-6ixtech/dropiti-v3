@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { REVIEW_TYPES } from '@/constants/review';
 import { StarIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon } from '@heroicons/react/24/outline';
 import { CreateReviewModalProps } from '@/types/review';
 
 export default function CreateReviewModal({
@@ -55,11 +56,19 @@ export default function CreateReviewModal({
         
         {/* Modal */}
         <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Leave a Review</h2>
-            <p className="text-sm text-gray-600 mt-1">
-              Share your experience with {otherPartyName}
-            </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Leave a Review</h2>
+              <p className="text-sm text-gray-600 mt-1">
+                Share your experience with {otherPartyName}
+              </p>
+            </div>
+            <button
+              onClick={handleClose}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <XMarkIcon className="h-4 w-4 text-gray-500" />
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
