@@ -33,7 +33,7 @@ export default function IncomingOfferCardStatus({
             <div className="ml-3">
               {offer.finalAcceptedAt && (
               <h3 className="text-sm font-medium text-purple-800 mb-0">
-                ✅ You accepted this tenant's offer. Accepted on {formatDate(offer.finalAcceptedAt)}. Write a <Link href="/reviews">Review</Link>.
+                ✅ You accepted this tenant's offer. Accepted on {formatDate(offer.finalAcceptedAt)}. Write a <Link href="/dashboard/reviews">Review</Link>.
               </h3> )}
             </div>
           </div>

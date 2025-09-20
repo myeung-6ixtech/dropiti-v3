@@ -188,6 +188,7 @@ export const propertiesAPI = {
     rental_price_currency?: string;
     availability_date?: string | null;
     is_public?: boolean;
+    status?: string;
     photos?: string[]; // For backward compatibility
   }) => {
     const response = await apiClient.put('/properties/update-property', { id, updates });
@@ -258,7 +259,8 @@ export const propertiesAPI = {
       }
       throw error;
     }
-  },};
+  },
+};
 
 // Users API
 export const usersAPI = {

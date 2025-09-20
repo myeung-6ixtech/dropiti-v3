@@ -16,21 +16,31 @@ import { useState, useEffect } from 'react';
 import { Review } from '@/types/review';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import ReviewOpportunities from '@/components/dashboard/ReviewOpportunities';
+import { getTotalPropertyCount, getPublishedPropertyCountByStatus, getAverageUserRating } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [propertyCounts, setPropertyCounts] = useState({
+    totalProperties: 0,
+    publishedProperties: 0
+  });
+  const [userRating, setUserRating] = useState({
+    averageRating: 0,
+    reviewCount: 0
+  });
 
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchData = async () => {
       // Use id from the user object, which contains the Firebase UID
       const firebaseUid = authUser?.id;
       
       if (!firebaseUid) {
-        console.warn('Dashboard: No Firebase UID available for fetching reviews');
+        console.warn('Dashboard: No Firebase UID available for fetching data');
         setReviews([]);
+        setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
         setLoading(false);
         return;
       }
@@ -39,28 +49,50 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
         
-        console.log('Dashboard: Fetching reviews for Firebase UID:', firebaseUid);
+        console.log('Dashboard: Fetching data for Firebase UID:', firebaseUid);
         
-        const response = await reviewsAPI.getReviewsByUser({
-          userFirebaseUid: firebaseUid,
-          limit: 5 // Show only 5 recent reviews on dashboard
-        });
+        // Fetch reviews, property counts, and average rating in parallel
+        const [reviewsResponse, totalCount, publishedCount, ratingData] = await Promise.all([
+          reviewsAPI.getReviewsByUser({
+            userFirebaseUid: firebaseUid,
+            limit: 5 // Show only 5 recent reviews on dashboard
+          }),
+          getTotalPropertyCount(firebaseUid),
+          getPublishedPropertyCountByStatus(firebaseUid),
+          getAverageUserRating(firebaseUid)
+        ]);
         
-        if (response.success && response.data) {
-          setReviews(Array.isArray(response.data) ? response.data : [response.data]);
+        // Set reviews
+        if (reviewsResponse.success && reviewsResponse.data) {
+          setReviews(Array.isArray(reviewsResponse.data) ? reviewsResponse.data : [reviewsResponse.data]);
         } else {
           setReviews([]);
         }
+        
+        // Set property counts
+        setPropertyCounts({
+          totalProperties: totalCount,
+          publishedProperties: publishedCount
+        });
+        
+        // Set user rating data
+        setUserRating({
+          averageRating: ratingData.averageRating,
+          reviewCount: ratingData.reviewCount
+        });
+        
       } catch (err) {
-        setError('Failed to fetch reviews.');
-        console.error('Dashboard: Error fetching reviews:', err);
+        setError('Failed to fetch dashboard data.');
+        console.error('Dashboard: Error fetching data:', err);
         setReviews([]); // Set empty array on error
+        setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
+        setUserRating({ averageRating: 0, reviewCount: 0 });
       } finally {
         setLoading(false);
       }
     };
 
-    fetchReviews();
+    fetchData();
   }, [authUser?.id]);
 
   if (isLoading) {
@@ -102,8 +134,8 @@ export default function DashboardPage() {
     location: authUser.location || 'Hong Kong',
     joinDate: authUser.userSince || authUser.createdAt || '2024-01-01',
     verified: authUser.verified || false,
-    rating: authUser.rating || 0,
-    reviewCount: authUser.reviewCount || 0,
+    rating: userRating.averageRating || 0,
+    reviewCount: userRating.reviewCount || 0,
     about: authUser.about || 'Professional landlord with over 5 years of experience in property management.',
     languages: parseLanguages(authUser.languages),
     education: authUser.education || 'Not specified',
@@ -112,8 +144,8 @@ export default function DashboardPage() {
     stats: {
       responseRate: authUser.responseRate || 0,
       avgResponseTime: authUser.avgResponseTime || 'Not specified',
-      totalProperties: authUser.totalProperties || 0,
-      publishedProperties: authUser.totalProperties || 0
+      totalProperties: propertyCounts.totalProperties,
+      publishedProperties: propertyCounts.publishedProperties
     }
   };
 
@@ -169,10 +201,6 @@ export default function DashboardPage() {
             <div className="dashboard-stat-item">
               <div className="dashboard-stat-value">{userData.stats.publishedProperties}</div>
               <div className="dashboard-stat-label">Published</div>
-            </div>
-            <div className="dashboard-stat-item">
-              <div className="dashboard-stat-value">{userData.stats.responseRate}%</div>
-              <div className="dashboard-stat-label">Response Rate</div>
             </div>
             <div className="dashboard-stat-item">
               <div className="dashboard-stat-value">{userData.rating}</div>

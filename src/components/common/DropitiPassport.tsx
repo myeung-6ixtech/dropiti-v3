@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { getPublishedPropertyCount } from "@/lib/utils";
+import { getTotalPropertyCount, getPublishedPropertyCountByStatus, getAverageUserRating } from "@/lib/utils";
 import Image from 'next/image';
 import { 
   StarIcon, 
@@ -34,24 +34,50 @@ interface DropitiPassportProps {
 }
 
 export default function DropitiPassport({ user, firebaseUid }: DropitiPassportProps) {
-  const [propertyCount, setPropertyCount] = useState<number>(0);
+  const [propertyCounts, setPropertyCounts] = useState({
+    totalProperties: 0,
+    publishedProperties: 0
+  });
+  const [userRating, setUserRating] = useState({
+    averageRating: 0,
+    reviewCount: 0
+  });
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  const [isLoadingRating, setIsLoadingRating] = useState(true);
+  
   useEffect(() => {
-    const fetchPropertyCount = async () => {
+    const fetchData = async () => {
       try {
         setIsLoadingProperties(true);
-        const count = await getPublishedPropertyCount(firebaseUid);
-        setPropertyCount(count);
+        setIsLoadingRating(true);
+        
+        const [totalCount, publishedCount, ratingData] = await Promise.all([
+          getTotalPropertyCount(firebaseUid),
+          getPublishedPropertyCountByStatus(firebaseUid),
+          getAverageUserRating(firebaseUid)
+        ]);
+        
+        setPropertyCounts({
+          totalProperties: totalCount,
+          publishedProperties: publishedCount
+        });
+        
+        setUserRating({
+          averageRating: ratingData.averageRating,
+          reviewCount: ratingData.reviewCount
+        });
       } catch (error) {
-        console.error("Error fetching property count:", error);
-        setPropertyCount(0);
+        console.error("Error fetching data:", error);
+        setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
+        setUserRating({ averageRating: 0, reviewCount: 0 });
       } finally {
         setIsLoadingProperties(false);
+        setIsLoadingRating(false);
       }
     };
 
     if (firebaseUid) {
-      fetchPropertyCount();
+      fetchData();
     }
   }, [firebaseUid]);
   const formatJoinDate = (dateString: string) => {
@@ -92,9 +118,13 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
             <h3 className={passportStyles.profileName}>{user.name}</h3>
             <div className={passportStyles.profileRating}>
               <StarIcon className={passportStyles.ratingStar} />
-              <span className={passportStyles.ratingValue}>{user.rating}</span>
+              <span className={passportStyles.ratingValue}>
+                {isLoadingRating ? "..." : userRating.averageRating}
+              </span>
               <span className={passportStyles.ratingSeparator}>•</span>
-              <span className={passportStyles.reviewCount}>{user.reviewCount} reviews</span>
+              <span className={passportStyles.reviewCount}>
+                {isLoadingRating ? "..." : userRating.reviewCount} reviews
+              </span>
             </div>
           </div>
         </div>
@@ -104,11 +134,11 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
       {user.stats && (
         <div className={passportStyles.stats}>
           <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCount}</div>
+            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCounts.totalProperties}</div>
             <div className={passportStyles.statLabel}>Properties</div>
           </div>
           <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCount}</div>
+            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCounts.publishedProperties}</div>
             <div className={passportStyles.statLabel}>Published</div>
           </div>
           <div className={passportStyles.statItem}>

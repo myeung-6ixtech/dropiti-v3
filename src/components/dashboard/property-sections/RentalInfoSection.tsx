@@ -119,7 +119,7 @@ export function RentalInfoSection({
         onUpdateField('rentalDetails', 'rentalDetails', localRentalDetails);
         
         // Show success toast
-        showToast('success', 'Rental information updated successfully!');
+        showToast('success', 'The rental details have been updated successfully.');
         
         // Exit edit mode
         setIsEditing(false);

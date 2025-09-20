@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { getPublishedPropertyCount } from "@/lib/utils";
+import { getTotalPropertyCount, getPublishedPropertyCountByStatus, getAverageUserRating } from "@/lib/utils";
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { 
@@ -33,24 +33,50 @@ interface DropitiPassport2Props {
 }
 
 export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2Props) {
-  const [propertyCount, setPropertyCount] = useState<number>(0);
+  const [propertyCounts, setPropertyCounts] = useState({
+    totalProperties: 0,
+    publishedProperties: 0
+  });
+  const [userRating, setUserRating] = useState({
+    averageRating: 0,
+    reviewCount: 0
+  });
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  const [isLoadingRating, setIsLoadingRating] = useState(true);
+  
   useEffect(() => {
-    const fetchPropertyCount = async () => {
+    const fetchData = async () => {
       try {
         setIsLoadingProperties(true);
-        const count = await getPublishedPropertyCount(firebaseUid);
-        setPropertyCount(count);
+        setIsLoadingRating(true);
+        
+        const [totalCount, publishedCount, ratingData] = await Promise.all([
+          getTotalPropertyCount(firebaseUid),
+          getPublishedPropertyCountByStatus(firebaseUid),
+          getAverageUserRating(firebaseUid)
+        ]);
+        
+        setPropertyCounts({
+          totalProperties: totalCount,
+          publishedProperties: publishedCount
+        });
+        
+        setUserRating({
+          averageRating: ratingData.averageRating,
+          reviewCount: ratingData.reviewCount
+        });
       } catch (error) {
-        console.error("Error fetching property count:", error);
-        setPropertyCount(0);
+        console.error("Error fetching data:", error);
+        setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
+        setUserRating({ averageRating: 0, reviewCount: 0 });
       } finally {
         setIsLoadingProperties(false);
+        setIsLoadingRating(false);
       }
     };
 
     if (firebaseUid) {
-      fetchPropertyCount();
+      fetchData();
     }
   }, [firebaseUid]);
   const formatJoinDate = (dateString?: string) => {
@@ -109,11 +135,11 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
           {/* Quick Stats Row */}
           <div className="flex items-center space-x-8 mb-4 text-sm">
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCount}</span>
+              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCounts.totalProperties}</span>
               <span className="text-gray-500">Properties</span>
             </div>
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCount}</span>
+              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCounts.publishedProperties}</span>
               <span className="text-gray-500">Published</span>
             </div>
             <div className="flex items-center space-x-1">
@@ -126,9 +152,13 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
           <div className="flex items-center space-x-4 mb-4">
             <div className="flex items-center space-x-1">
               <StarIcon className="h-4 w-4 text-yellow-400" />
-              <span className="font-semibold text-gray-900">{user.rating}</span>
+              <span className="font-semibold text-gray-900">
+                {isLoadingRating ? "..." : userRating.averageRating}
+              </span>
               <span className="text-gray-500">•</span>
-              <span className="text-gray-600">{user.reviewCount} reviews</span>
+              <span className="text-gray-600">
+                {isLoadingRating ? "..." : userRating.reviewCount} reviews
+              </span>
             </div>
           </div>
 

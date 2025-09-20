@@ -211,24 +211,150 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
   }
 };
 
+
 /**
- * Get the total number of published properties for a user
+ * Get the total number of properties (all statuses) created by a user
+ * @param landlordFirebaseUid - The Firebase UID of the landlord
+ * @returns Promise<number> - The count of all properties (drafts, published, archived, etc.)
+ */
+export async function getTotalPropertyCount(landlordFirebaseUid: string): Promise<number> {
+  try {
+    const { propertiesAPI } = await import('./api-client');
+    
+    // Fetch both published properties and drafts in parallel
+    const [publishedResponse, draftsResponse] = await Promise.all([
+      propertiesAPI.getListings({
+        landlord_firebase_uid: landlordFirebaseUid,
+        limit: 1000
+      }),
+      propertiesAPI.getDrafts(landlordFirebaseUid)
+    ]);
+    
+    let totalCount = 0;
+    
+    // Count published properties
+    if (publishedResponse.success && publishedResponse.data) {
+      const publishedProperties = Array.isArray(publishedResponse.data) ? publishedResponse.data : publishedResponse.data.properties || [];
+      totalCount += publishedProperties.length;
+    }
+    
+    // Count draft properties
+    if (draftsResponse.success && draftsResponse.data) {
+      const drafts = Array.isArray(draftsResponse.data) ? draftsResponse.data : [];
+      totalCount += drafts.length;
+    }
+    return totalCount;
+    
+  } catch (error) {
+    console.error('Error getting total property count:', error);
+    return 0;
+  }
+}
+
+/**
+ * Get the count of properties with 'published' status for a user
  * @param landlordFirebaseUid - The Firebase UID of the landlord
  * @returns Promise<number> - The count of published properties
  */
-export async function getPublishedPropertyCount(landlordFirebaseUid: string): Promise<number> {
+export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: string): Promise<number> {
   try {
     const { propertiesAPI } = await import('./api-client');
-    const response = await propertiesAPI.getPropertyCountByUser(landlordFirebaseUid);
     
-    if (response.success && response.data) {
-      return response.data.count || 0;
+    // First try the dedicated API endpoint for published property count
+    try {
+      const countResponse = await propertiesAPI.getPropertyCountByUser(landlordFirebaseUid);
+      if (countResponse.success && countResponse.data) {
+        console.log('getPublishedPropertyCountByStatus - Using dedicated API, count:', countResponse.data.count);
+        return countResponse.data.count || 0;
+      }
+    } catch (countError) {
+      console.warn('Dedicated count API failed, falling back to listings API:', countError);
     }
     
-    console.warn('Failed to get property count:', response.error);
+    // Fallback to getListings API if dedicated count API fails
+    const response = await propertiesAPI.getListings({
+      landlord_firebase_uid: landlordFirebaseUid,
+      limit: 1000
+    });
+    
+    if (response.success && response.data) {
+      const properties = Array.isArray(response.data) ? response.data : response.data.properties || [];
+      
+      console.log('getPublishedPropertyCountByStatus - All properties from listings:', properties.length);
+      console.log('getPublishedPropertyCountByStatus - Property details:', properties.map((p: any) => ({ 
+        id: p.id, 
+        status: p.status, 
+        is_public: p.is_public,
+        available: p.available 
+      })));
+      
+      // Filter for published properties - check multiple possible status indicators
+      const publishedProperties = properties.filter((property: any) => 
+        property.status === 'published' || 
+        property.is_public === true ||
+        property.available === true
+      );
+      
+      console.log('getPublishedPropertyCountByStatus - Published properties after filtering:', publishedProperties.length);
+      console.log('getPublishedPropertyCountByStatus - Published property details:', publishedProperties.map((p: any) => ({ 
+        id: p.id, 
+        status: p.status, 
+        is_public: p.is_public,
+        available: p.available 
+      })));
+      
+      return publishedProperties.length;
+    }
+    
+    console.warn('Failed to get published property count by status:', response.error);
     return 0;
   } catch (error) {
-    console.error('Error getting published property count:', error);
+    console.error('Error getting published property count by status:', error);
     return 0;
+  }
+}
+
+/**
+ * Calculate the average rating received by a user from all reviews
+ * @param userFirebaseUid - The Firebase UID of the user
+ * @returns Promise<{ averageRating: number; reviewCount: number }> - The average rating and total review count
+ */
+export async function getAverageUserRating(userFirebaseUid: string): Promise<{ averageRating: number; reviewCount: number }> {
+  try {
+    const { reviewsAPI } = await import('./api-client');
+    
+    // Fetch all reviews received by the user (where they are the reviewed user)
+    const response = await reviewsAPI.getReviewsByUser({
+      userFirebaseUid: userFirebaseUid,
+      limit: 1000 // Get all reviews to calculate accurate average
+    });
+    
+    if (response.success && response.data) {
+      const reviews = Array.isArray(response.data) ? response.data : [response.data];
+      
+      // Filter for reviews where the user is the reviewed user (not the reviewer)
+      const receivedReviews = reviews.filter((review: any) => 
+        review.reviewedUserFirebaseUid === userFirebaseUid
+      );
+      
+      if (receivedReviews.length === 0) {
+        return { averageRating: 0, reviewCount: 0 };
+      }
+      
+      // Calculate average rating
+      const totalRating = receivedReviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0);
+      const averageRating = totalRating / receivedReviews.length;
+      
+      return {
+        averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+        reviewCount: receivedReviews.length
+      };
+    }
+    
+    console.warn('Failed to get user reviews for rating calculation:', response.error);
+    return { averageRating: 0, reviewCount: 0 };
+  } catch (error) {
+    console.error('Error calculating average user rating:', error);
+    return { averageRating: 0, reviewCount: 0 };
   }
 }

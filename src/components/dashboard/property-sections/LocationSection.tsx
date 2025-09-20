@@ -170,7 +170,7 @@ export function LocationSection({
         onUpdateField('address', 'address', localAddress);
         
         // Show success toast instead of inline message
-        showToast('success', 'Address updated successfully!');
+        showToast('success', 'The location details have been updated successfully.');
         
         // Exit edit mode
         setIsEditing(false);

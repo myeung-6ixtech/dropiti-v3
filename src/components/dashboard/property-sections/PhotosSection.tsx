@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react';
 import { PencilIcon, PhotoIcon, TrashIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { PropertyData } from '@/types/property';
 import Image from 'next/image';
+import { useToast } from '@/context/ToastContext';
 
 interface UploadedFile {
   url: string;
@@ -42,6 +43,7 @@ export function PhotosSection({
   onPhotoSaveSuccess,
   onPhotoSaveError
 }: PhotosSectionProps) {
+  const { showToast } = useToast();
   
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -208,6 +210,7 @@ export function PhotosSection({
             const propertyResult = await propertyResponse.json();
             
             if (propertyResult.success) {
+              showToast('success', 'The photos have been updated.');
               onPhotoSaveSuccess?.();
               // Exit editing mode
               onSaveEdit();
