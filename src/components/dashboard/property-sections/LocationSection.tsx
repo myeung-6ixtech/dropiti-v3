@@ -6,7 +6,19 @@ import { PropertyData } from '@/types/property';
 import { propertiesAPI } from '@/lib/api-client';
 import { formatAddressForDatabase } from '@/utils/addressFormatter';
 import { useToast } from '@/context/ToastContext';
-import { COUNTRIES, getDistrictsByCountry, DEFAULT_COUNTRY } from '@/constants/locations';
+import { COUNTRIES, getDistrictsByCountry, DEFAULT_COUNTRY, getCountryByCode } from '@/constants/locations';
+
+// Helper function to convert country code to full name for consistency
+const getCountryNameByCode = (countryCode: string): string => {
+  const country = getCountryByCode(countryCode);
+  return country ? country.name : countryCode;
+};
+
+// Helper function to convert full country name back to code for form display
+const getCountryCodeByName = (countryName: string): string => {
+  const country = COUNTRIES.find(c => c.name === countryName);
+  return country ? country.code : countryName;
+};
 
 interface LocationSectionProps {
   propertyId: string;
@@ -72,7 +84,7 @@ export function LocationSection({
                 addressLine2: parsedAddress.addressLine2 || '',
                 district: parsedAddress.district || '',
                 state: parsedAddress.state || '',
-                country: parsedAddress.country || '',
+                country: parsedAddress.country ? getCountryCodeByName(parsedAddress.country) : '',
                 city: parsedAddress.city || '',
                 showSpecificLocation: parsedAddress.showSpecificLocation || false,
               };
@@ -81,9 +93,13 @@ export function LocationSection({
               showToast('error', 'Error parsing address data');
             }
           } else if (property.address && typeof property.address === 'object') {
-            // If address is already an object, use it directly
+            // If address is already an object, use it directly but convert country name to code
             console.log('🔍 LocationSection: Using address object directly:', property.address);
-            addressData = property.address as PropertyData['address'];
+            const addressObj = property.address as PropertyData['address'];
+            addressData = {
+              ...addressObj,
+              country: addressObj?.country ? getCountryCodeByName(addressObj.country) : addressObj?.country
+            };
           } else if (property.details) {
             // Extract address data from details (fallback for old format)
             console.log('🔍 LocationSection: Using details fallback for address data');
@@ -97,7 +113,7 @@ export function LocationSection({
               addressLine2: details.addressLine2 as string || '',
               district: details.district as string || '',
               state: details.state as string || '',
-              country: details.country as string || '',
+              country: details.country ? getCountryCodeByName(details.country as string) : '',
               city: details.city as string || '',
               showSpecificLocation: false,
             };
@@ -154,8 +170,15 @@ export function LocationSection({
   const handleSaveEdit = async () => {
     try {
       setIsSavingLocally(true);
+      
+      // Convert country code to full name for consistency with add-property flow
+      const addressWithFullCountryName = {
+        ...localAddress,
+        country: localAddress?.country ? getCountryNameByCode(localAddress.country) : localAddress?.country
+      };
+      
       // Format the address using the utility function to ensure consistent database structure
-      const formattedAddress = formatAddressForDatabase(localAddress)
+      const formattedAddress = formatAddressForDatabase(addressWithFullCountryName);
 
       const response = await propertiesAPI.updateProperty(propertyId, {
         address: formattedAddress

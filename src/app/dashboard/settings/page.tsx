@@ -6,7 +6,6 @@ import { useToast } from '@/context/ToastContext';
 import { usersAPI } from '@/lib/api-client';
 import { 
   UserIcon, 
-  BellIcon, 
   ShieldCheckIcon, 
   CogIcon
 } from '@heroicons/react/24/outline';
@@ -16,11 +15,6 @@ interface UserSettings {
   lastName: string;
   email: string;
   phone: string;
-  notifications: {
-    email: boolean;
-    push: boolean;
-    sms: boolean;
-  };
   preferences: {
     language: string;
     timezone: string;
@@ -39,11 +33,6 @@ export default function SettingsPage() {
     lastName: 'Doe',
     email: 'demo@example.com',
     phone: '+852 1234 5678',
-    notifications: {
-      email: true,
-      push: true,
-      sms: false,
-    },
     preferences: {
       language: 'English',
       timezone: 'Asia/Hong_Kong (UTC+8)',
@@ -56,11 +45,6 @@ export default function SettingsPage() {
     lastName: settings.lastName || '',
     email: settings.email || '',
     phone: settings.phone || '',
-    notifications: {
-      email: Boolean(settings.notifications.email),
-      push: Boolean(settings.notifications.push),
-      sms: Boolean(settings.notifications.sms),
-    },
     preferences: {
       language: settings.preferences.language || 'English',
       timezone: settings.preferences.timezone || 'Asia/Hong_Kong (UTC+8)',
@@ -88,11 +72,6 @@ export default function SettingsPage() {
               lastName: userData.last_name || userData.display_name?.split(' ').slice(1).join(' ') || 'Doe',
               email: userData.email || 'demo@example.com',
               phone: userData.phone_number || '+852 1234 5678',
-              notifications: {
-                email: Boolean(userData.notification_settings?.email ?? true),
-                push: Boolean(userData.notification_settings?.push ?? true),
-                sms: Boolean(userData.notification_settings?.sms ?? false),
-              },
               preferences: {
                 language: String(userData.preferences?.language || 'English'),
                 timezone: String(userData.preferences?.timezone || 'Asia/Hong_Kong (UTC+8)'),
@@ -134,15 +113,6 @@ export default function SettingsPage() {
     }));
   };
 
-  const handleNotificationChange = (type: keyof typeof tempSettings.notifications, value: boolean) => {
-    setTempSettings(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [type]: value
-      }
-    }));
-  };
 
   const handlePreferenceChange = (type: keyof typeof tempSettings.preferences, value: string) => {
     setTempSettings(prev => ({
@@ -172,14 +142,6 @@ export default function SettingsPage() {
       };
 
       // Only add complex objects if they exist in the user data
-      if (tempSettings.notifications) {
-        updates.notification_settings = {
-          email: tempSettings.notifications.email,
-          push: tempSettings.notifications.push,
-          sms: tempSettings.notifications.sms,
-        };
-      }
-
       if (tempSettings.preferences) {
         updates.preferences = {
           language: tempSettings.preferences.language,
@@ -213,7 +175,6 @@ export default function SettingsPage() {
 
   const tabs = [
     { id: 'profile', name: 'Profile', icon: UserIcon },
-    { id: 'notifications', name: 'Notifications', icon: BellIcon },
     { id: 'security', name: 'Security', icon: ShieldCheckIcon },
     { id: 'preferences', name: 'Preferences', icon: CogIcon },
   ];
@@ -304,97 +265,6 @@ export default function SettingsPage() {
           </div>
         );
 
-      case 'notifications':
-        return (
-          <div>
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Notification Preferences</h2>
-              <p className="text-gray-600">Choose how you want to be notified about important updates.</p>
-            </div>
-            <div className="bg-white rounded-lg p-6">
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Email Notifications</h4>
-                      <p className="text-sm text-gray-500">Receive notifications via email</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={tempSettings.notifications.email}
-                        onChange={(e) => handleNotificationChange('email', e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">Push Notifications</h4>
-                      <p className="text-sm text-gray-500">Receive push notifications in your browser</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={tempSettings.notifications.push}
-                        onChange={(e) => handleNotificationChange('push', e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-900">SMS Notifications</h4>
-                      <p className="text-sm text-gray-500">Receive notifications via SMS</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={tempSettings.notifications.sms}
-                        onChange={(e) => handleNotificationChange('sms', e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <button
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                  className={`btn-secondary px-4 py-2 rounded-md transition-colors font-medium ${
-                    isLoading 
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                      : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
-                  }`}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  disabled={isLoading}
-                  className={`btn-primary px-4 py-2 text-white rounded-md transition-colors font-medium ${
-                    isLoading 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Saving...
-                    </div>
-                  ) : (
-                    'Save Changes'
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        );
 
       case 'security':
         return (

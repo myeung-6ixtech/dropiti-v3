@@ -98,7 +98,7 @@
      ======================================== */
 
   .passport-stats {
-    @apply flex items-center justify-between text-xs mb-4 p-3 bg-gray-50 rounded-xl;
+    @apply flex items-center justify-around text-xs mb-4 p-3 bg-gray-50 rounded-xl;
   }
 
   .passport-stat-item {

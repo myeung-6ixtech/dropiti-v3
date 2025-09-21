@@ -358,3 +358,41 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
     return { averageRating: 0, reviewCount: 0 };
   }
 }
+
+/**
+ * Calculate the duration a user has been on the platform
+ * @param joinDate - The date the user joined (string or Date)
+ * @returns string - Formatted duration (e.g., "2 years", "6 months", "3 days")
+ */
+export function calculatePlatformDuration(joinDate: string | Date | undefined): string {
+  if (!joinDate) {
+    return 'Unknown';
+  }
+  
+  try {
+    const join = new Date(joinDate);
+    const now = new Date();
+    
+    if (isNaN(join.getTime())) {
+      return 'Invalid date';
+    }
+    
+    const diffInMs = now.getTime() - join.getTime();
+    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const diffInMonths = Math.floor(diffInDays / 30);
+    const diffInYears = Math.floor(diffInDays / 365);
+    
+    if (diffInYears > 0) {
+      return diffInYears === 1 ? '1 year' : `${diffInYears} years`;
+    } else if (diffInMonths > 0) {
+      return diffInMonths === 1 ? '1 month' : `${diffInMonths} months`;
+    } else if (diffInDays > 0) {
+      return diffInDays === 1 ? '1 day' : `${diffInDays} days`;
+    } else {
+      return 'Less than a day';
+    }
+  } catch (error) {
+    console.error('Error calculating platform duration:', error);
+    return 'Unknown';
+  }
+}

@@ -132,7 +132,7 @@ export default function DashboardPage() {
             avatar: getSafeProfileImage(authUser.photoUrl || authUser.avatar, '/images/Portrait_Placeholder.png'),
     email: authUser.email || 'user@example.com',
     location: authUser.location || 'Hong Kong',
-    joinDate: authUser.userSince || authUser.createdAt || '2024-01-01',
+    created_at: authUser.userSince || authUser.createdAt || '2024-01-01',
     verified: authUser.verified || false,
     rating: userRating.averageRating || 0,
     reviewCount: userRating.reviewCount || 0,
