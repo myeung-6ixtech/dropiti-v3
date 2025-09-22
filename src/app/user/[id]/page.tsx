@@ -13,17 +13,17 @@ interface User {
   photo_url?: string;
   email: string;
   location?: string;
-  user_since: string;
+  created_at: string;
   verified: boolean;
   rating: number;
   review_count: number;
   about?: string;
   languages?: string[];
-  response_time?: string;
   response_rate: number;
-  total_properties: number;
-  total_guests: number;
-  avg_response_time?: string;
+  education?: string;
+  occupation?: string;
+  marital_status?: string;
+  phone_number?: string;
   // Properties and reviews are now fetched separately by dedicated components
 }
 
@@ -56,17 +56,17 @@ export default function UserProfilePage() {
               photo_url: response.data.photo_url,
               email: response.data.email || '',
               location: response.data.location || 'Location not specified',
-              user_since: response.data.user_since || new Date().toISOString(),
+              created_at: response.data.created_at,
               verified: response.data.verified || false,
               rating: response.data.rating || 0,
               review_count: response.data.review_count || 0,
               about: response.data.about || 'No description available',
               languages: response.data.languages || [],
-              response_time: response.data.response_time || 'Unknown',
               response_rate: response.data.response_rate || 0,
-              total_properties: response.data.total_properties || 0,
-              total_guests: response.data.total_guests || 0,
-              avg_response_time: response.data.avg_response_time || 'Unknown'
+              education: response.data.education,
+              occupation: response.data.occupation,
+              marital_status: response.data.marital_status,
+              phone_number: response.data.phone_number
             };
             
             setUser(transformedUser);
@@ -95,7 +95,7 @@ export default function UserProfilePage() {
     avatar: user.photo_url || '/images/placeholder.png', // Fallback avatar
     email: user.email,
     location: user.location,
-    joinDate: user.user_since || new Date().toISOString(),
+    created_at: user.created_at,
     verified: user.verified,
     rating: user.rating,
     reviewCount: user.review_count,
@@ -103,9 +103,9 @@ export default function UserProfilePage() {
     languages: user.languages,
     stats: {
       responseRate: user.response_rate,
-      avgResponseTime: user.avg_response_time || 'Unknown',
-      totalProperties: user.total_properties,
-      publishedProperties: user.total_properties
+      avgResponseTime: 'Unknown', // This field is not available in the API response
+      totalProperties: 0, // This will be calculated by the DropitiPassport2 component
+      publishedProperties: 0 // This will be calculated by the DropitiPassport2 component
     }
   });
 

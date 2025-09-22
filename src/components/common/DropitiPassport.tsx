@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from "react";
-import { getPublishedPropertyCount } from "@/lib/utils";
+import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatformDuration } from "@/lib/utils";
 import Image from 'next/image';
 import { 
   StarIcon, 
@@ -15,7 +15,7 @@ interface DropitiPassportProps {
     avatar: string;
     email: string;
     location?: string;
-    joinDate: string;
+    created_at: string;
     verified: boolean;
     rating: number;
     reviewCount: number;
@@ -34,32 +34,45 @@ interface DropitiPassportProps {
 }
 
 export default function DropitiPassport({ user, firebaseUid }: DropitiPassportProps) {
-  const [propertyCount, setPropertyCount] = useState<number>(0);
+  const [publishedProperties, setPublishedProperties] = useState(0);
+  const [userRating, setUserRating] = useState({
+    averageRating: 0,
+    reviewCount: 0
+  });
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  const [isLoadingRating, setIsLoadingRating] = useState(true);
+  
   useEffect(() => {
-    const fetchPropertyCount = async () => {
+    const fetchData = async () => {
       try {
         setIsLoadingProperties(true);
-        const count = await getPublishedPropertyCount(firebaseUid);
-        setPropertyCount(count);
+        setIsLoadingRating(true);
+        
+        const [publishedCount, ratingData] = await Promise.all([
+          getPublishedPropertyCountByStatus(firebaseUid),
+          getAverageUserRating(firebaseUid)
+        ]);
+        
+        setPublishedProperties(publishedCount);
+        
+        setUserRating({
+          averageRating: ratingData.averageRating,
+          reviewCount: ratingData.reviewCount
+        });
       } catch (error) {
-        console.error("Error fetching property count:", error);
-        setPropertyCount(0);
+        console.error("Error fetching data:", error);
+        setPublishedProperties(0);
+        setUserRating({ averageRating: 0, reviewCount: 0 });
       } finally {
         setIsLoadingProperties(false);
+        setIsLoadingRating(false);
       }
     };
 
     if (firebaseUid) {
-      fetchPropertyCount();
+      fetchData();
     }
   }, [firebaseUid]);
-  const formatJoinDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
-    });
-  };
 
   return (
     <div className={passportStyles.container}>
@@ -92,31 +105,33 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
             <h3 className={passportStyles.profileName}>{user.name}</h3>
             <div className={passportStyles.profileRating}>
               <StarIcon className={passportStyles.ratingStar} />
-              <span className={passportStyles.ratingValue}>{user.rating}</span>
+              <span className={passportStyles.ratingValue}>
+                {isLoadingRating ? "..." : userRating.averageRating}
+              </span>
               <span className={passportStyles.ratingSeparator}>•</span>
-              <span className={passportStyles.reviewCount}>{user.reviewCount} reviews</span>
+              <span className={passportStyles.reviewCount}>
+                {isLoadingRating ? "..." : userRating.reviewCount} reviews
+              </span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Quick Stats Row */}
-      {user.stats && (
-        <div className={passportStyles.stats}>
-          <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCount}</div>
-            <div className={passportStyles.statLabel}>Properties</div>
-          </div>
-          <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : propertyCount}</div>
-            <div className={passportStyles.statLabel}>Published</div>
-          </div>
-          <div className={passportStyles.statItem}>
-            <div className={passportStyles.statValue}>{user.stats.responseRate}%</div>
-            <div className={passportStyles.statLabel}>Response Rate</div>
-          </div>
+      <div className={passportStyles.stats}>
+        <div className={passportStyles.statItem}>
+          <div className={passportStyles.statValue}>{isLoadingProperties ? "..." : publishedProperties}</div>
+          <div className={passportStyles.statLabel}>Published</div>
         </div>
-      )}
+        <div className={passportStyles.statItem}>
+          <div className={passportStyles.statValue}>{isLoadingRating ? "..." : userRating.reviewCount}</div>
+          <div className={passportStyles.statLabel}>Reviews</div>
+        </div>
+        <div className={passportStyles.statItem}>
+          <div className={passportStyles.statValue}>{calculatePlatformDuration(user.created_at)}</div>
+          <div className={passportStyles.statLabel}>on Dropiti</div>
+        </div>
+      </div>
 
       {/* About Section */}
       {user.about && (
@@ -183,19 +198,17 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
         </div>
       )}
 
-      {/* Location & Join Date */}
-      <div className={passportStyles.infoSection}>
-        <div className={passportStyles.infoContent}>
-          {user.location && (
-            <div className={passportStyles.infoItem}>
-              <span className={passportStyles.infoText}>{user.location}</span>
-            </div>
-          )}
-          <div className={passportStyles.infoItem}>
-            <span className={passportStyles.infoText}>Member since {formatJoinDate(user.joinDate)}</span>
+      {/* Location Section */}
+      {user.location && (
+        <div className={passportStyles.section}>
+          <h4 className={passportStyles.sectionTitle}>
+            Location
+          </h4>
+          <div className={passportStyles.sectionSimple}>
+            <span className={passportStyles.sectionText}>{user.location}</span>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Footer */}
       <div className={passportStyles.footer}>

@@ -144,7 +144,7 @@ export function PropertyDetailsSection({
         onUpdateField('unitDetails', 'unitDetails', localUnitDetails);
         
         // Show success toast
-        showToast('success', 'Property details updated successfully!');
+        showToast('success', 'The property details have been updated successfully.');
         
         // Exit edit mode
         setIsEditing(false);

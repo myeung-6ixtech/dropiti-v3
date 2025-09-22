@@ -13,7 +13,7 @@ interface Step5AmenitiesProps {
 
 export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(data?.amenities || []);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
   const handleAmenityToggle = (amenityId: string) => {
     const updatedAmenities = selectedAmenities.includes(amenityId)
@@ -24,7 +24,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
     onUpdate({ amenities: updatedAmenities });
   };
 
-  const filteredAmenities = selectedCategory === 'All' || selectedCategory === null
+  const filteredAmenities = selectedCategory === 'All'
     ? getAllAmenities()
     : getAmenitiesByCategory(selectedCategory as keyof typeof AMENITY_CATEGORIES);
 
@@ -45,9 +45,9 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
             {['All', ...Object.keys(AMENITY_CATEGORIES)].map((category) => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category === 'All' ? null : category)}
+                onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === category || (category === 'All' && selectedCategory === null)
+                  selectedCategory === category
                     ? 'bg-purple-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
@@ -60,14 +60,15 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
 
         {/* Amenities Grid */}
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {filteredAmenities.map((amenity) => (
-              <div
+              <button
                 key={amenity.id}
-                className={`relative p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                type="button"
+                className={`relative flex items-center space-x-3 p-3 border-2 rounded-lg cursor-pointer transition-all duration-200 text-left ${
                   selectedAmenities.includes(amenity.id)
                     ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                 }`}
                 onClick={() => handleAmenityToggle(amenity.id)}
               >
@@ -78,34 +79,34 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                   className="sr-only"
                 />
                 
-                <div className="flex flex-col items-center space-y-3">
-                  <div className={`p-3 rounded-full ${
-                    selectedAmenities.includes(amenity.id)
-                      ? 'bg-purple-100'
-                      : 'bg-gray-100'
-                  }`}>
-                    {(() => {
-                      const IconComponent = getAmenityIconByName(amenity.name);
-                      return IconComponent ? <IconComponent className="h-6 w-6 text-gray-600" /> : null;
-                    })()}
-                  </div>
-                  
-                  <div className="text-center">
-                    <p className="font-medium text-gray-900 text-sm">{amenity.name}</p>
-                    <p className="text-xs text-gray-500">{amenity.category}</p>
-                  </div>
+                {/* Icon */}
+                <div className={`p-2 rounded-full flex-shrink-0 ${
+                  selectedAmenities.includes(amenity.id)
+                    ? 'bg-purple-100'
+                    : 'bg-gray-100'
+                }`}>
+                  {(() => {
+                    const IconComponent = getAmenityIconByName(amenity.name);
+                    return IconComponent ? <IconComponent className="h-4 w-4 text-gray-600" /> : null;
+                  })()}
+                </div>
+                
+                {/* Label */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 text-sm truncate">{amenity.name}</p>
                 </div>
 
+                {/* Checkmark */}
                 {selectedAmenities.includes(amenity.id) && (
-                  <div className="absolute top-2 right-2">
-                    <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex-shrink-0">
+                    <div className="w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center">
+                      <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
                 )}
-              </div>
+              </button>
             ))}
           </div>
         </div>

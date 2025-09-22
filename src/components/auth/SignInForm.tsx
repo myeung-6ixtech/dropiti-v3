@@ -66,7 +66,7 @@ export default function SignInForm() {
     <div className={authClasses.formWrapper}>
       <div className={authClasses.sectionSpacing}>
         <Link href="/" className={authClasses.backLink}>
-          ← Back to dashboard
+          ← Back to homepage
         </Link>
       </div>
       

@@ -6,6 +6,7 @@ import { propertiesAPI } from '@/lib/api-client';
 import { PropertyData, PROPERTY_TYPE, RESIDENTIAL_TYPE, PropertyTypeValue, ResidentialTypeValue } from '@/types/property';
 import { formatAddressForDatabase } from '@/utils/addressFormatter';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { useToast } from '@/context/ToastContext';
 import { BasicInfoSection } from './property-sections/BasicInfoSection';
 import { LocationSection } from './property-sections/LocationSection';
 import { PropertyDetailsSection } from './property-sections/PropertyDetailsSection';
@@ -28,6 +29,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
   const [tempData, setTempData] = useState<Partial<PropertyData>>({});
   const [originalData, setOriginalData] = useState<PropertyData>({});
   const router = useRouter();
+  const { showToast } = useToast();
 
   const normalizeAmenities = useCallback((amenities: unknown): string[] => {
     if (Array.isArray(amenities)) {
@@ -172,6 +174,17 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       console.log('InlineEditPropertyView: updateProperty response:', response);
       
       if (response.success) {
+        // Show appropriate toast message based on the section
+        const toastMessages: Record<string, string> = {
+          'basic': 'Unit details have been updated successfully.',
+          'location': 'The location details have been updated successfully.',
+          'photos': 'The photos have been updated.',
+          'default': 'Property updated successfully.'
+        };
+        
+        const toastMessage = toastMessages[section] || toastMessages.default;
+        showToast('success', toastMessage);
+        
         // IMPORTANT: Update propertyData BEFORE changing editing state
         setPropertyData(updatedData);  // Keep this one
         setEditingSection(null);
@@ -179,6 +192,11 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
         setOriginalData(updatedData);
         onSave?.();
       } else {
+        console.error('InlineEditPropertyView: API Error Details:', {
+          error: response.error,
+          status: response.status,
+          data: response.data
+        });
         throw new Error(response.error || 'Failed to update property');
       }
     } catch (error) {
@@ -214,7 +232,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       description: propertyData.rentalDetails?.listingDescription || 'Property description',
       address: formatAddressForDatabase(propertyData.address),
       property_type: propertyData.propertyType || 'residential', // Ensure property_type is always set
-      rental_space: propertyData.rentalSpace || 'entire', // Ensure rental_space is always set (match create API format)
+      rental_space: propertyData.rentalSpace || 'entire-apartment', // Ensure rental_space is always set (match create API format)
       num_bedroom: propertyData.unitDetails?.bedrooms || 0,
       num_bathroom: propertyData.unitDetails?.bathrooms || 0,
       gross_area_size: propertyData.unitDetails?.grossArea || 0,
@@ -239,6 +257,8 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     console.log('InlineEditPropertyView: transformPropertyDataToApi - apiData:', apiData);
     console.log('InlineEditPropertyView: propertyData.propertyType:', propertyData.propertyType);
     console.log('InlineEditPropertyView: propertyData.rentalSpace:', propertyData.rentalSpace);
+    console.log('InlineEditPropertyView: propertyData.status:', propertyData.status);
+    console.log('InlineEditPropertyView: propertyData.isPublic:', propertyData.isPublic);
     
     return apiData;
   };

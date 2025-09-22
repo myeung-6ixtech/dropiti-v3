@@ -54,31 +54,64 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
   // Extract District and Country for simplified display
   const getSimplifiedLocation = () => {
     if (!location || location === 'No Location') return '';
+    
     // Try to parse the location to extract District and Country
-    // Location format is typically: "District, State, Country" or similar
+    // Location format is: "building, addressLine1, addressLine2, district, state, country"
     if (location.includes(',')) {
       const parts = location.split(',').map(part => part.trim());
       console.log('PropertyCard: Location parts:', parts);
       
-      // If we have at least 2 parts, show District and Country
+      // Find district and country in the parts array
+      // District is typically one of the last 3 parts, country is usually the last
+      let district = '';
+      let country = '';
+      
+      // Country is usually the last part
+      if (parts.length > 0) {
+        country = parts[parts.length - 1];
+      }
+      
+      // District is usually the second-to-last or third-to-last part
+      // Look for common district patterns or use the second-to-last part
       if (parts.length >= 2) {
-        const district = parts[5];
-        const country = parts[parts.length - 1]; // Last part is usually country
+        // Try the second-to-last part first (most common case)
+        district = parts[parts.length - 2];
         
-        // If district and country are different, show both
-        if (district !== country) {
-          const result = `${district}, ${country}`;
-          console.log('PropertyCard: Simplified location (District, Country):', result);
-          return result;
+        // If we have more parts, check if there's a more likely district candidate
+        if (parts.length >= 3) {
+          // Check if the third-to-last part looks more like a district
+          const thirdToLast = parts[parts.length - 3];
+          // If the second-to-last looks like a state and third-to-last looks like a district
+          if (thirdToLast && !thirdToLast.match(/^\d+$/) && thirdToLast.length > 2) {
+            district = thirdToLast;
+          }
         }
-        // If they're the same, just show district
+      }
+      
+      console.log('PropertyCard: Extracted district:', district, 'country:', country);
+      
+      // If we have both district and country, show them
+      if (district && country && district !== country) {
+        const result = `${district}, ${country}`;
+        console.log('PropertyCard: Simplified location (District, Country):', result);
+        return result;
+      }
+      
+      // If we only have country, show it
+      if (country) {
+        console.log('PropertyCard: Simplified location (Country only):', country);
+        return country;
+      }
+      
+      // If we only have district, show it
+      if (district) {
         console.log('PropertyCard: Simplified location (District only):', district);
         return district;
       }
       
-      // If we have only 1 part, return as is
-      console.log('PropertyCard: Simplified location (single part):', parts[0]);
-      return parts[0];
+      // Fallback: show the last part
+      console.log('PropertyCard: Simplified location (fallback):', parts[parts.length - 1]);
+      return parts[parts.length - 1];
     }
     
     // For simple addresses without commas, return as is

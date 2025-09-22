@@ -1,13 +1,11 @@
 'use client';
 import { useState, useEffect } from "react";
-import { getPublishedPropertyCount } from "@/lib/utils";
+import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatformDuration } from "@/lib/utils";
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { 
   StarIcon, 
-  CheckCircleIcon,
-  MapPinIcon,
-  CalendarIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassport2Props {
@@ -17,7 +15,7 @@ interface DropitiPassport2Props {
     avatar: string;
     email: string;
     location?: string;
-    joinDate?: string;
+    created_at: string;
     verified: boolean;
     rating: number;
     reviewCount: number;
@@ -33,46 +31,45 @@ interface DropitiPassport2Props {
 }
 
 export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2Props) {
-  const [propertyCount, setPropertyCount] = useState<number>(0);
+  const [publishedProperties, setPublishedProperties] = useState(0);
+  const [userRating, setUserRating] = useState({
+    averageRating: 0,
+    reviewCount: 0
+  });
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
+  const [isLoadingRating, setIsLoadingRating] = useState(true);
+  
   useEffect(() => {
-    const fetchPropertyCount = async () => {
+    const fetchData = async () => {
       try {
         setIsLoadingProperties(true);
-        const count = await getPublishedPropertyCount(firebaseUid);
-        setPropertyCount(count);
+        setIsLoadingRating(true);
+        
+        const [publishedCount, ratingData] = await Promise.all([
+          getPublishedPropertyCountByStatus(firebaseUid),
+          getAverageUserRating(firebaseUid)
+        ]);
+        
+        setPublishedProperties(publishedCount);
+        
+        setUserRating({
+          averageRating: ratingData.averageRating,
+          reviewCount: ratingData.reviewCount
+        });
       } catch (error) {
-        console.error("Error fetching property count:", error);
-        setPropertyCount(0);
+        console.error("Error fetching data:", error);
+        setPublishedProperties(0);
+        setUserRating({ averageRating: 0, reviewCount: 0 });
       } finally {
         setIsLoadingProperties(false);
+        setIsLoadingRating(false);
       }
     };
 
     if (firebaseUid) {
-      fetchPropertyCount();
+      fetchData();
     }
   }, [firebaseUid]);
-  const formatJoinDate = (dateString?: string) => {
-    if (!dateString) {
-      return 'Unknown';
-    }
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
-      
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long'
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid date';
-    }
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
@@ -109,40 +106,37 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
           {/* Quick Stats Row */}
           <div className="flex items-center space-x-8 mb-4 text-sm">
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCount}</span>
-              <span className="text-gray-500">Properties</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : propertyCount}</span>
+              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : publishedProperties}</span>
               <span className="text-gray-500">Published</span>
             </div>
             <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{user.stats.responseRate}%</span>
-              <span className="text-gray-500">Response rate</span>
+              <span className="font-semibold text-gray-900">{isLoadingRating ? "..." : userRating.reviewCount}</span>
+              <span className="text-gray-500">Reviews</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="font-semibold text-gray-900">{calculatePlatformDuration(user.created_at)}</span>
+              <span className="text-gray-500">on dropiti</span>
             </div>
           </div>
 
           {/* Rating and Response Time */}
           <div className="flex items-center space-x-4 mb-4">
             <div className="flex items-center space-x-1">
-              <StarIcon className="h-4 w-4 text-yellow-400" />
-              <span className="font-semibold text-gray-900">{user.rating}</span>
+              <StarIcon className="h-4 w-4 text-gray-900" />
+              <span className="text-sm font-semibold text-gray-900">
+                {isLoadingRating ? "..." : userRating.averageRating}
+              </span>
               <span className="text-gray-500">•</span>
-              <span className="text-gray-600">{user.reviewCount} reviews</span>
+              <span className="text-sm text-gray-600">
+                {isLoadingRating ? "..." : userRating.reviewCount} reviews
+              </span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="text-sm text-gray-900">Located in:</span>
+              <span className="text-sm text-gray-500">{user.location}</span>
             </div>
           </div>
 
-          {/* Location and Join Date */}
-          <div className="flex items-center space-x-6 text-gray-600 text-sm mb-4">
-            <div className="flex items-center">
-              <MapPinIcon className="h-3 w-3 mr-2" />
-              <span>{user.location}</span>
-            </div>
-            <div className="flex items-center">
-              <CalendarIcon className="h-3 w-3 mr-2" />
-              <span>Member since {formatJoinDate(user.joinDate)}</span>
-            </div>
-          </div>
 
           {/* Languages */}
           <div className="flex items-center space-x-2 mb-4">

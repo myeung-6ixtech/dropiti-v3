@@ -142,7 +142,7 @@ export default function ProfilePage() {
     avatar: profile.avatar,
     email: profile.email,
     location: profile.location,
-    joinDate: profile.joinDate,
+    created_at: profile.joinDate, // joinDate in UserProfile is actually the created_at date
     verified: profile.verified,
     rating: profile.rating,
     reviewCount: profile.reviewCount,

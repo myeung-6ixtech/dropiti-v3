@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { useSession, signOut, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { usersAPI } from "@/lib/api-client";
+import { AUTH_ERRORS } from "@/types/error-messages";
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -51,6 +52,45 @@ export const useAuth = () => {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
+};
+
+// Error mapping function for NextAuth/Firebase errors
+const mapAuthError = (error: string): string => {
+  const errorMap: Record<string, string> = {
+    // NextAuth generic errors
+    'CredentialsSignin': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Invalid credentials': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'User not found': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Wrong password': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Invalid email': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'User disabled': AUTH_ERRORS.ACCOUNT_DISABLED,
+    'Too many requests': 'Too many login attempts. Please try again later.',
+    'Network error': AUTH_ERRORS.UNEXPECTED_ERROR,
+    
+    // Firebase Auth error codes
+    'Firebase: Error (auth/user-not-found)': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Firebase: Error (auth/wrong-password)': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Firebase: Error (auth/invalid-email)': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Firebase: Error (auth/user-disabled)': AUTH_ERRORS.ACCOUNT_DISABLED,
+    'Firebase: Error (auth/too-many-requests)': 'Too many login attempts. Please try again later.',
+    'Firebase: Error (auth/network-request-failed)': AUTH_ERRORS.UNEXPECTED_ERROR,
+    'Firebase: Error (auth/invalid-credential)': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'Firebase: Error (auth/operation-not-allowed)': 'This sign-in method is not enabled. Please contact support.',
+    'Firebase: Error (auth/requires-recent-login)': 'This operation requires recent authentication. Please sign in again.',
+    'Firebase: Error (auth/email-already-in-use)': AUTH_ERRORS.EMAIL_ALREADY_EXISTS,
+    'Firebase: Error (auth/weak-password)': AUTH_ERRORS.PASSWORD_TOO_WEAK,
+    'Firebase: Error (auth/invalid-verification-code)': 'Invalid verification code. Please try again.',
+    'Firebase: Error (auth/invalid-verification-id)': 'Invalid verification ID. Please try again.',
+    'Firebase: Error (auth/code-expired)': 'Verification code has expired. Please request a new one.',
+    'Firebase: Error (auth/missing-verification-code)': 'Verification code is required.',
+    'Firebase: Error (auth/missing-verification-id)': 'Verification ID is required.',
+    'Firebase: Error (auth/quota-exceeded)': 'Too many requests. Please try again later.',
+    'Firebase: Error (auth/captcha-check-failed)': 'Captcha verification failed. Please try again.',
+    'Firebase: Error (auth/invalid-phone-number)': 'Invalid phone number format.',
+    'Firebase: Error (auth/missing-phone-number)': 'Phone number is required.',
+  };
+  
+  return errorMap[error] || AUTH_ERRORS.UNEXPECTED_ERROR;
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -102,8 +142,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const parsed = JSON.parse(languages);
         return Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        console.warn('Failed to parse languages JSON:', error);
+      } catch {
         return [];
       }
     }
@@ -111,47 +150,114 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return [];
   };
 
-  // Utility function to check if session is about to expire
-  const checkSessionExpiry = useCallback(() => {
-    if (!isAuthenticated || !isRememberMeEnabled) return;
+  // Helper function to safely parse preferences
+  const parsePreferences = (preferences: unknown): Record<string, unknown> => {
+    if (preferences && typeof preferences === 'object') {
+      return preferences as Record<string, unknown>;
+    }
     
-    // Check if session will expire in the next 24 hours
-    // This is a simplified check - in a real app you might want to check the actual JWT expiration
-    // const sessionWarningThreshold = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+    if (typeof preferences === 'string') {
+      try {
+        const parsed = JSON.parse(preferences);
+        return typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
     
-    // For now, we'll just log this - you could integrate with a toast notification system
-    console.log('Session expiry check - Remember me enabled:', isRememberMeEnabled);
-  }, [isAuthenticated, isRememberMeEnabled]);
+    return {};
+  };
 
-  // Fetch user profile data from database when session changes
+  // Helper function to safely parse notification settings
+  const parseNotificationSettings = (settings: unknown): Record<string, unknown> => {
+    if (settings && typeof settings === 'object') {
+      return settings as Record<string, unknown>;
+    }
+    
+    if (typeof settings === 'string') {
+      try {
+        const parsed = JSON.parse(settings);
+        return typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+    
+    return {};
+  };
+
+  // Helper function to safely parse privacy settings
+  const parsePrivacySettings = (settings: unknown): Record<string, unknown> => {
+    if (settings && typeof settings === 'object') {
+      return settings as Record<string, unknown>;
+    }
+    
+    if (typeof settings === 'string') {
+      try {
+        const parsed = JSON.parse(settings);
+        return typeof parsed === 'object' ? parsed : {};
+      } catch {
+        return {};
+      }
+    }
+    
+    return {};
+  };
+
+  // Check if remember me is enabled from localStorage
+  const checkRememberMePreference = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      const savedRememberMe = localStorage.getItem('dropiti_remember_me');
+      return savedRememberMe === 'true';
+    }
+    return false;
+  }, []);
+
+  // Check session expiry for remember me functionality
+  const checkSessionExpiry = useCallback(() => {
+    if (typeof window !== 'undefined' && isRememberMeEnabled) {
+      const sessionExpiry = localStorage.getItem('dropiti_session_expiry');
+      if (sessionExpiry) {
+        const expiryTime = parseInt(sessionExpiry, 10);
+        const currentTime = Date.now();
+        
+        if (currentTime > expiryTime) {
+          console.log('Session expired, logging out');
+          // Call logout directly without dependency
+          signOut({ redirect: false });
+        }
+      }
+    }
+  }, [isRememberMeEnabled]);
+
+  // Set up session expiry check interval
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (status === 'loading') return;
-      
+    const interval = setInterval(checkSessionExpiry, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [checkSessionExpiry]);
+
+  // Load user data when session changes
+  useEffect(() => {
+    const loadUserData = async () => {
       if (session?.user?.id) {
         try {
-          console.log('AuthContext: Fetching user profile for:', session.user.id);
+          console.log('Loading user data for ID:', session.user.id);
           
-          // Check if remember me is enabled from localStorage
-          const savedRememberMe = localStorage.getItem('dropiti_remember_me');
-          setIsRememberMeEnabled(savedRememberMe === 'true');
-          
-          // Fetch user data from our database using the Firebase UID
+          // Try to get user data from API
           const response = await usersAPI.getUserByFirebaseUid(session.user.id);
           
           if (response.success && response.data) {
             const userData = response.data;
-            console.log('AuthContext: User profile fetched:', userData);
+            console.log('User data loaded from API:', userData);
             
             setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              name: userData.display_name || session.user.name || 'User',
-              avatar: userData.photo_url || session.user.image || '/images/Portrait_Placeholder.png',
-              // Additional user profile fields
+              id: userData.firebase_uid || session.user.id,
+              email: userData.email || session.user.email || '',
+              name: userData.display_name || userData.name || session.user.name || 'User',
+              avatar: userData.photo_url || userData.avatar || session.user.image || undefined,
               uuid: userData.uuid,
               displayName: userData.display_name,
-              photoUrl: userData.photo_url || '/images/Portrait_Placeholder.png',
+              photoUrl: userData.photo_url,
               location: userData.location,
               about: userData.about,
               education: userData.education,
@@ -159,114 +265,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               maritalStatus: userData.marital_status,
               languages: parseLanguages(userData.languages),
               responseTime: userData.response_time,
-              verified: userData.verified,
-              rating: userData.rating,
-              reviewCount: userData.review_count,
-              responseRate: userData.response_rate,
-              avgResponseTime: userData.avg_response_time,
-              totalProperties: userData.total_properties,
-              totalGuests: userData.total_guests,
-              userSince: userData.user_since,
+              verified: userData.verified || false,
+              rating: userData.rating || 0,
+              reviewCount: userData.review_count || 0,
+              responseRate: userData.response_rate || 0,
+              avgResponseTime: userData.avg_response_time || 'Not specified',
+              totalProperties: userData.total_properties || 0,
+              totalGuests: userData.total_guests || 0,
+              userSince: userData.created_at,
               phoneNumber: userData.phone_number,
-              preferences: userData.preferences,
-              notificationSettings: userData.notification_settings,
-              privacySettings: userData.privacy_settings,
+              preferences: parsePreferences(userData.preferences),
+              notificationSettings: parseNotificationSettings(userData.notification_settings),
+              privacySettings: parsePrivacySettings(userData.privacy_settings),
               createdAt: userData.created_at,
               updatedAt: userData.updated_at,
             });
             
             setIsAuthenticated(true);
+            
+            // Set remember me preference
+            const rememberMe = checkRememberMePreference();
+            setIsRememberMeEnabled(rememberMe);
+            
+            // Set session expiry if remember me is enabled
+            if (rememberMe) {
+              const expiryTime = Date.now() + (90 * 24 * 60 * 60 * 1000); // 90 days
+              localStorage.setItem('dropiti_session_expiry', expiryTime.toString());
+            }
+            
           } else {
-            console.warn('AuthContext: Failed to fetch user profile, using session data');
-            // Fallback to session data if database fetch fails
+            console.log('No user data found in API, using session data');
+            // Fallback to session data if API call fails
             setUser({
               id: session.user.id,
               email: session.user.email || '',
               name: session.user.name || 'User',
-              avatar: session.user.image || '/images/Portrait_Placeholder.png',
-              // Additional user profile fields with defaults
-              uuid: undefined,
-              displayName: session.user.name || 'User',
-              photoUrl: session.user.image || '/images/Portrait_Placeholder.png',
-              location: undefined,
-              about: undefined,
-              education: undefined,
-              occupation: undefined,
-              maritalStatus: undefined,
-              languages: [],
-              responseTime: undefined,
-              verified: false,
-              rating: 0,
-              reviewCount: 0,
-              responseRate: 0,
-              avgResponseTime: undefined,
-              totalProperties: 0,
-              totalGuests: 0,
-              userSince: undefined,
-              phoneNumber: undefined,
-              preferences: undefined,
-              notificationSettings: undefined,
-              privacySettings: undefined,
-              createdAt: undefined,
-              updatedAt: undefined,
+              avatar: session.user.image || undefined,
             });
             setIsAuthenticated(true);
+            
+            // Set remember me preference
+            const rememberMe = checkRememberMePreference();
+            setIsRememberMeEnabled(rememberMe);
           }
         } catch (error) {
-          console.error('AuthContext: Error fetching user profile:', error);
-          // Fallback to session data if there's an error
+          console.error('Error loading user data:', error);
+          // Fallback to session data on error
           setUser({
             id: session.user.id,
             email: session.user.email || '',
             name: session.user.name || 'User',
-            avatar: session.user.image || '/images/Portrait_Placeholder.png',
-            // Additional user profile fields with defaults
-            uuid: undefined,
-            displayName: session.user.name || 'User',
-            photoUrl: session.user.image || '/images/Portrait_Placeholder.png',
-            location: undefined,
-            about: undefined,
-            education: undefined,
-            occupation: undefined,
-            maritalStatus: undefined,
-            languages: [],
-            responseTime: undefined,
-            verified: false,
-            rating: 0,
-            reviewCount: 0,
-            responseRate: 0,
-            avgResponseTime: undefined,
-            totalProperties: 0,
-            totalGuests: 0,
-            userSince: undefined,
-            phoneNumber: undefined,
-            preferences: undefined,
-            notificationSettings: undefined,
-            privacySettings: undefined,
-            createdAt: undefined,
-            updatedAt: undefined,
+            avatar: session.user.image || undefined,
           });
           setIsAuthenticated(true);
+          
+          // Set remember me preference
+          const rememberMe = checkRememberMePreference();
+          setIsRememberMeEnabled(rememberMe);
         }
       } else {
-        setIsAuthenticated(false);
+        console.log('No session, clearing user data');
         setUser(null);
+        setIsAuthenticated(false);
         setIsRememberMeEnabled(false);
       }
     };
 
-    fetchUserProfile();
-  }, [session, status]);
+    loadUserData();
+  }, [session, checkRememberMePreference]);
 
-  // Periodically check session expiry for remember me users
+  // Check session expiry on mount and when remember me changes
   useEffect(() => {
-    if (!isAuthenticated || !isRememberMeEnabled) return;
-    
-    const interval = setInterval(() => {
+    if (isAuthenticated && isRememberMeEnabled) {
       checkSessionExpiry();
-    }, 60 * 60 * 1000); // Check every hour
-    
-    return () => clearInterval(interval);
+    }
   }, [isAuthenticated, isRememberMeEnabled, checkSessionExpiry]);
 
   const login = async (email: string, password: string, rememberMe: boolean = false) => {
@@ -279,7 +351,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (result?.error) {
-        return { success: false, error: result.error };
+        return { success: false, error: mapAuthError(result.error) };
       }
 
       // If remember me is enabled, we'll handle the session duration in the NextAuth config
@@ -289,7 +361,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return { success: true };
     } catch (error) {
       console.error("Login error:", error);
-      return { success: false, error: "Network error" };
+      return { success: false, error: AUTH_ERRORS.UNEXPECTED_ERROR };
     }
   };
 

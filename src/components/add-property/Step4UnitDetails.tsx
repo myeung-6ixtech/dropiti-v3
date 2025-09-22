@@ -128,7 +128,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                 step="0.5"
                 value={unitDetails.bathrooms || ''}
                 onChange={(e) => handleInputChange('bathrooms', parseFloat(e.target.value) || 0)}
-                placeholder="e.g., 1.5"
+                placeholder="e.g., 1"
                 className="form-input"
               />
             </div>
@@ -200,8 +200,8 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
                     <HomeIcon className="h-4 w-4" />
                   </div>
                   <div className="ml-3">
-                    <h4 className="font-medium text-gray-900 text-sm">{option.label}</h4>
-                    <p className="text-xs text-gray-600 mt-1">{option.description}</p>
+                    <h4 className="font-medium text-gray-900 text-sm mb-0">{option.label}</h4>
+                    <p className="text-xs text-gray-600 mt-1 mb-0">{option.description}</p>
                   </div>
                 </div>
                 

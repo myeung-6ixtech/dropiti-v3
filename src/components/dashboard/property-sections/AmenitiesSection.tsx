@@ -93,7 +93,7 @@ export function AmenitiesSection({
         setLocalAmenities(localAmenities);
         
         // ✅ Show success toast instead of inline message
-        showToast('success', 'Amenities updated successfully!');
+        showToast('success', 'Amenities have been updated successfully.');
         
         // Exit edit mode
         setIsEditing(false);
