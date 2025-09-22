@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Bed } from '@/assets/icons';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface SearchData {
   location: string;
@@ -12,6 +13,7 @@ interface SearchData {
 
 export default function HeroSection() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [searchData, setSearchData] = useState<SearchData>({
     location: '',
     bedrooms: ''
@@ -62,13 +64,12 @@ export default function HeroSection() {
             <div className="sm:text-center lg:text-left">
               {/* Hero Title - Now White */}
               <h1 className="text-4xl tracking-tight font-bold text-white sm:text-5xl md:text-6xl">
-                <span className="block xl:inline">Find Your Perfect</span>{' '}
-                <span className="block text-blue-400 xl:inline">Home</span>
+                {t('hero.title')}
               </h1>
               
               {/* Hero Description - Now White */}
               <p className="mt-3 text-base text-white sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0 opacity-90">
-                Discover thousands of properties for rent and sale. Search by location, bedrooms, and price to find your ideal home.
+                {t('hero.subtitle')}
               </p>
               
               {/* Integrated Search Bar */}
@@ -82,7 +83,7 @@ export default function HeroSection() {
                         type="text"
                         value={searchData.location}
                         onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
-                        placeholder="Enter city, neighborhood, or address..."
+                        placeholder={t('hero.searchPlaceholder')}
                         className="w-full pl-10 pr-4 py-4 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl mb-0"
                       />
                     </div>

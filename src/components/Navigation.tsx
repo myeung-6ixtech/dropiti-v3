@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
@@ -14,6 +15,7 @@ import { Chat } from '@/assets/icons';
 export default function Navigation() {
   const pathname = usePathname();
   const { isAuthenticated, isLoading, logout, user } = useAuth();
+  const { t } = useLanguage();
   const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -276,7 +278,7 @@ export default function Navigation() {
                       className={navigationStyles.dropdownItem}
                       onClick={() => setIsDropdownOpen(false)}
                     >
-                      View Dashboard
+                      {t('navigation.dashboard')}
                     </Link>
                     <button
                       onClick={() => {
@@ -292,7 +294,7 @@ export default function Navigation() {
                         </>
                       ) : (
                         <>
-                          Logout
+                          {t('navigation.signOut')}
                         </>
                       )}
                     </button>

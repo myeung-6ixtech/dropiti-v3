@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useRouter } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
 
@@ -44,6 +45,7 @@ interface UserProfile {
 
 export default function EditProfilePage() {
   const { user: authUser } = useAuth();
+  const { locale, setLocale, t, isLoading: isLanguageLoading } = useLanguage();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
     displayName: 'dropiti User',
@@ -402,7 +404,7 @@ export default function EditProfilePage() {
             <label className="form-label">
               <span className="flex items-center">
                 <GlobeAltIcon className="h-4 w-4 mr-2 text-black" />
-                Languages You Speak
+                {t('profile.languages')}
               </span>
             </label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -419,6 +421,26 @@ export default function EditProfilePage() {
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-1">Select all languages you can communicate in</p>
+          </div>
+
+          {/* Preferred Language */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <GlobeAltIcon className="h-4 w-4 mr-2 text-black" />
+                {t('profile.preferredLanguage')}
+              </span>
+            </label>
+            <select
+              value={locale}
+              onChange={(e) => setLocale(e.target.value)}
+              disabled={isLanguageLoading}
+              className="form-select"
+            >
+              <option value="en">🇺🇸 English</option>
+              <option value="zh-HK">🇭🇰 繁體中文 (Hong Kong)</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">{t('profile.languageDescription')}</p>
           </div>
 
           {/* Education */}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { usersAPI } from '@/lib/api-client';
 import { 
@@ -24,6 +25,7 @@ interface UserSettings {
 
 export default function SettingsPage() {
   const { user: authUser } = useAuth();
+  const { locale, setLocale, t } = useLanguage();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +53,9 @@ export default function SettingsPage() {
       currency: settings.preferences.currency || 'HKD (Hong Kong Dollar)',
     },
   });
+
+  // Temporary language state for the language switcher
+  const [tempLanguage, setTempLanguage] = useState(locale);
 
   // Load user settings from API when component mounts
   useEffect(() => {
@@ -103,6 +108,11 @@ export default function SettingsPage() {
     loadUserSettings();
   }, [authUser?.id, showToast]);
 
+  // Update tempLanguage when locale changes
+  useEffect(() => {
+    setTempLanguage(locale);
+  }, [locale]);
+
 
   const handleInputChange = (field: keyof UserSettings, value: string | boolean | object) => {
     // Ensure the value is never undefined
@@ -124,6 +134,10 @@ export default function SettingsPage() {
     }));
   };
 
+  const handleLanguageChange = (newLanguage: string) => {
+    setTempLanguage(newLanguage);
+  };
+
   const handleSave = async () => {
     if (!authUser?.id) {
       showToast('error', 'You must be logged in to save changes');
@@ -143,8 +157,14 @@ export default function SettingsPage() {
 
       // Only add complex objects if they exist in the user data
       if (tempSettings.preferences) {
+        // Map language code to language name
+        const languageMap: Record<string, string> = {
+          'en': 'English',
+          'zh-HK': 'Traditional Chinese'
+        };
+
         updates.preferences = {
-          language: tempSettings.preferences.language,
+          language: languageMap[tempLanguage] || tempSettings.preferences.language,
           timezone: tempSettings.preferences.timezone,
           currency: tempSettings.preferences.currency,
         };
@@ -157,6 +177,12 @@ export default function SettingsPage() {
 
       if (updateResponse.success) {
         setSettings(tempSettings);
+        
+        // Update language if it changed
+        if (tempLanguage !== locale) {
+          await setLocale(tempLanguage);
+        }
+        
         showToast('success', 'Settings updated successfully!');
       } else {
         throw new Error(updateResponse.error || 'Failed to update settings');
@@ -171,6 +197,7 @@ export default function SettingsPage() {
 
   const handleCancel = () => {
     setTempSettings(settings);
+    setTempLanguage(locale);
   };
 
   const tabs = [
@@ -322,15 +349,15 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="form-label">Language</label>
+                    <label className="form-label">{t('settings.language')}</label>
                     <select 
-                      value={tempSettings.preferences.language}
-                      onChange={(e) => handlePreferenceChange('language', e.target.value)}
+                      value={tempLanguage}
+                      onChange={(e) => handleLanguageChange(e.target.value)}
+                      disabled={isLoading}
                       className="form-select"
                     >
-                      <option value="English">English</option>
-                      <option value="繁體中文">繁體中文</option>
-                      <option value="简体中文">简体中文</option>
+                      <option value="en">🇺🇸 English</option>
+                      <option value="zh-HK">🇭🇰 繁體中文 (Hong Kong)</option>
                     </select>
                   </div>
                   <div className="space-y-2">
