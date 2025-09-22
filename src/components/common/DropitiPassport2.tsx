@@ -5,9 +5,7 @@ import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { 
   StarIcon, 
-  CheckCircleIcon,
-  MapPinIcon,
-  CalendarIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 
 interface DropitiPassport2Props {
@@ -72,26 +70,6 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
       fetchData();
     }
   }, [firebaseUid]);
-  const formatJoinDate = (dateString?: string) => {
-    if (!dateString) {
-      return 'Unknown';
-    }
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return 'Invalid date';
-      }
-      
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long'
-      });
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'Invalid date';
-    }
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">

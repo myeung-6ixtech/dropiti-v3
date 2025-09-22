@@ -223,7 +223,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         
         if (currentTime > expiryTime) {
           console.log('Session expired, logging out');
-          logout();
+          // Call logout directly without dependency
+          signOut({ redirect: false });
         }
       }
     }

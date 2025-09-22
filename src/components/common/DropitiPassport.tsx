@@ -73,12 +73,6 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
       fetchData();
     }
   }, [firebaseUid]);
-  const formatJoinDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long'
-    });
-  };
 
   return (
     <div className={passportStyles.container}>

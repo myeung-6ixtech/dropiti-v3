@@ -281,7 +281,7 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
       const properties = Array.isArray(response.data) ? response.data : response.data.properties || [];
       
       console.log('getPublishedPropertyCountByStatus - All properties from listings:', properties.length);
-      console.log('getPublishedPropertyCountByStatus - Property details:', properties.map((p: any) => ({ 
+      console.log('getPublishedPropertyCountByStatus - Property details:', properties.map((p: { id: string; status: string; is_public: boolean; available: boolean }) => ({ 
         id: p.id, 
         status: p.status, 
         is_public: p.is_public,
@@ -289,14 +289,14 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
       })));
       
       // Filter for published properties - check multiple possible status indicators
-      const publishedProperties = properties.filter((property: any) => 
+      const publishedProperties = properties.filter((property: { status: string; is_public: boolean; available: boolean }) => 
         property.status === 'published' || 
         property.is_public === true ||
         property.available === true
       );
       
       console.log('getPublishedPropertyCountByStatus - Published properties after filtering:', publishedProperties.length);
-      console.log('getPublishedPropertyCountByStatus - Published property details:', publishedProperties.map((p: any) => ({ 
+      console.log('getPublishedPropertyCountByStatus - Published property details:', publishedProperties.map((p: { id: string; status: string; is_public: boolean; available: boolean }) => ({ 
         id: p.id, 
         status: p.status, 
         is_public: p.is_public,
@@ -333,7 +333,7 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
       const reviews = Array.isArray(response.data) ? response.data : [response.data];
       
       // Filter for reviews where the user is the reviewed user (not the reviewer)
-      const receivedReviews = reviews.filter((review: any) => 
+      const receivedReviews = reviews.filter((review: { reviewedUserFirebaseUid: string }) => 
         review.reviewedUserFirebaseUid === userFirebaseUid
       );
       
@@ -342,7 +342,7 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
       }
       
       // Calculate average rating
-      const totalRating = receivedReviews.reduce((sum: number, review: any) => sum + (review.rating || 0), 0);
+      const totalRating = receivedReviews.reduce((sum: number, review: { rating: number }) => sum + (review.rating || 0), 0);
       const averageRating = totalRating / receivedReviews.length;
       
       return {

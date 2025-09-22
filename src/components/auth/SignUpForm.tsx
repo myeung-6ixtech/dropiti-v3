@@ -69,7 +69,7 @@ export default function SignUpForm() {
   const { showToast } = useToast();
 
   // Real-time validation functions
-  const validateField = (fieldName: string, value: string, additionalValue?: string) => {
+  const validateField = (fieldName: string, value: string) => {
     let validation: { isValid: boolean; message: string };
     
     switch (fieldName) {
