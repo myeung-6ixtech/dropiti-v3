@@ -3,11 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
-  MagnifyingGlassIcon,
-  BellIcon
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import ChatInterface from '@/components/chat/ChatInterface';
-import Button from '@/components/ui/button/Button';
 import { useAuth } from '@/context/AuthContext';
 import { chatAPI, convertChatRoomToContact } from '@/lib/chat-api';
 import { useToast } from '@/context/ToastContext';
@@ -35,7 +33,6 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [typingIndicator, setTypingIndicator] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showNotifications, setShowNotifications] = useState(false);
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -128,17 +125,6 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
               <MagnifyingGlassIcon className="absolute right-2.5 top-3 h-4 w-4 text-gray-400" />
             </div>
             
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2 text-sm"
-              onClick={() => setShowNotifications(!showNotifications)}
-            >
-              <BellIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Notifications</span>
-            </Button>
-
-
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Modal } from '@/components/ui/modal';
+import Modal from '@/components/ui/modal';
 import { 
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -117,7 +117,7 @@ export default function CreateOfferModal({
       <div className="bg-white rounded-lg shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-gray-900 mb-0">
             {mode === 'counter' ? 'Counter Offer' : 'Create Offer'}
           </h2>
           <button

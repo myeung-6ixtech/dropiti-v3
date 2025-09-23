@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
 import DraftCard from '@/components/dashboard/DraftCard';
-import { PlusIcon, MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import Link from 'next/link';
@@ -40,7 +40,6 @@ export default function PropertiesPage() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
 
   // Fetch user's properties and drafts
@@ -93,18 +92,9 @@ export default function PropertiesPage() {
     fetchData();
   }, [isAuthenticated, authUser?.id]);
 
-  // Filter properties and drafts based on search term and active tab
-  const filteredProperties = properties.filter(property =>
-    property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (property.details?.type as string)?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const filteredDrafts = drafts.filter(draft =>
-    draft.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (draft.address || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (draft.property_type || '').toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Use properties and drafts directly without filtering
+  const filteredProperties = properties;
+  const filteredDrafts = drafts;
 
   if (!isAuthenticated) {
     return <CenteredLoadingSpinner size="lg" />;
@@ -125,27 +115,6 @@ export default function PropertiesPage() {
           </Link>
         </div>
       </div>
-
-      {/* Search and Filters */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center space-x-4">
-          <div className="relative flex-1 max-w-md">
-            <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search properties..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="form-input pl-10"
-            />
-          </div>
-          <button className="btn-outline-md">
-            <FunnelIcon className="h-4 w-4 mr-2" />
-            Filter
-          </button>
-        </div>
-      </div>
-
       {/* Tabs */}
       <div className="bg-white border-b border-gray-200 px-6">
         <div className="flex space-x-8">
@@ -207,9 +176,9 @@ export default function PropertiesPage() {
           <EmptyState
             icon="🏠"
             title="No Published Properties"
-            description={searchTerm ? 'No published properties match your search criteria. Try adjusting your search terms.' : "You haven't published any properties yet. Start by creating your first property listing to attract potential tenants."}
-            actionText={!searchTerm ? "Add Your First Property" : undefined}
-            actionHref={!searchTerm ? "/dashboard/add-property" : undefined}
+            description="You haven't published any properties yet. Start by creating your first property listing to attract potential tenants."
+            actionText="Add Your First Property"
+            actionHref="/dashboard/add-property"
           />
         </div>
       )}
@@ -219,9 +188,9 @@ export default function PropertiesPage() {
           <EmptyState
             icon="📝"
             title="No Drafts"
-            description={searchTerm ? 'No drafts match your search criteria. Try adjusting your search terms.' : "You haven't created any drafts yet. Start by creating your first property draft to work on your listing before publishing."}
-            actionText={!searchTerm ? "Create Your First Draft" : undefined}
-            actionHref={!searchTerm ? "/dashboard/add-property" : undefined}
+            description="You haven't created any drafts yet. Start by creating your first property draft to work on your listing before publishing."
+            actionText="Create Your First Draft"
+            actionHref="/dashboard/add-property"
           />
         </div>
       )}

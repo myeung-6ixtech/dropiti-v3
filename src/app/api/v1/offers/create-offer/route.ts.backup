@@ -1,22 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
-
-const CHECK_EXISTING_OFFER_QUERY = `
-  query CheckExistingOffer($propertyUuid: String!, $initiatorFirebaseUid: String!) {
-    real_estate_offer(
-      where: {
-        property_uuid: { _eq: $propertyUuid }
-        initiator_firebase_uid: { _eq: $initiatorFirebaseUid }
-        offer_status: { _in: ["pending", "accepted"] }
-        is_active: { _eq: true }
-      }
-      limit: 1
-    ) {
-      id
-      offer_status
-    }
-  }
-`;
+import { executeMutation } from '@/app/api/graphql/serverClient';
 
 const CREATE_OFFER_MUTATION = `
   mutation CreateOffer($offer: real_estate_offer_insert_input!) {
@@ -41,6 +24,7 @@ const CREATE_OFFER_MUTATION = `
 export async function POST(request: NextRequest) {
   try {
     const offerData = await request.json();
+    console.log('Create Offer API: Received offer data:', offerData);
 
     // Validate required fields
     const requiredFields = [
@@ -78,40 +62,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for existing offers from the same user for this property
-    console.log('Create Offer API: Checking for existing offers for property:', offerData.propertyId, 'user:', offerData.initiatorFirebaseUid);
-    
-    try {
-      const existingOffersData = await executeQuery(CHECK_EXISTING_OFFER_QUERY, {
-        propertyUuid: offerData.propertyId,
-        initiatorFirebaseUid: offerData.initiatorFirebaseUid
-      }) as {
-        real_estate_offer: Array<{
-          id: string;
-          offer_status: string;
-        }>;
-      };
-
-      console.log('Create Offer API: Existing offers query result:', existingOffersData);
-
-      if (existingOffersData.real_estate_offer && existingOffersData.real_estate_offer.length > 0) {
-        const existingOffer = existingOffersData.real_estate_offer[0];
-        console.log('Create Offer API: Found existing offer:', existingOffer);
-        return NextResponse.json(
-          { 
-            error: `You already have a ${existingOffer.offer_status} offer for this property. Only one active offer per property is allowed.`,
-            existingOfferStatus: existingOffer.offer_status
-          },
-          { status: 409 } // Conflict status code
-        );
-      }
-      
-      console.log('Create Offer API: No existing offers found, proceeding with creation');
-    } catch (checkError) {
-      console.error('Create Offer API: Error checking existing offers:', checkError);
-      // Continue with offer creation if check fails (don't block on check errors)
-    }
-
     // Generate unique offer key
     const offerKey = `offer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
@@ -131,6 +81,7 @@ export async function POST(request: NextRequest) {
       created_at: new Date().toISOString(), // Add current timestamp
     };
 
+    console.log('Create Offer API: Prepared offer object:', offer);
 
     try {
       const data = await executeMutation(CREATE_OFFER_MUTATION, { offer }) as {
@@ -150,6 +101,8 @@ export async function POST(request: NextRequest) {
           created_at: string;
         };
       };
+      
+      console.log('Create Offer API: GraphQL response:', data);
 
       // Check if the mutation was successful
       if (!data || !data.insert_real_estate_offer_one) {

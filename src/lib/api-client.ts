@@ -368,7 +368,7 @@ export const offersAPI = {
       const response = await apiClient.post('/offers/create-offer', offerData);
       return response.data;
     } catch (error) {
-      console.error('Error creating offer:', error);
+      // Re-throw error to be handled by the calling component
       throw error;
     }
   },

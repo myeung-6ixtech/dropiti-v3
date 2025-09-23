@@ -103,26 +103,14 @@ export default function PropertyDetailPage() {
   const checkExistingOffer = useCallback(async (propertyUuid: string, userId: string) => {
     if (!userId || !propertyUuid) return;
     
-    console.log('Frontend: Checking existing offers for user:', userId, 'property:', propertyUuid);
-    
     try {
       const response = await offersAPI.getOffersByInitiator(userId);
       
-      console.log('Frontend: Offers response:', response);
-      
       if (response.success && response.data) {
-        // Check if any of the user's active offers are for this property
-        const hasOffer = response.data.some((offer: { 
-          property_uuid: string; 
-          offer_status: string; 
-          is_active: boolean;
-        }) => 
-          offer.property_uuid === propertyUuid && 
-          offer.is_active && 
-          (offer.offer_status === 'pending' || offer.offer_status === 'accepted')
+        // Check if any of the user's offers are for this property
+        const hasOffer = response.data.some((offer: { property_uuid: string }) => 
+          offer.property_uuid === propertyUuid
         );
-        
-        console.log('Frontend: Has existing offer:', hasOffer);
         setHasExistingOffer(hasOffer);
       }
     } catch (error) {
@@ -375,9 +363,6 @@ export default function PropertyDetailPage() {
         // Show success toast
         showToast('success', 'Offer Successfully Created!');
         
-        // Update the hasExistingOffer state immediately
-        setHasExistingOffer(true);
-        
         // Close the modal
         setIsCreateOfferModalOpen(false);
         
@@ -388,19 +373,9 @@ export default function PropertyDetailPage() {
       } else {
         showToast('error', `Failed to submit offer: ${response.error || 'Unknown error'}`);
       }
-    } catch (error: unknown) {
-      // Handle 409 Conflict error (duplicate offer) - this is expected behavior
-      if (error && typeof error === 'object' && 'response' in error && 
-          error.response && typeof error.response === 'object' && 'status' in error.response && 
-          error.response.status === 409) {
-        // This is expected - user already has an offer for this property
-        showToast('error', 'You already have a pending offer for this property');
-        setHasExistingOffer(true);
-      } else {
-        // This is an unexpected error - log it for debugging
-        console.error('Unexpected error creating offer:', error);
-        showToast('error', `Error creating offer: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
+    } catch (error) {
+      console.error('Error creating offer:', error);
+      showToast('error', `Error creating offer: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

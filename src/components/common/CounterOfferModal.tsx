@@ -1,6 +1,6 @@
 'use client';
 
-import { Modal } from '@/components/ui/modal';
+import Modal from '@/components/ui/modal';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Offer } from '@/types/offer';
 import { XMarkIcon } from '@heroicons/react/24/outline';
