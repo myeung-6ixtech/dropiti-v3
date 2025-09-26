@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { FiSearch, FiMapPin } from 'react-icons/fi';
 import { Bed } from '@/assets/icons';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -78,7 +78,7 @@ export default function HeroSection() {
                   <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
                     {/* Location - Made larger on desktop */}
                     <div className="flex-1 sm:flex-[2] relative">
-                      <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-900" />
+                      <FiMapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-900" />
                       <input
                         type="text"
                         value={searchData.location}
@@ -113,7 +113,7 @@ export default function HeroSection() {
                       className="flex-shrink-0 w-full sm:w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                       disabled={!searchData.location && !searchData.bedrooms}
                     >
-                      <MagnifyingGlassIcon className="h-6 w-6 text-white" />
+                      <FiSearch className="h-6 w-6 text-white" />
                       <span className="sm:hidden ml-2 text-white font-medium">Search Properties</span>
                     </button>
                   </div>

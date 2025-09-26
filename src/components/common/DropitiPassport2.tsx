@@ -4,9 +4,9 @@ import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatf
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { 
-  StarIcon, 
-  CheckCircleIcon
-} from '@heroicons/react/24/outline';
+  FiStar, 
+  FiCheckCircle
+} from 'react-icons/fi';
 
 interface DropitiPassport2Props {
   firebaseUid: string;
@@ -87,7 +87,7 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
           </div>
           {user.verified && (
             <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1.5">
-              <CheckCircleIcon className="h-3 w-3 text-white" />
+              <FiCheckCircle className="h-3 w-3 text-white" />
             </div>
           )}
         </div>
@@ -104,25 +104,25 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
           </div>
 
           {/* Quick Stats Row */}
-          <div className="flex items-center space-x-8 mb-4 text-sm">
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{isLoadingProperties ? "..." : publishedProperties}</span>
-              <span className="text-gray-500">Published</span>
+          <div className="flex items-center justify-between sm:justify-start sm:space-x-8 mb-4">
+            <div className="flex flex-col items-center sm:items-start">
+              <span className="text-lg font-bold text-gray-900">{isLoadingProperties ? "..." : publishedProperties}</span>
+              <span className="text-xs text-gray-500">Published</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{isLoadingRating ? "..." : userRating.reviewCount}</span>
-              <span className="text-gray-500">Reviews</span>
+            <div className="flex flex-col items-center sm:items-start">
+              <span className="text-lg font-bold text-gray-900">{isLoadingRating ? "..." : userRating.reviewCount}</span>
+              <span className="text-xs text-gray-500">Reviews</span>
             </div>
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-gray-900">{calculatePlatformDuration(user.created_at)}</span>
-              <span className="text-gray-500">on dropiti</span>
+            <div className="flex flex-col items-center sm:items-start">
+              <span className="text-lg font-bold text-gray-900">{calculatePlatformDuration(user.created_at)}</span>
+              <span className="text-xs text-gray-500">on dropiti</span>
             </div>
           </div>
 
           {/* Rating and Response Time */}
           <div className="flex items-center space-x-4 mb-4">
             <div className="flex items-center space-x-1">
-              <StarIcon className="h-4 w-4 text-gray-900" />
+              <FiStar className="h-4 w-4 text-gray-900" />
               <span className="text-sm font-semibold text-gray-900">
                 {isLoadingRating ? "..." : userRating.averageRating}
               </span>

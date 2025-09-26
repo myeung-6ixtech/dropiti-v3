@@ -2,18 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  UserIcon, 
-  BuildingOfficeIcon, 
-  CogIcon, 
-  Bars3Icon,
-  XMarkIcon,
-  ClockIcon,
-  UsersIcon,
-  ChatBubbleLeftRightIcon,
-  PlusIcon,
-  StarIcon
-} from '@heroicons/react/24/outline';
-import { ChartTreeMap, PropertyListings } from '@/assets/icons';
+  FiUser, 
+  FiHome, 
+  FiSettings, 
+  FiMenu,
+  FiX,
+  FiClock,
+  FiUsers,
+  FiMessageCircle,
+  FiPlus,
+  FiStar,
+  FiChevronLeft,
+  FiChevronRight,
+  FiLayers
+} from 'react-icons/fi';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
@@ -91,26 +93,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   const tenantNavigation = [
-    { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Applications', icon: ClockIcon, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
-    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
-    { name: 'Reviews', icon: StarIcon, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: 'Dashboard', icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: 'Applications', icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
+    { name: 'Chat', icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
+    { name: 'Reviews', icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
     // { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
-    { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
-    { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    { name: 'Profile', icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: 'Settings', icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
     // { name: 'Recent Activity', icon: ChartBarIcon, href: '/dashboard/activity', current: pathname === '/dashboard/activity' },
   ];
 
   const landlordNavigation = [
-    { name: 'Dashboard', icon: ChartTreeMap, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Offers', icon: ClockIcon, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
-    { name: 'Properties', icon: PropertyListings, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
-    { name: 'Add Property', icon: PlusIcon, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
-    { name: 'Chat', icon: ChatBubbleLeftRightIcon, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
-    { name: 'Reviews', icon: StarIcon, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
-    { name: 'Profile', icon: UsersIcon, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
-    { name: 'Settings', icon: CogIcon, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    { name: 'Dashboard', icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: 'Offers', icon: FiClock, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
+    { name: 'Properties', icon: FiHome, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
+    { name: 'Add Property', icon: FiPlus, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
+    { name: 'Chat', icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
+    { name: 'Reviews', icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: 'Profile', icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: 'Settings', icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
     // { name: 'Analytics', icon: ChartBarIcon, href: '/dashboard/analytics', current: pathname === '/dashboard/analytics' },
   ];
@@ -133,21 +135,22 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <div className={`dashboard-sidebar ${
         isMobile && !sidebarOpen ? 'dashboard-sidebar-closed' : 'dashboard-sidebar-open'
       } ${!isMobile && !sidebarOpen ? 'collapsed' : ''}`}>
+        {/* V-shaped toggle button for desktop - positioned on edge */}
+        {!isMobile && (
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="dashboard-sidebar-v-toggle"
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {sidebarOpen ? (
+              <FiChevronLeft className="dashboard-sidebar-v-toggle-icon" />
+            ) : (
+              <FiChevronRight className="dashboard-sidebar-v-toggle-icon" />
+            )}
+          </button>
+        )}
+        
         <div className="dashboard-sidebar-content">
-          {/* Sidebar toggle button - moved to top of sidebar */}
-          <div className="dashboard-sidebar-toggle">
-            {/* Show toggle button on both mobile and desktop */}
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="dashboard-sidebar-toggle-button"
-            >
-              {sidebarOpen ? (
-                <XMarkIcon className="h-5 w-5" />
-              ) : (
-                <Bars3Icon className="h-5 w-5" />
-              )}
-            </button>
-          </div>
           {/* User info */}
           <div className="dashboard-user-section">
             <div className="flex items-center justify-between w-full">
@@ -205,12 +208,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </>
                   ) : activeView === 'tenant' ? (
                     <>
-                      <UserIcon className="h-5 w-5 mr-2" />
+                      <FiUser className="h-5 w-5 mr-2" />
                       <span>Tenant View</span>
                     </>
                   ) : (
                     <>
-                      <BuildingOfficeIcon className="h-5 w-5 mr-2" />
+                      <FiHome className="h-5 w-5 mr-2" />
                       <span>Landlord View</span>
                     </>
                   )}
@@ -222,7 +225,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Navigation */}
           <nav className={`dashboard-navigation transition-opacity duration-200 ${isViewChanging ? 'opacity-75' : 'opacity-100'}`}>
-            <p className="dashboard-navigation-title">Navigation</p>
             {currentNavigation.map((item) => (
               <Link
                 key={item.name}

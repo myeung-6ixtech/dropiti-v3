@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { ChevronDownIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { FiChevronDown, FiMenu } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -14,11 +14,12 @@ import { Chat } from '@/assets/icons';
 
 export default function Navigation() {
   const pathname = usePathname();
-  const { isAuthenticated, isLoading, logout, user } = useAuth();
+  const { isAuthenticated, logout, user } = useAuth();
   const { t } = useLanguage();
   const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Debug: Log user data for profile image debugging
@@ -33,6 +34,32 @@ export default function Navigation() {
       });
     }
   }, [user]);
+
+  // Handle avatar loading state
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      // If user is authenticated but doesn't have avatar yet, show loading
+      if (!user.avatar) {
+        setIsAvatarLoading(true);
+        // In a real app, this would be handled by image loading events
+        // For now, we'll show loading briefly then stop
+        const timer = setTimeout(() => {
+          setIsAvatarLoading(false);
+        }, 500);
+        return () => clearTimeout(timer);
+      } else {
+        // User has avatar, but we might still need to load it
+        setIsAvatarLoading(true);
+        // Simulate image loading time
+        const timer = setTimeout(() => {
+          setIsAvatarLoading(false);
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      setIsAvatarLoading(false);
+    }
+  }, [isAuthenticated, user]);
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -63,64 +90,8 @@ export default function Navigation() {
     };
   }, []);
 
-  // Show loading state while determining authentication status
-  if (isLoading) {
-    // Hide navigation on mobile during loading
-    if (isMobile) {
-      return null;
-    }
-    
-    return (
-      <nav className={navigationStyles.container}>
-        <div className={navigationStyles.content}>
-          <div className={navigationStyles.header}>
-            <div className={navigationStyles.brand}>
-              <Link href="/" className={navigationStyles.brandLink}>
-                <Image
-                  src="/images/dropiti_logo.png"
-                  alt="Dropiti"
-                  width={160}
-                  height={32}
-                  priority
-                  className="hidden sm:block h-11 w-auto"
-                />
-              </Link>
-            </div>
-            
-            <div className={navigationStyles.menu}>
-              <Link
-                href="/"
-                className={`${navigationStyles.link} ${
-                  isActive('/') 
-                    ? navigationStyles.linkActive
-                    : navigationStyles.linkInactive
-                }`}
-              >
-                <span>Home</span>
-              </Link>
-              
-              <Link
-                href="/search"
-                className={`${navigationStyles.link} ${
-                  isActive('/search') 
-                    ? navigationStyles.linkActive
-                    : navigationStyles.linkInactive
-                }`}
-              >
-                <span>Explore</span>
-              </Link>
-              
-              {/* Loading state for auth button - simplified skeleton */}
-              <div className={navigationStyles.loadingSkeleton}>
-                {/* Skeleton profile photo */}
-                <div className={navigationStyles.loadingAvatar}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-    );
-  }
+  // Don't show loading skeleton - assume user is not authenticated initially
+  // This provides better UX by showing the login button immediately
 
   // Hide navigation completely on mobile for homepage, search, property pages, user profile pages, and auth pages
   if (isMobile && (
@@ -148,7 +119,7 @@ export default function Navigation() {
                 className={navigationStyles.menuButton}
                 aria-label={sidebarOpen ? "Close menu" : "Open menu"}
               >
-                <Bars3Icon className={navigationStyles.menuIcon} />
+                <FiMenu className={navigationStyles.menuIcon} />
               </button>
               
               <Link href="/" className={navigationStyles.brandLink}>
@@ -191,7 +162,7 @@ export default function Navigation() {
                 className={navigationStyles.menuButton}
                 aria-label={sidebarOpen ? "Close menu" : "Open menu"}
               >
-                <Bars3Icon className={navigationStyles.menuIcon} />
+                <FiMenu className={navigationStyles.menuIcon} />
               </button>
             )}
             
@@ -249,7 +220,9 @@ export default function Navigation() {
                   className={navigationStyles.userButton}
                 >
                   <div className={navigationStyles.userAvatar}>
-                    {user?.avatar ? (
+                    {isAvatarLoading ? (
+                      <div className={navigationStyles.loadingAvatar}></div>
+                    ) : user?.avatar ? (
                       <Image 
                         src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')} 
                         alt="User avatar" 
@@ -267,7 +240,7 @@ export default function Navigation() {
                       />
                     )}
                   </div>
-                  <ChevronDownIcon className={`${navigationStyles.userChevron} ${isDropdownOpen ? navigationStyles.userChevronOpen : ''}`} />
+                  <FiChevronDown className={`${navigationStyles.userChevron} ${isDropdownOpen ? navigationStyles.userChevronOpen : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}

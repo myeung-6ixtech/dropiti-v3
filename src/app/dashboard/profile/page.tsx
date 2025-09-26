@@ -5,15 +5,15 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
 import { 
-  UserIcon,
-  GlobeAltIcon,
-  AcademicCapIcon,
-  BriefcaseIcon,
-  HeartIcon,
-  MapPinIcon,
-  ClockIcon,
-  PencilIcon
-} from '@heroicons/react/24/outline';
+  FiUser,
+  FiGlobe,
+  FiBook,
+  FiBriefcase,
+  FiHeart,
+  FiMapPin,
+  FiClock,
+  FiEdit
+} from 'react-icons/fi';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 // import ProfileStatusBanner from '@/components/profile/ProfileStatusBanner';
 
@@ -181,7 +181,7 @@ export default function ProfilePage() {
             onClick={handleEditProfile}
             className="btn-primary flex items-center space-x-2"
           >
-            <PencilIcon className="h-4 w-4" />
+            <FiEdit className="h-4 w-4" />
             <span>Edit Profile</span>
           </button>
         </div>
@@ -205,12 +205,6 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
-
-      {/* Profile Status Banner */}
-      {/*<ProfileStatusBanner
-        verified={profile.verified}
-        className="mb-6"
-      />*/}
 
       {/* Dropiti Passport Display */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
@@ -237,7 +231,7 @@ export default function ProfilePage() {
             
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
-                <UserIcon className="h-5 w-5 text-gray-400" />
+                <FiUser className="h-5 w-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500 mb-0">Display Name</p>
                   <p className="text-md font-medium text-gray-700">{profile.displayName}</p>
@@ -245,7 +239,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex items-center space-x-3">
-                <UserIcon className="h-5 w-5 text-gray-400" />
+                <FiUser className="h-5 w-5 text-gray-400" />
                 <div>
                   <p className="text-sm text-gray-500 mb-0">Email</p>
                   <p className="font-medium text-gray-700">{profile.email}</p>
@@ -254,7 +248,7 @@ export default function ProfilePage() {
 
               {profile.location && (
                 <div className="flex items-center space-x-3">
-                  <MapPinIcon className="h-5 w-5 text-gray-400" />
+                  <FiMapPin className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Location</p>
                     <p className="font-medium text-gray-700">{profile.location}</p>
@@ -264,7 +258,7 @@ export default function ProfilePage() {
 
               {profile.phoneNumber && (
                 <div className="flex items-center space-x-3">
-                  <UserIcon className="h-5 w-5 text-gray-400" />
+                  <FiUser className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Phone Number</p>
                     <p className="font-medium text-gray-700">{profile.phoneNumber}</p>
@@ -281,7 +275,7 @@ export default function ProfilePage() {
             <div className="space-y-3">
               {profile.education && (
                 <div className="flex items-center space-x-3">
-                  <AcademicCapIcon className="h-5 w-5 text-gray-400" />
+                  <FiBook className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Education</p>
                     <p className="font-medium text-gray-700">{profile.education}</p>
@@ -291,7 +285,7 @@ export default function ProfilePage() {
 
               {profile.occupation && (
                 <div className="flex items-center space-x-3">
-                  <BriefcaseIcon className="h-5 w-5 text-gray-400" />
+                  <FiBriefcase className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Occupation</p>
                     <p className="font-medium text-gray-700">{profile.occupation}</p>
@@ -301,7 +295,7 @@ export default function ProfilePage() {
 
               {profile.maritalStatus && (
                 <div className="flex items-center space-x-3">
-                  <HeartIcon className="h-5 w-5 text-gray-400" />
+                  <FiHeart className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Marital Status</p>
                     <p className="font-medium text-gray-700">{profile.maritalStatus}</p>
@@ -311,7 +305,7 @@ export default function ProfilePage() {
 
               {profile.languages.length > 0 && (
                 <div className="flex items-center space-x-3">
-                  <GlobeAltIcon className="h-5 w-5 text-gray-400" />
+                  <FiGlobe className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Languages</p>
                     <p className="font-medium text-gray-700">{profile.languages.join(', ')}</p>
@@ -321,7 +315,7 @@ export default function ProfilePage() {
 
               {profile.responseTime && (
                 <div className="flex items-center space-x-3">
-                  <ClockIcon className="h-5 w-5 text-gray-400" />
+                  <FiClock className="h-5 w-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500 mb-0">Response Time</p>
                     <p className="font-medium text-gray-700">{profile.responseTime}</p>

@@ -1191,11 +1191,6 @@
     margin-right: 0;
   }
 
-  .dashboard-nav-item-active span {
-    @apply text-white;
-    margin-left: 0.5rem;
-  }
-
   .dashboard-nav-item-inactive {
     @apply text-gray-600 hover:text-gray-900 hover:bg-gray-100;
   }
@@ -1227,26 +1222,9 @@
 
   .dashboard-sidebar.collapsed .dashboard-user-info,
   .dashboard-sidebar.collapsed .dashboard-view-toggle,
+  .dashboard-sidebar.collapsed .dashboard-navigation,
   .dashboard-sidebar.collapsed .dashboard-sidebar-footer {
     @apply hidden;
-  }
-
-  .dashboard-sidebar.collapsed .dashboard-navigation {
-    @apply flex flex-col items-center space-y-2;
-  }
-
-  .dashboard-sidebar.collapsed .dashboard-nav-item {
-    @apply flex flex-col items-center justify-center p-4 w-12;
-  }
-
-  .dashboard-sidebar.collapsed .dashboard-nav-item span {
-    @apply hidden;
-    margin-left: 1rem;
-  }
-
-  .dashboard-sidebar.collapsed .dashboard-nav-item svg {
-    @apply h-5 w-5;
-    margin-right: 0;
   }
 
   .dashboard-sidebar.collapsed .dashboard-sidebar-toggle {
@@ -1258,12 +1236,10 @@
   }
 
   .dashboard-sidebar.collapsed .dashboard-user-avatar {
-    @apply h-8 w-8 rounded-full;
+    @apply h-8 w-8;
   }
 
-  .dashboard-sidebar.collapsed .dashboard-navigation-title {
-    @apply hidden;
-  }  /* Dashboard Mobile Styles */
+  /* Dashboard Mobile Styles */
   .dashboard-mobile-backdrop {
     @apply fixed inset-0 z-40 lg:hidden;
   }
