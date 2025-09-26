@@ -5,8 +5,6 @@ import {
   FiUser, 
   FiHome, 
   FiSettings, 
-  FiMenu,
-  FiX,
   FiClock,
   FiUsers,
   FiMessageCircle,
