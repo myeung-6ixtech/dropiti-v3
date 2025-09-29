@@ -73,6 +73,28 @@ export default function OutgoingOfferCardStatus({
     );
   }
 
+  if (offer.offerStatus === 'tentatively_accepted') {
+    return (
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        <div className="flex">
+          <div className="flex-shrink-0">
+            <InformationCircleIcon className="h-5 w-5 text-yellow-400" />
+          </div>
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-yellow-800 mb-0">
+              ⏳ You have tentatively accepted this offer
+            </h3>
+            <div className="mt-2 text-sm mb-0">
+              <p className="text-sm text-gray-600 mb-0">
+                Waiting for landlord confirmation to finalize the deal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (offer.offerStatus === 'rejected') {
     return (
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">

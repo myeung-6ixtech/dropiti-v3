@@ -18,7 +18,7 @@ interface OfferWithProperty extends Offer {
   propertyImage?: string;
 }
 
-type FilterStatus = 'all' | 'pending' | 'countered' | 'accepted' | 'rejected';
+type FilterStatus = 'all' | 'pending' | 'tentatively_accepted' | 'countered' | 'accepted' | 'rejected';
 
 interface PropertyGroup {
   propertyTitle: string;
@@ -250,6 +250,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
     return {
       all: offers.length,
       pending: offers.filter(o => o.offerStatus === 'pending').length,
+      tentatively_accepted: offers.filter(o => o.offerStatus === 'tentatively_accepted').length,
       countered: offers.filter(o => o.offerStatus === 'countered').length,
       accepted: offers.filter(o => o.offerStatus === 'accepted').length,
       rejected: offers.filter(o => o.offerStatus === 'rejected').length,
@@ -297,6 +298,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
           {[
             { key: 'all', label: 'All Offers', count: statusCounts.all },
             { key: 'pending', label: 'Pending', count: statusCounts.pending },
+            { key: 'tentatively_accepted', label: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
             { key: 'countered', label: 'Countered', count: statusCounts.countered },
             { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
             { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },

@@ -13,7 +13,7 @@ interface AllOutgoingOffersProps {
   showPropertyInfo?: boolean;
 }
 
-type FilterStatus = 'all' | 'pending' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
+type FilterStatus = 'all' | 'pending' | 'tentatively_accepted' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
 
 export default function AllOutgoingOffers({ 
   initiatorFirebaseUid, 
@@ -100,6 +100,7 @@ export default function AllOutgoingOffers({
     return {
       all: offers.length,
       pending: offers.filter(o => o.offerStatus === 'pending').length,
+      tentatively_accepted: offers.filter(o => o.offerStatus === 'tentatively_accepted').length,
       countered: offers.filter(o => o.offerStatus === 'countered').length,
       accepted: offers.filter(o => o.offerStatus === 'accepted').length,
       rejected: offers.filter(o => o.offerStatus === 'rejected').length,
@@ -150,6 +151,7 @@ export default function AllOutgoingOffers({
           {[
             { key: 'all', label: 'All Applications', count: statusCounts.all },
             { key: 'pending', label: 'Pending', count: statusCounts.pending },
+            { key: 'tentatively_accepted', label: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
             { key: 'countered', label: 'Countered', count: statusCounts.countered },
             { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
             { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },

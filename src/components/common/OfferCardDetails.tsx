@@ -36,7 +36,9 @@ export default function OfferCardDetails({ offer, showPropertyInfo = true }: Off
   const currentMoveInDate = offer.currentMoveInDate ?? offer.moveInDate;
 
   // Check if there are counter offers by comparing current values with initial values
-  const hasCounters = offer.currentRentPrice !== undefined && 
+  // Only show line-through text if there are actual counter offers (negotiationRound > 0)
+  const hasCounters = offer.negotiationRound > 0 && 
+                     offer.currentRentPrice !== undefined && 
                      (offer.currentRentPrice !== offer.proposingRentPrice ||
                       offer.currentNumLeasingMonths !== offer.numLeasingMonths ||
                       offer.currentPaymentFrequency !== offer.paymentFrequency ||

@@ -179,25 +179,10 @@ export default function IncomingOfferCardActions({
   if (offer.offerStatus === 'tentatively_accepted') {
     return (
       <div className="pt-4 border-t border-gray-200">
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <InformationCircleIcon className="h-5 w-5 text-purple-400" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-purple-800 mb-0">Tenant has tentatively accepted your offer</h3>
-              <div className="mt-2 text-sm mb-0">
-                <p className="text-sm text-gray-600 mb-0">
-                  Please confirm to finalize the deal and reject other pending offers.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
         <div className="flex space-x-3">
           <button
             onClick={handleAcceptOffer}
-            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+            className="btn-primary flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
             disabled={isAccepting}
           >
             <CheckIcon className="h-4 w-4 mr-2" />
@@ -205,7 +190,7 @@ export default function IncomingOfferCardActions({
           </button>
           <button
             onClick={handleRejectOffer}
-            className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+            className="btn-secondary flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
             disabled={isRejecting}
           >
             <XMarkIcon className="h-4 w-4 mr-2" />

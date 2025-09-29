@@ -63,6 +63,18 @@ export default function OfferCard({
         />
       )}
 
+      {/* Action Buttons for Incoming Tentatively Accepted Offers */}
+      {isIncomingOffer && offer.offerStatus === 'tentatively_accepted' && (
+        <IncomingOfferCardActions
+          offer={offer}
+          onAcceptOffer={onAcceptOffer}
+          onRejectOffer={onRejectOffer}
+          onCounterOffer={onCounterOffer}
+          currentUserId={currentUserId}
+          onOfferStatusChange={onOfferStatusChange}
+        />
+      )}
+
       {/* Action Buttons for Incoming Countered Offers */}
       {isIncomingOffer && offer.offerStatus === 'countered' && (
         <IncomingOfferCardActions
@@ -77,6 +89,16 @@ export default function OfferCard({
 
       {/* Action Buttons for Outgoing Offers */}
       {!isIncomingOffer && offer.offerStatus === 'pending' && (
+        <OutgoingOfferCardActions
+          offer={offer}
+          onWithdrawOffer={onWithdrawOffer}
+          currentUserId={currentUserId}
+          onOfferStatusChange={onOfferStatusChange}
+        />
+      )}
+
+      {/* Action Buttons for Outgoing Tentatively Accepted Offers */}
+      {!isIncomingOffer && offer.offerStatus === 'tentatively_accepted' && (
         <OutgoingOfferCardActions
           offer={offer}
           onWithdrawOffer={onWithdrawOffer}

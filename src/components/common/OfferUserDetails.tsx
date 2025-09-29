@@ -30,6 +30,7 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { color: string; text: string }> = {
       pending: { color: 'bg-yellow-100 text-yellow-800', text: 'Pending' },
+      tentatively_accepted: { color: 'bg-yellow-100 text-yellow-800', text: 'Tentatively Accepted' },
       accepted: { color: 'bg-green-100 text-green-800', text: 'Accepted' },
       rejected: { color: 'bg-red-100 text-red-800', text: 'Rejected' },
       countered: { color: 'bg-blue-100 text-blue-800', text: 'Countered' },

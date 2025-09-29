@@ -33,6 +33,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { sidebarOpen, setSidebarOpen, isMobile } = useSidebar();
   const [activeView, setActiveView] = useState<ViewType>('landlord');
   const [isViewChanging, setIsViewChanging] = useState(false);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   
@@ -74,20 +75,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     }, 500);
   };
 
-  // Handle redirect when not authenticated
+  // Handle redirect when not authenticated - improved to prevent loops
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      // Add a small delay to show the loading spinner briefly
-      const timer = setTimeout(() => {
-        router.push('/auth/signin');
-      }, 500);
-      return () => clearTimeout(timer);
+    if (!isLoading && !isAuthenticated && !hasRedirected) {
+      setHasRedirected(true);
+      // Use replace instead of push to prevent back button issues
+      router.replace('/auth/signin');
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isLoading, isAuthenticated, hasRedirected, router]);
 
-  // Show loading spinner while checking authentication or redirecting
-  if (isLoading || !isAuthenticated) {
+  // Show loading spinner while checking authentication
+  if (isLoading) {
     return <FullScreenLoadingSpinner />;
+  }
+
+  // Don't render anything if not authenticated (redirect will happen)
+  if (!isAuthenticated) {
+    return null;
   }
 
   const tenantNavigation = [

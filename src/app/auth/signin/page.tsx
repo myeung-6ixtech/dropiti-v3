@@ -17,7 +17,8 @@ export default function SignInPage() {
     if (!isLoading && isAuthenticated && !redirectedRef.current) {
       redirectedRef.current = true;
       showToast('success', 'User successfully authenticated');
-      router.push('/');
+      // Use replace to prevent back button issues
+      router.replace('/dashboard');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isLoading]);

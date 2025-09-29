@@ -39,7 +39,7 @@ export default function ChatSidebar({ contacts, selectedContact, onContactSelect
       {/* Header */}
       <div className="border-b border-gray-200 px-4 py-3">
         <h2 className="text-sm mb-0 font-semibold text-gray-900">
-          {userType === 'tenant' ? 'Landlords & Support' : 'Tenants & Support'}
+          {userType === 'tenant' ? 'Messages' : 'Messages'}
         </h2>
         <p className="text-xs mb-0 text-gray-500">
           {contacts.length} {contacts.length === 1 ? 'contact' : 'contacts'}

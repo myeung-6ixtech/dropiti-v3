@@ -43,19 +43,26 @@ export default function SettingsPage() {
   });
 
   const [tempSettings, setTempSettings] = useState<UserSettings>({
-    firstName: settings.firstName || '',
-    lastName: settings.lastName || '',
-    email: settings.email || '',
-    phone: settings.phone || '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
     preferences: {
-      language: settings.preferences.language || 'English',
-      timezone: settings.preferences.timezone || 'Asia/Hong_Kong (UTC+8)',
-      currency: settings.preferences.currency || 'HKD (Hong Kong Dollar)',
+      language: 'English',
+      timezone: 'Asia/Hong_Kong (UTC+8)',
+      currency: 'HKD (Hong Kong Dollar)',
     },
   });
 
   // Temporary language state for the language switcher
   const [tempLanguage, setTempLanguage] = useState(locale);
+
+  // Security form state
+  const [securityForm, setSecurityForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
 
   // Load user settings from API when component mounts
   useEffect(() => {
@@ -113,6 +120,11 @@ export default function SettingsPage() {
     setTempLanguage(locale);
   }, [locale]);
 
+  // Update tempSettings when settings are loaded from API
+  useEffect(() => {
+    setTempSettings(settings);
+  }, [settings]);
+
 
   const handleInputChange = (field: keyof UserSettings, value: string | boolean | object) => {
     // Ensure the value is never undefined
@@ -136,6 +148,13 @@ export default function SettingsPage() {
 
   const handleLanguageChange = (newLanguage: string) => {
     setTempLanguage(newLanguage);
+  };
+
+  const handleSecurityChange = (field: keyof typeof securityForm, value: string) => {
+    setSecurityForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleSave = async () => {
@@ -307,6 +326,8 @@ export default function SettingsPage() {
                     <label className="form-label">Current Password</label>
                     <input
                       type="password"
+                      value={securityForm.currentPassword}
+                      onChange={(e) => handleSecurityChange('currentPassword', e.target.value)}
                       className="form-input"
                       placeholder="Enter current password"
                     />
@@ -315,6 +336,8 @@ export default function SettingsPage() {
                     <label className="form-label">New Password</label>
                     <input
                       type="password"
+                      value={securityForm.newPassword}
+                      onChange={(e) => handleSecurityChange('newPassword', e.target.value)}
                       className="form-input"
                       placeholder="Enter new password"
                     />
@@ -323,6 +346,8 @@ export default function SettingsPage() {
                     <label className="form-label">Confirm New Password</label>
                     <input
                       type="password"
+                      value={securityForm.confirmPassword}
+                      onChange={(e) => handleSecurityChange('confirmPassword', e.target.value)}
                       className="form-input"
                       placeholder="Confirm new password"
                     />
