@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckIcon, XMarkIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { offersAPI } from '@/lib/api-client';
 import { useToast } from '@/context/ToastContext';
 import FinalDealDisplay from './FinalDealDisplay';
@@ -141,11 +141,11 @@ export default function IncomingOfferCardActions({
   if (offer.offerStatus === 'pending') {
     return (
       <div className="pt-4 border-t border-gray-200 mb-4">
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           {onAcceptOffer && (
             <button
               onClick={handleAcceptOffer}
-              className="btn-primary flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+              className="btn-primary w-full sm:flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
               disabled={isAccepting}
             >
               <CheckIcon className="h-4 w-4 mr-2" />
@@ -155,7 +155,7 @@ export default function IncomingOfferCardActions({
           {onRejectOffer && (
             <button
               onClick={handleRejectOffer}
-              className="flex-1 btn-secondary text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+              className="w-full sm:flex-1 btn-secondary text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
               disabled={isRejecting}
             >
               <XMarkIcon className="h-4 w-4 mr-2" />
@@ -165,7 +165,7 @@ export default function IncomingOfferCardActions({
           {onCounterOffer && (
             <button
               onClick={() => onCounterOffer(offer.id)}
-              className="btn-secondary flex-1 text-white py-2 px-4 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="btn-secondary w-full sm:flex-1 text-white py-2 px-4 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Counter Offer
             </button>
@@ -179,10 +179,10 @@ export default function IncomingOfferCardActions({
   if (offer.offerStatus === 'tentatively_accepted') {
     return (
       <div className="pt-4 border-t border-gray-200">
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           <button
             onClick={handleAcceptOffer}
-            className="btn-primary flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+            className="btn-primary w-full sm:flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
             disabled={isAccepting}
           >
             <CheckIcon className="h-4 w-4 mr-2" />
@@ -190,7 +190,7 @@ export default function IncomingOfferCardActions({
           </button>
           <button
             onClick={handleRejectOffer}
-            className="btn-secondary flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+            className="btn-secondary w-full sm:flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
             disabled={isRejecting}
           >
             <XMarkIcon className="h-4 w-4 mr-2" />
@@ -235,11 +235,11 @@ export default function IncomingOfferCardActions({
           </div>
           
           {/* Accept/Reject buttons */}
-          <div className="flex space-x-3 mb-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mb-4">
             {onAcceptOffer && (
               <button
                 onClick={handleAcceptOffer}
-                className="flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
+                className="w-full sm:flex-1 bg-green-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors flex items-center justify-center"
                 disabled={isAccepting}
               >
                 <CheckIcon className="h-4 w-4 mr-2" />
@@ -249,7 +249,7 @@ export default function IncomingOfferCardActions({
             {onRejectOffer && (
               <button
                 onClick={handleRejectOffer}
-                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+                className="w-full sm:flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
                 disabled={isRejecting}
               >
                 <XMarkIcon className="h-4 w-4 mr-2" />
