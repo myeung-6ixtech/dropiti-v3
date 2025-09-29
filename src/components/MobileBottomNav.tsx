@@ -5,8 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getSafeProfileImage } from '@/lib/utils';
-import { Home, Search, Passport } from '@/assets/icons';
-import { FiLayers } from 'react-icons/fi';
+import { FiHome, FiSearch, FiLayers, FiUser } from 'react-icons/fi';
 import { mobileBottomNavStyles } from '@/styles/index';
 
 interface MobileBottomNavProps {
@@ -31,14 +30,14 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
       id: 'home',
       label: 'Home',
       href: '/',
-      icon: Home,
+      icon: FiHome,
       isActive: () => isActive('/')
     },
     {
       id: 'explore',
       label: 'Explore',
       href: '/search',
-      icon: Search,
+      icon: FiSearch,
       isActive: () => isActive('/search')
     },
     // Only show Dashboard for authenticated users
@@ -53,7 +52,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
       id: 'profile',
       label: 'Profile',
       href: isAuthenticated && user?.uuid ? `/user/${user.uuid}` : '/auth/signin',
-      icon: Passport,
+      icon: FiUser,
       isActive: () => isActive('/profile'),
       showAvatar: isAuthenticated && user?.avatar
     }

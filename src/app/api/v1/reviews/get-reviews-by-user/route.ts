@@ -135,11 +135,11 @@ const GET_USER_BY_FIREBASE_UID_QUERY = `
 
 // GraphQL query to get property details by UUID
 const GET_PROPERTY_BY_UUID_QUERY = `
-  query GetPropertyByUuid($propertyUuid: String!) {
-    real_estate_property_listing(where: { uuid: { _eq: $propertyUuid } }) {
-      uuid
+  query GetPropertyByUuid($propertyUuid: uuid!) {
+    real_estate_property_listing(where: { property_uuid: { _eq: $propertyUuid } }) {
+      property_uuid
       title
-      location
+      address
       rental_price
       rental_price_currency
       property_type

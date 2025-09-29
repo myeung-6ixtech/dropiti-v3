@@ -2342,7 +2342,7 @@
 }
 
 .mobile-bottom-nav-icon {
-  @apply h-6 w-6;
+  @apply h-5 w-5;
   @apply transition-colors duration-200;
 }
 

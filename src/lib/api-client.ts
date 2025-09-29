@@ -531,6 +531,75 @@ export const searchAPI = {
   },
 };
 
+// Notifications API
+export const notificationsAPI = {
+  // Get notifications for a user
+  getNotifications: async (userFirebaseUid: string, filters?: {
+    isRead?: boolean;
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    try {
+      const params = new URLSearchParams({ userFirebaseUid });
+      if (filters?.isRead !== undefined) params.append('isRead', filters.isRead.toString());
+      if (filters?.category) params.append('category', filters.category);
+      if (filters?.limit) params.append('limit', filters.limit.toString());
+      if (filters?.offset) params.append('offset', filters.offset.toString());
+      
+      const response = await apiClient.get(`/notifications?${params.toString()}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      throw error;
+    }
+  },
+
+  // Get unread count
+  getUnreadCount: async (userFirebaseUid: string) => {
+    try {
+      const response = await apiClient.get(`/notifications/unread-count?userFirebaseUid=${userFirebaseUid}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching unread count:', error);
+      throw error;
+    }
+  },
+
+  // Mark notification as read
+  markAsRead: async (notificationId: string) => {
+    try {
+      const response = await apiClient.post('/notifications/mark-read', { notificationId });
+      return response.data;
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  },
+
+  // Mark all notifications as read
+  markAllAsRead: async (userFirebaseUid: string) => {
+    try {
+      const response = await apiClient.post('/notifications/mark-all-read', { userFirebaseUid });
+      return response.data;
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
+    }
+  },
+
+  // Archive notification
+  archiveNotification: async (notificationId: string) => {
+    try {
+      const response = await apiClient.post('/notifications/archive', { notificationId });
+      return response.data;
+    } catch (error) {
+      console.error('Error archiving notification:', error);
+      throw error;
+    }
+  },
+};
+
 // Reviews API
 export const reviewsAPI = {
   // Create a new review

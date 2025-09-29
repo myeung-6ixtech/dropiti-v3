@@ -156,6 +156,60 @@ export async function POST(request: NextRequest) {
         throw new Error('GraphQL mutation failed - no data returned');
       }
 
+      // Create notification for the recipient (landlord)
+      try {
+        const { NotificationService } = await import('@/lib/notification-service');
+        
+        // Get property details for notification
+        const GET_PROPERTY_QUERY = `
+          query GetProperty($property_uuid: uuid!) {
+            real_estate_property_listing(where: { property_uuid: { _eq: $property_uuid } }) {
+              title
+              address
+            }
+          }
+        `;
+        
+        const propertyData = await executeQuery(GET_PROPERTY_QUERY, { 
+          property_uuid: offerData.propertyId 
+        }) as { real_estate_property_listing: Array<{ title: string; address: string }> };
+        
+        // Get initiator details for notification
+        const GET_USER_QUERY = `
+          query GetUser($firebaseUid: String!) {
+            real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+              display_name
+              name
+            }
+          }
+        `;
+        
+        const initiatorData = await executeQuery(GET_USER_QUERY, { 
+          firebaseUid: offerData.initiatorFirebaseUid 
+        }) as { real_estate_user: Array<{ display_name?: string; name?: string }> };
+
+        await NotificationService.createNotification({
+          typeKey: 'offer_created',
+          recipientFirebaseUid: offerData.recipientFirebaseUid,
+          senderFirebaseUid: offerData.initiatorFirebaseUid,
+          data: {
+            offer_id: data.insert_real_estate_offer_one.id,
+            property_title: propertyData.real_estate_property_listing[0]?.title || 'Property',
+            property_id: offerData.propertyId,
+            sender_name: initiatorData.real_estate_user[0]?.display_name || initiatorData.real_estate_user[0]?.name || 'User',
+            rent_price: new Intl.NumberFormat('en-HK', {
+              style: 'currency',
+              currency: offerData.currency || 'HKD',
+              minimumFractionDigits: 0
+            }).format(parseFloat(offerData.proposingRentPrice)),
+          },
+          priority: 'high',
+        });
+      } catch (notificationError) {
+        console.error('Failed to create notification:', notificationError);
+        // Don't fail the offer creation if notification fails
+      }
+
       return NextResponse.json({
         success: true,
         data: data.insert_real_estate_offer_one,

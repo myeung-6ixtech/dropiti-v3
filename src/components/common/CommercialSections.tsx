@@ -32,8 +32,8 @@ export default function CommercialSections() {
             
             {/* Real Estate Service */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
-              <div className="mb-4">
-                <div className="relative w-[25rem] h-[25rem] mx-auto">
+              <div className="mb-4 px-4 sm:px-0">
+                <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-homepage-001.webp"
                     alt="Real Estate Service"
@@ -57,8 +57,8 @@ export default function CommercialSections() {
 
             {/* My Home Service */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
-              <div className="mb-4">
-                <div className="relative w-[25rem] h-[25rem] mx-auto">
+              <div className="mb-4 px-4 sm:px-0">
+                <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-homepage-002.webp"
                     alt="My Home Service"
@@ -83,8 +83,8 @@ export default function CommercialSections() {
 
             {/* Smart Home */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
-              <div className="mb-4">
-                <div className="relative w-[25rem] h-[25rem] mx-auto">
+              <div className="mb-4 px-4 sm:px-0">
+                <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-homepage-003.webp"
                     alt="Smart Home"
@@ -109,8 +109,8 @@ export default function CommercialSections() {
 
             {/* Dropiti Connect */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
-              <div className="mb-4">
-                <div className="relative w-[25rem] h-[25rem] mx-auto">
+              <div className="mb-4 px-4 sm:px-0">
+                <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-connect.webp"
                     alt="Dropiti Connect"

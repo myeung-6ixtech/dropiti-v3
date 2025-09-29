@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { FiChevronDown, FiMenu } from 'react-icons/fi';
+import { FiChevronDown, FiMenu, FiMessageCircle } from 'react-icons/fi';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
 import { navigationStyles } from '@/styles/index';
-import { Chat } from '@/assets/icons';
+import NotificationCenter from '@/components/notifications/NotificationCenter';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -134,15 +134,18 @@ export default function Navigation() {
               </Link>
             </div>
             
-            {/* Mobile Chat Icon */}
+            {/* Mobile Icons */}
             {isAuthenticated && (
-              <Link
-                href="/dashboard/chat-mobile"
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="Open chat"
-              >
-                <Chat className="h-6 w-6 text-gray-600" />
-              </Link>
+              <div className="flex items-center space-x-2">
+                <NotificationCenter />
+                <Link
+                  href="/dashboard/chat-mobile"
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  aria-label="Open chat"
+                >
+                  <FiMessageCircle className="w-5 h-5 text-gray-600" />
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -214,6 +217,12 @@ export default function Navigation() {
               >
                 <span>My Profile</span>
             </Link>
+            
+            {/* Desktop Notification Center */}
+            <div className="hidden sm:block">
+              <NotificationCenter />
+            </div>
+            
             <div className={navigationStyles.userDropdown} ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
