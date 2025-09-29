@@ -46,7 +46,7 @@ export class NotificationService {
       created_at: new Date().toISOString(),
     };
 
-    const result = await executeMutation(CREATE_NOTIFICATION_MUTATION, { notification });
+    const result = await executeMutation(CREATE_NOTIFICATION_MUTATION, { notification }) as { insert_real_estate_notification_one: Notification };
     return result.insert_real_estate_notification_one;
   }
 
@@ -56,7 +56,7 @@ export class NotificationService {
     filters: NotificationFilters = {}
   ): Promise<Notification[]> {
     // Build the where clause dynamically
-    const whereConditions: any = {
+    const whereConditions: Record<string, unknown> = {
       recipient_firebase_uid: { _eq: userFirebaseUid },
       is_archived: { _eq: false }
     };
@@ -100,7 +100,7 @@ export class NotificationService {
       where: whereConditions,
       limit: filters.limit || 50,
       offset: filters.offset || 0,
-    });
+    }) as { real_estate_notification: Notification[] };
 
     return result.real_estate_notification;
   }
@@ -174,7 +174,7 @@ export class NotificationService {
       }
     `;
 
-    const result = await executeQuery(GET_UNREAD_COUNT_QUERY, { userFirebaseUid });
+    const result = await executeQuery(GET_UNREAD_COUNT_QUERY, { userFirebaseUid }) as { real_estate_notification_aggregate: { aggregate: { count: number } } };
     return result.real_estate_notification_aggregate.aggregate.count;
   }
 
@@ -196,18 +196,18 @@ export class NotificationService {
       }
     `;
 
-    const result = await executeQuery(GET_TYPE_QUERY, { typeKey });
+    const result = await executeQuery(GET_TYPE_QUERY, { typeKey }) as { real_estate_notification_type: NotificationType[] };
     return result.real_estate_notification_type[0] || null;
   }
 
-  private static generateNotificationContent(type: NotificationType, data: Record<string, any>): { title: string; message: string } {
+  private static generateNotificationContent(type: NotificationType, data: Record<string, unknown>): { title: string; message: string } {
     let title = type.name;
     let message = type.template;
 
     // Replace placeholders in template
     Object.keys(data).forEach(key => {
       const placeholder = `{${key}}`;
-      const value = data[key] || '';
+      const value = String(data[key] || '');
       title = title.replace(new RegExp(placeholder, 'g'), value);
       message = message.replace(new RegExp(placeholder, 'g'), value);
     });
@@ -215,8 +215,8 @@ export class NotificationService {
     return { title, message };
   }
 
-  private static buildFilters(filters: NotificationFilters): any {
-    const where: any = {};
+  private static buildFilters(filters: NotificationFilters): Record<string, unknown> {
+    const where: Record<string, unknown> = {};
 
     if (filters.isRead !== undefined) {
       where.is_read = { _eq: filters.isRead };

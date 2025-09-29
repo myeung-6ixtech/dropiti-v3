@@ -3,7 +3,7 @@ import { NotificationService } from '@/lib/notification-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const { notificationId, userFirebaseUid } = await request.json();
+    const { notificationId } = await request.json();
 
     if (!notificationId) {
       return NextResponse.json(

@@ -21,7 +21,7 @@ export interface Notification {
   senderFirebaseUid?: string;
   title: string;
   message: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   isRead: boolean;
   isArchived: boolean;
   priority: 'low' | 'normal' | 'high' | 'urgent';
@@ -53,7 +53,7 @@ export interface CreateNotificationInput {
   typeKey: string;
   recipientFirebaseUid: string;
   senderFirebaseUid?: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
   expiresAt?: string;
 }

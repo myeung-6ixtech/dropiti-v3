@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { FiBell, FiX, FiCheck, FiArchive } from 'react-icons/fi';
-import { Notification } from '@/types/notification';
 
 export default function NotificationCenter() {
   const {

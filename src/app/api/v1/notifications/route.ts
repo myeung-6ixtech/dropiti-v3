@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     const notifications = await NotificationService.getUserNotifications(userFirebaseUid, {
       isRead: isRead ? isRead === 'true' : undefined,
-      category,
+      category: category || undefined,
       limit,
       offset,
     });
