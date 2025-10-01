@@ -12,7 +12,8 @@ import {
   FiStar,
   FiChevronLeft,
   FiChevronRight,
-  FiLayers
+  FiLayers,
+  FiLogOut
 } from 'react-icons/fi';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -29,7 +30,7 @@ interface DashboardLayoutProps {
 type ViewType = 'tenant' | 'landlord';
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const { user: authUser, isAuthenticated, isLoading } = useAuth();
+  const { user: authUser, isAuthenticated, isLoading, logout } = useAuth();
   const { sidebarOpen, setSidebarOpen, isMobile } = useSidebar();
   const [activeView, setActiveView] = useState<ViewType>('landlord');
   const [isViewChanging, setIsViewChanging] = useState(false);
@@ -247,6 +248,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
           {/* Sidebar footer */}
           <div className="dashboard-sidebar-footer">
+            <button
+              onClick={logout}
+              className="dashboard-nav-item w-full text-left dashboard-nav-item-inactive hover:bg-red-50 hover:text-red-600 transition-colors mb-2"
+            >
+              <FiLogOut className="h-5 w-5 mr-2" />
+              <span>Log Out</span>
+            </button>
             <div className="dashboard-footer-links">
               <p className="text-xs text-gray-500 text-center">
                 © 2025 dropiti. All rights reserved.

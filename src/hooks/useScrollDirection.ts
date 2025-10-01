@@ -32,6 +32,7 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [idleTimer, setIdleTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Debounced scroll handler
   const handleScroll = useCallback(() => {
@@ -73,6 +74,17 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
 
     setLastScrollY(currentScrollY);
 
+    // Clear existing idle timer
+    if (idleTimer) {
+      clearTimeout(idleTimer);
+    }
+
+    // Set new idle timer - show nav after 2 seconds of idle
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 2000);
+    setIdleTimer(timer);
+
     // Reset scrolling state after debounce
     setTimeout(() => {
       setScrollDirection(prev => ({
@@ -80,7 +92,7 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
         isScrolling: false,
       }));
     }, debounceMs);
-  }, [lastScrollY, threshold, debounceMs, hideOnScrollDown, showOnScrollUp]);
+  }, [lastScrollY, threshold, debounceMs, hideOnScrollDown, showOnScrollUp, idleTimer]);
 
   // Throttled scroll handler for better performance
   useEffect(() => {
@@ -100,6 +112,9 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
     
     return () => {
       window.removeEventListener('scroll', throttledHandleScroll);
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+      }
     };
   }, [handleScroll]);
 
@@ -114,6 +129,15 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
   useEffect(() => {
     setLastScrollY(window.scrollY);
   }, []);
+
+  // Cleanup idle timer on unmount
+  useEffect(() => {
+    return () => {
+      if (idleTimer) {
+        clearTimeout(idleTimer);
+      }
+    };
+  }, [idleTimer]);
 
   return {
     direction: scrollDirection.direction,
