@@ -14,7 +14,7 @@ interface AllOutgoingOffersProps {
   showPropertyInfo?: boolean;
 }
 
-type FilterStatus = 'all' | 'pending' | 'tentatively_accepted' | 'countered' | 'accepted' | 'rejected' | 'withdrawn';
+type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 
 export default function AllOutgoingOffers({ 
   initiatorFirebaseUid, 
@@ -70,9 +70,12 @@ export default function AllOutgoingOffers({
     }
   }, [initiatorFirebaseUid]);
 
-  // Filter offers based on status
+  // Filter offers based on status - combine pending, tentatively_accepted, and countered into "pending"
   const filteredOffers = offers.filter(offer => {
     if (filterStatus === 'all') return true;
+    if (filterStatus === 'pending') {
+      return ['pending', 'tentatively_accepted', 'countered'].includes(offer.offerStatus);
+    }
     return offer.offerStatus === filterStatus;
   });
 
@@ -98,11 +101,13 @@ export default function AllOutgoingOffers({
   };
 
   const getStatusCounts = () => {
+    const pendingCount = offers.filter(o => 
+      ['pending', 'tentatively_accepted', 'countered'].includes(o.offerStatus)
+    ).length;
+    
     return {
       all: offers.length,
-      pending: offers.filter(o => o.offerStatus === 'pending').length,
-      tentatively_accepted: offers.filter(o => o.offerStatus === 'tentatively_accepted').length,
-      countered: offers.filter(o => o.offerStatus === 'countered').length,
+      pending: pendingCount,
       accepted: offers.filter(o => o.offerStatus === 'accepted').length,
       rejected: offers.filter(o => o.offerStatus === 'rejected').length,
       withdrawn: offers.filter(o => o.offerStatus === 'withdrawn').length,
@@ -151,8 +156,6 @@ export default function AllOutgoingOffers({
         tabs={[
           { id: 'all', name: 'All Applications', count: statusCounts.all },
           { id: 'pending', name: 'Pending', count: statusCounts.pending },
-          { id: 'tentatively_accepted', name: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
-          { id: 'countered', name: 'Countered', count: statusCounts.countered },
           { id: 'accepted', name: 'Accepted', count: statusCounts.accepted },
           { id: 'rejected', name: 'Rejected', count: statusCounts.rejected },
           { id: 'withdrawn', name: 'Withdrawn', count: statusCounts.withdrawn },
@@ -168,8 +171,6 @@ export default function AllOutgoingOffers({
           {[
             { key: 'all', label: 'All Applications', count: statusCounts.all },
             { key: 'pending', label: 'Pending', count: statusCounts.pending },
-            { key: 'tentatively_accepted', label: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
-            { key: 'countered', label: 'Countered', count: statusCounts.countered },
             { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
             { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },
             { key: 'withdrawn', label: 'Withdrawn', count: statusCounts.withdrawn },

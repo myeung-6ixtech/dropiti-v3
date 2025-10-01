@@ -1,6 +1,8 @@
 import { UserIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Offer } from '@/types/offer';
+import { calculatePlatformDuration } from '@/lib/utils';
 
 interface OfferUserDetailsProps {
   offer: Pick<Offer, 'createdAt' | 'initiator' | 'recipient'>;
@@ -18,14 +20,6 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
   }
 
   const userLabel = isIncomingOffer ? 'Tenant' : 'Landlord';
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { color: string; text: string }> = {
@@ -65,10 +59,19 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
           </div>
           <div>
             <h3 className="font-medium text-sm text-gray-900 mb-0">
-              {userToShow.displayName || `Unknown ${userLabel}`}
+              {userToShow.uuid ? (
+                <Link 
+                  href={`/user/${userToShow.uuid}`}
+                  className="hover:text-blue-600 hover:underline transition-colors"
+                >
+                  {userToShow.displayName || `Unknown ${userLabel}`}
+                </Link>
+              ) : (
+                userToShow.displayName || `Unknown ${userLabel}`
+              )}
             </h3>
             <p className="text-sm text-gray-500 mb-0">
-              dropiti user since {formatDate(offer.createdAt)}
+              dropiti user since {calculatePlatformDuration(offer.createdAt)}
             </p>
           </div>
         </div>

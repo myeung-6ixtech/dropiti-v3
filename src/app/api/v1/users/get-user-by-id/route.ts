@@ -43,8 +43,8 @@ const TEST_QUERY = `
 `;
 
 const GET_USER_BY_ID_QUERY = `
-  query GetUserById($firebase_uid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
+  query GetUserById($id: String!) {
+    real_estate_user(where: { firebase_uid: { _eq: $id } }, limit: 1) {
       uuid
       firebase_uid
       display_name
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
       // Get user by ID
       console.log('API Route: Executing GraphQL query for user ID:', userId);
       try {
-        data = await executeQuery(GET_USER_BY_ID_QUERY, { firebase_uid: userId });
+        data = await executeQuery(GET_USER_BY_ID_QUERY, { id: userId });
         console.log('API Route: GraphQL query result:', data);
       } catch (graphqlError) {
         console.error('API Route: GraphQL query failed:', graphqlError);

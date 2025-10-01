@@ -19,13 +19,17 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
         
         const response = await reviewsAPI.getReviewsByUser({
           userFirebaseUid: userFirebaseUid,
-          reviewType: 'landlord_review', // Get reviews where user is the landlord being reviewed
+          // Remove reviewType filter to get ALL reviews received by the user
           limit: 20,
           offset: 0
         });
         
         if (response.success && response.data) {
-          setReviews(response.data);
+          // Filter to only show reviews received by the user (not reviews they wrote)
+          const receivedReviews = response.data.filter((review: ReviewDisplayData) => 
+            review.reviewedUserFirebaseUid === userFirebaseUid
+          );
+          setReviews(receivedReviews);
         } else {
           setError(response.error || 'Failed to load reviews');
         }
@@ -163,8 +167,8 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
                       </div>
                     )}
                     <div className="flex-1">
-                      <h5 className="font-medium text-gray-900 text-sm">{review.property.title}</h5>
-                      <p className="text-xs text-gray-600">{review.property.location}</p>
+                      <h5 className="font-medium text-gray-900 text-sm mb-0">{review.property.title}</h5>
+                      <p className="text-xs text-gray-600 mb-0">{review.property.location}</p>
                       <p className="text-xs text-gray-500">
                         {review.property.bedrooms} bed • {review.property.bathrooms} bath
                       </p>
@@ -178,7 +182,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
       ) : (
         <div className="text-center py-8 text-gray-500">
           <p className="text-lg font-medium">No reviews yet</p>
-          <p className="text-sm">This user hasn't received any reviews yet.</p>
+          <p className="text-sm">This user hasn't received any reviews from other users yet.</p>
         </div>
       )}
     </div>

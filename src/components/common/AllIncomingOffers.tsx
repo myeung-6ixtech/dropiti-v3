@@ -17,7 +17,7 @@ interface OfferWithProperty extends Offer {
   propertyImage?: string;
 }
 
-type FilterStatus = 'all' | 'pending' | 'tentatively_accepted' | 'countered' | 'accepted' | 'rejected';
+type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected';
 
 interface PropertyGroup {
   propertyTitle: string;
@@ -145,9 +145,12 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
     }
   }, [recipientFirebaseUid]);
 
-  // Filter offers based on status
+  // Filter offers based on status - combine pending, tentatively_accepted, and countered into "pending"
   const filteredOffers = offers.filter(offer => {
     if (filterStatus === 'all') return true;
+    if (filterStatus === 'pending') {
+      return ['pending', 'tentatively_accepted', 'countered'].includes(offer.offerStatus);
+    }
     return offer.offerStatus === filterStatus;
   });
 
@@ -246,11 +249,13 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
   };
 
   const getStatusCounts = () => {
+    const pendingCount = offers.filter(o => 
+      ['pending', 'tentatively_accepted', 'countered'].includes(o.offerStatus)
+    ).length;
+    
     return {
       all: offers.length,
-      pending: offers.filter(o => o.offerStatus === 'pending').length,
-      tentatively_accepted: offers.filter(o => o.offerStatus === 'tentatively_accepted').length,
-      countered: offers.filter(o => o.offerStatus === 'countered').length,
+      pending: pendingCount,
       accepted: offers.filter(o => o.offerStatus === 'accepted').length,
       rejected: offers.filter(o => o.offerStatus === 'rejected').length,
     };
@@ -296,8 +301,6 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
         tabs={[
           { id: 'all', name: 'All Offers', count: statusCounts.all },
           { id: 'pending', name: 'Pending', count: statusCounts.pending },
-          { id: 'tentatively_accepted', name: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
-          { id: 'countered', name: 'Countered', count: statusCounts.countered },
           { id: 'accepted', name: 'Accepted', count: statusCounts.accepted },
           { id: 'rejected', name: 'Rejected', count: statusCounts.rejected },
         ]}
@@ -312,8 +315,6 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
           {[
             { key: 'all', label: 'All Offers', count: statusCounts.all },
             { key: 'pending', label: 'Pending', count: statusCounts.pending },
-            { key: 'tentatively_accepted', label: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
-            { key: 'countered', label: 'Countered', count: statusCounts.countered },
             { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
             { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },
           ].map(({ key, label, count }) => (

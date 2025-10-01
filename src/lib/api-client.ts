@@ -290,6 +290,8 @@ export const usersAPI = {
         const axiosError = error as { response: { data: unknown; status: number } };
         console.error('Error response:', axiosError.response.data);
         console.error('Error status:', axiosError.response.status);
+      } else if (error instanceof Error) {
+        console.error('Error message:', error.message);
       }
       throw error;
     }
@@ -323,6 +325,8 @@ export const usersAPI = {
         const axiosError = error as { response: { data: unknown; status: number } };
         console.error('Error response:', axiosError.response.data);
         console.error('Error status:', axiosError.response.status);
+      } else if (error instanceof Error) {
+        console.error('Error message:', error.message);
       }
       throw error;
     }
