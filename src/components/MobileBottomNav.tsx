@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { getSafeProfileImage } from '@/lib/utils';
 import { FiHome, FiSearch, FiLayers, FiUser } from 'react-icons/fi';
 import { mobileBottomNavStyles } from '@/styles/index';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
 
 interface MobileBottomNavProps {
   className?: string;
@@ -15,6 +16,14 @@ interface MobileBottomNavProps {
 export default function MobileBottomNav({ className = '' }: MobileBottomNavProps) {
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuth();
+  
+  // Scroll direction detection for auto-hide functionality
+  const { isVisible } = useScrollDirection({
+    threshold: 5, // Minimum scroll distance to trigger
+    debounceMs: 150, // Debounce delay
+    hideOnScrollDown: true,
+    showOnScrollUp: true,
+  });
 
   const isActive = (path: string) => {
     if (path === '/profile') {
@@ -59,7 +68,9 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
   ];
 
   return (
-    <nav className={`${mobileBottomNavStyles.container} ${className}`}>
+    <nav className={`${mobileBottomNavStyles.container} ${className} ${
+      isVisible ? 'mobile-bottom-nav-visible' : 'mobile-bottom-nav-hidden'
+    }`}>
       <div className={mobileBottomNavStyles.content}>
         {navItems.map((item) => {
           const Icon = item.icon;

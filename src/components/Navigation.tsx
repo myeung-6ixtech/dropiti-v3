@@ -11,12 +11,14 @@ import { useState, useRef, useEffect } from 'react';
 import { getSafeProfileImage } from '@/lib/utils';
 import { navigationStyles } from '@/styles/index';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
+import { useMobileChat } from '@/context/MobileChatContext';
 
 export default function Navigation() {
   const pathname = usePathname();
   const { isAuthenticated, logout, user } = useAuth();
   const { t } = useLanguage();
   const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
+  const { openBottomSheet } = useMobileChat();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAvatarLoading, setIsAvatarLoading] = useState(false);
@@ -138,13 +140,13 @@ export default function Navigation() {
             {isAuthenticated && (
               <div className="flex items-center space-x-2">
                 <NotificationCenter />
-                <Link
-                  href="/dashboard/chat-mobile"
+                <button
+                  onClick={openBottomSheet}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   aria-label="Open chat"
                 >
                   <FiMessageCircle className="w-5 h-5 text-gray-600" />
-                </Link>
+                </button>
               </div>
             )}
           </div>

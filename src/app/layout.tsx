@@ -3,10 +3,12 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import "@/styles/design-system.css";
 import "@/styles/form-components.css";
+import "@/styles/mobile-chat.css";
 import Navigation from "@/components/Navigation";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Providers from "@/components/Providers";
 import ToastContainer from "@/components/ui/toast/ToastContainer";
+import MobileChatContainer from "@/components/chat/mobile/MobileChatContainer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -86,6 +88,7 @@ export default function RootLayout({
             <MobileBottomNav />
           </div>
           <ToastContainer />
+          <MobileChatContainer />
         </Providers>
       </body>
     </html>

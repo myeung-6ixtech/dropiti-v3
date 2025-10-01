@@ -1,0 +1,227 @@
+/* ========================================
+   MOBILE CHAT - Carousell Style
+   ======================================== */
+
+/* Backdrop */
+.mobile-chat-backdrop {
+  @apply fixed inset-0 bg-black bg-opacity-50 z-[100] transition-opacity duration-300;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Bottom Sheet */
+.mobile-chat-bottom-sheet {
+  @apply fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-[101];
+  max-height: 95vh;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  touch-action: pan-y;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Handle Bar */
+.mobile-chat-handle-container {
+  @apply flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing;
+}
+
+.mobile-chat-handle {
+  @apply w-12 h-1.5 bg-gray-400 rounded-full transition-colors;
+}
+
+.mobile-chat-handle-container:hover .mobile-chat-handle {
+  @apply bg-gray-500;
+}
+
+/* Header */
+.mobile-chat-header {
+  @apply flex items-center justify-between px-6 py-4 border-b border-gray-200;
+}
+
+.mobile-chat-title {
+  @apply text-xl font-bold text-gray-900 mb-0;
+}
+
+.mobile-chat-close-button {
+  @apply p-2 hover:bg-gray-100 rounded-full transition-colors;
+}
+
+/* Chat List */
+.mobile-chat-list {
+  @apply overflow-y-auto;
+  max-height: calc(95vh - 80px);
+}
+
+.mobile-chat-loading {
+  @apply flex flex-col items-center justify-center py-16;
+}
+
+.mobile-chat-empty {
+  @apply flex flex-col items-center justify-center py-16 px-6 text-center;
+}
+
+.mobile-chat-empty-icon {
+  @apply mb-4;
+}
+
+.mobile-chat-empty-title {
+  @apply text-lg font-semibold text-gray-900 mb-2;
+}
+
+.mobile-chat-empty-description {
+  @apply text-gray-500;
+}
+
+/* Contact List */
+.mobile-chat-contacts {
+  @apply divide-y divide-gray-100;
+}
+
+.mobile-chat-contact-item {
+  @apply w-full flex items-center space-x-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left;
+}
+
+.mobile-chat-contact-avatar {
+  @apply relative flex-shrink-0;
+}
+
+.mobile-chat-avatar-image {
+  @apply h-12 w-12 rounded-full object-cover;
+}
+
+.mobile-chat-avatar-placeholder {
+  @apply h-12 w-12 rounded-full bg-purple-500 flex items-center justify-center;
+}
+
+.mobile-chat-avatar-initial {
+  @apply text-sm font-medium text-white;
+}
+
+.mobile-chat-online-indicator {
+  @apply absolute bottom-0 right-0 h-3 w-3 bg-green-500 border-2 border-white rounded-full;
+}
+
+.mobile-chat-contact-info {
+  @apply flex-1 min-w-0;
+}
+
+.mobile-chat-contact-header {
+  @apply flex items-center justify-between mb-1;
+}
+
+.mobile-chat-contact-name {
+  @apply text-sm font-semibold text-gray-900 truncate mb-0;
+}
+
+.mobile-chat-contact-time {
+  @apply text-xs text-gray-500 flex-shrink-0 ml-2 mb-0;
+}
+
+.mobile-chat-contact-message {
+  @apply flex items-center justify-between;
+}
+
+.mobile-chat-last-message {
+  @apply text-sm text-gray-600 truncate mb-0 flex-1 mr-2;
+}
+
+.mobile-chat-unread-badge {
+  @apply inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold text-white bg-purple-600 rounded-full flex-shrink-0;
+  min-width: 20px;
+}
+
+/* Full Screen Chat */
+.mobile-chat-fullscreen {
+  @apply fixed inset-0 bg-white z-[102] flex flex-col;
+  animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.mobile-chat-fullscreen-header {
+  @apply flex items-center space-x-3 px-4 py-3 bg-white border-b border-gray-200 shadow-sm;
+}
+
+.mobile-chat-back-button {
+  @apply p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 text-gray-600;
+}
+
+.mobile-chat-fullscreen-contact {
+  @apply flex items-center space-x-3 flex-1 min-w-0;
+}
+
+.mobile-chat-fullscreen-avatar {
+  @apply h-8 w-8 rounded-full object-cover;
+}
+
+.mobile-chat-fullscreen-avatar-placeholder {
+  @apply h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center;
+}
+
+.mobile-chat-fullscreen-info {
+  @apply flex-1 min-w-0;
+}
+
+.mobile-chat-fullscreen-name {
+  @apply text-base font-semibold text-gray-900 truncate mb-0;
+}
+
+.mobile-chat-fullscreen-status {
+  @apply text-xs text-green-600 mb-0;
+}
+
+.mobile-chat-fullscreen-content {
+  @apply flex-1 overflow-hidden;
+}
+
+/* Desktop - hide mobile chat components */
+@media (min-width: 768px) {
+  .mobile-chat-backdrop,
+  .mobile-chat-bottom-sheet,
+  .mobile-chat-fullscreen {
+    @apply hidden;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 767px) {
+  .mobile-chat-bottom-sheet {
+    max-height: 95vh;
+  }
+  
+  .mobile-chat-list {
+    max-height: calc(95vh - 80px);
+  }
+}
+
+/* Smooth scrolling for mobile */
+.mobile-chat-list,
+.mobile-chat-fullscreen-content {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent body scroll when modals are open */
+body.mobile-chat-open {
+  @apply overflow-hidden;
+}

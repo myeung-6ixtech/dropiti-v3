@@ -6,7 +6,8 @@ import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import EmptyState from '@/components/common/EmptyState';
-import { Offer } from '@/types/offer';import MobileTabs from '@/components/common/MobileTabs';
+import { Offer } from '@/types/offer';
+
 interface AllIncomingOffersProps {
   recipientFirebaseUid: string;
 }
@@ -291,23 +292,8 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
 
   return (
     <div className="space-y-6">
-      {/* Mobile Tabs */}
-      <MobileTabs
-        tabs={[
-          { id: 'all', name: 'All Offers', count: statusCounts.all },
-          { id: 'pending', name: 'Pending', count: statusCounts.pending },
-          { id: 'tentatively_accepted', name: 'Tentatively Accepted', count: statusCounts.tentatively_accepted },
-          { id: 'countered', name: 'Countered', count: statusCounts.countered },
-          { id: 'accepted', name: 'Accepted', count: statusCounts.accepted },
-          { id: 'rejected', name: 'Rejected', count: statusCounts.rejected },
-        ]}
-        activeTab={filterStatus}
-        onTabChange={(tabId) => setFilterStatus(tabId as FilterStatus)}
-      />
-
-      {/* Desktop Tabs */}
-
-      <div className="desktop-tabs border-b border-gray-200">
+      {/* Filter Tabs */}
+      <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           {[
             { key: 'all', label: 'All Offers', count: statusCounts.all },

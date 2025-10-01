@@ -2432,3 +2432,43 @@
     @apply flex-1 justify-center; /* Center the logo */
   }
 }
+
+/* ========================================
+   MOBILE BOTTOM NAV AUTO-HIDE
+   ======================================== */
+
+/* Auto-hide functionality for mobile bottom navigation */
+.mobile-bottom-nav-visible {
+  @apply transform translate-y-0;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-bottom-nav-hidden {
+  @apply transform translate-y-full;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure smooth transitions on mobile */
+@media (max-width: 767px) {
+  .mobile-bottom-nav-container {
+    @apply transition-transform duration-300 ease-out;
+  }
+  
+  /* Add subtle shadow when visible for better depth perception */
+  .mobile-bottom-nav-visible {
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .mobile-bottom-nav-hidden {
+    box-shadow: none;
+  }
+}
+
+/* Desktop - always visible */
+@media (min-width: 768px) {
+  .mobile-bottom-nav-visible,
+  .mobile-bottom-nav-hidden {
+    @apply transform-none;
+    transition: none;
+  }
+}
