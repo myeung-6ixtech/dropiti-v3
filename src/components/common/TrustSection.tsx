@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { FiAward, FiShield, FiUsers, FiCheckCircle } from 'react-icons/fi';
+import { FiAward, FiShield, FiUsers } from 'react-icons/fi';
 
 export default function TrustSection() {
   return (
