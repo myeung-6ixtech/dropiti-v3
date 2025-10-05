@@ -110,7 +110,7 @@ export default function HeroSection() {
                     {/* Search Button - Full width on mobile, fixed width on desktop */}
                     <button
                       type="submit"
-                      className="flex-shrink-0 w-full sm:w-14 h-14 bg-blue-600 hover:bg-blue-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      className="flex-shrink-0 w-full sm:w-14 h-14 bg-purple-600 hover:bg-purple-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                       disabled={!searchData.location && !searchData.bedrooms}
                     >
                       <FiSearch className="h-6 w-6 text-white" />
