@@ -6,7 +6,7 @@ interface GraphQLReview {
   id: string;
   review_uuid: string;
   reviewer_firebase_uid: string;
-  reviewed_user_firebase_uid: string;
+  reviewee_firebase_uid: string;
   review_type: string;
   rating: number;
   title?: string | null;
@@ -52,7 +52,7 @@ const GET_REVIEWS_BY_PROPERTY_QUERY = `
       id
       review_uuid
       reviewer_firebase_uid
-      reviewed_user_firebase_uid
+      reviewee_firebase_uid
       review_type
       rating
       title
@@ -83,7 +83,7 @@ const GET_REVIEWS_BY_PROPERTY_NO_TYPE_QUERY = `
       id
       review_uuid
       reviewer_firebase_uid
-      reviewed_user_firebase_uid
+      reviewee_firebase_uid
       review_type
       rating
       title
@@ -157,7 +157,7 @@ export async function GET(request: NextRequest) {
 
     console.log('Get Reviews by Property API: Raw GraphQL response:', reviewsData);
 
-    if (!reviewsData?.real_estate_review) {
+    if (!reviewsData?.real_estate_review || reviewsData.real_estate_review.length === 0) {
       return NextResponse.json({
         success: true,
         data: [],
@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
     // Collect unique user IDs to fetch additional data
     const uniqueUserIds = [...new Set([
       ...reviewsData.real_estate_review.map(review => review.reviewer_firebase_uid),
-      ...reviewsData.real_estate_review.map(review => review.reviewed_user_firebase_uid)
+      ...reviewsData.real_estate_review.map(review => review.reviewee_firebase_uid)
     ])];
 
     // Fetch user details for all unique users
@@ -188,13 +188,13 @@ export async function GET(request: NextRequest) {
     // Transform and combine data
     const transformedReviews = reviewsData.real_estate_review.map((review: GraphQLReview) => {
       const reviewer = userDetails[review.reviewer_firebase_uid];
-      const reviewedUser = userDetails[review.reviewed_user_firebase_uid];
+      const reviewee = userDetails[review.reviewee_firebase_uid];
 
       return {
         id: review.id,
         reviewUuid: review.review_uuid,
         reviewerFirebaseUid: review.reviewer_firebase_uid,
-        reviewedUserFirebaseUid: review.reviewed_user_firebase_uid,
+        revieweeFirebaseUid: review.reviewee_firebase_uid,
         reviewType: review.review_type,
         rating: review.rating,
         title: review.title || undefined,
@@ -213,12 +213,12 @@ export async function GET(request: NextRequest) {
           email: reviewer.email,
           photoUrl: reviewer.photo_url || undefined,
         } : null,
-        // Include reviewed user details
-        reviewedUser: reviewedUser ? {
-          uuid: reviewedUser.uuid,
-          displayName: reviewedUser.display_name,
-          email: reviewedUser.email,
-          photoUrl: reviewedUser.photo_url || undefined,
+        // Include reviewee details
+        reviewee: reviewee ? {
+          uuid: reviewee.uuid,
+          displayName: reviewee.display_name,
+          email: reviewee.email,
+          photoUrl: reviewee.photo_url || undefined,
         } : null,
       };
     });

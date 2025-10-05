@@ -1,0 +1,57 @@
+verified,about,auth_provider,avg_response_time,display_name,education,email,firebase_uid,first_name,last_name,location,marital_status,occupation,phone_number,photo_url,response_time,review_count,total_guests,total_properties,notification_settings,preferences,privacy_settings,rating,response_rate,languages,created_at,updated_at,uuid
+"false","null","'google.com'","null","'Dowon Hwang (David)'","null","'hdwkr95@gmail.com'","'3sDVIaZFCkaQDz6S51l2X8RANIk1'","null","null","null","null","null","null","'https://lh3.googleusercontent.com/a/ACg8ocJnE3TfhNg_3tru3RF8yXKMuUIJRCGzViHLcgJxjPuuE4GsSg=s96-c'","null","0","0","0","{
+  'sms': false,
+  'push': true,
+  'email': true
+}","[]","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","null","'2025-08-11T07:41:01.410007+00:00'","'2025-08-11T07:41:18.178447+00:00'","'bfbb697e-9c14-4be7-b2cd-22dd6f920698'"
+"false","null","'password'","null","'Pureum Kim'","null","'pureum5530@gmail.com'","'RI7lyvuV8vgSYvIUbdPRNDfuvrj1'","null","null","null","null","null","null","null","null","0","0","0","{
+  'sms': false,
+  'push': true,
+  'email': true
+}","[]","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","null","'2025-08-11T07:41:01.410007+00:00'","'2025-08-11T07:41:18.178447+00:00'","'b0216ff2-f92d-4baa-9154-6e8030e4f476'"
+"false","'Hi I am kimmy!!'","'firebase'","null","'jungeun kim'","'Bachelors'","'kimmy80892@gmail.com'","'w3SdkDhFxPZlxQSTqnJPVROuY603'","null","null","'discovery bay'","'Married'","'Other'","12341234","'/images/Portrait_Placeholder.png'","null","0","0","0","{
+  'sms': false,
+  'push': true,
+  'email': true
+}","{}","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","['English','Japanese','Korean']","'2025-09-28T08:03:06.824792+00:00'","'2025-09-28T08:12:23.959+00:00'","'08413e28-16f0-4172-83cd-10a71bceb986'"
+"false","'Whats up chum!'","'firebase'","null","'Muser Yeung'","null","'museryeung@banamedia.com'","'VBA14JGUH7N2XoVa5PbFbg9wEzE2'","null","null","''","null","null","''","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/1469a10d-210a-4587-b736-76eeef26d74d_1755094842641_xscz2r93amr.png'","null","0","0","0","{
+  'sms': false,
+  'push': true,
+  'email': true
+}","{}","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","[]","'2025-08-13T00:08:36.416913+00:00'","'2025-08-14T01:22:19.124+00:00'","'e3b8cc7c-a851-45a3-954f-468300763c3d'"
+"false","'Hello, I am a first-time dropiti house owner!'","'google.com'","'Unknown'","'Chow Chow Man'","'Highschool'","'muser.yeung@dropiti.com'","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Muser '","'Yeung'","'Hong Kong'","'Married'","'Engineer'","'+85212345678'","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/ChatGPT Image Aug 28, 2025, 10_52_43 PM_1756642381898_7pa3g7lmppr.png'","'Within 1 hour'","0","0","0","{'email':true,'push':true,'sms':false}","{'language':'English','timezone':'Asia/Hong_Kong (UTC+8)','currency':'HKD (Hong Kong Dollar)'}","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","['English','Cantonese','Mandarin']","'2025-08-11T07:41:01.410007+00:00'","'2025-09-28T15:16:20.086+00:00'","'a338afcc-3490-4d1e-b963-e097d29bbd06'"
+"false","null","'firebase'","null","'Gerry Kuo'","null","'gerrycykuo@gmail.com'","'MfbKjwALdnaaN30SmB1hm97KrZc2'","null","null","null","null","null","null","null","null","0","0","0","{
+  'sms': false,
+  'push': true,
+  'email': true
+}","{}","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","null","'2025-08-13T13:02:33.193856+00:00'","'2025-08-13T13:02:33.193856+00:00'","'b23ab5ff-a4d6-451c-9cb4-4c2ed7e4ad71'"
+"false","'hello hello I am a happy dropiti user.'","'firebase'","null","'Mooser Yang'","'Highschool'","'museryeung@banamedia.com'","'xixfqnpsDHN6jOZMZkPnIg0wxiD3'","null","null","'Hong Kong'","'Married'","'Student'","'+852 1234 5678'","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/IMG_4310_1755083068482_2ao6j7jj6bc.jpeg'","null","0","0","0","{'email':true,'push':true,'sms':false}","{'language':'English','timezone':'Asia/Hong_Kong (UTC+8)','currency':'HKD (Hong Kong Dollar)'}","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","['Cantonese','Mandarin']","'2025-08-13T02:04:40.243905+00:00'","'2025-09-09T15:14:35.632+00:00'","'409c6d73-6529-4f87-b1ac-0beb80479b04'"
+"false","'I am a great tenant and great host! 6 years of experience!'","'firebase'","null","'Bana Master'","'Bachelors'","'banaradioo@gmail.com'","'wSd80msezLVpt5BdZ0a3b4EfH9N2'","null","null","''","'Married'","'Engineer'","''","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/09/5kpjre_1758547886222_entpibhhfs.jpg'","null","0","0","0","{
+  'sms': false,
+  'push': true,
+  'email': true
+}","{}","{
+  'showContactInfo': true,
+  'profileVisibility': 'public'
+}","0","0","['English','Cantonese','Korean']","'2025-08-17T10:50:16.292834+00:00'","'2025-09-22T13:31:28.925+00:00'","'e81d0223-888a-4a3b-b428-c83620b7dc6d'"

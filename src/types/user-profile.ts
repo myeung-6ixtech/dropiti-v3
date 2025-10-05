@@ -75,7 +75,7 @@ export interface ReviewDisplayData {
   id: string;
   reviewUuid: string;
   reviewerFirebaseUid: string;
-  reviewedUserFirebaseUid: string;
+  revieweeFirebaseUid: string;
   reviewType: string;
   rating: number;
   title?: string;

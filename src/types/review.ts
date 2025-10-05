@@ -10,7 +10,7 @@ export interface Review {
   id: string;
   reviewUuid: string;
   reviewerFirebaseUid: string;
-  reviewedUserFirebaseUid: string;
+  revieweeFirebaseUid: string;
   reviewType: ReviewType;
   rating: number;
   title?: string;
@@ -24,7 +24,7 @@ export interface Review {
   updatedAt: string;
   // Related data
   reviewer?: ReviewUser;
-  reviewedUser?: ReviewUser;
+  reviewee?: ReviewUser;
   property?: ReviewProperty;
 }
 
@@ -99,7 +99,7 @@ export interface ReviewProperty {
 
 export interface CreateReviewInput {
   reviewerFirebaseUid: string;
-  reviewedUserFirebaseUid: string;
+  revieweeFirebaseUid: string;
   reviewType: ReviewType;
   rating: number;
   title?: string;

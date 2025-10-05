@@ -9,7 +9,7 @@ const DELETE_REVIEW_MUTATION = `
         id
         review_uuid
         reviewer_firebase_uid
-        reviewed_user_firebase_uid
+        reviewee_firebase_uid
         review_type
         rating
         title
@@ -47,7 +47,7 @@ export async function DELETE(request: NextRequest) {
           id: string;
           review_uuid: string;
           reviewer_firebase_uid: string;
-          reviewed_user_firebase_uid: string;
+          reviewee_firebase_uid: string;
           review_type: string;
           rating: number;
           title?: string;

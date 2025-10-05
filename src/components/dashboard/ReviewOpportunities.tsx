@@ -62,7 +62,7 @@ export default function ReviewOpportunities() {
         rating: reviewData.rating,
         comment: reviewData.comment,
         reviewerId: authUser.id,
-        reviewedUserId: selectedOpportunity.otherPartyId,
+        revieweeUserId: selectedOpportunity.otherPartyId,
         propertyUuid: selectedOpportunity.propertyUuid
       });
 

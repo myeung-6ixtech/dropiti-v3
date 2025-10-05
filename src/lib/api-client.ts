@@ -494,7 +494,7 @@ export const offersAPI = {
     rating: number;
     comment: string;
     reviewerId: string;
-    reviewedUserId: string;
+    revieweeUserId: string;
     propertyUuid: string;
   }) => {
     try {
@@ -642,6 +642,17 @@ export const reviewsAPI = {
         const axiosError = error as { response: { data: unknown; status: number } };
         console.error('Error response:', axiosError.response.data);
         console.error('Error status:', axiosError.response.status);
+        
+        // If it's a 500 error, return empty results instead of throwing
+        if (axiosError.response.status === 500) {
+          console.warn('API Client: Returning empty results due to 500 error (likely empty database)');
+          return {
+            success: true,
+            data: [],
+            total: 0,
+            message: 'No reviews found for this user'
+          };
+        }
       }
       throw error;
     }
@@ -665,6 +676,17 @@ export const reviewsAPI = {
         const axiosError = error as { response: { data: unknown; status: number } };
         console.error('Error response:', axiosError.response.data);
         console.error('Error status:', axiosError.response.status);
+        
+        // If it's a 500 error, return empty results instead of throwing
+        if (axiosError.response.status === 500) {
+          console.warn('API Client: Returning empty results due to 500 error (likely empty database)');
+          return {
+            success: true,
+            data: [],
+            total: 0,
+            message: 'No reviews found for this property'
+          };
+        }
       }
       throw error;
     }

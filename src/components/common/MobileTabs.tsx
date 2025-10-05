@@ -31,7 +31,7 @@ export default function MobileTabs({
   const [showRightArrow, setShowRightArrow] = useState(false);
 
   // Auto-detect best variant based on tab count
-  const detectedVariant = tabs.length <= 3 ? 'segmented' : tabs.length <= 5 ? 'scroll' : 'dropdown';
+  const detectedVariant = tabs.length <= 3 ? 'segmented' : tabs.length <= 4 ? 'scroll' : 'dropdown';
   const finalVariant = variant === 'scroll' ? detectedVariant : variant;
 
   // Check scroll position for arrows

@@ -77,7 +77,7 @@ export default function ReviewCard({
           <div className="flex-shrink-0">
             <Image
               src={getSafeProfileImage(
-                review.reviewer?.photoUrl || review.reviewedUser?.photoUrl || undefined,
+                review.reviewer?.photoUrl || review.reviewee?.photoUrl || undefined,
                 '/images/Portrait_Placeholder.png'
               )}
               alt="Profile"
@@ -92,7 +92,7 @@ export default function ReviewCard({
           </div>
           <div>
             <p className="text-sm mb-1 font-medium text-gray-900">
-              {review.reviewer?.displayName || review.reviewedUser?.displayName || 'Anonymous'}
+              {review.reviewer?.displayName || review.reviewee?.displayName || 'Anonymous'}
             </p>
             <p className="text-xs mb-1 text-gray-500">
               {getReviewTypeLabel(review.reviewType)}

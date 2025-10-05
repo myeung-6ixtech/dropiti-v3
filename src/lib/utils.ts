@@ -333,8 +333,8 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
       const reviews = Array.isArray(response.data) ? response.data : [response.data];
       
       // Filter for reviews where the user is the reviewed user (not the reviewer)
-      const receivedReviews = reviews.filter((review: { reviewedUserFirebaseUid: string }) => 
-        review.reviewedUserFirebaseUid === userFirebaseUid
+      const receivedReviews = reviews.filter((review: { revieweeFirebaseUid: string }) => 
+        review.revieweeFirebaseUid === userFirebaseUid
       );
       
       if (receivedReviews.length === 0) {
@@ -349,6 +349,9 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
         averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
         reviewCount: receivedReviews.length
       };
+    } else if (response.success && Array.isArray(response.data) && response.data.length === 0) {
+      // Handle empty results gracefully
+      return { averageRating: 0, reviewCount: 0 };
     }
     
     console.warn('Failed to get user reviews for rating calculation:', response.error);

@@ -12,7 +12,7 @@ const CREATE_REVIEW_MUTATION = `
       rating
       comment
       reviewer_firebase_uid
-      reviewed_user_firebase_uid
+      reviewee_firebase_uid
       property_uuid
       is_public
       is_verified
@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
       rating: rating,
       comment: comment,
       reviewer_firebase_uid: reviewerId,
-      reviewed_user_firebase_uid: reviewedUserId,
+      reviewee_firebase_uid: reviewedUserId,
       property_uuid: actualPropertyUuid, // Use the actual UUID from the offer
       is_public: true, // Default to public
       is_verified: false, // Default to not verified
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
         rating: number;
         comment: string;
         reviewer_firebase_uid: string;
-        reviewed_user_firebase_uid: string;
+        reviewee_firebase_uid: string;
         property_uuid: string;
         is_public: boolean;
         is_verified: boolean;

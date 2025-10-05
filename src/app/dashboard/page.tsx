@@ -51,8 +51,8 @@ export default function DashboardPage() {
         
         console.log('Dashboard: Fetching data for Firebase UID:', firebaseUid);
         
-        // Fetch reviews, property counts, and average rating in parallel
-        const [reviewsResponse, totalCount, publishedCount, ratingData] = await Promise.all([
+        // Fetch reviews, property counts, and average rating in parallel with individual error handling
+        const [reviewsResponse, totalCount, publishedCount, ratingData] = await Promise.allSettled([
           reviewsAPI.getReviewsByUser({
             userFirebaseUid: firebaseUid,
             limit: 5 // Show only 5 recent reviews on dashboard
@@ -62,31 +62,53 @@ export default function DashboardPage() {
           getAverageUserRating(firebaseUid)
         ]);
         
-        // Set reviews
-        if (reviewsResponse.success && reviewsResponse.data) {
-          setReviews(Array.isArray(reviewsResponse.data) ? reviewsResponse.data : [reviewsResponse.data]);
+        // Handle reviews response
+        if (reviewsResponse.status === 'fulfilled' && reviewsResponse.value.success && reviewsResponse.value.data) {
+          setReviews(Array.isArray(reviewsResponse.value.data) ? reviewsResponse.value.data : [reviewsResponse.value.data]);
         } else {
+          console.warn('Dashboard: Failed to fetch reviews, setting empty array');
           setReviews([]);
         }
         
-        // Set property counts
-        setPropertyCounts({
-          totalProperties: totalCount,
-          publishedProperties: publishedCount
-        });
+        // Handle property counts
+        if (totalCount.status === 'fulfilled') {
+          setPropertyCounts(prev => ({ ...prev, totalProperties: totalCount.value }));
+        } else {
+          console.warn('Dashboard: Failed to fetch total property count');
+          setPropertyCounts(prev => ({ ...prev, totalProperties: 0 }));
+        }
         
-        // Set user rating data
-        setUserRating({
-          averageRating: ratingData.averageRating,
-          reviewCount: ratingData.reviewCount
-        });
+        if (publishedCount.status === 'fulfilled') {
+          setPropertyCounts(prev => ({ ...prev, publishedProperties: publishedCount.value }));
+        } else {
+          console.warn('Dashboard: Failed to fetch published property count');
+          setPropertyCounts(prev => ({ ...prev, publishedProperties: 0 }));
+        }
+        
+        // Handle user rating data
+        if (ratingData.status === 'fulfilled') {
+          setUserRating({
+            averageRating: ratingData.value.averageRating,
+            reviewCount: ratingData.value.reviewCount
+          });
+        } else {
+          console.warn('Dashboard: Failed to fetch user rating data');
+          setUserRating({ averageRating: 0, reviewCount: 0 });
+        }
         
       } catch (err) {
-        setError('Failed to fetch dashboard data.');
-        console.error('Dashboard: Error fetching data:', err);
-        setReviews([]); // Set empty array on error
+        console.error('Dashboard: Unexpected error fetching data:', err);
+        // Set fallback values for all data
+        setReviews([]);
         setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
         setUserRating({ averageRating: 0, reviewCount: 0 });
+        // Only show error if it's not related to empty database
+        if (err && typeof err === 'object' && 'message' in err) {
+          const errorMessage = (err as Error).message;
+          if (!errorMessage.includes('relation') && !errorMessage.includes('does not exist')) {
+            setError('Failed to fetch some dashboard data. Please refresh the page.');
+          }
+        }
       } finally {
         setLoading(false);
       }

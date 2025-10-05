@@ -27,9 +27,12 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
         if (response.success && response.data) {
           // Filter to only show reviews received by the user (not reviews they wrote)
           const receivedReviews = response.data.filter((review: ReviewDisplayData) => 
-            review.reviewedUserFirebaseUid === userFirebaseUid
+            review.revieweeFirebaseUid === userFirebaseUid
           );
           setReviews(receivedReviews);
+        } else if (response.success && Array.isArray(response.data) && response.data.length === 0) {
+          // Handle empty results gracefully
+          setReviews([]);
         } else {
           setError(response.error || 'Failed to load reviews');
         }

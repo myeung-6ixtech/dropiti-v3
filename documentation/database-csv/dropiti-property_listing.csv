@@ -1,0 +1,213 @@
+id,landlord_firebase_uid,title,description,property_type,rental_space,address,show_specific_location,gross_area_size,gross_area_size_unit,num_bedroom,num_bathroom,furnished,pets_allowed,amenities,display_image,uploaded_images,rental_price,rental_price_currency,availability_date,is_public,property_uuid,updated_at,status,deposit_amount,utilities_included,created_at,draft_metadata,last_saved_at,completion_percentage
+"27","'MfbKjwALdnaaN30SmB1hm97KrZc2'","'Park Island Apartment'","'Very cozy 3 bedroom apartment with balcony'","'residential'","'entire-apartment'","{
+  'city': 'Islands',
+  'unit': 'A',
+  'block': '19',
+  'floor': '31',
+  'state': 'Hong Kong',
+  'street': 'Park Island. Ma Wan.',
+  'country': 'Hong Kong',
+  'district': 'Islands',
+  'addressLine1': 'Park Island. Ma Wan.',
+  'addressLine2': '',
+  'buildingName': 'park island',
+  'apartmentEstate': 'park island'
+}","false","1400","'sqft'","3","2","'fully'","false","[
+  'wifi',
+  'air-conditioning',
+  'heating',
+  'tv',
+  'dryer',
+  'washer',
+  'dishwasher',
+  'gym',
+  'pool',
+  'security',
+  'elevator',
+  'furnished',
+  'balcony'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/700-width_1755091018504_ec4jngtzgus.jpg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/700-width_1755091018504_ec4jngtzgus.jpg'
+]","35000","'HKD'","'2025-10-15T00:00:00.000Z'","true","'9c639bbc-0134-4d24-b94b-6fffee7c89f6'","'2025-08-13T13:17:00.709501+00:00'","'published'","0","[]","'2025-08-13T13:17:00.709501+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"23","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Modern Hong Kong Apartment in Ma Wan'","'Awesome place to live in '","'residential'","'entire-apartment'","{
+  'city': 'Kowloon City',
+  'unit': 'A',
+  'block': 'A',
+  'floor': '11',
+  'state': 'Hong Kong',
+  'street': '9 Ma Wan Road',
+  'country': 'Hong Kong',
+  'district': 'Kowloon City',
+  'addressLine1': '9 Ma Wan Road',
+  'addressLine2': '',
+  'buildingName': 'Causeway Bay',
+  'apartmentEstate': 'Causeway Bay'
+}","false","800","'sqft'","2","2","'fully'","true","[
+  'wifi',
+  'dishwasher',
+  'washer'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/177487768_10216458896379858_5427642960964417415_n_1755081849172_heweatzkh79.jpeg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/177487768_10216458896379858_5427642960964417415_n_1755081849172_heweatzkh79.jpeg'
+]","200000","'HKD'","'2025-08-30T00:00:00.000Z'","true","'9f60daf0-9cf6-4be6-bde1-61ee4ea7a8d7'","'2025-08-13T10:44:11.755726+00:00'","'published'","0","[]","'2025-08-13T10:44:11.755726+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"25","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Modern 2BR Apartment in Central Admiralty'","'Listing Description'","'residential'","'entire-apartment'","{
+  'city': 'Eastern',
+  'unit': '14',
+  'block': 'A',
+  'floor': '11',
+  'state': 'Hong Kong',
+  'street': '1 Park Island Road',
+  'country': 'Hong Kong',
+  'district': 'Eastern',
+  'addressLine1': '1 Park Island Road',
+  'addressLine2': '',
+  'buildingName': 'Park Island',
+  'apartmentEstate': 'Park Island'
+}","false","800","'sqft'","2","2","'fully'","true","[
+  'heating',
+  'air-conditioning',
+  'washer',
+  'dryer',
+  'cleaning'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/177487768_10216458896379858_5427642960964417415_n_1755087220932_71s238br0uq.jpeg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/177487768_10216458896379858_5427642960964417415_n_1755087220932_71s238br0uq.jpeg'
+]","20000","'HKD'","'2025-08-29T00:00:00.000Z'","true","'8d7d29c5-c693-4e88-8f5a-2495d5acc868'","'2025-08-13T12:13:42.680678+00:00'","'published'","0","[]","'2025-08-13T12:13:42.680678+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"24","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Modern 2BR Bedroom Apartment'","'This is a great apartment'","'residential'","'partial-apartment'","{
+  'city': 'Sham Shui Po',
+  'unit': 'A',
+  'block': 'Block A',
+  'floor': '14',
+  'state': 'Hong Kong',
+  'street': '9 Ma Wan Road',
+  'country': 'Hong Kong',
+  'district': 'Sham Shui Po',
+  'addressLine1': '9 Ma Wan Road',
+  'addressLine2': '',
+  'buildingName': 'Partial Apartment',
+  'apartmentEstate': 'Partial Apartment'
+}","false","800","'sqft'","2","2","'partially'","true","[
+  'washer',
+  'dryer',
+  'parking',
+  'tv',
+  'heating',
+  'air-conditioning',
+  'wifi',
+  'dishwasher',
+  'gym',
+  'pool'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/178577675_1551135755084454_4395797135176510288_n_1755082136134_a96pg94hws.jpeg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/178577675_1551135755084454_4395797135176510288_n_1755082136134_a96pg94hws.jpeg'
+]","20000","'HKD'","'2025-08-16T00:00:00.000Z'","true","'6bda21e0-21f5-4fe4-83fd-768ae09b909d'","'2025-08-13T10:48:58.305991+00:00'","'available'","0","[]","'2025-08-13T10:48:58.305991+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"22","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Whampoa Room with 2 Bedrooms'","'Good Stuff nice room, totally worth the price!'","'residential'","'entire-apartment'","{
+  'unit': '01',
+  'block': '103',
+  'floor': '4',
+  'state': 'Gyeongsang-buk do',
+  'street': '1 Hyuksin Road',
+  'country': 'Hong Kong',
+  'district': 'Gimcheon',
+  'apartmentEstate': 'Gimcheon Park Dream City Summit'
+}","false","800","'sqft'","2","2","'non-furnished'","true","[
+  'dryer',
+  'security',
+  'heating'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/destinations8_1754992615878_qvm36auh4f9.jpg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/destinations8_1754992615878_qvm36auh4f9.jpg'
+]","20000","'HKD'","'2025-08-29T00:00:00.000Z'","true","'157deead-ffa3-41fc-a4f8-1f6097ac3d51'","'2025-08-12T09:56:57.494389+00:00'","'published'","0","[]","'2025-08-12T09:56:57.494389+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"21","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Modern 2 Bedroom Flat'","'Property description'","'residential'","'entire-apartment'","{
+  'city': 'Gimcheon',
+  'state': 'Gyeongsang-buk do',
+  'country': 'Hong Kong',
+  'district': 'Gimcheon',
+  'showSpecificLocation': false
+}","false","800","'sqft'","2","2","'fully'","true","[
+  'pool',
+  'washer',
+  'heating',
+  'dryer'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/destinations10_1754929022624_nsl6jekw53.jpg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/destinations10_1754929022624_nsl6jekw53.jpg'
+]","20000","'HKD'","'2025-08-14T00:00:00.000Z'","true","'e7abce51-1553-4cfe-805b-891502690840'","'2025-09-20T15:04:58.467+00:00'","'published'","0","[]","'2025-08-11T16:17:03.974098+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"26","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'2BR Modern Bedroom Apartment Test'","'Cool properties'","'residential'","'entire-apartment'","{
+  'city': 'Hong Kong',
+  'state': 'Hong Kong',
+  'country': 'Hong Kong',
+  'building': 'Ma Wan Building',
+  'district': 'Southern',
+  'addressLine1': '1 Ma Wan Park Island Road',
+  'showSpecificLocation': false
+}","false","600","'sqft'","4","3","'partially'","true","[
+  'pool',
+  'washer',
+  'air-conditioning',
+  'heating',
+  'tv',
+  'fridge',
+  'oven',
+  'induction-stove',
+  'dishwasher',
+  'wifi',
+  'microwave',
+  'dryer',
+  'gas-stove',
+  'gym'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/destinations9_1755314283057_9nuyvomr3s.jpg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/destinations9_1755314283057_9nuyvomr3s.jpg',
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/EleanorEmail-5aaf1c6ec5cf45eea0a4cd70ddbd4b21_1755314283058_dlvdalaxt9l.png'
+]","25000","'HKD'","'2025-08-22T00:00:00.000Z'","true","'f0be2db4-6aab-40ff-9302-70f6bf32deaa'","'2025-09-21T15:15:51.507+00:00'","'published'","0","[]","'2025-08-13T12:59:24.418686+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"28","'VBA14JGUH7N2XoVa5PbFbg9wEzE2'","'Discovery Bay Unit Great for Couples'","'Great place for couples in Discovery Bay'","'residential'","'entire-apartment'","{
+  'city': 'Central and Western',
+  'unit': '15',
+  'block': 'Block A',
+  'floor': '15',
+  'state': 'Hong Kong',
+  'street': '1 Discovery Bay Road',
+  'country': 'Hong Kong',
+  'district': 'Central and Western',
+  'addressLine1': '1 Discovery Bay Road',
+  'addressLine2': '',
+  'buildingName': 'Greenburg Estate',
+  'apartmentEstate': 'Greenburg Estate'
+}","false","800","'sqft'","2","2","'fully'","false","[
+  'pool',
+  'dryer',
+  'heating'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/EleanorEmail-5aaf1c6ec5cf45eea0a4cd70ddbd4b21_1755095007233_q1zgg1h41sg.png'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/EleanorEmail-5aaf1c6ec5cf45eea0a4cd70ddbd4b21_1755095007233_q1zgg1h41sg.png'
+]","15000","'HKD'","'2025-08-30T00:00:00.000Z'","true","'e9b1ba33-18b7-45cf-baab-5d6cfceae7b3'","'2025-08-13T14:23:29.882872+00:00'","'published'","0","[]","'2025-08-13T14:23:29.882872+00:00'","{}","'2025-08-29T08:37:17.814358+00:00'","0"
+"32","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Property Listing'","'Property description'","'residential'","'private-room'","{
+  'country': 'HK',
+  'district': 'Eastern',
+  'addressLine1': '1 Discovery Bay Road',
+  'showSpecificLocation': false
+}","false","0","'sqft'","0","0","'non-furnished'","false","[]","''","[]","0","'HKD'","'2025-09-02T12:59:23.383Z'","false","'7f50d157-875f-4ea9-a872-a01aad40c308'","'2025-09-02T12:59:23.604535+00:00'","'available'","0","[]","'2025-09-02T12:59:23.604535+00:00'","{}","'2025-09-02T12:59:23.383+00:00'","0"
+"31","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Property Listing'","'Property description'","'residential'","'entire'","{
+  'city': 'Hong Kong',
+  'unit': '1',
+  'block': 'B',
+  'floor': '2',
+  'state': 'Lantau Island',
+  'building': 'Greenvale Village',
+  'district': 'Islands',
+  'addressLine1': '9 Discovery Bay Road',
+  'showSpecificLocation': false
+}","false","0","'sqft'","0","0","'non-furnished'","false","[]","''","[]","0","'HKD'","'2025-08-31T12:42:54.073Z'","false","'331c8909-0ee3-4e6a-a7e7-c9726b611f52'","'2025-09-07T12:49:37.715+00:00'","'draft'","0","[]","'2025-08-31T12:42:54.213761+00:00'","{}","'2025-08-31T12:42:54.073+00:00'","0"
+"30","'d2pdgjkyOkM6HbI9WKvK174sYvh1'","'Modern Chai Wan Flat 2 Bedrooms'","'Welcome to this beautifully maintained [X]-bedroom, [X]-bathroom rental home in the desirable [Neighborhood Name] area. This spacious [Apartment/Condo/Townhouse] offers a perfect blend of comfort, convenience, and modern living.\n\nProperty Highlights:\n\nSpacious Layout: An open-concept floor plan with [square footage] of living space, featuring large windows that flood the interior with natural light.\n\nModern Kitchen: Fully equipped with stainless steel appliances (refrigerator, dishwasher, stove, microwave), sleek granite/quartz countertops, ample cabinet storage, and a convenient breakfast bar.\n\nComfortable Retreat: Generously sized bedrooms with generous closet space. The master bedroom includes a private en-suite bathroom/walk-in closet for your convenience.\n\nIn-Unit Laundry: Features a full-sized washer and dryer, adding ease to your daily routine.\n\nPrivate Outdoor Space: Enjoy your own private balcony/patio/deck, perfect for morning coffee or evening relaxation.\n\nCommunity Amenities:\nResidents enjoy access to fantastic on-site amenities, including a sparkling swimming pool, a state-of-the-art fitness center, secure covered parking, and beautifully landscaped common areas.\n\nIdeal Location:\nNestled in a prime location, you are just minutes away from [mention 2-3 key attractions, e.g., downtown, Main Street shopping, I-95, Riverside Park]. Enjoy easy access to public transit, top-rated schools, shopping centers, and a variety of dining and entertainment options.\n\nThis move-in-ready home won't last long! Schedule your private showing today.'","'residential'","'entire-apartment'","{
+  'city': 'Eastern',
+  'state': 'Aberdeen',
+  'country': 'Hong Kong',
+  'building': 'Harvest Estate Building',
+  'district': 'Southern',
+  'addressLine1': '123 Hennessy Road',
+  'showSpecificLocation': false
+}","false","800","'sqft'","2","2","'partially'","true","[
+  'fridge',
+  'gas-stove',
+  'dryer',
+  'phone',
+  'trees',
+  'clean',
+  'bathtub'
+]","'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/177487768_10216458896379858_5427642960964417415_n_1756642317206_ww2dw8c0prq.jpeg'","[
+  'https://tastyplates-bucket.s3.ap-northeast-2.amazonaws.com/dropiti_uploads/images/2025/08/177487768_10216458896379858_5427642960964417415_n_1756642317206_ww2dw8c0prq.jpeg'
+]","30000","'HKD'","'2025-08-30T00:00:00.000Z'","true","'e99af96d-487e-48c2-8ca6-5a8350c366bd'","'2025-09-21T15:14:33.297+00:00'","'published'","0","[]","'2025-08-31T12:11:59.515279+00:00'","{}","'2025-08-31T12:11:59.32+00:00'","100"

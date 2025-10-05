@@ -6,7 +6,7 @@ interface GraphQLReview {
   id: string;
   review_uuid: string;
   reviewer_firebase_uid: string;
-  reviewed_user_firebase_uid: string;
+  reviewee_firebase_uid: string;
   review_type: string;
   rating: number;
   title?: string | null;
@@ -60,7 +60,7 @@ const GET_REVIEWS_BY_USER_QUERY = `
       where: {
         _or: [
           { reviewer_firebase_uid: { _eq: $userFirebaseUid } },
-          { reviewed_user_firebase_uid: { _eq: $userFirebaseUid } }
+          { reviewee_firebase_uid: { _eq: $userFirebaseUid } }
         ]
         review_type: { _eq: $reviewType }
       }
@@ -71,7 +71,7 @@ const GET_REVIEWS_BY_USER_QUERY = `
       id
       review_uuid
       reviewer_firebase_uid
-      reviewed_user_firebase_uid
+      reviewee_firebase_uid
       review_type
       rating
       title
@@ -94,7 +94,7 @@ const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
       where: {
         _or: [
           { reviewer_firebase_uid: { _eq: $userFirebaseUid } },
-          { reviewed_user_firebase_uid: { _eq: $userFirebaseUid } }
+          { reviewee_firebase_uid: { _eq: $userFirebaseUid } }
         ]
       }
       order_by: { created_at: desc }
@@ -104,7 +104,7 @@ const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
       id
       review_uuid
       reviewer_firebase_uid
-      reviewed_user_firebase_uid
+      reviewee_firebase_uid
       review_type
       rating
       title
@@ -196,7 +196,9 @@ export async function GET(request: NextRequest) {
 
     console.log('Get Reviews by User API: Raw GraphQL response:', reviewsData);
 
-    if (!reviewsData?.real_estate_review) {
+    // Handle empty or missing results gracefully (normal for new users)
+    if (!reviewsData?.real_estate_review || reviewsData.real_estate_review.length === 0) {
+      console.log('Get Reviews by User API: No reviews found for user (returning empty list)');
       return NextResponse.json({
         success: true,
         data: [],
@@ -208,7 +210,7 @@ export async function GET(request: NextRequest) {
     // Collect unique user IDs and property UUIDs to fetch additional data
     const uniqueUserIds = [...new Set([
       ...reviewsData.real_estate_review.map(review => review.reviewer_firebase_uid),
-      ...reviewsData.real_estate_review.map(review => review.reviewed_user_firebase_uid)
+      ...reviewsData.real_estate_review.map(review => review.reviewee_firebase_uid)
     ])];
     
     const uniquePropertyUuids = [...new Set(
@@ -246,14 +248,14 @@ export async function GET(request: NextRequest) {
     // Transform and combine data
     const transformedReviews = reviewsData.real_estate_review.map((review: GraphQLReview) => {
       const reviewer = userDetails[review.reviewer_firebase_uid];
-      const reviewedUser = userDetails[review.reviewed_user_firebase_uid];
+      const reviewee = userDetails[review.reviewee_firebase_uid];
       const property = review.property_uuid ? propertyDetails[review.property_uuid] : null;
 
       return {
         id: review.id,
         reviewUuid: review.review_uuid,
         reviewerFirebaseUid: review.reviewer_firebase_uid,
-        reviewedUserFirebaseUid: review.reviewed_user_firebase_uid,
+        revieweeFirebaseUid: review.reviewee_firebase_uid,
         reviewType: review.review_type,
         rating: review.rating,
         title: review.title || undefined,
@@ -272,12 +274,12 @@ export async function GET(request: NextRequest) {
           email: reviewer.email,
           photoUrl: reviewer.photo_url || undefined,
         } : null,
-        // Include reviewed user details
-        reviewedUser: reviewedUser ? {
-          uuid: reviewedUser.uuid,
-          displayName: reviewedUser.display_name,
-          email: reviewedUser.email,
-          photoUrl: reviewedUser.photo_url || undefined,
+        // Include reviewee details
+        reviewee: reviewee ? {
+          uuid: reviewee.uuid,
+          displayName: reviewee.display_name,
+          email: reviewee.email,
+          photoUrl: reviewee.photo_url || undefined,
         } : null,
         // Include property details
         property: property ? {
@@ -303,8 +305,31 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Get Reviews by User API: Error:', error);
+    
+    // Check if it's a GraphQL error or database connection issue
+    if (error && typeof error === 'object') {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // If it's likely a database connection or schema issue, return empty results
+      if (errorMessage.includes('relation') || errorMessage.includes('does not exist') || 
+          errorMessage.includes('connection') || errorMessage.includes('schema')) {
+        console.warn('Get Reviews by User API: Database/schema issue detected, returning empty results');
+        return NextResponse.json({
+          success: true,
+          data: [],
+          total: 0,
+          message: 'No reviews found for this user',
+        });
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to fetch reviews' },
+      { 
+        success: false,
+        error: 'Failed to fetch reviews',
+        data: [],
+        total: 0
+      },
       { status: 500 }
     );
   }

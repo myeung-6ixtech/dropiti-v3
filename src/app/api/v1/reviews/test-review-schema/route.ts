@@ -29,7 +29,7 @@ const TEST_REVIEW_TABLE_QUERY = `
       rating
       comment
       reviewer_firebase_uid
-      reviewed_user_firebase_uid
+      reviewee_firebase_uid
       property_uuid
       is_public
       is_verified

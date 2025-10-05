@@ -28,24 +28,30 @@ CREATE EXTENSION IF NOT EXISTS "citext";
 -- CORE USER MANAGEMENT TABLES
 -- ========================================
 
--- 1. Real Estate User Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_user (
+-- 1. User Table
+CREATE TABLE IF NOT EXISTS real_estate.user (
     uuid UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    firebase_uid TEXT NOT NULL UNIQUE,
-    display_name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    auth_provider TEXT CHECK (auth_provider IN ('firebase', 'google', 'facebook', 'apple')) DEFAULT 'firebase',
+    firebase_uid VARCHAR(128) NOT NULL UNIQUE,
+    display_name VARCHAR(100) NOT NULL,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(255) NOT NULL,
+    auth_provider VARCHAR(20) CHECK (auth_provider IN ('firebase', 'google', 'facebook', 'apple', 'google.com', 'password')) DEFAULT 'firebase',
     photo_url TEXT,
-    phone_number TEXT,
-    location TEXT,
+    phone_number VARCHAR(20),
+    location VARCHAR(100),
+    avg_response_time VARCHAR(50),
+    response_time VARCHAR(50),
     about TEXT,
-    education TEXT,
-    occupation TEXT,
-    marital_status TEXT,
+    education VARCHAR(100),
+    occupation VARCHAR(100),
+    marital_status VARCHAR(20),
     languages JSONB DEFAULT '[]',
     verified BOOLEAN DEFAULT false,
     rating DECIMAL(3,2) DEFAULT 0.00 CHECK (rating >= 0 AND rating <= 5),
+    total_guests INTEGER DEFAULT 0 CHECK (total_guests >= 0),
     review_count INTEGER DEFAULT 0 CHECK (review_count >= 0),
+    total_properties INTEGER DEFAULT 0 CHECK (total_properties >= 0),
     response_rate DECIMAL(5,2) DEFAULT 0.00 CHECK (response_rate >= 0 AND response_rate <= 100),
     preferences JSONB DEFAULT '{}',
     notification_settings JSONB DEFAULT '{}',
@@ -59,30 +65,33 @@ CREATE TABLE IF NOT EXISTS real_estate.real_estate_user (
 -- ========================================
 
 -- 2. Property Listing Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_property_listing (
+CREATE TABLE IF NOT EXISTS real_estate.property_listing (
     id SERIAL PRIMARY KEY,
     property_uuid UUID UNIQUE DEFAULT gen_random_uuid(),
-    title TEXT NOT NULL,
+    title VARCHAR(200) NOT NULL,
     description TEXT,
-    landlord_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    property_type TEXT CHECK (property_type IN ('apartment', 'house', 'condo', 'studio', 'townhouse', 'loft', 'other')) DEFAULT 'apartment',
-    rental_space TEXT CHECK (rental_space IN ('entire_place', 'private_room', 'shared_room')) DEFAULT 'entire_place',
-    address TEXT NOT NULL,
+    landlord_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    property_type VARCHAR(20) CHECK (property_type IN ('apartment', 'house', 'condo', 'studio', 'townhouse', 'loft', 'other', 'residential')) DEFAULT 'apartment',
+    rental_space VARCHAR(30) CHECK (rental_space IN ('entire_place', 'private_room', 'shared_room', 'entire-apartment', 'partial-apartment', 'private-room', 'entire')) DEFAULT 'entire_place',
+    address TEXT,
     show_specific_location BOOLEAN DEFAULT true,
     gross_area_size DECIMAL(10,2),
-    gross_area_size_unit TEXT CHECK (gross_area_size_unit IN ('sqft', 'sqm')) DEFAULT 'sqft',
+    gross_area_size_unit VARCHAR(10) CHECK (gross_area_size_unit IN ('sqft', 'sqm')) DEFAULT 'sqft',
     num_bedroom INTEGER CHECK (num_bedroom >= 0),
     num_bathroom DECIMAL(3,1) CHECK (num_bathroom >= 0),
-    furnished BOOLEAN DEFAULT false,
+    furnished VARCHAR(20) CHECK (furnished IN ('fully', 'partially', 'non-furnished')) DEFAULT 'non-furnished',
     pets_allowed BOOLEAN DEFAULT false,
     amenities JSONB DEFAULT '[]',
     display_image TEXT,
     uploaded_images JSONB DEFAULT '[]',
     rental_price DECIMAL(12,2) NOT NULL CHECK (rental_price > 0),
-    rental_price_currency TEXT CHECK (rental_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
+    rental_price_currency VARCHAR(10) CHECK (rental_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
     availability_date DATE,
     is_public BOOLEAN DEFAULT false,
-    status TEXT CHECK (status IN ('draft', 'published', 'archived', 'expired')) DEFAULT 'draft',
+    status VARCHAR(20) CHECK (status IN ('draft', 'published', 'archived', 'expired', 'available')) DEFAULT 'draft',
+    deposit_amount DECIMAL(12,2) DEFAULT 0 CHECK (deposit_amount >= 0),
+    utilities_included JSONB DEFAULT '[]',
+    draft_metadata JSONB DEFAULT '{}',
     last_saved_at TIMESTAMPTZ DEFAULT NOW(),
     completion_percentage INTEGER DEFAULT 0 CHECK (completion_percentage >= 0 AND completion_percentage <= 100),
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -93,37 +102,46 @@ CREATE TABLE IF NOT EXISTS real_estate.real_estate_property_listing (
 -- OFFER MANAGEMENT TABLES
 -- ========================================
 
--- 3. Real Estate Offer Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_offer (
+-- 3. Offer Table
+CREATE TABLE IF NOT EXISTS real_estate.offer (
     id SERIAL PRIMARY KEY,
-    offer_key TEXT UNIQUE DEFAULT gen_random_uuid()::text,
-    property_uuid UUID NOT NULL REFERENCES real_estate.real_estate_property_listing(property_uuid) ON DELETE CASCADE,
-    initiator_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    recipient_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
+    offer_key VARCHAR(100) UNIQUE DEFAULT gen_random_uuid()::text,
+    offer_uuid UUID UNIQUE DEFAULT gen_random_uuid(),
+    property_uuid UUID NOT NULL REFERENCES real_estate.property_listing(property_uuid) ON DELETE CASCADE,
+    initiator_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    recipient_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
     proposing_rent_price DECIMAL(12,2) NOT NULL CHECK (proposing_rent_price > 0),
-    proposing_rent_price_currency TEXT CHECK (proposing_rent_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
+    proposing_rent_price_currency VARCHAR(10) CHECK (proposing_rent_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
     num_leasing_months INTEGER NOT NULL CHECK (num_leasing_months > 0),
-    payment_frequency TEXT CHECK (payment_frequency IN ('monthly', 'quarterly', 'annually')) DEFAULT 'monthly',
+    payment_frequency VARCHAR(20) CHECK (payment_frequency IN ('monthly', 'quarterly', 'annually')) DEFAULT 'monthly',
     move_in_date DATE NOT NULL,
-    offer_status TEXT CHECK (offer_status IN ('pending', 'tentatively_accepted', 'countered', 'accepted', 'rejected', 'withdrawn')) DEFAULT 'pending',
+    offer_status VARCHAR(20) CHECK (offer_status IN ('pending', 'tentatively_accepted', 'countered', 'accepted', 'rejected', 'withdrawn')) DEFAULT 'pending',
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     -- Negotiation fields
     current_rent_price DECIMAL(12,2),
-    current_rent_price_currency TEXT CHECK (current_rent_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
+    current_rent_price_currency VARCHAR(10) CHECK (current_rent_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
     current_num_leasing_months INTEGER,
-    current_payment_frequency TEXT CHECK (current_payment_frequency IN ('monthly', 'quarterly', 'annually')) DEFAULT 'monthly',
+    current_payment_frequency VARCHAR(20) CHECK (current_payment_frequency IN ('monthly', 'quarterly', 'annually')) DEFAULT 'monthly',
     current_move_in_date DATE,
     negotiation_round INTEGER DEFAULT 0 CHECK (negotiation_round >= 0 AND negotiation_round <= 2),
-    last_action_by TEXT CHECK (last_action_by IN ('initiator', 'recipient')) DEFAULT 'initiator',
+    last_action_by VARCHAR(20) CHECK (last_action_by IN ('initiator', 'recipient', 'system')) DEFAULT 'initiator',
     last_action_at TIMESTAMPTZ DEFAULT NOW(),
-    last_action_type TEXT,
+    last_action_type VARCHAR(50),
+    -- Final acceptance fields
+    final_rent_price DECIMAL(12,2),
+    final_rent_price_currency VARCHAR(10) CHECK (final_rent_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
+    final_num_leasing_months INTEGER,
+    final_payment_frequency VARCHAR(20) CHECK (final_payment_frequency IN ('monthly', 'quarterly', 'annually')) DEFAULT 'monthly',
+    final_move_in_date DATE,
+    final_accepted_by VARCHAR(20) CHECK (final_accepted_by IN ('initiator', 'recipient')) DEFAULT NULL,
+    final_accepted_at TIMESTAMPTZ,
     -- Review window fields
     review_window_start TIMESTAMPTZ,
     review_window_end TIMESTAMPTZ,
-    initiator_review_status TEXT CHECK (initiator_review_status IN ('pending', 'completed', 'expired', 'missed')) DEFAULT 'pending',
-    recipient_review_status TEXT CHECK (recipient_review_status IN ('pending', 'completed', 'expired', 'missed')) DEFAULT 'pending'
+    initiator_review_status VARCHAR(20) CHECK (initiator_review_status IN ('pending', 'completed', 'expired', 'missed')) DEFAULT 'pending',
+    recipient_review_status VARCHAR(20) CHECK (recipient_review_status IN ('pending', 'completed', 'expired', 'missed')) DEFAULT 'pending'
 );
 
 -- ========================================
@@ -131,20 +149,22 @@ CREATE TABLE IF NOT EXISTS real_estate.real_estate_offer (
 -- ========================================
 
 -- 4. Review Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_review (
+CREATE TABLE IF NOT EXISTS real_estate.review (
     id SERIAL PRIMARY KEY,
     review_uuid UUID UNIQUE DEFAULT gen_random_uuid(),
-    reviewer_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    reviewee_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    property_uuid UUID REFERENCES real_estate.real_estate_property_listing(property_uuid) ON DELETE CASCADE,
-    offer_id INTEGER REFERENCES real_estate.real_estate_offer(id) ON DELETE CASCADE,
-    review_type TEXT CHECK (review_type IN ('offer_review', 'tenant_to_landlord', 'landlord_to_tenant')) NOT NULL,
+    reviewer_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    reviewee_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    property_uuid UUID REFERENCES real_estate.property_listing(property_uuid) ON DELETE CASCADE,
+    offer_id INTEGER REFERENCES real_estate.offer(id) ON DELETE CASCADE,
+    offer_uuid UUID REFERENCES real_estate.offer(offer_uuid) ON DELETE CASCADE,
+    review_type VARCHAR(30) CHECK (review_type IN ('offer_review', 'tenant_to_landlord', 'landlord_to_tenant')) NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    title TEXT,
+    title VARCHAR(200),
     content TEXT,
     helpful_count INTEGER DEFAULT 0 CHECK (helpful_count >= 0),
     is_verified BOOLEAN DEFAULT false,
     is_public BOOLEAN DEFAULT true,
+    review_window_id UUID,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -154,12 +174,12 @@ CREATE TABLE IF NOT EXISTS real_estate.real_estate_review (
 -- ========================================
 
 -- 5. Notification Type Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_notification_type (
+CREATE TABLE IF NOT EXISTS real_estate.notification_type (
     id SERIAL PRIMARY KEY,
-    type_key TEXT UNIQUE NOT NULL,
-    name TEXT NOT NULL,
-    description TEXT,
-    category TEXT CHECK (category IN ('offer', 'property', 'user', 'system')) NOT NULL,
+    type_key VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    category VARCHAR(20) CHECK (category IN ('offer', 'property', 'user', 'system')) NOT NULL,
     template TEXT NOT NULL,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -167,17 +187,17 @@ CREATE TABLE IF NOT EXISTS real_estate.real_estate_notification_type (
 );
 
 -- 6. Notification Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_notification (
+CREATE TABLE IF NOT EXISTS real_estate.notification (
     id SERIAL PRIMARY KEY,
-    type_id INTEGER NOT NULL REFERENCES real_estate.real_estate_notification_type(id) ON DELETE CASCADE,
-    recipient_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    sender_firebase_uid TEXT REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    title TEXT NOT NULL,
+    type_id INTEGER NOT NULL REFERENCES real_estate.notification_type(id) ON DELETE CASCADE,
+    recipient_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    sender_firebase_uid VARCHAR(128) REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
     message TEXT NOT NULL,
     data JSONB DEFAULT '{}',
     is_read BOOLEAN DEFAULT false,
     is_archived BOOLEAN DEFAULT false,
-    priority TEXT CHECK (priority IN ('low', 'normal', 'high', 'urgent')) DEFAULT 'normal',
+    priority VARCHAR(20) CHECK (priority IN ('low', 'normal', 'high', 'urgent')) DEFAULT 'normal',
     expires_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     read_at TIMESTAMPTZ,
@@ -185,12 +205,12 @@ CREATE TABLE IF NOT EXISTS real_estate.real_estate_notification (
 );
 
 -- 7. Notification Preference Table
-CREATE TABLE IF NOT EXISTS real_estate.real_estate_notification_preference (
+CREATE TABLE IF NOT EXISTS real_estate.notification_preference (
     id SERIAL PRIMARY KEY,
-    user_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    type_id INTEGER NOT NULL REFERENCES real_estate.real_estate_notification_type(id) ON DELETE CASCADE,
+    user_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    type_id INTEGER NOT NULL REFERENCES real_estate.notification_type(id) ON DELETE CASCADE,
     is_enabled BOOLEAN DEFAULT true,
-    delivery_method TEXT CHECK (delivery_method IN ('in_app', 'email', 'push', 'all')) DEFAULT 'in_app',
+    delivery_method VARCHAR(20) CHECK (delivery_method IN ('in_app', 'email', 'push', 'all')) DEFAULT 'in_app',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_firebase_uid, type_id)
@@ -205,8 +225,8 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_room (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
-    title TEXT,
-    room_type TEXT CHECK (room_type IN ('direct', 'group', 'support')) DEFAULT 'direct',
+    title VARCHAR(200),
+    room_type VARCHAR(20) CHECK (room_type IN ('direct', 'group', 'support')) DEFAULT 'direct',
     is_active BOOLEAN DEFAULT true,
     last_message_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -215,8 +235,8 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_room (
 CREATE TABLE IF NOT EXISTS real_estate.chat_room_participant (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id UUID NOT NULL REFERENCES real_estate.chat_room(id) ON DELETE CASCADE,
-    user_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    role TEXT CHECK (role IN ('tenant', 'landlord', 'support', 'admin')) DEFAULT 'tenant',
+    user_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    role VARCHAR(20) CHECK (role IN ('tenant', 'landlord', 'support', 'admin')) DEFAULT 'tenant',
     joined_at TIMESTAMPTZ DEFAULT NOW(),
     last_read_at TIMESTAMPTZ DEFAULT NOW(),
     is_active BOOLEAN DEFAULT true,
@@ -227,10 +247,13 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_room_participant (
 CREATE TABLE IF NOT EXISTS real_estate.chat_message (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id UUID NOT NULL REFERENCES real_estate.chat_room(id) ON DELETE CASCADE,
-    sender_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
+    sender_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    message_type TEXT CHECK (message_type IN ('text', 'image', 'file', 'system')) DEFAULT 'text',
-    status TEXT CHECK (status IN ('sent', 'delivered', 'read')) DEFAULT 'sent',
+    encrypted_content TEXT,
+    message_type VARCHAR(20) CHECK (message_type IN ('text', 'image', 'file', 'system')) DEFAULT 'text',
+    status VARCHAR(20) CHECK (status IN ('sent', 'delivered', 'read')) DEFAULT 'sent',
+    encryption_key_id VARCHAR(100),
+    deleted_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW(),
     reply_to_message_id UUID REFERENCES real_estate.chat_message(id),
@@ -244,11 +267,11 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_message (
 -- 11. Chat Presence Table
 CREATE TABLE IF NOT EXISTS real_estate.chat_presence (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_firebase_uid TEXT NOT NULL UNIQUE REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
+    user_firebase_uid VARCHAR(128) NOT NULL UNIQUE REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
     room_id UUID REFERENCES real_estate.chat_room(id) ON DELETE CASCADE,
     is_online BOOLEAN DEFAULT false,
     last_seen_at TIMESTAMPTZ DEFAULT NOW(),
-    status TEXT CHECK (status IN ('online', 'away', 'busy', 'offline')) DEFAULT 'offline',
+    status VARCHAR(20) CHECK (status IN ('online', 'away', 'busy', 'offline')) DEFAULT 'offline',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -257,7 +280,7 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_presence (
 CREATE TABLE IF NOT EXISTS real_estate.chat_typing (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id UUID NOT NULL REFERENCES real_estate.chat_room(id) ON DELETE CASCADE,
-    user_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
+    user_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
     is_typing BOOLEAN DEFAULT false,
     started_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(room_id, user_firebase_uid)
@@ -267,8 +290,8 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_typing (
 CREATE TABLE IF NOT EXISTS real_estate.chat_message_reaction (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     message_id UUID NOT NULL REFERENCES real_estate.chat_message(id) ON DELETE CASCADE,
-    user_firebase_uid TEXT NOT NULL REFERENCES real_estate.real_estate_user(firebase_uid) ON DELETE CASCADE,
-    reaction_type TEXT NOT NULL CHECK (reaction_type IN ('like', 'love', 'laugh', 'wow', 'sad', 'angry')),
+    user_firebase_uid VARCHAR(128) NOT NULL REFERENCES real_estate.user(firebase_uid) ON DELETE CASCADE,
+    reaction_type VARCHAR(20) NOT NULL CHECK (reaction_type IN ('like', 'love', 'laugh', 'wow', 'sad', 'angry')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(message_id, user_firebase_uid, reaction_type)
 );
@@ -278,63 +301,63 @@ CREATE TABLE IF NOT EXISTS real_estate.chat_message_reaction (
 -- ========================================
 
 -- User indexes
-CREATE INDEX IF NOT EXISTS idx_user_firebase_uid ON real_estate.real_estate_user(firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_user_email ON real_estate.real_estate_user(email);
-CREATE INDEX IF NOT EXISTS idx_user_verified ON real_estate.real_estate_user(verified);
-CREATE INDEX IF NOT EXISTS idx_user_rating ON real_estate.real_estate_user(rating);
+CREATE INDEX IF NOT EXISTS idx_user_firebase_uid ON real_estate.user(firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_user_email ON real_estate.user(email);
+CREATE INDEX IF NOT EXISTS idx_user_verified ON real_estate.user(verified);
+CREATE INDEX IF NOT EXISTS idx_user_rating ON real_estate.user(rating);
 
 -- Property indexes
-CREATE INDEX IF NOT EXISTS idx_property_uuid ON real_estate.real_estate_property_listing(property_uuid);
-CREATE INDEX IF NOT EXISTS idx_property_landlord ON real_estate.real_estate_property_listing(landlord_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_property_status ON real_estate.real_estate_property_listing(status);
-CREATE INDEX IF NOT EXISTS idx_property_is_public ON real_estate.real_estate_property_listing(is_public);
-CREATE INDEX IF NOT EXISTS idx_property_type ON real_estate.real_estate_property_listing(property_type);
-CREATE INDEX IF NOT EXISTS idx_property_rental_price ON real_estate.real_estate_property_listing(rental_price);
-CREATE INDEX IF NOT EXISTS idx_property_location ON real_estate.real_estate_property_listing(address);
-CREATE INDEX IF NOT EXISTS idx_property_created_at ON real_estate.real_estate_property_listing(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_property_uuid ON real_estate.property_listing(property_uuid);
+CREATE INDEX IF NOT EXISTS idx_property_landlord ON real_estate.property_listing(landlord_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_property_status ON real_estate.property_listing(status);
+CREATE INDEX IF NOT EXISTS idx_property_is_public ON real_estate.property_listing(is_public);
+CREATE INDEX IF NOT EXISTS idx_property_type ON real_estate.property_listing(property_type);
+CREATE INDEX IF NOT EXISTS idx_property_rental_price ON real_estate.property_listing(rental_price);
+CREATE INDEX IF NOT EXISTS idx_property_location ON real_estate.property_listing(address);
+CREATE INDEX IF NOT EXISTS idx_property_created_at ON real_estate.property_listing(created_at DESC);
 
 -- Offer indexes
-CREATE INDEX IF NOT EXISTS idx_offer_key ON real_estate.real_estate_offer(offer_key);
-CREATE INDEX IF NOT EXISTS idx_offer_property_uuid ON real_estate.real_estate_offer(property_uuid);
-CREATE INDEX IF NOT EXISTS idx_offer_initiator ON real_estate.real_estate_offer(initiator_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_offer_recipient ON real_estate.real_estate_offer(recipient_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_offer_status ON real_estate.real_estate_offer(offer_status);
-CREATE INDEX IF NOT EXISTS idx_offer_is_active ON real_estate.real_estate_offer(is_active);
-CREATE INDEX IF NOT EXISTS idx_offer_negotiation_round ON real_estate.real_estate_offer(negotiation_round);
-CREATE INDEX IF NOT EXISTS idx_offer_last_action_by ON real_estate.real_estate_offer(last_action_by);
-CREATE INDEX IF NOT EXISTS idx_offer_last_action_at ON real_estate.real_estate_offer(last_action_at);
-CREATE INDEX IF NOT EXISTS idx_offer_status_round ON real_estate.real_estate_offer(offer_status, negotiation_round);
-CREATE INDEX IF NOT EXISTS idx_offer_review_window_start ON real_estate.real_estate_offer(review_window_start);
-CREATE INDEX IF NOT EXISTS idx_offer_review_window_end ON real_estate.real_estate_offer(review_window_end);
-CREATE INDEX IF NOT EXISTS idx_offer_initiator_review_status ON real_estate.real_estate_offer(initiator_review_status);
-CREATE INDEX IF NOT EXISTS idx_offer_recipient_review_status ON real_estate.real_estate_offer(recipient_review_status);
+CREATE INDEX IF NOT EXISTS idx_offer_key ON real_estate.offer(offer_key);
+CREATE INDEX IF NOT EXISTS idx_offer_property_uuid ON real_estate.offer(property_uuid);
+CREATE INDEX IF NOT EXISTS idx_offer_initiator ON real_estate.offer(initiator_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_offer_recipient ON real_estate.offer(recipient_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_offer_status ON real_estate.offer(offer_status);
+CREATE INDEX IF NOT EXISTS idx_offer_is_active ON real_estate.offer(is_active);
+CREATE INDEX IF NOT EXISTS idx_offer_negotiation_round ON real_estate.offer(negotiation_round);
+CREATE INDEX IF NOT EXISTS idx_offer_last_action_by ON real_estate.offer(last_action_by);
+CREATE INDEX IF NOT EXISTS idx_offer_last_action_at ON real_estate.offer(last_action_at);
+CREATE INDEX IF NOT EXISTS idx_offer_status_round ON real_estate.offer(offer_status, negotiation_round);
+CREATE INDEX IF NOT EXISTS idx_offer_review_window_start ON real_estate.offer(review_window_start);
+CREATE INDEX IF NOT EXISTS idx_offer_review_window_end ON real_estate.offer(review_window_end);
+CREATE INDEX IF NOT EXISTS idx_offer_initiator_review_status ON real_estate.offer(initiator_review_status);
+CREATE INDEX IF NOT EXISTS idx_offer_recipient_review_status ON real_estate.offer(recipient_review_status);
 
 -- Review indexes
-CREATE INDEX IF NOT EXISTS idx_review_uuid ON real_estate.real_estate_review(review_uuid);
-CREATE INDEX IF NOT EXISTS idx_review_reviewer ON real_estate.real_estate_review(reviewer_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_review_reviewee ON real_estate.real_estate_review(reviewee_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_review_property_uuid ON real_estate.real_estate_review(property_uuid);
-CREATE INDEX IF NOT EXISTS idx_review_offer_id ON real_estate.real_estate_review(offer_id);
-CREATE INDEX IF NOT EXISTS idx_review_type ON real_estate.real_estate_review(review_type);
-CREATE INDEX IF NOT EXISTS idx_review_rating ON real_estate.real_estate_review(rating);
-CREATE INDEX IF NOT EXISTS idx_review_is_verified ON real_estate.real_estate_review(is_verified);
-CREATE INDEX IF NOT EXISTS idx_review_is_public ON real_estate.real_estate_review(is_public);
-CREATE INDEX IF NOT EXISTS idx_review_created_at ON real_estate.real_estate_review(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_review_uuid ON real_estate.review(review_uuid);
+CREATE INDEX IF NOT EXISTS idx_review_reviewer ON real_estate.review(reviewer_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_review_reviewee ON real_estate.review(reviewee_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_review_property_uuid ON real_estate.review(property_uuid);
+CREATE INDEX IF NOT EXISTS idx_review_offer_id ON real_estate.review(offer_id);
+CREATE INDEX IF NOT EXISTS idx_review_type ON real_estate.review(review_type);
+CREATE INDEX IF NOT EXISTS idx_review_rating ON real_estate.review(rating);
+CREATE INDEX IF NOT EXISTS idx_review_is_verified ON real_estate.review(is_verified);
+CREATE INDEX IF NOT EXISTS idx_review_is_public ON real_estate.review(is_public);
+CREATE INDEX IF NOT EXISTS idx_review_created_at ON real_estate.review(created_at DESC);
 
 -- Notification indexes
-CREATE INDEX IF NOT EXISTS idx_notification_type_key ON real_estate.real_estate_notification_type(type_key);
-CREATE INDEX IF NOT EXISTS idx_notification_type_category ON real_estate.real_estate_notification_type(category);
-CREATE INDEX IF NOT EXISTS idx_notification_type_active ON real_estate.real_estate_notification_type(is_active);
-CREATE INDEX IF NOT EXISTS idx_notification_type_id ON real_estate.real_estate_notification(type_id);
-CREATE INDEX IF NOT EXISTS idx_notification_recipient ON real_estate.real_estate_notification(recipient_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_notification_sender ON real_estate.real_estate_notification(sender_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_notification_is_read ON real_estate.real_estate_notification(is_read);
-CREATE INDEX IF NOT EXISTS idx_notification_is_archived ON real_estate.real_estate_notification(is_archived);
-CREATE INDEX IF NOT EXISTS idx_notification_priority ON real_estate.real_estate_notification(priority);
-CREATE INDEX IF NOT EXISTS idx_notification_created_at ON real_estate.real_estate_notification(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_notification_expires_at ON real_estate.real_estate_notification(expires_at);
-CREATE INDEX IF NOT EXISTS idx_notification_preference_user ON real_estate.real_estate_notification_preference(user_firebase_uid);
-CREATE INDEX IF NOT EXISTS idx_notification_preference_type ON real_estate.real_estate_notification_preference(type_id);
+CREATE INDEX IF NOT EXISTS idx_notification_type_key ON real_estate.notification_type(type_key);
+CREATE INDEX IF NOT EXISTS idx_notification_type_category ON real_estate.notification_type(category);
+CREATE INDEX IF NOT EXISTS idx_notification_type_active ON real_estate.notification_type(is_active);
+CREATE INDEX IF NOT EXISTS idx_notification_type_id ON real_estate.notification(type_id);
+CREATE INDEX IF NOT EXISTS idx_notification_recipient ON real_estate.notification(recipient_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_notification_sender ON real_estate.notification(sender_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_notification_is_read ON real_estate.notification(is_read);
+CREATE INDEX IF NOT EXISTS idx_notification_is_archived ON real_estate.notification(is_archived);
+CREATE INDEX IF NOT EXISTS idx_notification_priority ON real_estate.notification(priority);
+CREATE INDEX IF NOT EXISTS idx_notification_created_at ON real_estate.notification(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notification_expires_at ON real_estate.notification(expires_at);
+CREATE INDEX IF NOT EXISTS idx_notification_preference_user ON real_estate.notification_preference(user_firebase_uid);
+CREATE INDEX IF NOT EXISTS idx_notification_preference_type ON real_estate.notification_preference(type_id);
 
 -- Chat indexes
 CREATE INDEX IF NOT EXISTS idx_chat_room_updated_at ON real_estate.chat_room(updated_at DESC);
@@ -423,32 +446,32 @@ $$ LANGUAGE plpgsql;
 
 -- Update timestamps for all tables
 CREATE TRIGGER trigger_update_user_updated_at
-    BEFORE UPDATE ON real_estate.real_estate_user
+    BEFORE UPDATE ON real_estate.user
     FOR EACH ROW
     EXECUTE FUNCTION real_estate.update_updated_at_column();
 
 CREATE TRIGGER trigger_update_property_updated_at
-    BEFORE UPDATE ON real_estate.real_estate_property_listing
+    BEFORE UPDATE ON real_estate.property_listing
     FOR EACH ROW
     EXECUTE FUNCTION real_estate.update_updated_at_column();
 
 CREATE TRIGGER trigger_update_offer_updated_at
-    BEFORE UPDATE ON real_estate.real_estate_offer
+    BEFORE UPDATE ON real_estate.offer
     FOR EACH ROW
     EXECUTE FUNCTION real_estate.update_updated_at_column();
 
 CREATE TRIGGER trigger_update_review_updated_at
-    BEFORE UPDATE ON real_estate.real_estate_review
+    BEFORE UPDATE ON real_estate.review
     FOR EACH ROW
     EXECUTE FUNCTION real_estate.update_updated_at_column();
 
 CREATE TRIGGER trigger_update_notification_type_updated_at
-    BEFORE UPDATE ON real_estate.real_estate_notification_type
+    BEFORE UPDATE ON real_estate.notification_type
     FOR EACH ROW
     EXECUTE FUNCTION real_estate.update_updated_at_column();
 
 CREATE TRIGGER trigger_update_notification_preference_updated_at
-    BEFORE UPDATE ON real_estate.real_estate_notification_preference
+    BEFORE UPDATE ON real_estate.notification_preference
     FOR EACH ROW
     EXECUTE FUNCTION real_estate.update_updated_at_column();
 
@@ -520,7 +543,7 @@ SELECT
     ru.photo_url,
     ru.verified
 FROM real_estate.chat_room_participant crp
-LEFT JOIN real_estate.real_estate_user ru ON crp.user_firebase_uid = ru.firebase_uid
+LEFT JOIN real_estate.user ru ON crp.user_firebase_uid = ru.firebase_uid
 WHERE crp.is_active = true;
 
 -- ========================================
@@ -528,7 +551,7 @@ WHERE crp.is_active = true;
 -- ========================================
 
 -- Insert default notification types
-INSERT INTO real_estate.real_estate_notification_type (type_key, name, description, category, template) VALUES
+INSERT INTO real_estate.notification_type (type_key, name, description, category, template) VALUES
 ('offer_created', 'New Offer Received', 'You have received a new rental offer', 'offer', '{{sender_name}} has made an offer for {{property_title}} at {{rent_price}}'),
 ('offer_accepted', 'Offer Accepted', 'Your offer has been accepted', 'offer', 'Your offer for {{property_title}} has been accepted!'),
 ('offer_rejected', 'Offer Rejected', 'Your offer has been rejected', 'offer', 'Your offer for {{property_title}} has been rejected'),
@@ -609,12 +632,12 @@ DROP TRIGGER IF EXISTS trigger_update_chat_room_timestamps ON real_estate.chat_m
 DROP TRIGGER IF EXISTS trigger_update_chat_presence_updated_at ON real_estate.chat_presence CASCADE;
 DROP TRIGGER IF EXISTS trigger_update_chat_message_updated_at ON real_estate.chat_message CASCADE;
 DROP TRIGGER IF EXISTS trigger_update_chat_room_updated_at ON real_estate.chat_room CASCADE;
-DROP TRIGGER IF EXISTS trigger_update_notification_preference_updated_at ON real_estate.real_estate_notification_preference CASCADE;
-DROP TRIGGER IF EXISTS trigger_update_notification_type_updated_at ON real_estate.real_estate_notification_type CASCADE;
-DROP TRIGGER IF EXISTS trigger_update_review_updated_at ON real_estate.real_estate_review CASCADE;
-DROP TRIGGER IF EXISTS trigger_update_offer_updated_at ON real_estate.real_estate_offer CASCADE;
-DROP TRIGGER IF EXISTS trigger_update_property_updated_at ON real_estate.real_estate_property_listing CASCADE;
-DROP TRIGGER IF EXISTS trigger_update_user_updated_at ON real_estate.real_estate_user CASCADE;
+DROP TRIGGER IF EXISTS trigger_update_notification_preference_updated_at ON real_estate.notification_preference CASCADE;
+DROP TRIGGER IF EXISTS trigger_update_notification_type_updated_at ON real_estate.notification_type CASCADE;
+DROP TRIGGER IF EXISTS trigger_update_review_updated_at ON real_estate.review CASCADE;
+DROP TRIGGER IF EXISTS trigger_update_offer_updated_at ON real_estate.offer CASCADE;
+DROP TRIGGER IF EXISTS trigger_update_property_updated_at ON real_estate.property_listing CASCADE;
+DROP TRIGGER IF EXISTS trigger_update_user_updated_at ON real_estate.user CASCADE;
 
 -- Drop functions
 DROP FUNCTION IF EXISTS real_estate.cleanup_old_typing_indicators() CASCADE;
@@ -630,13 +653,13 @@ DROP TABLE IF EXISTS real_estate.chat_presence CASCADE;
 DROP TABLE IF EXISTS real_estate.chat_message CASCADE;
 DROP TABLE IF EXISTS real_estate.chat_room_participant CASCADE;
 DROP TABLE IF EXISTS real_estate.chat_room CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_notification_preference CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_notification CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_notification_type CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_review CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_offer CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_property_listing CASCADE;
-DROP TABLE IF EXISTS real_estate.real_estate_user CASCADE;
+DROP TABLE IF EXISTS real_estate.notification_preference CASCADE;
+DROP TABLE IF EXISTS real_estate.notification CASCADE;
+DROP TABLE IF EXISTS real_estate.notification_type CASCADE;
+DROP TABLE IF EXISTS real_estate.review CASCADE;
+DROP TABLE IF EXISTS real_estate.offer CASCADE;
+DROP TABLE IF EXISTS real_estate.property_listing CASCADE;
+DROP TABLE IF EXISTS real_estate.user CASCADE;
 
 -- Drop schema
 DROP SCHEMA IF EXISTS real_estate CASCADE;

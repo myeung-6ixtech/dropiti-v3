@@ -42,10 +42,15 @@ export default function ReviewsPage() {
         
         // Separate reviews given vs received
         const given = allReviews.filter((review: Review) => review.reviewerFirebaseUid === authUser.id);
-        const received = allReviews.filter((review: Review) => review.reviewedUserFirebaseUid === authUser.id);
+        const received = allReviews.filter((review: Review) => review.revieweeFirebaseUid === authUser.id);
         
         setReviewsGiven(given);
         setReviewsReceived(received);
+      } else if (reviewsResponse.status === 500) {
+        // Handle 500 errors gracefully (likely empty database)
+        console.warn('Reviews API returned 500, likely empty database. Setting empty reviews.');
+        setReviewsGiven([]);
+        setReviewsReceived([]);
       } else {
         console.warn('Failed to fetch reviews:', reviewsResponse.status, reviewsResponse.statusText);
       }
@@ -88,7 +93,7 @@ export default function ReviewsPage() {
           offerUuid: selectedOpportunity.offerUuid,
           reviewType: selectedOpportunity.reviewType,
           reviewerId: authUser.id,
-          reviewedUserId: selectedOpportunity.otherPartyId,
+          revieweeUserId: selectedOpportunity.otherPartyId,
         }),
       });
 
