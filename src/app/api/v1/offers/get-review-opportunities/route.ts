@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_REVIEW_OPPORTUNITIES_QUERY = `
-  query GetReviewOpportunities($userId: String!, $minEnd: timestamptz!) {
+  query GetReviewOpportunities($userId: String!, $minEnd: timestamp!) {
     real_estate_offer(
       where: {
         _and: [

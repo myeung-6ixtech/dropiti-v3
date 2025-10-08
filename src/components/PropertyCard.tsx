@@ -88,29 +88,13 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
         }
       }
       
-      console.log('PropertyCard: Extracted district:', district, 'country:', country);
       
       // If we have both district and country, show them
       if (district && country && district !== country) {
         const result = `${district}, ${country}`;
-        console.log('PropertyCard: Simplified location (District, Country):', result);
         return result;
       }
       
-      // If we only have country, show it
-      if (country) {
-        console.log('PropertyCard: Simplified location (Country only):', country);
-        return country;
-      }
-      
-      // If we only have district, show it
-      if (district) {
-        console.log('PropertyCard: Simplified location (District only):', district);
-        return district;
-      }
-      
-      // Fallback: show the last part
-      console.log('PropertyCard: Simplified location (fallback):', parts[parts.length - 1]);
       return parts[parts.length - 1];
     }
     

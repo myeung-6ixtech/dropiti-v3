@@ -3,7 +3,6 @@ import Footer from '@/components/common/Footer';
 import HeroSection from '@/components/common/HeroSection';
 import ModernHeroSection from '@/components/common/ModernHeroSection';
 import CommercialSections from '@/components/common/CommercialSections';
-import LatestNewsSection from '@/components/common/LatestNewsSection';
 import TrustSection from '@/components/common/TrustSection';
 
 export const metadata: Metadata = {
@@ -36,7 +35,6 @@ export default function HomePage() {
       <CommercialSections />
 
       {/* Latest News Section */}
-      <LatestNewsSection />
 
       {/* Trust Section - Cyberport Partnership */}
       <TrustSection />

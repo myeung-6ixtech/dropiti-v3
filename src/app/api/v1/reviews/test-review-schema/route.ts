@@ -27,9 +27,7 @@ const TEST_REVIEW_TABLE_QUERY = `
       offer_uuid
       review_type
       rating
-      comment
       reviewer_firebase_uid
-      reviewee_firebase_uid
       property_uuid
       is_public
       is_verified

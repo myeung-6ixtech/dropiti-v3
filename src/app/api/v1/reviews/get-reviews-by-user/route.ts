@@ -6,7 +6,6 @@ interface GraphQLReview {
   id: string;
   review_uuid: string;
   reviewer_firebase_uid: string;
-  reviewee_firebase_uid: string;
   review_type: string;
   rating: number;
   title?: string | null;
@@ -53,15 +52,12 @@ interface GraphQLPropertyResponse {
   real_estate_property_listing: GraphQLProperty[];
 }
 
-// GraphQL query to get reviews by user (either as reviewer or reviewed)
+// GraphQL query to get reviews by user (as reviewer only - temporary fix for old database)
 const GET_REVIEWS_BY_USER_QUERY = `
   query GetReviewsByUser($userFirebaseUid: String!, $reviewType: String, $limit: Int, $offset: Int) {
     real_estate_review(
       where: {
-        _or: [
-          { reviewer_firebase_uid: { _eq: $userFirebaseUid } },
-          { reviewee_firebase_uid: { _eq: $userFirebaseUid } }
-        ]
+        reviewer_firebase_uid: { _eq: $userFirebaseUid }
         review_type: { _eq: $reviewType }
       }
       order_by: { created_at: desc }
@@ -71,7 +67,6 @@ const GET_REVIEWS_BY_USER_QUERY = `
       id
       review_uuid
       reviewer_firebase_uid
-      reviewee_firebase_uid
       review_type
       rating
       title
@@ -87,15 +82,12 @@ const GET_REVIEWS_BY_USER_QUERY = `
   }
 `;
 
-// GraphQL query to get reviews by user without reviewType filter
+// GraphQL query to get reviews by user without reviewType filter (as reviewer only - temporary fix)
 const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
   query GetReviewsByUser($userFirebaseUid: String!, $limit: Int, $offset: Int) {
     real_estate_review(
       where: {
-        _or: [
-          { reviewer_firebase_uid: { _eq: $userFirebaseUid } },
-          { reviewee_firebase_uid: { _eq: $userFirebaseUid } }
-        ]
+        reviewer_firebase_uid: { _eq: $userFirebaseUid }
       }
       order_by: { created_at: desc }
       limit: $limit
@@ -104,7 +96,6 @@ const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
       id
       review_uuid
       reviewer_firebase_uid
-      reviewee_firebase_uid
       review_type
       rating
       title
@@ -209,8 +200,8 @@ export async function GET(request: NextRequest) {
 
     // Collect unique user IDs and property UUIDs to fetch additional data
     const uniqueUserIds = [...new Set([
-      ...reviewsData.real_estate_review.map(review => review.reviewer_firebase_uid),
-      ...reviewsData.real_estate_review.map(review => review.reviewee_firebase_uid)
+      ...reviewsData.real_estate_review.map(review => review.reviewer_firebase_uid)
+      // Note: reviewee_firebase_uid not available in old database schema
     ])];
     
     const uniquePropertyUuids = [...new Set(
@@ -248,14 +239,14 @@ export async function GET(request: NextRequest) {
     // Transform and combine data
     const transformedReviews = reviewsData.real_estate_review.map((review: GraphQLReview) => {
       const reviewer = userDetails[review.reviewer_firebase_uid];
-      const reviewee = userDetails[review.reviewee_firebase_uid];
+      // Note: reviewee_firebase_uid not available in old database schema
       const property = review.property_uuid ? propertyDetails[review.property_uuid] : null;
 
       return {
         id: review.id,
         reviewUuid: review.review_uuid,
         reviewerFirebaseUid: review.reviewer_firebase_uid,
-        revieweeFirebaseUid: review.reviewee_firebase_uid,
+        revieweeFirebaseUid: null, // Not available in old database schema
         reviewType: review.review_type,
         rating: review.rating,
         title: review.title || undefined,
@@ -274,13 +265,8 @@ export async function GET(request: NextRequest) {
           email: reviewer.email,
           photoUrl: reviewer.photo_url || undefined,
         } : null,
-        // Include reviewee details
-        reviewee: reviewee ? {
-          uuid: reviewee.uuid,
-          displayName: reviewee.display_name,
-          email: reviewee.email,
-          photoUrl: reviewee.photo_url || undefined,
-        } : null,
+        // Include reviewee details (not available in old database schema)
+        reviewee: null, // Not available in old database schema
         // Include property details
         property: property ? {
           propertyUuid: property.uuid,
