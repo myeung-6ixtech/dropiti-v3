@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getSafeProfileImage } from '@/lib/utils';
 import { FiHome, FiSearch, FiLayers, FiUser } from 'react-icons/fi';
@@ -17,7 +17,7 @@ interface NavItem {
   id: string;
   label: string;
   href: string;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   isActive: () => boolean;
   onClick?: (e: React.MouseEvent) => void;
   showAvatar?: boolean;
@@ -25,7 +25,6 @@ interface NavItem {
 
 export default function MobileBottomNav({ className = '' }: MobileBottomNavProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { isAuthenticated, user } = useAuth();
   
   // Scroll direction detection for auto-hide functionality
@@ -36,11 +35,11 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
     showOnScrollUp: true,
   });
 
-  const isActive = (path: string) => {
+  const isActive = (path: string): boolean => {
     if (path === '/profile') {
       // Check if we're on dashboard or user profile pages
       return pathname.startsWith('/dashboard') || 
-             (user?.uuid && pathname.startsWith(`/user/${user.uuid}`));
+             (user?.uuid && pathname.startsWith(`/user/${user.uuid}`)) || false;
     }
     return pathname === path;
   };
@@ -76,7 +75,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
       href: isAuthenticated && user?.uuid ? `/user/${user.uuid}` : '/auth/signin',
       icon: FiUser,
       isActive: () => isActive('/profile'),
-      showAvatar: isAuthenticated && user?.avatar
+      showAvatar: !!(isAuthenticated && user?.avatar)
     }
   ];
 
