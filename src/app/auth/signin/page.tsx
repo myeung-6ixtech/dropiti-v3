@@ -17,8 +17,13 @@ export default function SignInPage() {
     if (!isLoading && isAuthenticated && !redirectedRef.current) {
       redirectedRef.current = true;
       showToast('success', 'User successfully authenticated');
+      
+      // Check for callback URL in search params
+      const urlParams = new URLSearchParams(window.location.search);
+      const callbackUrl = urlParams.get('callbackUrl');
+      
       // Use replace to prevent back button issues
-      router.replace('/dashboard');
+      router.replace(callbackUrl || '/dashboard');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isLoading]);

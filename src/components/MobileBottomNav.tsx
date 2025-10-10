@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { getSafeProfileImage } from '@/lib/utils';
 import { FiHome, FiSearch, FiLayers, FiUser } from 'react-icons/fi';
@@ -13,8 +13,19 @@ interface MobileBottomNavProps {
   className?: string;
 }
 
+interface NavItem {
+  id: string;
+  label: string;
+  href: string;
+  icon: React.ComponentType<any>;
+  isActive: () => boolean;
+  onClick?: (e: React.MouseEvent) => void;
+  showAvatar?: boolean;
+}
+
 export default function MobileBottomNav({ className = '' }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { isAuthenticated, user } = useAuth();
   
   // Scroll direction detection for auto-hide functionality
@@ -34,7 +45,9 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
     return pathname === path;
   };
 
-  const navItems = [
+  // Remove custom dashboard click handler to rely on native Link navigation
+
+  const navItems: NavItem[] = [
     {
       id: 'home',
       label: 'Home',
