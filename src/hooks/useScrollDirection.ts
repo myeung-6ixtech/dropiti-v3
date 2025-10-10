@@ -13,6 +13,7 @@ interface UseScrollDirectionOptions {
   debounceMs?: number; // Debounce delay for scroll events
   hideOnScrollDown?: boolean; // Whether to hide nav on scroll down
   showOnScrollUp?: boolean; // Whether to show nav on scroll up
+  rapidScrollThreshold?: number; // Minimum scroll speed to hide nav (pixels per scroll event)
 }
 
 export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
@@ -21,6 +22,7 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
     debounceMs = 100,
     hideOnScrollDown = true,
     showOnScrollUp = true,
+    rapidScrollThreshold = 30,
   } = options;
 
   const [scrollDirection, setScrollDirection] = useState<ScrollDirection>({
@@ -65,9 +67,12 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
       scrollY: currentScrollY,
     });
 
-    // Update visibility based on scroll direction
+    // Update visibility based on scroll direction and speed
     if (newDirection === 'down' && hideOnScrollDown && !atBottom) {
-      setIsVisible(false);
+      // Only hide on rapid scroll down
+      if (scrollDifference >= rapidScrollThreshold) {
+        setIsVisible(false);
+      }
     } else if (newDirection === 'up' && showOnScrollUp) {
       setIsVisible(true);
     }
@@ -79,10 +84,10 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
       clearTimeout(idleTimerRef.current);
     }
 
-    // Set new idle timer - show nav after 2 seconds of idle
+    // Set new idle timer - show nav after 1 second of idle (reduced from 2s)
     idleTimerRef.current = setTimeout(() => {
       setIsVisible(true);
-    }, 2000);
+    }, 1000);
 
     // Reset scrolling state after debounce
     setTimeout(() => {
@@ -91,7 +96,7 @@ export const useScrollDirection = (options: UseScrollDirectionOptions = {}) => {
         isScrolling: false,
       }));
     }, debounceMs);
-  }, [lastScrollY, threshold, debounceMs, hideOnScrollDown, showOnScrollUp]);
+  }, [lastScrollY, threshold, debounceMs, hideOnScrollDown, showOnScrollUp, rapidScrollThreshold]);
 
   // Throttled scroll handler for better performance
   useEffect(() => {

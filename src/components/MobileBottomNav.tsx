@@ -29,10 +29,11 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
   
   // Scroll direction detection for auto-hide functionality
   const { isVisible } = useScrollDirection({
-    threshold: 5, // Minimum scroll distance to trigger
-    debounceMs: 150, // Debounce delay
+    threshold: 20, // Higher threshold for rapid scroll detection
+    debounceMs: 100, // Faster response
     hideOnScrollDown: true,
     showOnScrollUp: true,
+    rapidScrollThreshold: 50, // Only hide on rapid scroll
   });
 
   const isActive = (path: string): boolean => {

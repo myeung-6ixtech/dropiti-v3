@@ -4,18 +4,10 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     // Add any additional middleware logic here
-    // Ensure proper redirect for dashboard access
+    // For dashboard routes, let the layout handle authentication
+    // This prevents redirect loops between middleware and layout
     if (req.nextUrl.pathname.startsWith('/dashboard')) {
-      // If user is authenticated, allow access
-      if (req.nextauth.token) {
-        return NextResponse.next();
-      }
-      // If not authenticated, redirect to signin with callback URL
-      const signInUrl = new URL('/auth/signin', req.url);
-      // Preserve full intended URL (pathname + search) for proper post-login redirect
-      const fullDestination = req.nextUrl.pathname + (req.nextUrl.search || '');
-      signInUrl.searchParams.set('callbackUrl', fullDestination);
-      return NextResponse.redirect(signInUrl);
+      return NextResponse.next();
     }
     
     return NextResponse.next();
@@ -23,9 +15,9 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Allow access to dashboard if token exists
+        // For dashboard routes, always allow (layout will handle auth)
         if (req.nextUrl.pathname.startsWith('/dashboard')) {
-          return !!token;
+          return true;
         }
         // For other protected routes, check token
         return !!token;
