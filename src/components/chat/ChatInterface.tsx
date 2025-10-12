@@ -8,6 +8,7 @@ import ChatSidebar from './ChatSidebar';
 import { useRealTimeChat } from '@/hooks/useRealTimeChat';
 import { convertMessageToUIMessage } from '@/lib/chat-api';
 import { useAuth } from '@/context/AuthContext';
+import { MessageSkeleton } from '@/components/skeleton';
 
 interface Message {
   id: string;
@@ -236,9 +237,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {isLoadingMessages && uiMessages.length === 0 ? (
-                <div className="flex justify-center items-center h-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                </div>
+                <MessageSkeleton count={4} />
               ) : (
                 <>
                   {uiMessages.map((message) => (

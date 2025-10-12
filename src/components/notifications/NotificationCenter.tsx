@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useMobileNotifications } from '@/context/MobileNotificationsContext';
+import { useSidebar } from '@/context/SidebarContext';
 import { FiBell, FiX, FiCheck, FiArchive } from 'react-icons/fi';
+import { NotificationSkeleton } from '@/components/skeleton';
 
 export default function NotificationCenter() {
   const {
@@ -12,7 +15,17 @@ export default function NotificationCenter() {
     archiveNotification,
   } = useNotifications();
 
+  const { openBottomSheet } = useMobileNotifications();
+  const { isMobile } = useSidebar();
   const [isOpen, setIsOpen] = useState(false);
+
+  const handleBellClick = () => {
+    if (isMobile) {
+      openBottomSheet();
+    } else {
+      setIsOpen(!isOpen);
+    }
+  };
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString);
@@ -44,7 +57,7 @@ export default function NotificationCenter() {
     <div className="relative">
       {/* Notification Bell */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleBellClick}
         className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full transition-colors"
       >
         <FiBell className="w-5 h-5" />
@@ -90,10 +103,7 @@ export default function NotificationCenter() {
 
             <div className="max-h-96 overflow-y-auto">
               {isLoading ? (
-                <div className="p-4 text-center text-gray-500">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                  Loading...
-                </div>
+                <NotificationSkeleton count={3} className="p-2" />
               ) : notifications.length === 0 ? (
                 <div className="p-4 text-center text-gray-500">
                   <FiBell className="h-6 w-6 mx-auto mb-2 mt-2 text-gray-300" />

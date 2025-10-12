@@ -65,14 +65,14 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
     // Only show Dashboard for authenticated users
     ...(isAuthenticated ? [{
       id: 'dashboard',
-      label: 'Dashboard',
+      label: 'Manage',
       href: '/dashboard',
       icon: FiLayers,
       isActive: () => isActive('/dashboard')
     }] : []),
     {
       id: 'profile',
-      label: 'Profile',
+      label: isAuthenticated ? 'Profile' : 'Sign In',
       href: isAuthenticated && user?.uuid ? `/user/${user.uuid}` : '/auth/signin',
       icon: FiUser,
       isActive: () => isActive('/profile'),

@@ -17,12 +17,15 @@
   }
 }
 
-/* Bottom Sheet */
+/* Bottom Sheet - Standardized sizing */
 .mobile-chat-bottom-sheet {
   @apply fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-[101];
-  height: 85vh;
+  height: 75vh;
+  max-height: 600px;
+  min-height: 400px;
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
+  overscroll-behavior: contain;
 }
 
 @keyframes slideUp {
@@ -34,13 +37,15 @@
   }
 }
 
-/* Handle Bar */
+/* Handle Bar - Enhanced for better touch targets */
 .mobile-chat-handle-container {
-  @apply flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing;
+  @apply flex justify-center pt-4 pb-3 cursor-grab active:cursor-grabbing;
+  min-height: 44px; /* iOS minimum touch target */
 }
 
 .mobile-chat-handle {
   @apply w-12 h-1.5 bg-gray-400 rounded-full transition-colors;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .mobile-chat-handle-container:hover .mobile-chat-handle {
@@ -57,13 +62,19 @@
 }
 
 .mobile-chat-close-button {
-  @apply p-2 hover:bg-gray-100 rounded-full transition-colors;
+  @apply p-3 hover:bg-gray-100 rounded-full transition-colors;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Chat List */
+/* Chat List - Standardized height calculation */
 .mobile-chat-list {
   @apply overflow-y-auto;
-  height: calc(95vh - 80px);
+  height: calc(75vh - 100px);
+  max-height: calc(600px - 100px);
 }
 
 .mobile-chat-loading {
@@ -93,6 +104,7 @@
 
 .mobile-chat-contact-item {
   @apply w-full flex items-center space-x-4 px-6 py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left;
+  min-height: 60px; /* Better touch target */
 }
 
 .mobile-chat-contact-avatar {
@@ -204,14 +216,76 @@
   }
 }
 
-/* Mobile optimizations */
-@media (max-width: 767px) {
+/* Device-specific optimizations */
+
+/* iPhone 16 and similar (6.1") */
+@media screen and (max-width: 430px) and (max-height: 932px) {
   .mobile-chat-bottom-sheet {
-    height: 95vh;
+    height: 70vh;
+    max-height: 550px;
   }
   
   .mobile-chat-list {
-    height: calc(95vh - 80px);
+    height: calc(70vh - 100px);
+    max-height: calc(550px - 100px);
+  }
+}
+
+/* iPhone 16 Plus/Pro Max and similar (6.7") */
+@media screen and (max-width: 430px) and (min-height: 932px) {
+  .mobile-chat-bottom-sheet {
+    height: 75vh;
+    max-height: 650px;
+  }
+  
+  .mobile-chat-list {
+    height: calc(75vh - 100px);
+    max-height: calc(650px - 100px);
+  }
+}
+
+/* Smaller devices */
+@media screen and (max-width: 375px) {
+  .mobile-chat-bottom-sheet {
+    height: 65vh;
+    max-height: 500px;
+  }
+  
+  .mobile-chat-list {
+    height: calc(65vh - 100px);
+    max-height: calc(500px - 100px);
+  }
+}
+
+/* Dynamic viewport height support for better mobile compatibility */
+@supports (height: 100dvh) {
+  .mobile-chat-bottom-sheet {
+    height: 75dvh;
+  }
+  
+  @media screen and (max-width: 430px) and (max-height: 932px) {
+    .mobile-chat-bottom-sheet {
+      height: 70dvh;
+    }
+  }
+  
+  @media screen and (max-width: 430px) and (min-height: 932px) {
+    .mobile-chat-bottom-sheet {
+      height: 75dvh;
+    }
+  }
+  
+  @media screen and (max-width: 375px) {
+    .mobile-chat-bottom-sheet {
+      height: 65dvh;
+    }
+  }
+}
+
+/* Safe area support for iPhone */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .mobile-chat-bottom-sheet {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 

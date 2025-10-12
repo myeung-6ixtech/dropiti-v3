@@ -11,11 +11,22 @@ import {
   CogIcon
 } from '@heroicons/react/24/outline';
 
+// Area code options for supported regions
+const AREA_CODES = [
+  { code: '+852', country: 'Hong Kong', flag: '🇭🇰' },
+  { code: '+1', country: 'United States', flag: '🇺🇸' },
+  { code: '+86', country: 'China', flag: '🇨🇳' },
+  { code: '+65', country: 'Singapore', flag: '🇸🇬' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
+  { code: '+61', country: 'Australia', flag: '🇦🇺' },
+];
+
 interface UserSettings {
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  areaCode: string;
   preferences: {
     language: string;
     timezone: string;
@@ -23,18 +34,44 @@ interface UserSettings {
   };
 }
 
+// Phone number parsing function
+const parsePhoneNumber = (phone: string) => {
+  // Extract area code and number from existing phone
+  const match = phone.match(/^(\+\d{1,3})\s*(.+)$/);
+  if (match) {
+    return { areaCode: match[1], number: match[2] };
+  }
+  return { areaCode: '+852', number: phone }; // Default fallback
+};
+
+// Phone validation function
+const validatePhone = (phone: string, areaCode: string) => {
+  const phoneRegex = {
+    '+852': /^[0-9]{8}$/, // Hong Kong: 8 digits
+    '+1': /^[0-9]{10}$/, // US: 10 digits
+    '+86': /^[0-9]{11}$/, // China: 11 digits
+    '+65': /^[0-9]{8}$/, // Singapore: 8 digits
+    '+44': /^[0-9]{10,11}$/, // UK: 10-11 digits
+    '+61': /^[0-9]{9}$/, // Australia: 9 digits
+  };
+  
+  return phoneRegex[areaCode as keyof typeof phoneRegex]?.test(phone.replace(/\s/g, '')) || false;
+};
+
 export default function SettingsPage() {
   const { user: authUser } = useAuth();
   const { locale, setLocale, t } = useLanguage();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [areaCode, setAreaCode] = useState('+852'); // Default to Hong Kong
   
   const [settings, setSettings] = useState<UserSettings>({
     firstName: 'John',
     lastName: 'Doe',
     email: 'demo@example.com',
-    phone: '+852 1234 5678',
+    phone: '1234 5678',
+    areaCode: '+852',
     preferences: {
       language: 'English',
       timezone: 'Asia/Hong_Kong (UTC+8)',
@@ -47,6 +84,7 @@ export default function SettingsPage() {
     lastName: '',
     email: '',
     phone: '',
+    areaCode: '+852',
     preferences: {
       language: 'English',
       timezone: 'Asia/Hong_Kong (UTC+8)',
@@ -78,18 +116,23 @@ export default function SettingsPage() {
             const userData = response.data;
             console.log('User data received:', userData);
             
+            // Parse existing phone number
+            const { areaCode: parsedAreaCode, number: phoneNumber } = parsePhoneNumber(userData.phone_number || '+852 1234 5678');
+            
             // Handle missing fields gracefully with fallbacks - ensure all values are defined
             const newSettings: UserSettings = {
               firstName: userData.first_name || userData.display_name?.split(' ')[0] || 'John',
               lastName: userData.last_name || userData.display_name?.split(' ').slice(1).join(' ') || 'Doe',
               email: userData.email || 'demo@example.com',
-              phone: userData.phone_number || '+852 1234 5678',
+              phone: phoneNumber,
+              areaCode: parsedAreaCode,
               preferences: {
                 language: String(userData.preferences?.language || 'English'),
                 timezone: String(userData.preferences?.timezone || 'Asia/Hong_Kong (UTC+8)'),
                 currency: String(userData.preferences?.currency || 'HKD (Hong Kong Dollar)'),
               },
             };
+            setAreaCode(parsedAreaCode); // Set the area code state
             setSettings(newSettings);
             setTempSettings(newSettings);
           } else {
@@ -163,6 +206,12 @@ export default function SettingsPage() {
       return;
     }
 
+    // Validate phone number
+    if (!validatePhone(tempSettings.phone, areaCode)) {
+      showToast('error', 'Please enter a valid phone number for the selected country');
+      return;
+    }
+
     try {
       setIsLoading(true);
 
@@ -171,7 +220,7 @@ export default function SettingsPage() {
       // Prepare updates for the API
       const updates: Record<string, unknown> = {
         display_name: `${tempSettings.firstName} ${tempSettings.lastName}`.trim(),
-        phone_number: tempSettings.phone,
+        phone_number: `${areaCode} ${tempSettings.phone}`.trim(), // Combine area code and phone
       };
 
       // Only add complex objects if they exist in the user data
@@ -267,12 +316,29 @@ export default function SettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="form-label">Phone</label>
-                    <input
-                      type="tel"
-                      value={tempSettings.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="form-input"
-                    />
+                    <div className="flex space-x-2">
+                      <select
+                        value={areaCode}
+                        onChange={(e) => setAreaCode(e.target.value)}
+                        className="form-select max-w-[100px] text-sm"
+                      >
+                        {AREA_CODES.map((area) => (
+                          <option key={area.code} value={area.code}>
+                            {area.flag} {area.code}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        value={tempSettings.phone}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        className="form-input flex-1"
+                        placeholder="1234 5678"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Enter your phone number without the country code
+                    </p>
                   </div>
                 </div>
               </div>

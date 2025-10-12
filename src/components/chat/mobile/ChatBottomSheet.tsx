@@ -8,6 +8,7 @@ import { useToast } from '@/context/ToastContext';
 import { useMobileChat } from '@/context/MobileChatContext';
 import { chatAPI, convertChatRoomToContact } from '@/lib/chat-api';
 import { getSafeProfileImage } from '@/lib/utils';
+import { ChatContactSkeleton } from '@/components/skeleton';
 
 interface ChatContact {
   id: string;
@@ -70,6 +71,9 @@ export default function ChatBottomSheet() {
     setIsDragging(true);
     setDragStartY(e.touches[0].clientY);
     setDragOffset(0);
+    
+    // Prevent default to avoid scrolling issues
+    e.preventDefault();
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -78,15 +82,18 @@ export default function ChatBottomSheet() {
     const currentY = e.touches[0].clientY;
     const deltaY = currentY - dragStartY;
     
-    // Only allow downward dragging
+    // Only allow downward dragging with cap
     if (deltaY > 0) {
-      setDragOffset(deltaY);
+      const cappedDeltaY = Math.min(deltaY, 200); // Cap at 200px
+      setDragOffset(cappedDeltaY);
       
       // Apply transform to bottom sheet
       if (bottomSheetRef.current) {
-        bottomSheetRef.current.style.transform = `translateY(${deltaY}px)`;
+        bottomSheetRef.current.style.transform = `translateY(${cappedDeltaY}px)`;
       }
     }
+    
+    e.preventDefault();
   };
 
   const handleTouchEnd = () => {
@@ -94,8 +101,8 @@ export default function ChatBottomSheet() {
     
     setIsDragging(false);
     
-    // If dragged more than 100px down, close the sheet
-    if (dragOffset > 100) {
+    // Reduced threshold for easier closing on iPhone 16
+    if (dragOffset > 50) { // Reduced from 100px to 50px
       closeBottomSheet();
     } else {
       // Snap back to original position
@@ -160,10 +167,7 @@ export default function ChatBottomSheet() {
         {/* Chat List */}
         <div className="mobile-chat-list">
           {isLoadingContacts ? (
-            <div className="mobile-chat-loading">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-              <p className="text-gray-600 mt-2">Loading conversations...</p>
-            </div>
+            <ChatContactSkeleton count={5} className="p-4" />
           ) : contacts.length === 0 ? (
             <div className="mobile-chat-empty">
               <div className="mobile-chat-empty-icon">

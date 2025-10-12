@@ -885,6 +885,13 @@
     @apply flex-1 flex flex-col justify-center px-6 py-12 bg-white;
   }
 
+  /* Mobile optimization for auth forms - reduce top padding */
+  @media (max-width: 768px) {
+    .auth-form-section {
+      @apply py-6 pt-4;
+    }
+  }
+
   .auth-content-section {
     @apply hidden lg:block flex-1 bg-gray-100 relative;
     background-image: url('/images/dropiti-login-image.png');
@@ -1109,7 +1116,7 @@
 
   /* V-shaped toggle button for desktop */
   .dashboard-sidebar-v-toggle {
-    @apply absolute top-1/2 -right-3 z-50 transform -translate-y-1/2;
+    @apply absolute top-1/2 -right-3 z-[60] transform -translate-y-1/2;
     @apply w-6 h-12 bg-white border border-gray-200 rounded-r-lg shadow-lg;
     @apply flex items-center justify-center cursor-pointer;
     @apply hover:bg-gray-50 hover:border-gray-300 transition-all duration-200;
@@ -1275,7 +1282,7 @@
   /* Dashboard Responsive */
   @media (max-width: 1023px) {
     .dashboard-sidebar {
-      @apply fixed inset-y-0 right-0 z-50 transform transition-transform duration-300 ease-in-out;
+      @apply fixed inset-y-0 right-0 z-[60] transform transition-transform duration-300 ease-in-out;
       @apply w-80 max-w-[85vw];
       @apply shadow-2xl;
       @apply bg-white;
@@ -1294,7 +1301,7 @@
     }
     
     .dashboard-sidebar-toggle {
-      @apply sticky top-0 bg-white z-10;
+      @apply sticky top-0 bg-white z-[60];
     }
     
     .dashboard-mobile-backdrop {

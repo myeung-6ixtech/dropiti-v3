@@ -206,8 +206,8 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* Dropiti Passport Display */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
+      {/* Dropiti Passport Display - Hidden on mobile */}
+      <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center justify-between mb-1">
           <h2 className="text-lg font-semibold text-gray-900 mb-0">Your Dropiti Passport</h2>
           <span className="text-sm text-gray-500 mt-1mb-0">Live Preview</span>
@@ -223,6 +223,14 @@ export default function ProfilePage() {
       {/* Profile Summary */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Summary</h2>
+        
+        {/* About Section - Moved to top */}
+        {profile.about && (
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 mb-3">About You</h3>
+            <p className="text-gray-700 leading-relaxed">{profile.about}</p>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Information */}
@@ -325,14 +333,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-
-        {/* About Section */}
-        {profile.about && (
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 mb-3">About You</h3>
-            <p className="text-gray-700 leading-relaxed">{profile.about}</p>
-          </div>
-        )}
 
         {/* Edit Profile CTA */}
         <div className="mt-8 pt-6 border-t border-gray-200 text-center">

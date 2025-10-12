@@ -3,9 +3,11 @@ import { useState, useEffect } from "react";
 import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatformDuration } from "@/lib/utils";
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 import { 
   FiStar, 
-  FiCheckCircle
+  FiCheckCircle,
 } from 'react-icons/fi';
 
 interface DropitiPassport2Props {
@@ -31,6 +33,8 @@ interface DropitiPassport2Props {
 }
 
 export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2Props) {
+  const { user: authUser } = useAuth();
+  const router = useRouter();
   const [publishedProperties, setPublishedProperties] = useState(0);
   const [userRating, setUserRating] = useState({
     averageRating: 0,
@@ -38,6 +42,9 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
   });
   const [isLoadingProperties, setIsLoadingProperties] = useState(true);
   const [isLoadingRating, setIsLoadingRating] = useState(true);
+
+  // Check if the authenticated user is viewing their own profile
+  const isOwnProfile = authUser?.id === firebaseUid;
   
   useEffect(() => {
     const fetchData = async () => {
@@ -94,12 +101,22 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
 
         {/* Profile Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-3 mb-4">
-            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-0">{user.displayName}</h1>
-            {user.verified && (
-              <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                Verified
-              </span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-0">{user.displayName}</h1>
+              {user.verified && (
+                <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
+                  Verified
+                </span>
+              )}
+            </div>
+            {isOwnProfile && (
+              <button
+                onClick={() => router.push('/dashboard/profile')}
+                className="btn-secondary flex items-center space-x-2"
+              >
+                <span>Edit Profile</span>
+              </button>
             )}
           </div>
 

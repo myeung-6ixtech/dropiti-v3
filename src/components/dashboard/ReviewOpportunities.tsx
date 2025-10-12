@@ -99,23 +99,20 @@ export default function ReviewOpportunities() {
       <div className="dashboard-card mb-8">
         <div className="dashboard-card-header">
           <h2 className="dashboard-card-title">Review Opportunities</h2>
-          <div className="text-sm text-gray-500">
-            {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days to leave reviews after accepting offers
-          </div>
         </div>
         
         {opportunities.length === 0 ? (
           <div className="dashboard-card-content">
-            <div className="text-center py-8">
-              <div className="text-gray-400 mb-2">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="dashboard-review-empty">
+              <div className="text-gray-500">
+                <svg className="dashboard-review-empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
+                <p className="dashboard-review-empty-text">No review opportunities at this time</p>
+                <p className="dashboard-review-empty-subtext">
+                  Reviews become available after accepting offers and expire in {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days
+                </p>
               </div>
-              <p className="text-gray-500">No review opportunities at this time.</p>
-              <p className="text-sm text-gray-400 mt-1">
-                Reviews become available after accepting offers and expire in {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days.
-              </p>
             </div>
           </div>
         ) : (

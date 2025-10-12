@@ -9,6 +9,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import Providers from "@/components/Providers";
 import ToastContainer from "@/components/ui/toast/ToastContainer";
 import MobileChatContainer from "@/components/chat/mobile/MobileChatContainer";
+import MobileNotificationsContainer from "@/components/notifications/mobile/MobileNotificationsContainer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -89,6 +90,7 @@ export default function RootLayout({
           </div>
           <ToastContainer />
           <MobileChatContainer />
+          <MobileNotificationsContainer />
         </Providers>
       </body>
     </html>
