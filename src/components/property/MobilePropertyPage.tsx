@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Bed, Bathtub, Clock } from '@/assets/icons';
 import { getAmenityIcon } from '@/constants/amenity-icons';
+import PropertyMap from '@/components/common/PropertyMap';
 
 interface MobilePropertyPageProps {
   property: {
@@ -20,6 +21,8 @@ interface MobilePropertyPageProps {
     price: number;
     description: string;
     amenities?: string[] | Record<string, unknown>;
+    address?: Record<string, unknown>;
+    show_specific_location?: boolean;
   };
   landlord: {
     name: string;
@@ -32,6 +35,7 @@ interface MobilePropertyPageProps {
   allImages: string[];
   handleCreateOffer: () => void;
   hasExistingOffer: boolean;
+  formatAddressDisplay: (address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => string;
 }
 
 export default function MobilePropertyPage({
@@ -40,7 +44,8 @@ export default function MobilePropertyPage({
   mainImage,
   allImages,
   handleCreateOffer,
-  hasExistingOffer
+  hasExistingOffer,
+  formatAddressDisplay
 }: MobilePropertyPageProps) {
   const router = useRouter();
 
@@ -85,7 +90,7 @@ export default function MobilePropertyPage({
   return (
     <div className="block md:hidden">
       {/* Mobile Hero Section - Full Width */}
-      <div className="relative w-full h-[60vh]">
+      <div className="relative w-full h-[50vh]">
         {/* Main Hero Image */}
         <div className="relative w-full h-full">
           <Image
@@ -143,13 +148,16 @@ export default function MobilePropertyPage({
       </div>
 
       {/* Mobile Content Container */}
-      <div className="px-4 pb-20">
+      <div className="px-4 mb-5">
         {/* Property Title and Location */}
         <div className="py-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h1>
           <div className="flex items-center text-gray-600">
             <span className="text-sm">
-              {property.location}
+              {(() => {
+                const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
+                return formattedAddress || property.location;
+              })()}
             </span>
           </div>
         </div>
@@ -175,7 +183,7 @@ export default function MobilePropertyPage({
       </div>
 
       {/* Create Offer Section - Prominent Placement */}
-      <div className="px-4 py-6 bg-gray-50">
+      <div className="px-4 py-6 bg-white">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -191,7 +199,7 @@ export default function MobilePropertyPage({
           {/* Create Offer Button */}
           <button
             onClick={handleCreateOffer}
-            className="w-full bg-black text-white py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors"
+            className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors"
           >
             {hasExistingOffer ? 'View Your Offer' : 'Create Offer'}
           </button>
@@ -199,7 +207,7 @@ export default function MobilePropertyPage({
           {/* Additional Info */}
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
-              No booking fees • Secure payment • Instant confirmation
+              No booking fees • Secure payment
             </p>
           </div>
         </div>
@@ -219,7 +227,7 @@ export default function MobilePropertyPage({
       {amenitiesList.length > 0 && (
         <div className="px-4 py-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">What this place offers</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h2>
             <div className="grid grid-cols-2 gap-4">
               {amenitiesList.map((amenity, index) => {
                 const AmenityIcon = getAmenityIcon(amenity);
@@ -237,11 +245,32 @@ export default function MobilePropertyPage({
         </div>
       )}
 
+      {/* Map Section */}
+      <div className="px-4 py-6">
+        <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Where you'll be</h2>
+          <div className="rounded-lg overflow-hidden border border-gray-200">
+            <PropertyMap 
+              address={(() => {
+                const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
+                return formattedAddress || property.location;
+              })()}
+              location={property.location}
+              className="w-full"
+              disableGeocoding={false}
+            />
+          </div>
+          <div className="text-sm text-gray-600 mt-3">
+            <p>📍 Tap and drag to explore the area around this property</p>
+          </div>
+        </div>
+      </div>
+
       {/* Landlord Section */}
       {landlord && (
         <div className="px-4 py-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Meet your host</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-4">Meet the Landlord</h2>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full overflow-hidden">
                 <Image
@@ -253,14 +282,16 @@ export default function MobilePropertyPage({
                 />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">{landlord.name}</h3>
-                <p className="text-sm text-gray-600">{landlord.response_time} response time</p>
-                <div className="flex items-center mt-1">
+                <h3 className="text-sm font-semibold text-gray-900 mb-0">{landlord.name}</h3>
+                <div className="flex items-center mt-1 mb-5">
                   <StarIcon className="h-4 w-4 text-yellow-400" />
                   <span className="text-sm text-gray-600 ml-1">
                     {landlord.rating} ({landlord.review_count} reviews)
                   </span>
                 </div>
+                <button className="btn-primary w-full bg-black text-white py-4 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
+                  Chat with Landlord
+                </button>
               </div>
             </div>
           </div>

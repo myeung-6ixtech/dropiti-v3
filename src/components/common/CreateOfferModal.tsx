@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '@/components/ui/modal';
+import { useResponsiveModal } from '@/hooks/useResponsiveModal';
+import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { 
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -34,13 +36,23 @@ interface OfferData {
 }
 
 export default function CreateOfferModal({ 
-  isOpen, 
+  isOpen,
   onClose, 
   currentPrice = 0,
   onOfferSubmit,
   mode = 'create',
   existingOffer
 }: CreateOfferModalProps) {
+  const { user: authUser } = useAuth();
+  const { showToast } = useToast();
+  
+  const { ModalComponent } = useResponsiveModal({
+    mobileTitle: mode === 'counter' ? 'Counter Offer' : 'Create Offer',
+    mobileHeight: 'large',
+    isOpen,
+    onClose
+  });
+
   const [offerData, setOfferData] = useState<OfferData>({
     rentalPrice: existingOffer?.rentalPrice || currentPrice,
     leaseDuration: existingOffer?.leaseDuration || 12,
@@ -88,6 +100,12 @@ export default function CreateOfferModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check authentication
+    if (!authUser) {
+      showToast('error', 'Please sign in to create an offer');
+      return;
+    }
+    
     if (validateForm()) {
       if (onOfferSubmit) {
         onOfferSubmit(offerData);
@@ -113,7 +131,7 @@ export default function CreateOfferModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-4xl w-full mx-4">
+    <ModalComponent>
       <div className="bg-white rounded-lg shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -294,6 +312,6 @@ export default function CreateOfferModal({
           </div>
         </form>
       </div>
-    </Modal>
+    </ModalComponent>
   );
 }

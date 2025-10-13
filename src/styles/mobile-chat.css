@@ -28,6 +28,32 @@
   overscroll-behavior: contain;
 }
 
+/* Modal Size Variants */
+.mobile-modal-small {
+  height: 50vh;
+  max-height: 400px;
+  min-height: 300px;
+}
+
+.mobile-modal-medium {
+  height: 75vh;
+  max-height: 600px;
+  min-height: 400px;
+}
+
+.mobile-modal-large {
+  height: 90vh;
+  max-height: 800px;
+  min-height: 500px;
+}
+
+.mobile-modal-full {
+  height: 100vh;
+  max-height: 100vh;
+  min-height: 100vh;
+  border-radius: 0;
+}
+
 @keyframes slideUp {
   from {
     transform: translateY(100%);

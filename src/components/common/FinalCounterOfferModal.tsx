@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Modal from '@/components/ui/modal';
+import { useResponsiveModal } from '@/hooks/useResponsiveModal';
 import { 
   CurrencyDollarIcon, 
   CalendarIcon, 
@@ -38,6 +38,13 @@ export default function FinalCounterOfferModal({
   onSubmit,
   loading = false
 }: FinalCounterOfferModalProps) {
+  const { ModalComponent } = useResponsiveModal({
+    mobileTitle: 'Final Counter Offer',
+    mobileHeight: 'large',
+    isOpen,
+    onClose
+  });
+
   const [offerData, setOfferData] = useState({
     rentalPrice: offer?.proposingRentPrice || 0,
     leaseDuration: offer?.numLeasingMonths || 12,
@@ -117,7 +124,7 @@ export default function FinalCounterOfferModal({
   if (!offer) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-4xl w-full mx-4">
+    <ModalComponent>
       <div className="bg-white rounded-lg shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
@@ -303,6 +310,6 @@ export default function FinalCounterOfferModal({
           </div>
         </form>
       </div>
-    </Modal>
+    </ModalComponent>
   );
 }

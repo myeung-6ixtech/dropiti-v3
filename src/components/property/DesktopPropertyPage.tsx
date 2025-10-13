@@ -10,6 +10,7 @@ import {
 import { Bed, Bathtub, Clock } from '@/assets/icons';
 import { getAmenityIcon } from '@/constants/amenity-icons';
 import PropertyPricingCard from '@/components/common/PropertyPricingCard';
+import PropertyMap from '@/components/common/PropertyMap';
 
 interface DesktopPropertyPageProps {
   property: {
@@ -287,9 +288,8 @@ export default function DesktopPropertyPage({
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{landlord.name}</h3>
-                    <p className="text-sm text-gray-600">{landlord.response_time} response time</p>
-                    <div className="flex items-center mt-1">
+                    <h3 className="font-semibold text-sm font-semibold text-gray-900 mb-0">{landlord.name}</h3>
+                    <div className="flex items-center mt-1 mb-5">
                       <StarIcon className="h-4 w-4 text-yellow-400" />
                       <span className="text-sm text-gray-600 ml-1">
                         {landlord.rating} ({landlord.review_count} reviews)
@@ -303,8 +303,19 @@ export default function DesktopPropertyPage({
             {/* Map */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Where you'll be</h2>
-              <div className="h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-500">Map will be displayed here</span>
+              <div className="rounded-lg overflow-hidden border border-gray-200">
+                <PropertyMap 
+                  address={(() => {
+                    const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
+                    return formattedAddress || property.location;
+                  })()}
+                  location={property.location}
+                  className="w-full"
+                  disableGeocoding={false}
+                />
+              </div>
+              <div className="text-sm text-gray-600 mt-3">
+                <p>📍 Click and drag to explore the area around this property</p>
               </div>
             </div>
           </div>

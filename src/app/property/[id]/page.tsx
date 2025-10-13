@@ -432,6 +432,7 @@ export default function PropertyDetailPage() {
         allImages={allImages}
         handleCreateOffer={handleCreateOffer}
         hasExistingOffer={hasExistingOffer}
+        formatAddressDisplay={(address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => formatAddressDisplay(address, showSpecific) || ''}
       />
 
       {/* Desktop Property Page */}
