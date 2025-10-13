@@ -6,19 +6,12 @@ import Image from 'next/image';
 import { propertiesAPI, offersAPI } from '@/lib/api-client';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
-import { chatAPI } from '@/lib/chat-api';
-import { 
-  HeartIcon,
-  ShareIcon
-} from '@heroicons/react/24/outline';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
-import PropertyPricingCard from '@/components/common/PropertyPricingCard';
 import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
-import { getAmenityIcon } from '@/constants/amenity-icons';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
-import { Bed, Bathtub, Clock } from '@/assets/icons';
-import PropertyMap from '@/components/common/PropertyMap';
+import MobilePropertyPage from '@/components/property/MobilePropertyPage';
+import DesktopPropertyPage from '@/components/property/DesktopPropertyPage';
 
 interface PropertyData {
   id: string;
@@ -299,46 +292,6 @@ export default function PropertyDetailPage() {
     setIsCreateOfferModalOpen(true);
   };
 
-  const handleChatWithLandlord = async () => {
-    if (!authUser?.id) {
-      showToast('error', 'You must be logged in to chat with the landlord');
-      return;
-    }
-
-    if (!propertyData?.landlord?.firebase_uid) {
-      showToast('error', 'Landlord information not available');
-      return;
-    }
-
-    // Check if user is trying to chat with themselves
-    if (authUser.id === propertyData.landlord.firebase_uid) {
-      showToast('error', 'You cannot chat with yourself');
-      return;
-    }
-
-    try {
-      // Show loading state
-      showToast('info', 'Creating chat room...');
-
-      // Get or create a direct chat room between user and landlord
-      const roomResponse = await chatAPI.getOrCreateRoom(
-        authUser.id, // current user (tenant)
-        propertyData.landlord.firebase_uid, // landlord
-        'tenant', // current user role
-        'landlord' // landlord role
-      );
-
-      if (roomResponse.roomId) {
-        // Navigate to chat page with the specific room
-        router.push(`/dashboard/chat?roomId=${roomResponse.roomId}`);
-      } else {
-        showToast('error', 'Failed to create chat room');
-      }
-    } catch (error) {
-      console.error('Error creating chat room:', error);
-      showToast('error', 'Failed to start chat. Please try again.');
-    }
-  };
 
   const handleOfferSubmit = async (offerData: {
     rentalPrice: number;
@@ -457,293 +410,46 @@ export default function PropertyDetailPage() {
     return [mainImage];
   })();
 
+  // Get amenities list
+  const amenitiesList = property.amenities && Array.isArray(property.amenities) 
+    ? property.amenities 
+    : [];
+
+  // Group amenities by category
+  const groupedAmenities = groupAmenitiesByCategory(
+    Array.isArray(property.amenities) 
+      ? property.amenities 
+      : []
+  );
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.back()}
-                className="p-2 hover:bg-gray-100 text-gray-600 rounded-full transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <h1 className="text-lg font-semibold text-gray-900 mb-0">{property.title}</h1>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <ShareIcon className="w-5 h-5" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <HeartIcon className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Mobile Property Page */}
+      <MobilePropertyPage
+        property={property}
+        landlord={landlord}
+        mainImage={mainImage}
+        allImages={allImages}
+        handleCreateOffer={handleCreateOffer}
+        hasExistingOffer={hasExistingOffer}
+      />
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Property Details */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Image Gallery */}
-            <div className="space-y-4">
-              <div 
-                className="relative h-96 w-full rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity group"
-                onClick={() => openGallery(0)}
-              >
-                <Image
-                  src={allImages[0]}
-                  alt={property.title}
-                  fill
-                  className="object-cover"
-                />
-                {/* Hover overlay to indicate clickability */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-80 rounded-full p-2">
-                    <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Image Thumbnails Gallery */}
-              <div className="grid grid-cols-4 gap-2">
-                {allImages.slice(0, 4).map((image, index) => (
-                  <div
-                    key={index}
-                    className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => openGallery(index)}
-                  >
-                    <Image
-                      src={image}
-                      alt={`${property.title} - Image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-                {allImages.length > 4 && (
-                  <div 
-                    className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity bg-gray-800"
-                    onClick={() => openGallery(4)}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center text-white">
-                      <span className="text-sm font-medium">+{allImages.length - 4}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+      {/* Desktop Property Page */}
+      <DesktopPropertyPage
+        property={property}
+        landlord={landlord}
+        allImages={allImages}
+        handleCreateOffer={handleCreateOffer}
+        hasExistingOffer={hasExistingOffer}
+        openGallery={openGallery}
+        formatAddressDisplay={(address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => formatAddressDisplay(address, showSpecific) || ''}
+        shouldTruncateDescription={shouldTruncateDescription}
+        isDescriptionExpanded={isDescriptionExpanded}
+        setIsDescriptionExpanded={setIsDescriptionExpanded}
+        amenitiesList={amenitiesList}
+        groupedAmenities={groupedAmenities}
+      />
 
-            {/* Property Title and Basic Info */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h1>
-                  <div className="flex items-center text-gray-600">
-                    <span>
-                      {(() => {
-                        const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
-                        return formattedAddress || property.location;
-                      })()}
-                    </span>
-                  </div>
-                </div>
-                {/* <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    <StarIcon className="h-4 w-4 text-yellow-400" />
-                    <span className="ml-1 text-sm font-medium">4.8</span>
-                    <span className="text-gray-500 text-sm">(127 reviews)</span>
-                  </div>
-                </div> */}
-              </div>
-
-              {/* Property Stats - Key Details */}
-              <div className="grid grid-cols-3 gap-6 py-6 border-t border-gray-200">
-                <div className="text-center">
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <Bed className="h-10 w-10 text-gray-600" />
-                    <span className="text-xl font-bold text-gray-900">{property.bedrooms}</span>
-                    <p className="text-sm text-gray-600">Bedrooms</p>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <Bathtub className="h-10 w-10 text-gray-600" />
-                    <span className="text-xl font-bold text-gray-900">{property.bathrooms}</span>
-                    <p className="text-sm text-gray-600">Bathrooms</p>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="flex flex-col items-center justify-center space-y-2">
-                    <Clock className="h-10 w-10 text-gray-600" />
-                    <span className="text-xl font-bold text-gray-900">{property.minimum_lease}</span>
-                    <p className="text-sm text-gray-600">Min. Lease (months)</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">About this place</h2>
-              <div className="relative">
-                <p className={`text-gray-600 leading-relaxed whitespace-pre-wrap ${
-                  shouldTruncateDescription(property.description) && !isDescriptionExpanded 
-                    ? 'line-clamp-6' 
-                    : ''
-                }`}>
-                  {property.description}
-                </p>
-                {shouldTruncateDescription(property.description) && (
-                  <button
-                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                    className="mt-2 text-gray-900 hover:text-gray-700 font-medium text-sm transition-colors"
-                  >
-                    {isDescriptionExpanded ? 'See Less' : 'See More'}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Amenities */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">What this place offers</h2>
-              {Array.isArray(property.amenities) && property.amenities.length > 0 ? (
-                (() => {
-                  const categorizedAmenities = groupAmenitiesByCategory(property.amenities);
-                  const categoryKeys = Object.keys(categorizedAmenities);
-                  
-                  if (categoryKeys.length === 0) {
-                    return <p className="text-gray-500 text-sm">No amenities listed.</p>;
-                  }
-                  
-                  return (
-                    <div className="space-y-6">
-                      {categoryKeys.map((category) => (
-                        <div key={category} className="space-y-3">
-                          <h3 className="text-lg font-medium text-gray-900 border-b border-gray-200 pb-2">
-                            {category}
-                          </h3>
-                          <div className="grid grid-cols-2 gap-3">
-                            {categorizedAmenities[category].map((amenity) => {
-                              const AmenityIcon = getAmenityIcon(amenity.id);
-                              return (
-                                <div key={amenity.id} className="flex items-center space-x-3">
-                                  <AmenityIcon className="h-5 w-5 text-gray-600 flex-shrink-0" />
-                                  <span className="text-gray-600 text-sm">{amenity.name}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                })()
-              ) : (
-                <p className="text-gray-500 text-sm">No amenities listed.</p>
-              )}
-            </div>
-
-            {/* Property Details */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Property Details</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-gray-600 text-sm">Property Type</span>
-                  <p className="text-gray-600 capitalize font-medium">{String(property.details?.type || 'Unknown')}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600 text-sm">Furnished</span>
-                  <p className="text-gray-600 capitalize font-medium">{String(property.details?.furnished || 'Unknown')}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600 text-sm">Pets Allowed</span>
-                  <p className="text-gray-600 capitalize font-medium">{Boolean(property.details?.petsAllowed) ? 'Yes' : 'No'}</p>
-                </div>
-                <div>
-                  <span className="text-gray-600 text-sm">Parking</span>
-                  <p className="text-gray-600 capitalize font-medium">{Boolean(property.details?.parking) ? 'Available' : 'Not available'}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Location Section */}
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Location</h2>
-              <div className="space-y-4">
-                {/* Address Display */}
-                <div>
-                  <span className="text-gray-600 text-sm">Address</span>
-                  <p className="text-gray-900 font-medium">
-                    {(() => {
-                      const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
-                      return formattedAddress || property.location;
-                    })()}
-                  </p>
-                </div>
-                
-                {/* Map Component */}
-                <div className="rounded-lg overflow-hidden border border-gray-200">
-                  <PropertyMap 
-                    address={(() => {
-                      const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
-                      return formattedAddress || property.location;
-                    })()}
-                    location={property.location}
-                    className="w-full"
-                    disableGeocoding={false}
-                  />
-                </div>
-                
-                {/* Additional Location Info */}
-                <div className="text-sm text-gray-600">
-                  <p>📍 Click and drag to explore the area around this property</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-          {/* Right Column - Pricing and Actions */}
-          {(() => {
-            console.log('Rendering PropertyPricingCard with landlord:', landlord);
-            const isOwner = authUser?.id === property.owner_id;
-            
-            return (
-              <PropertyPricingCard
-                price={property.price}
-                availableDate={property.available_date || null}
-                landlord={{
-                  id: landlord?.id || '',
-                  uuid: landlord?.uuid || '', // Add uuid for navigation
-                  name: landlord?.name || 'Unknown Landlord',
-                  avatar: landlord?.avatar || '',
-                  rating: landlord?.rating || 0,
-                  reviewCount: landlord?.review_count || 0,
-                  responseTime: landlord?.response_time || 'Unknown',
-                  verified: landlord?.verified || false,
-                  responseRate: landlord?.response_rate || 98,
-                  totalProperties: landlord?.total_properties || 5,
-                }}
-                onCreateOffer={handleCreateOffer}
-                onChatWithLandlord={handleChatWithLandlord}
-                isOwner={isOwner}
-                hasExistingOffer={hasExistingOffer}
-                onEditListing={() => router.push(`/dashboard/properties/edit/${property.property_uuid}`)}
-              />
-            );
-          })()}
-        </div>
-      </div>
 
       {/* Footer */}
       <Footer />

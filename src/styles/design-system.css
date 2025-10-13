@@ -896,23 +896,120 @@
      MOBILE SCROLLING OPTIMIZATIONS
      ======================================== */
 
-  /* Mobile-specific main layout adjustments */
-  @media (max-width: 1023px) {
-    main {
-      @apply flex-1 pb-20; /* Increased padding for mobile bottom nav */
-    }
-    
-    /* Ensure smooth scrolling */
-    html, body {
-      @apply overflow-x-hidden;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    /* Remove any conflicting scroll behaviors */
-    .dashboard-content {
-      @apply overflow-visible; /* Allow natural page scrolling */
-    }
+/* ========================================
+   PROPERTY PAGE RESPONSIVE STYLES
+   ======================================== */
+
+/* Mobile Property Page Styles */
+@media (max-width: 767px) {
+  .property-page-mobile {
+    @apply block;
   }
+  
+  .property-page-desktop {
+    @apply hidden;
+  }
+  
+  /* Mobile Hero Image */
+  .mobile-hero-image {
+    @apply relative w-full h-[60vh];
+  }
+  
+  /* Mobile Navigation Overlay */
+  .mobile-nav-overlay {
+    @apply absolute top-0 left-0 right-0 z-10 p-4;
+  }
+  
+  /* Mobile Back Button */
+  .mobile-back-button {
+    @apply w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors;
+  }
+  
+  /* Mobile Action Buttons */
+  .mobile-action-button {
+    @apply w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-colors;
+  }
+  
+  /* Mobile Content Sections */
+  .mobile-content-section {
+    @apply px-4 py-6;
+  }
+  
+  .mobile-card {
+    @apply bg-white rounded-2xl p-6 shadow-sm border border-gray-200;
+  }
+  
+  /* Mobile Create Offer Section */
+  .mobile-create-offer {
+    @apply px-4 py-6 bg-gray-50;
+  }
+  
+  .mobile-create-offer-card {
+    @apply bg-white rounded-2xl p-6 shadow-sm border border-gray-200;
+  }
+  
+  /* Mobile Property Stats */
+  .mobile-property-stats {
+    @apply flex items-center justify-around py-6 border-y border-gray-200;
+  }
+  
+  .mobile-stat-item {
+    @apply flex flex-col items-center;
+  }
+  
+  .mobile-stat-icon {
+    @apply h-6 w-6 text-gray-600 mb-1;
+  }
+  
+  .mobile-stat-value {
+    @apply text-sm font-medium text-gray-900;
+  }
+  
+  .mobile-stat-label {
+    @apply text-xs text-gray-500;
+  }
+}
+
+/* Desktop Property Page Styles */
+@media (min-width: 768px) {
+  .property-page-mobile {
+    @apply hidden;
+  }
+  
+  .property-page-desktop {
+    @apply block;
+  }
+  
+  /* Desktop Header */
+  .desktop-property-header {
+    @apply bg-white border-b border-gray-200;
+  }
+  
+  /* Desktop Main Content */
+  .desktop-main-content {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+  }
+  
+  /* Desktop Grid Layout */
+  .desktop-grid-layout {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+  }
+  
+  /* Desktop Left Column */
+  .desktop-left-column {
+    @apply lg:col-span-2 space-y-8;
+  }
+  
+  /* Desktop Right Column */
+  .desktop-right-column {
+    @apply lg:col-span-1;
+  }
+  
+  /* Desktop Sticky Pricing */
+  .desktop-sticky-pricing {
+    @apply sticky top-8;
+  }
+}
 
   .auth-content-section {
     @apply hidden lg:block flex-1 bg-gray-100 relative;
