@@ -892,6 +892,28 @@
     }
   }
 
+  /* ========================================
+     MOBILE SCROLLING OPTIMIZATIONS
+     ======================================== */
+
+  /* Mobile-specific main layout adjustments */
+  @media (max-width: 1023px) {
+    main {
+      @apply flex-1 pb-20; /* Increased padding for mobile bottom nav */
+    }
+    
+    /* Ensure smooth scrolling */
+    html, body {
+      @apply overflow-x-hidden;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Remove any conflicting scroll behaviors */
+    .dashboard-content {
+      @apply overflow-visible; /* Allow natural page scrolling */
+    }
+  }
+
   .auth-content-section {
     @apply hidden lg:block flex-1 bg-gray-100 relative;
     background-image: url('/images/dropiti-login-image.png');
@@ -1277,6 +1299,47 @@
 
   .dashboard-mobile-backdrop-overlay {
     @apply fixed inset-0 bg-gray-600 bg-opacity-75 transition-opacity;
+  }
+
+  /* ========================================
+     MOBILE DASHBOARD SCROLLING FIXES
+     ======================================== */
+
+  /* Mobile-specific dashboard adjustments */
+  @media (max-width: 1023px) {
+    /* Fix container height and scrolling */
+    .dashboard-container {
+      @apply min-h-screen bg-white flex flex-col;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Remove overflow constraints on mobile */
+    .dashboard-main {
+      @apply flex-1 flex flex-col min-w-0;
+      @apply mb-16; /* Space for mobile bottom nav */
+    }
+    
+    /* Enable natural page scrolling */
+    .dashboard-content {
+      @apply flex-1 py-6 px-4 sm:px-6 lg:px-8;
+      @apply pb-24; /* Extra padding for mobile bottom nav */
+      @apply overflow-visible;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Smooth scrolling for all dashboard pages */
+    .dashboard-content * {
+      scroll-behavior: smooth;
+    }
+    
+    /* Prevent scroll conflicts */
+    .dashboard-sidebar {
+      overscroll-behavior: contain;
+    }
   }
 
   /* Dashboard Responsive */
