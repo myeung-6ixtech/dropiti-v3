@@ -112,7 +112,7 @@ export default function DesktopPropertyPage({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <h1 className="text-lg font-semibold text-gray-900 mb-0">{property.title}</h1>
+              <h1 className="text-base font-semibold text-gray-900 mb-0">{property.title}</h1>
             </div>
             <div className="flex items-center space-x-2">
               <button 
@@ -186,7 +186,7 @@ export default function DesktopPropertyPage({
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h1>
+                  <h1 className="text-xl font-bold text-gray-900 mb-2">{property.title}</h1>
                   <div className="flex items-center text-gray-600">
                     <span>
                       {(() => {
@@ -203,22 +203,22 @@ export default function DesktopPropertyPage({
                 <div className="text-center">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <Bed className="h-10 w-10 text-gray-600" />
-                    <span className="text-xl font-bold text-gray-900">{property.bedrooms}</span>
-                    <p className="text-sm text-gray-600">Bedrooms</p>
+                    <span className="text-lg font-bold text-gray-900">{property.bedrooms}</span>
+                    <p className="text-xs text-gray-600">Bedrooms</p>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <Bathtub className="h-10 w-10 text-gray-600" />
-                    <span className="text-xl font-bold text-gray-900">{property.bathrooms}</span>
-                    <p className="text-sm text-gray-600">Bathrooms</p>
+                    <span className="text-lg font-bold text-gray-900">{property.bathrooms}</span>
+                    <p className="text-xs text-gray-600">Bathrooms</p>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className="flex flex-col items-center justify-center space-y-2">
                     <Clock className="h-10 w-10 text-gray-600" />
-                    <span className="text-xl font-bold text-gray-900">{property.minimum_lease || 'N/A'}</span>
-                    <p className="text-sm text-gray-600">Min. Lease (months)</p>
+                    <span className="text-lg font-bold text-gray-900">{property.minimum_lease || 'N/A'}</span>
+                    <p className="text-xs text-gray-600">Min. Lease (months)</p>
                   </div>
                 </div>
               </div>
@@ -226,9 +226,9 @@ export default function DesktopPropertyPage({
 
             {/* Description */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">About this place</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">About this place</h2>
               <div className="relative">
-                <p className={`text-gray-600 leading-relaxed whitespace-pre-wrap ${
+                <p className={`text-gray-600 leading-relaxed whitespace-pre-wrap font-medium ${
                   shouldTruncateDescription(property.description) && !isDescriptionExpanded 
                     ? 'line-clamp-3' 
                     : ''
@@ -249,11 +249,11 @@ export default function DesktopPropertyPage({
             {/* Amenities */}
             {amenitiesList.length > 0 && (
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">What this place offers</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-6">What this place offers</h2>
                 <div className="space-y-6">
                   {Object.entries(groupedAmenities).map(([category, amenities]) => (
                     <div key={category}>
-                      <h3 className="text-lg font-medium text-gray-900 mb-3">{category}</h3>
+                      <h3 className="text-base font-medium text-gray-900 mb-3">{category}</h3>
                         <div className="grid grid-cols-2 gap-4">
                           {(amenities as Array<{ id: string; name: string }>).map((amenity, index) => {
                             const AmenityIcon = getAmenityIcon(amenity.id);
@@ -262,7 +262,7 @@ export default function DesktopPropertyPage({
                                 <div className="w-6 h-6 text-gray-600">
                                   <AmenityIcon className="h-6 w-6" />
                                 </div>
-                                <span className="text-gray-700">{amenity.name}</span>
+                                <span className="text-gray-700 font-medium">{amenity.name}</span>
                               </div>
                             );
                           })}
@@ -276,7 +276,7 @@ export default function DesktopPropertyPage({
             {/* Landlord Section */}
             {landlord && (
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Meet your host</h2>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Meet your host</h2>
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 rounded-full overflow-hidden">
                     <Image
@@ -288,10 +288,10 @@ export default function DesktopPropertyPage({
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-sm font-semibold text-gray-900 mb-0">{landlord.name}</h3>
+                    <h3 className="font-semibold text-sm font-medium text-gray-900 mb-0">{landlord.name}</h3>
                     <div className="flex items-center mt-1 mb-5">
                       <StarIcon className="h-4 w-4 text-yellow-400" />
-                      <span className="text-sm text-gray-600 ml-1">
+                      <span className="text-xs text-gray-600 ml-1">
                         {landlord.rating} ({landlord.review_count} reviews)
                       </span>
                     </div>

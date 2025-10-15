@@ -88,11 +88,25 @@ const config: Config = {
           900: 'var(--color-primary-900)',
         },
       },
-      // Typography using design system tokens
+      // Typography using Google Fonts
       fontFamily: {
-        sans: ['Inter', 'var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        // Primary font stack with Plus Jakarta Sans from Google Fonts
+        sans: ['Plus Jakarta Sans', 'var(--font-plus-jakarta-sans)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        // Direct font family references
+        'plus-jakarta': ['Plus Jakarta Sans', 'var(--font-plus-jakarta-sans)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        'inter': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
         serif: ['Georgia', 'Cambria', 'serif'],
         mono: ['Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
+      // Font weights using Plus Jakarta Sans weights
+      fontWeight: {
+        'extra-light': '200',
+        'light': '300',
+        'normal': '400',
+        'medium': '500',
+        'semibold': '600',
+        'bold': '700',
+        'extra-bold': '800',
       },
       // Spacing using design system tokens
       spacing: {

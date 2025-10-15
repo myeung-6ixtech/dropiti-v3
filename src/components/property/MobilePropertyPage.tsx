@@ -151,9 +151,9 @@ export default function MobilePropertyPage({
       <div className="px-4 mb-5">
         {/* Property Title and Location */}
         <div className="py-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.title}</h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">{property.title}</h1>
           <div className="flex items-center text-gray-600">
-            <span className="text-sm">
+            <span className="text-xs">
               {(() => {
                 const formattedAddress = formatAddressDisplay(property.address, property.show_specific_location);
                 return formattedAddress || property.location;
@@ -166,17 +166,17 @@ export default function MobilePropertyPage({
         <div className="flex items-center justify-around py-6 border-y border-gray-200">
           <div className="flex flex-col items-center">
             <Bed className="h-6 w-6 text-gray-600 mb-1" />
-            <span className="text-sm font-medium text-gray-900">{property.bedrooms}</span>
+            <span className="text-xs font-medium text-gray-900">{property.bedrooms}</span>
             <span className="text-xs text-gray-500">Bedrooms</span>
           </div>
           <div className="flex flex-col items-center">
             <Bathtub className="h-6 w-6 text-gray-600 mb-1" />
-            <span className="text-sm font-medium text-gray-900">{property.bathrooms}</span>
+            <span className="text-xs font-medium text-gray-900">{property.bathrooms}</span>
             <span className="text-xs text-gray-500">Bathrooms</span>
           </div>
           <div className="flex flex-col items-center">
             <Clock className="h-6 w-6 text-gray-600 mb-1" />
-            <span className="text-sm font-medium text-gray-900">{property.minimum_lease || 'N/A'}</span>
+            <span className="text-xs font-medium text-gray-900">{property.minimum_lease || 'N/A'}</span>
             <span className="text-xs text-gray-500">Min. Lease</span>
           </div>
         </div>
@@ -187,19 +187,19 @@ export default function MobilePropertyPage({
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Make an Offer</h3>
-              <p className="text-sm text-gray-600">Start your rental journey</p>
+              <h3 className="text-base font-semibold text-gray-900">Make an Offer</h3>
+              <p className="text-xs text-gray-600">Start your rental journey</p>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold text-gray-900">${property.price}</div>
-              <div className="text-sm text-gray-500">per month</div>
+              <div className="text-xl font-bold text-gray-900">${property.price}</div>
+              <div className="text-xs text-gray-500">per month</div>
             </div>
           </div>
           
           {/* Create Offer Button */}
           <button
             onClick={handleCreateOffer}
-            className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-lg hover:bg-gray-800 transition-colors"
+            className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
           >
             {hasExistingOffer ? 'View Your Offer' : 'Create Offer'}
           </button>
@@ -216,8 +216,8 @@ export default function MobilePropertyPage({
       {/* Description Section */}
       <div className="px-4 py-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">About this place</h2>
-          <div className="text-gray-600 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">About this place</h2>
+          <div className="text-gray-600 leading-relaxed font-medium">
             {property.description}
           </div>
         </div>
@@ -227,7 +227,7 @@ export default function MobilePropertyPage({
       {amenitiesList.length > 0 && (
         <div className="px-4 py-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Amenities</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Amenities</h2>
             <div className="grid grid-cols-2 gap-4">
               {amenitiesList.map((amenity, index) => {
                 const AmenityIcon = getAmenityIcon(amenity);
@@ -236,7 +236,7 @@ export default function MobilePropertyPage({
                     <div className="w-6 h-6 text-gray-600">
                       <AmenityIcon className="h-6 w-6" />
                     </div>
-                    <span className="text-sm text-gray-700">{amenity}</span>
+                    <span className="text-xs text-gray-700 font-medium">{amenity}</span>
                   </div>
                 );
               })}
@@ -248,7 +248,7 @@ export default function MobilePropertyPage({
       {/* Map Section */}
       <div className="px-4 py-6">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Where you'll be</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">Where you'll be</h2>
           <div className="rounded-lg overflow-hidden border border-gray-200">
             <PropertyMap 
               address={(() => {
@@ -260,7 +260,7 @@ export default function MobilePropertyPage({
               disableGeocoding={false}
             />
           </div>
-          <div className="text-sm text-gray-600 mt-3">
+          <div className="text-xs text-gray-600 mt-3">
             <p>📍 Tap and drag to explore the area around this property</p>
           </div>
         </div>
@@ -270,7 +270,7 @@ export default function MobilePropertyPage({
       {landlord && (
         <div className="px-4 py-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Meet the Landlord</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Meet the Landlord</h2>
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full overflow-hidden">
                 <Image
@@ -282,14 +282,14 @@ export default function MobilePropertyPage({
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-gray-900 mb-0">{landlord.name}</h3>
+                <h3 className="text-xs font-semibold text-gray-900 mb-0">{landlord.name}</h3>
                 <div className="flex items-center mt-1 mb-5">
                   <StarIcon className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm text-gray-600 ml-1">
+                  <span className="text-xs text-gray-600 ml-1">
                     {landlord.rating} ({landlord.review_count} reviews)
                   </span>
                 </div>
-                <button className="btn-primary w-full bg-black text-white py-4 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
+                <button className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors">
                   Chat with Landlord
                 </button>
               </div>

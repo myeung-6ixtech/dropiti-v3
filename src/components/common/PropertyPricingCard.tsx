@@ -79,14 +79,14 @@ export default function PropertyPricingCard({
         <div className="bg-white rounded-xl p-6 shadow-lg border border-gray-200">
           <div className="flex items-baseline justify-between mb-4">
             <div>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900">
                 {formatCurrency(price)}
               </span>
-              <span className="text-gray-600 ml-1">/month</span>
+              <span className="text-sm text-gray-600 ml-1">/month</span>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-500">Available</p>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-xs text-gray-500">Available</p>
+              <p className="text-xs font-medium text-gray-900">
                 {formatDate(availableDate)}
               </p>
             </div>
@@ -95,8 +95,8 @@ export default function PropertyPricingCard({
           {/* Additional Costs */}
           <div className="space-y-2 py-4 border-t border-gray-200">
             <div className="flex justify-between">
-              <span className="text-gray-600 mb-0">Utilities</span>
-              <span className="font-medium text-gray-600">Not Included</span>
+              <span className="text-sm text-gray-600 mb-0">Utilities</span>
+              <span className="text-sm font-medium text-gray-600">Not Included</span>
             </div>
           </div>
 
@@ -106,7 +106,7 @@ export default function PropertyPricingCard({
               // Owner sees Edit Your Listing button
               <button
                 onClick={onEditListing}
-                className="w-full btn-secondary py-3 px-4 font-semibold"
+                className="w-full btn-secondary py-3 px-4 font-medium text-sm"
               >
                 Edit Your Listing
               </button>
@@ -114,7 +114,7 @@ export default function PropertyPricingCard({
               // Not logged in - prompt to sign in
               <button
                 onClick={() => router.push('/auth/signin')}
-                className="w-full btn-primary py-3 px-4 font-semibold"
+                className="w-full btn-primary py-3 px-4 font-medium text-sm"
               >
                 Sign In to Make an Offer
               </button>
@@ -122,7 +122,7 @@ export default function PropertyPricingCard({
               // User has already made an offer
               <button
                 disabled
-                className="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-semibold cursor-not-allowed opacity-75"
+                className="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-medium text-sm cursor-not-allowed opacity-75"
               >
                 Offer Made
               </button>
@@ -130,7 +130,7 @@ export default function PropertyPricingCard({
               // Regular user can create offer
               <button
                 onClick={onCreateOffer}
-                className="w-full btn-primary py-3 px-4 font-semibold"
+                className="w-full btn-primary py-3 px-4 font-medium text-sm"
               >
                 Create Offer
               </button>
@@ -139,7 +139,7 @@ export default function PropertyPricingCard({
 
           {/* Contact Info */}
           <div className="mt-4 pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-500 text-center">
+            <p className="text-xs text-gray-500 text-center">
               No booking fees • Secure payment
             </p>
           </div>
@@ -173,7 +173,7 @@ export default function PropertyPricingCard({
                 <div className="flex items-center space-x-2 mb-1">
                   <Link 
                     href={`/user/${landlord.uuid}`}
-                    className="font-semibold text-gray-900 text-lg hover:text-black transition-colors cursor-pointer"
+                    className="font-medium text-gray-900 text-base hover:text-black transition-colors cursor-pointer"
                   >
                     {landlord.name}
                   </Link>
@@ -185,9 +185,9 @@ export default function PropertyPricingCard({
                 </div>
                 <div className="flex items-center space-x-1 mb-2">
                   <StarIcon className="h-4 w-4 text-yellow-400" />
-                  <span className="font-medium text-gray-900">{landlord.rating}</span>
+                  <span className="font-medium text-gray-900 text-sm">{landlord.rating}</span>
                   <span className="text-gray-500">•</span>
-                  <span className="text-gray-600">{landlord.reviewCount} reviews</span>
+                  <span className="text-sm text-gray-600">{landlord.reviewCount} reviews</span>
                 </div>
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function PropertyPricingCard({
             <div className="flex flex-col space-y-2 mb-4">
               <button
                 onClick={onChatWithLandlord}
-                className="w-full btn-secondary py-3 px-4 font-semibold"
+                className="w-full btn-secondary py-3 px-4 font-medium text-sm"
               >
                 Chat with Landlord
               </button>
@@ -218,15 +218,15 @@ export default function PropertyPricingCard({
             <div className="pt-4 border-t border-gray-200">
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-lg font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
+                  <div className="text-base font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
                   <div className="text-xs text-gray-500">Response rate</div>
                 </div>
                 <div>
-                  <div className="text-lg font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
+                  <div className="text-base font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
                   <div className="text-xs text-gray-500">Avg. response</div>
                 </div>
                 <div>
-                  <div className="text-lg font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
+                  <div className="text-base font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
                   <div className="text-xs text-gray-500">Properties</div>
                 </div>
               </div>

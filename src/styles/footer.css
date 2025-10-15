@@ -1,13 +1,13 @@
 /* ========================================
-   FOOTER COMPONENTS
+   FOOTER COMPONENTS - PURPLE THEME
    ======================================== */
 
 .footer-container {
-  @apply bg-gray-900 text-white;
+  @apply bg-gradient-to-br from-purple-900 to-purple-800 text-white;
 }
 
 .footer-main-content {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16;
 }
 
 .footer-grid {
@@ -19,19 +19,19 @@
 }
 
 .footer-company-header {
-  @apply flex items-center space-x-2 mb-4;
+  @apply flex items-center space-x-2 mb-6;
 }
 
 .footer-company-icon {
-  @apply h-8 w-8 text-blue-400;
+  @apply h-8 w-8 text-purple-400;
 }
 
 .footer-company-name {
-  @apply text-xl font-bold;
+  @apply text-2xl font-bold text-white;
 }
 
 .footer-company-description {
-  @apply text-gray-300 mb-6 text-sm;
+  @apply text-purple-200 mb-8 text-sm leading-relaxed;
 }
 
 .footer-social-links {
@@ -39,7 +39,7 @@
 }
 
 .footer-social-link {
-  @apply text-gray-400 hover:text-white transition-colors duration-200;
+  @apply text-purple-300 hover:text-purple-100 hover:scale-110 transition-all duration-300 p-2 rounded-lg hover:bg-purple-700/30;
 }
 
 .footer-social-sr-only {
@@ -47,19 +47,24 @@
 }
 
 .footer-section {
-  @apply text-sm font-semibold text-white uppercase tracking-wider mb-4;
+  @apply text-sm font-semibold text-white uppercase tracking-wider mb-6 relative;
+}
+
+.footer-section::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-8 h-0.5 bg-purple-400;
 }
 
 .footer-section-links {
-  @apply space-y-2;
+  @apply space-y-3;
 }
 
 .footer-section-link {
-  @apply text-gray-300 hover:text-white transition-colors duration-200 text-sm;
+  @apply text-purple-200 hover:text-white hover:translate-x-1 transition-all duration-200 text-sm;
 }
 
 .footer-contact-section {
-  @apply mt-8 pt-8 border-t border-gray-800;
+  @apply mt-8 pt-8 border-t border-purple-700;
 }
 
 .footer-contact-grid {
@@ -71,19 +76,19 @@
 }
 
 .footer-contact-icon {
-  @apply h-5 w-5 text-blue-400 flex-shrink-0;
+  @apply h-5 w-5 text-purple-400 flex-shrink-0;
 }
 
 .footer-contact-link {
-  @apply text-gray-300 hover:text-white transition-colors duration-200 text-sm;
+  @apply text-purple-200 hover:text-white transition-colors duration-200 text-sm;
 }
 
 .footer-bottom-bar {
-  @apply bg-gray-800 border-t border-gray-700;
+  @apply bg-purple-950 border-t border-purple-800;
 }
 
 .footer-bottom-content {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
 }
 
 .footer-bottom-flex {
@@ -91,7 +96,7 @@
 }
 
 .footer-copyright {
-  @apply text-gray-300 text-sm;
+  @apply text-purple-300 text-sm;
 }
 
 .footer-bottom-links {
@@ -99,5 +104,5 @@
 }
 
 .footer-bottom-link {
-  @apply text-gray-300 hover:text-white transition-colors duration-200;
+  @apply text-purple-300 hover:text-purple-100 hover:underline transition-all duration-200;
 }

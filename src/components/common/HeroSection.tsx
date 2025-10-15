@@ -63,7 +63,7 @@ export default function HeroSection() {
           <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
             <div className="sm:text-center lg:text-left">
               {/* Hero Title - Now White */}
-              <h1 className="text-4xl tracking-tight font-bold text-white sm:text-5xl md:text-6xl">
+              <h1 className="font-plus-jakarta text-4xl tracking-tight text-white sm:text-5xl md:text-5xl">
                 {t('hero.title')}
               </h1>
               
@@ -78,13 +78,13 @@ export default function HeroSection() {
                   <div className="flex flex-col sm:flex-row gap-3 bg-white rounded-2xl shadow-2xl border border-gray-200 p-2">
                     {/* Location - Made larger on desktop */}
                     <div className="flex-1 sm:flex-[2] relative">
-                      <FiMapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-900" />
+                      <FiMapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <input
                         type="text"
                         value={searchData.location}
                         onChange={(e) => setSearchData({ ...searchData, location: e.target.value })}
                         placeholder={t('hero.searchPlaceholder')}
-                        className="w-full pl-10 pr-4 py-4 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder-gray-500 rounded-xl mb-0"
+                        className="text-sm w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 placeholder:text-sm placeholder:text-gray-500 rounded-xl mb-0"
                       />
                     </div>
 
@@ -94,7 +94,7 @@ export default function HeroSection() {
                       <select
                         value={searchData.bedrooms}
                         onChange={(e) => setSearchData({ ...searchData, bedrooms: e.target.value })}
-                        className="w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 bg-transparent rounded-xl appearance-none cursor-pointer mb-0"
+                        className="text-sm w-full pl-10 pr-4 py-3 border-0 focus:ring-0 focus:outline-none text-gray-900 bg-transparent rounded-xl appearance-none cursor-pointer mb-0"
                       >
                         <option value="">Any Bedrooms</option>
                         <option value="1">1 Bedroom</option>
@@ -110,7 +110,7 @@ export default function HeroSection() {
                     {/* Search Button - Full width on mobile, fixed width on desktop */}
                     <button
                       type="submit"
-                      className="flex-shrink-0 w-full sm:w-14 h-14 bg-purple-600 hover:bg-purple-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                      className="flex-shrink-0 w-full sm:w-14 h-12 bg-purple-600 hover:bg-purple-700 rounded-xl sm:rounded-full flex items-center justify-center transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                       disabled={!searchData.location && !searchData.bedrooms}
                     >
                       <FiSearch className="h-6 w-6 text-white" />

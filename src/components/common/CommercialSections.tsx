@@ -7,22 +7,17 @@ export default function CommercialSections() {
   return (
     <>
       {/* Beyond Property Section */}
-      <div className="py-16 bg-white">
-        <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-            Your Complete Property Solution
-          </h1>
-          <h2 className="text-xl sm:text-2xl font-light text-gray-700 mb-6">
-            From finding your dream home to managing your property portfolio
-          </h2>
-          <h3 className="text-lg sm:text-xl font-medium text-purple-600 mb-6">
-            Everything you need, all in one platform
-          </h3>
-        </div>
+      <div className="text-center">
+        <p className="text-lg sm:text-xl text-gray-600 mb-3">
+          One platform, endless possibilities
+        </p>
+        <p className="text-xl sm:text-2xl font-bold text-gray-900">
+          Dropiti - Where Property Meets Innovation
+        </p>
       </div>
 
       {/* Services Section */}
-      <div className="py-16 bg-gray-50">
+      <div className="py-16">
         <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 justify-center">
             
@@ -39,8 +34,8 @@ export default function CommercialSections() {
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Smart Property Search</h3>
-                <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Smart Property Search</h3>
+                <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
                   AI-powered matching finds properties tailored to your lifestyle. 
                   Virtual tours, instant notifications, and verified listings make 
                   your search effortless and efficient.
@@ -65,8 +60,8 @@ export default function CommercialSections() {
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Property Management</h3>
-                <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Property Management</h3>
+                <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
                   Manage your entire property portfolio from your phone. 
                   Track rent payments, schedule maintenance, communicate with tenants, 
                   and access financial insights instantly.
@@ -91,8 +86,8 @@ export default function CommercialSections() {
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Smart Home Integration</h3>
-                <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Smart Home Integration</h3>
+                <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
                   Transform any property into a connected smart home. 
                   Control lighting, security, climate, and appliances remotely. 
                   Energy-efficient automation saves money and enhances comfort.
@@ -117,8 +112,8 @@ export default function CommercialSections() {
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-xl sm:text-2xl font-semibold text-gray-900">Community Network</h3>
-                <p className="text-base sm:text-lg text-gray-600 leading-relaxed">
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Community Network</h3>
+                <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
                   Connect with landlords, tenants, and property professionals. 
                   Share experiences, get recommendations, and build relationships 
                   that make property management easier and more rewarding.
@@ -130,16 +125,6 @@ export default function CommercialSections() {
               </div>
             </div>
 
-          </div>
-
-          {/* Bottom tagline */}
-          <div className="text-center">
-            <p className="text-lg sm:text-xl text-gray-600 mb-3">
-              One platform, endless possibilities
-            </p>
-            <p className="text-xl sm:text-2xl font-bold text-gray-900">
-              Dropiti - Where Property Meets Innovation
-            </p>
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@
   "hero": {
     "title": "Find Your Perfect Home",
     "subtitle": "Discover thousands of properties for rent and sale. Search by location, bedrooms, and price to find your ideal home.",
-    "searchPlaceholder": "Search for properties...",
+    "searchPlaceholder": "Search by keyword or location...",
     "searchButton": "Search",
     "popularSearches": "Popular Searches"
   },
