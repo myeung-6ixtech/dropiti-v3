@@ -1455,35 +1455,9 @@
 
   /* Dashboard Responsive */
   @media (max-width: 1023px) {
+    /* Hide desktop sidebar entirely on mobile. Mobile menu is a separate component. */
     .dashboard-sidebar {
-      @apply fixed inset-y-0 right-0 z-[70] transform transition-transform duration-300 ease-in-out;
-      @apply w-80 max-w-[85vw];
-      @apply shadow-2xl;
-      @apply bg-white;
-    }
-    
-    .dashboard-sidebar-open {
-      @apply translate-x-0;
-    }
-    
-    .dashboard-sidebar-closed {
-      @apply translate-x-full;
-    }
-    
-    .dashboard-sidebar-content {
-      @apply h-full;
-    }
-    
-    .dashboard-sidebar-toggle {
-      @apply sticky top-0 bg-white z-[70];
-    }
-    
-    .dashboard-mobile-backdrop {
-      @apply z-40;
-    }
-    
-    .dashboard-main {
-      @apply z-30;
+      display: none !important;
     }
   }
 
@@ -1529,6 +1503,96 @@
 
   .inline-edit-sections {
     @apply space-y-6;
+  }
+
+  /* ========================================
+     MOBILE DASHBOARD MENU COMPONENTS
+     ======================================== */
+
+  /* Lock scroll when menu is open */
+  body.mobile-menu-open {
+    overflow: hidden !important;
+  }
+
+  .mobile-dashboard-menu-backdrop {
+    @apply fixed inset-0 bg-black bg-opacity-50 z-[95];
+    transition: opacity 300ms ease-in-out;
+  }
+
+  .mobile-dashboard-menu {
+    @apply fixed inset-y-0 right-0 z-[100] w-80 max-w-[85vw] bg-white shadow-2xl;
+    @apply flex flex-col;
+    transform: translateX(100%);
+    transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .mobile-dashboard-menu-open {
+    transform: translateX(0);
+  }
+
+  .mobile-dashboard-menu-header {
+    @apply flex items-center justify-between p-6;
+  }
+
+  .mobile-dashboard-menu-user {
+    @apply flex items-center space-x-3;
+  }
+
+  .mobile-dashboard-menu-user-info {
+    @apply flex-1 min-w-0;
+  }
+
+  .mobile-dashboard-menu-user-name {
+    @apply text-sm font-semibold text-gray-900 truncate mb-0;
+  }
+
+  .mobile-dashboard-menu-user-email {
+    @apply text-xs text-gray-500 truncate mb-0;
+  }
+
+  .mobile-dashboard-menu-close {
+    @apply p-2 hover:bg-gray-200 rounded-full transition-colors;
+  }
+
+  .mobile-dashboard-menu-view-toggle {
+    @apply p-6 border-b border-gray-200;
+  }
+
+  .mobile-dashboard-menu-view-title {
+    @apply text-xs font-medium text-gray-500 uppercase tracking-wider mb-3;
+  }
+
+  .mobile-dashboard-menu-view-button {
+    @apply w-full flex items-center justify-center py-3 px-4 border-2 border-purple-600 text-purple-600 rounded-lg font-medium text-xs hover:bg-purple-50 transition-colors;
+  }
+
+  .mobile-dashboard-menu-nav {
+    @apply flex-1 py-4 overflow-y-auto;
+  }
+
+  .mobile-dashboard-menu-item {
+    @apply flex items-center px-6 py-4 text-xs font-medium transition-colors;
+  }
+
+  .mobile-dashboard-menu-item-active {
+    @apply bg-purple-50 text-purple-700 border-r-2 border-purple-700;
+  }
+
+  .mobile-dashboard-menu-item-inactive {
+    @apply text-gray-700 hover:bg-gray-50;
+  }
+
+  .mobile-dashboard-menu-footer {
+    @apply p-6 border-t border-gray-200;
+  }
+
+  .mobile-dashboard-menu-logout {
+    @apply w-full flex items-center py-3 px-1 text-xs text-gray-600 hover:bg-red-50 rounded-lg transition-colors mb-4;
+  }
+
+  .mobile-dashboard-menu-copyright {
+    @apply text-xs text-gray-500 text-center;
   }
 
   /* ========================================
@@ -2142,48 +2206,58 @@
      DASHBOARD WELCOME HEADER COMPONENTS
      ======================================== */
 
-  .dashboard-welcome-header {
-    @apply mb-8;
+  /* New mobile-first welcome header (Cathay/Airbnb inspired) */
+  .welcome-header-container {
+    @apply mb-6 px-0;
   }
 
-  .dashboard-welcome-container {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-8 text-white;
+  .welcome-greeting-section {
+    @apply mb-5 text-center md:text-left;
   }
 
-  .dashboard-welcome-content {
-    @apply flex items-center space-x-4 mb-4;
+  .welcome-greeting {
+    @apply text-xl font-semibold text-gray-900 mb-0;
   }
 
-  .dashboard-welcome-icon {
-    @apply w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center;
+  .welcome-stats {
+    @apply text-sm text-gray-600 mt-1;
   }
 
-  .dashboard-welcome-text {
-    @apply flex-1;
+  .welcome-actions-grid {
+    @apply grid grid-cols-2 gap-4 max-w-sm md:max-w-md md:grid-cols-4 mx-auto md:mx-0;
   }
 
-  .dashboard-welcome-title {
-    @apply text-3xl font-bold text-white mb-2;
+  .welcome-action-button {
+    @apply flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 active:scale-95 min-h-[84px];
   }
 
-  .dashboard-welcome-subtitle {
-    @apply text-gray-100 text-lg;
+  .welcome-action-icon {
+    @apply h-6 w-6 text-gray-700 mb-2;
   }
 
-  .dashboard-welcome-stats {
-    @apply grid grid-cols-1 md:grid-cols-4 gap-4 mt-6;
+  .welcome-action-label {
+    @apply text-xs font-medium text-gray-700 text-center leading-tight;
   }
 
-  .dashboard-stat-item {
-    @apply bg-white bg-opacity-20 rounded-xl p-4 text-center;
-  }
-
-  .dashboard-stat-value {
-    @apply text-2xl font-bold text-white;
-  }
-
-  .dashboard-stat-label {
-    @apply text-gray-100 text-sm;
+  @media (min-width: 768px) {
+    .welcome-header-container {
+      @apply mb-8;
+    }
+    .welcome-greeting {
+      @apply text-2xl;
+    }
+    .welcome-stats {
+      @apply text-base;
+    }
+    .welcome-action-button {
+      @apply min-h-[96px] p-5;
+    }
+    .welcome-action-icon {
+      @apply h-7 w-7 mb-3;
+    }
+    .welcome-action-label {
+      @apply text-sm;
+    }
   }
 
   /* ========================================

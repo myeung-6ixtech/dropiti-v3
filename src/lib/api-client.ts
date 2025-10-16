@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { PropertyDataForAPI, CreateUserInput, User } from '@/types';
+import { PropertyDataForAPI, CreateUserInput, UpdateUserInput } from '@/types';
 import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
 import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
 import { StandardizedAddress, formatAddressForDatabase } from '@/utils/addressFormatter';
@@ -333,7 +333,7 @@ export const usersAPI = {
   },
 
   // Update user profile
-  updateUser: async (userId: string, updates: Partial<User>) => {
+  updateUser: async (userId: string, updates: UpdateUserInput) => {
     try {
       console.log('API Client: Updating user:', userId, 'with updates:', updates);
       const response = await apiClient.put('/users/update-user', { id: userId, updates });

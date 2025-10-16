@@ -33,6 +33,7 @@ interface AuthContextType {
     totalGuests?: number;
     userSince?: string;
     phoneNumber?: string;
+    onboarding_complete?: boolean;
     preferences?: Record<string, unknown>;
     notificationSettings?: Record<string, unknown>;
     privacySettings?: Record<string, unknown>;
@@ -124,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     totalGuests?: number;
     userSince?: string;
     phoneNumber?: string;
+    onboarding_complete?: boolean;
     preferences?: Record<string, unknown>;
     notificationSettings?: Record<string, unknown>;
     privacySettings?: Record<string, unknown>;

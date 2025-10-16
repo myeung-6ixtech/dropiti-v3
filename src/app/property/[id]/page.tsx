@@ -70,7 +70,7 @@ export default function PropertyDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const { user: authUser } = useAuth(); // Get user from context
+  const { user: authUser, isAuthenticated } = useAuth(); // Get user from context
 
   // Function to check if description needs truncation (500 characters)
   const shouldTruncateDescription = (description: string) => {
@@ -432,6 +432,8 @@ export default function PropertyDetailPage() {
         allImages={allImages}
         handleCreateOffer={handleCreateOffer}
         hasExistingOffer={hasExistingOffer}
+        isAuthenticated={isAuthenticated}
+        isOwner={authUser?.id === property.owner_id}
         formatAddressDisplay={(address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => formatAddressDisplay(address, showSpecific) || ''}
       />
 

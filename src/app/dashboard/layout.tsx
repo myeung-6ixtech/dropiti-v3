@@ -22,6 +22,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { FullScreenLoadingSpinner } from '@/components/common/LoadingSpinner';
+import MobileDashboardMenu from '@/components/dashboard/MobileDashboardMenu';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -124,20 +125,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="dashboard-container">
-      {/* Mobile sidebar backdrop */}
-      {isMobile && sidebarOpen && (
-        <div 
-          className="dashboard-mobile-backdrop"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <div className="dashboard-mobile-backdrop-overlay" />
-        </div>
+      {/* Mobile Dashboard Menu (mobile only) */}
+      {isMobile && (
+        <MobileDashboardMenu 
+          key="mobile-dashboard-menu"
+          isOpen={sidebarOpen} 
+          onClose={() => setSidebarOpen(false)} 
+        />
       )}
 
-      {/* Sidebar */}
+      {/* Desktop Sidebar (desktop only) */}
+      {!isMobile && (
       <div className={`dashboard-sidebar ${
-        isMobile && !sidebarOpen ? 'dashboard-sidebar-closed' : 'dashboard-sidebar-open'
-      } ${!isMobile && !sidebarOpen ? 'collapsed' : ''}`}>
+        !sidebarOpen ? 'collapsed' : ''
+      }`}>
         {/* V-shaped toggle button for desktop - positioned on edge */}
         {!isMobile && (
           <button
@@ -194,10 +195,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <button
                 onClick={() => {
                   handleViewChange(activeView === 'tenant' ? 'landlord' : 'tenant');
-                  // Close sidebar on mobile after view change
-                  if (isMobile) {
-                    setTimeout(() => setSidebarOpen(false), 100);
-                  }
                 }}
                 disabled={isViewChanging}
                 className={`dashboard-view-toggle-button ${isViewChanging ? 'opacity-75 cursor-not-allowed' : ''}`}
@@ -238,7 +235,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     : 'dashboard-nav-item-inactive'
                 }`}
                 title={!sidebarOpen ? item.name : undefined}
-                onClick={() => isMobile && setSidebarOpen(false)}
               >
                 <item.icon className="h-5 w-5 mr-2" />
                 <span>{item.name}</span>
@@ -263,6 +259,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </div>
       </div>
+      )}
 
       {/* Main content */}
       <div className="dashboard-main">

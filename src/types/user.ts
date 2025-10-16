@@ -24,6 +24,7 @@ export interface User {
   rating: number;
   review_count: number;
   response_rate: number;
+  onboarding_complete: boolean;
   preferences: UserPreferences;
   notification_settings: NotificationSettings;
   privacy_settings: PrivacySettings;
@@ -109,6 +110,7 @@ export interface UpdateUserInput {
   rating?: number;
   review_count?: number;
   response_rate?: number;
+  onboarding_complete?: boolean;
   preferences?: Partial<UserPreferences>;
   notification_settings?: Partial<NotificationSettings>;
   privacy_settings?: Partial<PrivacySettings>;

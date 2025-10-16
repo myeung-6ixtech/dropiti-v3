@@ -25,6 +25,7 @@ const UPDATE_USER_MUTATION = `
         rating
         review_count
         response_rate
+        onboarding_complete
         preferences
         notification_settings
         privacy_settings
@@ -69,6 +70,7 @@ export async function PUT(request: NextRequest) {
       'rating',
       'review_count',
       'response_rate',
+      'onboarding_complete',
       'preferences',
       'notification_settings',
       'privacy_settings'
@@ -131,6 +133,7 @@ export async function PUT(request: NextRequest) {
           rating: number;
           review_count: number;
           response_rate: number;
+          onboarding_complete: boolean;
           preferences: Record<string, unknown>;
           notification_settings: Record<string, unknown>;
           privacy_settings: Record<string, unknown>;

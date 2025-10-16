@@ -10,6 +10,7 @@ import Providers from "@/components/Providers";
 import ToastContainer from "@/components/ui/toast/ToastContainer";
 import MobileChatContainer from "@/components/chat/mobile/MobileChatContainer";
 import MobileNotificationsContainer from "@/components/notifications/mobile/MobileNotificationsContainer";
+import ClientOnboardingGate from "@/components/ClientOnboardingGate";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -82,16 +83,18 @@ export default function RootLayout({
     <html lang="en" className={plusJakartaSans.variable}>
       <body className={`${plusJakartaSans.className} antialiased`}>
         <Providers>
-          <div className="min-h-screen flex flex-col bg-white">
-            <Navigation />
-            <main className="flex-1 pb-16 md:pb-0">
-              {children}
-            </main>
-            <MobileBottomNav />
-          </div>
-          <ToastContainer />
-          <MobileChatContainer />
-          <MobileNotificationsContainer />
+          <ClientOnboardingGate>
+            <div className="min-h-screen flex flex-col bg-white">
+              <Navigation />
+              <main className="flex-1 pb-16 md:pb-0">
+                {children}
+              </main>
+              <MobileBottomNav />
+            </div>
+            <ToastContainer />
+            <MobileChatContainer />
+            <MobileNotificationsContainer />
+          </ClientOnboardingGate>
         </Providers>
       </body>
     </html>

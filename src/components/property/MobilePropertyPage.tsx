@@ -23,6 +23,7 @@ interface MobilePropertyPageProps {
     amenities?: string[] | Record<string, unknown>;
     address?: Record<string, unknown>;
     show_specific_location?: boolean;
+    property_uuid?: string;
   };
   landlord: {
     name: string;
@@ -35,6 +36,8 @@ interface MobilePropertyPageProps {
   allImages: string[];
   handleCreateOffer: () => void;
   hasExistingOffer: boolean;
+  isAuthenticated: boolean;
+  isOwner?: boolean;
   formatAddressDisplay: (address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => string;
 }
 
@@ -45,6 +48,8 @@ export default function MobilePropertyPage({
   allImages,
   handleCreateOffer,
   hasExistingOffer,
+  isAuthenticated,
+  isOwner = false,
   formatAddressDisplay
 }: MobilePropertyPageProps) {
   const router = useRouter();
@@ -196,13 +201,36 @@ export default function MobilePropertyPage({
             </div>
           </div>
           
-          {/* Create Offer Button */}
-          <button
-            onClick={handleCreateOffer}
-            className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
-          >
-            {hasExistingOffer ? 'View Your Offer' : 'Create Offer'}
-          </button>
+          {/* Create Offer Button with Authentication Check */}
+          {isOwner ? (
+            <button
+              onClick={() => router.push(`/dashboard/properties/edit/${property.property_uuid || 'unknown'}`)}
+              className="btn-secondary w-full py-4 rounded-xl font-semibold text-base hover:bg-gray-100 transition-colors"
+            >
+              Edit Your Listing
+            </button>
+          ) : !isAuthenticated ? (
+            <button
+              onClick={() => router.push('/auth/signin')}
+              className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
+            >
+              Sign In to Make an Offer
+            </button>
+          ) : hasExistingOffer ? (
+            <button
+              disabled
+              className="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-base cursor-not-allowed opacity-75"
+            >
+              Offer Made
+            </button>
+          ) : (
+            <button
+              onClick={handleCreateOffer}
+              className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
+            >
+              Create Offer
+            </button>
+          )}
           
           {/* Additional Info */}
           <div className="mt-4 text-center">

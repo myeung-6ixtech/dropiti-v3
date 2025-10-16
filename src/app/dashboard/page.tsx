@@ -4,8 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 import DropitiPassport from '@/components/common/DropitiPassport';
 import { 
   StarIcon, 
-  UserIcon,
-  BuildingOfficeIcon,
   PlusIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -16,6 +14,7 @@ import { useState, useEffect } from 'react';
 import { Review } from '@/types/review';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import ReviewOpportunities from '@/components/dashboard/ReviewOpportunities';
+import DashboardWelcomeHeader from '@/components/dashboard/DashboardWelcomeHeader';
 import { getTotalPropertyCount, getPublishedPropertyCountByStatus, getAverageUserRating } from '@/lib/utils';
 
 export default function DashboardPage() {
@@ -202,35 +201,13 @@ export default function DashboardPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Welcome Header */}
-      <div className="dashboard-welcome-header">
-        <div className="dashboard-welcome-container">
-          <div className="dashboard-welcome-content">
-            <div className="dashboard-welcome-icon">
-              <UserIcon className="h-8 w-8" />
-            </div>
-            <div className="dashboard-welcome-text">
-              <h1 className="dashboard-welcome-title">Welcome back, {authUser.displayName || authUser.name || 'User'}! 👋</h1>
-              <p className="dashboard-welcome-subtitle">Here's what's happening with your properties today</p>
-            </div>
-          </div>
-          
-          {/* Quick Stats */}
-          <div className="dashboard-welcome-stats">
-            <div className="dashboard-stat-item">
-              <div className="dashboard-stat-value">{userData.stats.totalProperties}</div>
-              <div className="dashboard-stat-label">Properties</div>
-            </div>
-            <div className="dashboard-stat-item">
-              <div className="dashboard-stat-value">{userData.stats.publishedProperties}</div>
-              <div className="dashboard-stat-label">Published</div>
-            </div>
-            <div className="dashboard-stat-item">
-              <div className="dashboard-stat-value">{userData.rating}</div>
-              <div className="dashboard-stat-label">Rating</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DashboardWelcomeHeader 
+        userName={authUser.displayName || authUser.name || 'User'}
+        stats={{
+          totalProperties: userData.stats.totalProperties,
+          totalReviews: userData.reviewCount
+        }}
+      />
 
       {/* Main Content Grid */}
       <div className="dashboard-content-grid">
@@ -241,7 +218,7 @@ export default function DashboardPage() {
 
         {/* Right Column - Content */}
         <div className="dashboard-right-column">
-          {/* Quick Actions */}
+          {/* Quick Actions (keep only add-property here to avoid duplicating header actions) */}
           <div className="quick-actions-container">
             <h2 className="quick-actions-title">Quick Actions</h2>
             <div className="quick-actions-grid">
@@ -255,19 +232,6 @@ export default function DashboardPage() {
                 <div className="quick-action-content">
                   <p className="quick-action-title">Add New Property</p>
                   <p className="quick-action-description">List a new rental property</p>
-                </div>
-              </Link>
-
-              <Link
-                href="/dashboard/properties"
-                className="quick-action-item quick-action-secondary quick-action-hover group"
-              >
-                <div className="quick-action-icon-container quick-action-icon-container-secondary">
-                  <BuildingOfficeIcon className="quick-action-icon" />
-                </div>
-                <div className="quick-action-content">
-                  <p className="quick-action-title">Manage Properties</p>
-                  <p className="quick-action-description">View and edit your listings</p>
                 </div>
               </Link>
             </div>
