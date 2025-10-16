@@ -6,6 +6,7 @@ import {
   ClockIcon,
   MagnifyingGlassIcon,
   DocumentTextIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 
 interface DashboardWelcomeHeaderProps {
@@ -30,6 +31,11 @@ export default function DashboardWelcomeHeader({ userName, stats }: DashboardWel
         <Link href="/dashboard/properties" className="welcome-action-button">
           <BuildingOfficeIcon className="welcome-action-icon" />
           <span className="welcome-action-label">Manage Properties</span>
+        </Link>
+
+        <Link href="/dashboard/add-property" className="welcome-action-button">
+          <PlusIcon className="welcome-action-icon" />
+          <span className="welcome-action-label">Add New Property</span>
         </Link>
 
         <Link href="/dashboard/offers" className="welcome-action-button">

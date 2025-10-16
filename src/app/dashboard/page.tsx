@@ -3,8 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import DropitiPassport from '@/components/common/DropitiPassport';
 import { 
-  StarIcon, 
-  PlusIcon
+  StarIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { getSafeProfileImage } from '@/lib/utils';
@@ -218,25 +217,6 @@ export default function DashboardPage() {
 
         {/* Right Column - Content */}
         <div className="dashboard-right-column">
-          {/* Quick Actions (keep only add-property here to avoid duplicating header actions) */}
-          <div className="quick-actions-container">
-            <h2 className="quick-actions-title">Quick Actions</h2>
-            <div className="quick-actions-grid">
-              <Link
-                href="/dashboard/add-property"
-                className="quick-action-item quick-action-primary quick-action-hover group"
-              >
-                <div className="quick-action-icon-container quick-action-icon-container-primary">
-                  <PlusIcon className="quick-action-icon" />
-                </div>
-                <div className="quick-action-content">
-                  <p className="quick-action-title">Add New Property</p>
-                  <p className="quick-action-description">List a new rental property</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-
           {/* Recent Reviews */}
           <div className="dashboard-card">
             <div className="dashboard-card-header">

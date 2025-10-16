@@ -2224,15 +2224,15 @@
   }
 
   .welcome-actions-grid {
-    @apply grid grid-cols-2 gap-4 max-w-sm md:max-w-md md:grid-cols-4 mx-auto md:mx-0;
+    @apply grid grid-cols-2 gap-3 max-w-sm md:max-w-lg md:grid-cols-5 mx-auto md:mx-0;
   }
 
   .welcome-action-button {
-    @apply flex flex-col items-center justify-center p-4 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 active:scale-95 min-h-[84px];
+    @apply flex flex-col items-center justify-center p-3 bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200 active:scale-95 min-h-[72px];
   }
 
   .welcome-action-icon {
-    @apply h-6 w-6 text-gray-700 mb-2;
+    @apply h-5 w-5 text-gray-700 mb-1.5;
   }
 
   .welcome-action-label {
@@ -2250,13 +2250,13 @@
       @apply text-base;
     }
     .welcome-action-button {
-      @apply min-h-[96px] p-5;
+      @apply min-h-[80px] p-4;
     }
     .welcome-action-icon {
-      @apply h-7 w-7 mb-3;
+      @apply h-6 w-6 mb-2;
     }
     .welcome-action-label {
-      @apply text-sm;
+      @apply text-xs;
     }
   }
 

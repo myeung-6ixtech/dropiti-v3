@@ -4,17 +4,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
-import InputField from '@/components/form/input/InputField';
-import TextArea from '@/components/form/input/TextArea';
-import MultiSelect from '@/components/form/MultiSelect';
-import Label from '@/components/form/Label';
 import { availableLanguages } from '@/types/user';
-
-const LANGUAGE_OPTIONS = availableLanguages.map(lang => ({
-  value: lang,
-  text: lang,
-  selected: false
-}));
+import { 
+  UserIcon,
+  MapPinIcon,
+  AcademicCapIcon,
+  BriefcaseIcon,
+  GlobeAltIcon
+} from '@heroicons/react/24/outline';
 
 export default function OnboardingStepOne() {
   const { user } = useAuth();
@@ -59,79 +56,153 @@ export default function OnboardingStepOne() {
   }
 
   return (
-    <div className="space-y-6">
-      <header className="mb-2">
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="mb-8">
         <p className="text-xs text-gray-500 mb-1">Step 1 of 2</p>
-        <h1 className="text-xl font-semibold text-gray-900 mb-0">Set up your profile</h1>
-        <p className="text-xs text-gray-500">Tell us a bit about yourself.</p>
-      </header>
-
-      <div>
-        <Label htmlFor="name">Your name</Label>
-        <InputField
-          id="name"
-          placeholder="Enter your name"
-          defaultValue={form.name}
-          onChange={(e) => handleChange('name', e.target.value)}
-        />
+        <h1 className="text-3xl font-bold text-gray-900 mb-0">Set up your profile</h1>
+        <p className="text-gray-600">Tell us a bit about yourself to get started.</p>
       </div>
 
-      <div>
-        <Label htmlFor="location">Where are you based?</Label>
-        <InputField
-          id="location"
-          placeholder="City, Country"
-          defaultValue={form.location}
-          onChange={(e) => handleChange('location', e.target.value)}
-        />
+      {/* Profile Form */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
+        
+        <div className="space-y-6">
+          {/* Name */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <UserIcon className="h-4 w-4 mr-2 text-black" />
+                Your name *
+              </span>
+            </label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              className="form-input"
+              placeholder="Enter your name"
+            />
+            <p className="text-xs text-gray-500 mt-1">This is the name that will be visible to other users</p>
+          </div>
+
+          {/* Location */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <MapPinIcon className="h-4 w-4 mr-2 text-black" />
+                Where are you based?
+              </span>
+            </label>
+            <input
+              type="text"
+              value={form.location}
+              onChange={(e) => handleChange('location', e.target.value)}
+              className="form-input"
+              placeholder="City, Country"
+            />
+            <p className="text-xs text-gray-500 mt-1">Help others understand your location</p>
+          </div>
+
+          {/* About */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <UserIcon className="h-4 w-4 mr-2 text-black" />
+                Tell us about yourself
+              </span>
+            </label>
+            <textarea
+              value={form.about}
+              onChange={(e) => handleChange('about', e.target.value)}
+              rows={4}
+              className="form-textarea"
+              placeholder="A short introduction for your profile"
+            />
+            <p className="text-xs text-gray-500 mt-1">Share your story and what makes you unique</p>
+          </div>
+
+          {/* Education */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <AcademicCapIcon className="h-4 w-4 mr-2 text-black" />
+                What is your education background?
+              </span>
+            </label>
+            <input
+              type="text"
+              value={form.education}
+              onChange={(e) => handleChange('education', e.target.value)}
+              className="form-input"
+              placeholder="e.g. BSc in Computer Science"
+            />
+            <p className="text-xs text-gray-500 mt-1">Optional: Share your educational background</p>
+          </div>
+
+          {/* Occupation */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <BriefcaseIcon className="h-4 w-4 mr-2 text-black" />
+                What do you do?
+              </span>
+            </label>
+            <input
+              type="text"
+              value={form.occupation}
+              onChange={(e) => handleChange('occupation', e.target.value)}
+              className="form-input"
+              placeholder="e.g. Product Manager"
+            />
+            <p className="text-xs text-gray-500 mt-1">Optional: Tell us about your profession</p>
+          </div>
+
+          {/* Languages */}
+          <div>
+            <label className="form-label">
+              <span className="flex items-center">
+                <GlobeAltIcon className="h-4 w-4 mr-2 text-black" />
+                Languages
+              </span>
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {availableLanguages.map((language) => (
+                <label key={language} className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={form.languages.includes(language)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        handleChange('languages', [...form.languages, language]);
+                      } else {
+                        handleChange('languages', form.languages.filter(l => l !== language));
+                      }
+                    }}
+                    className="form-checkbox"
+                  />
+                  <span className="text-sm text-gray-700">{language}</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Select all languages you can communicate in</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+          <button
+            onClick={onNext}
+            disabled={saving || !form.name.trim()}
+            className="btn-primary disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Continue'}
+          </button>
+        </div>
       </div>
 
-      <div>
-        <Label htmlFor="about">Tell us about yourself</Label>
-        <TextArea
-          placeholder="A short introduction for your profile"
-          rows={4}
-          value={form.about}
-          onChange={(value) => handleChange('about', value)}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="education">What is your education background?</Label>
-        <InputField
-          id="education"
-          placeholder="e.g. BSc in Computer Science"
-          defaultValue={form.education}
-          onChange={(e) => handleChange('education', e.target.value)}
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="occupation">What do you do?</Label>
-        <InputField
-          id="occupation"
-          placeholder="e.g. Product Manager"
-          defaultValue={form.occupation}
-          onChange={(e) => handleChange('occupation', e.target.value)}
-        />
-      </div>
-
-      <MultiSelect
-        label="Languages"
-        options={LANGUAGE_OPTIONS}
-        defaultSelected={form.languages}
-        onChange={(vals) => handleChange('languages', vals)}
-      />
-
-      <button
-        onClick={onNext}
-        disabled={saving || !form.name.trim()}
-        className="auth-button"
-      >
-        {saving ? 'Saving…' : 'Continue'}
-      </button>
-
-      <p className="text-xs text-gray-500 text-center">You can update these anytime in your profile.</p>
+      <p className="text-xs text-gray-500 text-center mt-6">You can update these anytime in your profile.</p>
     </div>
   );
 }
