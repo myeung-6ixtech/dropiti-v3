@@ -7,6 +7,8 @@ const GET_USER_BY_FIREBASE_UID_QUERY = `
       uuid
       firebase_uid
       display_name
+      first_name
+      last_name
       email
       photo_url
       auth_provider
@@ -48,6 +50,8 @@ const GET_USER_BY_ID_QUERY = `
       uuid
       firebase_uid
       display_name
+      first_name
+      last_name
       email
       photo_url
       auth_provider

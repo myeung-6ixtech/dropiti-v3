@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
-import { availableLanguages } from '@/types/user';
-import { 
+import { availableLanguages, educationOptions, occupationOptions } from '@/types/user';
+import {
   UserIcon,
   MapPinIcon,
   AcademicCapIcon,
@@ -65,23 +65,23 @@ export default function OnboardingStepOne() {
       </div>
 
       {/* Profile Form */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-2xl p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
         
         <div className="space-y-6">
           {/* Name */}
           <div>
-            <label className="form-label">
+            <label className="form-label text-xs">
               <span className="flex items-center">
                 <UserIcon className="h-4 w-4 mr-2 text-black" />
-                Your name *
+                Display name *
               </span>
             </label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
-              className="form-input"
+              className="form-input-sm"
               placeholder="Enter your name"
             />
             <p className="text-xs text-gray-500 mt-1">This is the name that will be visible to other users</p>
@@ -89,7 +89,7 @@ export default function OnboardingStepOne() {
 
           {/* Location */}
           <div>
-            <label className="form-label">
+            <label className="form-label text-xs">
               <span className="flex items-center">
                 <MapPinIcon className="h-4 w-4 mr-2 text-black" />
                 Where are you based?
@@ -99,7 +99,7 @@ export default function OnboardingStepOne() {
               type="text"
               value={form.location}
               onChange={(e) => handleChange('location', e.target.value)}
-              className="form-input"
+              className="form-input-sm"
               placeholder="City, Country"
             />
             <p className="text-xs text-gray-500 mt-1">Help others understand your location</p>
@@ -107,7 +107,7 @@ export default function OnboardingStepOne() {
 
           {/* About */}
           <div>
-            <label className="form-label">
+            <label className="form-label text-xs">
               <span className="flex items-center">
                 <UserIcon className="h-4 w-4 mr-2 text-black" />
                 Tell us about yourself
@@ -117,7 +117,7 @@ export default function OnboardingStepOne() {
               value={form.about}
               onChange={(e) => handleChange('about', e.target.value)}
               rows={4}
-              className="form-textarea"
+              className="form-textarea text-sm"
               placeholder="A short introduction for your profile"
             />
             <p className="text-xs text-gray-500 mt-1">Share your story and what makes you unique</p>
@@ -125,43 +125,53 @@ export default function OnboardingStepOne() {
 
           {/* Education */}
           <div>
-            <label className="form-label">
+            <label className="form-label text-xs">
               <span className="flex items-center">
                 <AcademicCapIcon className="h-4 w-4 mr-2 text-black" />
                 What is your education background?
               </span>
             </label>
-            <input
-              type="text"
+            <select
               value={form.education}
               onChange={(e) => handleChange('education', e.target.value)}
-              className="form-input"
-              placeholder="e.g. BSc in Computer Science"
-            />
+              className="form-select text-sm"
+            >
+              <option value="">Select education level</option>
+              {educationOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
             <p className="text-xs text-gray-500 mt-1">Optional: Share your educational background</p>
           </div>
 
           {/* Occupation */}
           <div>
-            <label className="form-label">
+            <label className="form-label text-xs">
               <span className="flex items-center">
                 <BriefcaseIcon className="h-4 w-4 mr-2 text-black" />
                 What do you do?
               </span>
             </label>
-            <input
-              type="text"
+            <select
               value={form.occupation}
               onChange={(e) => handleChange('occupation', e.target.value)}
-              className="form-input"
-              placeholder="e.g. Product Manager"
-            />
+              className="form-select text-sm"
+            >
+              <option value="">Select occupation</option>
+              {occupationOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
             <p className="text-xs text-gray-500 mt-1">Optional: Tell us about your profession</p>
           </div>
 
           {/* Languages */}
           <div>
-            <label className="form-label">
+            <label className="form-label text-xs">
               <span className="flex items-center">
                 <GlobeAltIcon className="h-4 w-4 mr-2 text-black" />
                 Languages
@@ -182,7 +192,7 @@ export default function OnboardingStepOne() {
                     }}
                     className="form-checkbox"
                   />
-                  <span className="text-sm text-gray-700">{language}</span>
+                  <span className="text-xs text-gray-700">{language}</span>
                 </label>
               ))}
             </div>
@@ -191,11 +201,11 @@ export default function OnboardingStepOne() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+        <div className="flex flex-col space-y-3 pt-6 border-t border-gray-200">
           <button
             onClick={onNext}
             disabled={saving || !form.name.trim()}
-            className="btn-primary disabled:opacity-50"
+            className="btn-primary disabled:opacity-50 w-full py-4 rounded-xl font-semibold text-base"
           >
             {saving ? 'Saving...' : 'Continue'}
           </button>

@@ -145,7 +145,7 @@
 }
 
 .mobile-tabs-scroll-button-text {
-  @apply truncate;
+  @apply truncate text-gray-800;
 }
 
 .mobile-tabs-scroll-button-count {

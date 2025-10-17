@@ -1,11 +1,13 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import AllOutgoingOffers from '@/components/common/AllOutgoingOffers';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export default function ApplicationsPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
 
   if (isLoading) {
     return <CenteredLoadingSpinner size="lg" />;
@@ -20,9 +22,9 @@ export default function ApplicationsPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="border-b border-gray-200 pb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Your Applications</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('applications.yourApplications')}</h1>
           <p className="text-gray-600 mt-2">
-            Track and manage your rental applications
+            {t('applications.trackApplicationsDescription')}
           </p>
         </div>
       </div>

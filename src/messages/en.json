@@ -53,7 +53,12 @@
     "analytics": "Analytics",
     "applications": "Applications",
     "savedProperties": "Saved Properties",
-    "addProperty": "Add Property"
+    "addProperty": "Add Property",
+    "explore": "Explore",
+    "myProfile": "My Profile",
+    "loggingOut": "Logging out...",
+    "loginSignUp": "Login / Sign Up",
+    "login": "Login"
   },
   "hero": {
     "title": "Find Your Perfect Home",
@@ -72,7 +77,11 @@
     "onDropiti": "on Dropiti",
     "recentActivity": "Recent Activity",
     "upcomingEvents": "Upcoming Events",
-    "quickActions": "Quick Actions"
+    "quickActions": "Quick Actions",
+    "viewMode": "View Mode",
+    "switching": "Switching...",
+    "tenantView": "Tenant View",
+    "landlordView": "Landlord View"
   },
   "property": {
     "addProperty": "Add Property",
@@ -135,7 +144,26 @@
     "security": "Security",
     "billing": "Billing",
     "data": "Data & Privacy",
-    "help": "Help & Support"
+    "help": "Help & Support",
+    "manageAccountSettings": "Manage your account settings and preferences",
+    "personalInformation": "Personal Information",
+    "updatePersonalDetails": "Update your personal details and contact information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "emailCannotBeChanged": "Email cannot be changed as it's linked to your account",
+    "phonePlaceholder": "1234 5678",
+    "phoneInstructions": "Enter your phone number without the country code",
+    "saving": "Saving...",
+    "saveChanges": "Save Changes",
+    "securitySettings": "Security Settings",
+    "manageAccountSecurity": "Manage your account security and privacy",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "enterCurrentPassword": "Enter current password",
+    "enterNewPassword": "Enter new password",
+    "confirmNewPassword": "Confirm new password",
+    "updatePassword": "Update Password",
+    "customizeExperience": "Customize your experience and app settings"
   },
   "auth": {
     "signIn": "Sign In",
@@ -204,7 +232,52 @@
       "failedToUpdate": "Failed to update property",
       "failedToDelete": "Failed to delete property",
       "invalidData": "Invalid property data provided"
+    },
+    "settings": {
+      "failedToLoad": "Failed to load settings data",
+      "failedToSave": "Failed to save settings",
+      "failedToUpdate": "Failed to update settings"
     }
+  },
+  "offers": {
+    "incomingOffers": "Incoming Offers",
+    "manageOffersDescription": "Manage all offers received for your properties",
+    "allOffers": "All Offers",
+    "pendingOffers": "Pending",
+    "acceptedOffers": "Accepted",
+    "rejectedOffers": "Rejected",
+    "noOffersYet": "No Offers Yet",
+    "noOffersDescription": "You haven't received any offers for your properties yet. When tenants are interested in your listings, their offers will appear here.",
+    "noPendingOffers": "No pending offers",
+    "noPendingOffersDescription": "You don't have any pending offers at the moment.",
+    "noAcceptedOffers": "No accepted offers",
+    "noAcceptedOffersDescription": "You haven't accepted any offers yet.",
+    "noRejectedOffers": "No rejected offers",
+    "noRejectedOffersDescription": "You haven't rejected any offers yet.",
+    "noAllOffers": "No offers",
+    "noAllOffersDescription": "You haven't received any offers for your properties yet."
+  },
+  "applications": {
+    "yourApplications": "Your Applications",
+    "trackApplicationsDescription": "Track and manage your rental applications",
+    "allApplications": "All Applications",
+    "pendingApplications": "Pending",
+    "acceptedApplications": "Accepted",
+    "rejectedApplications": "Rejected",
+    "withdrawnApplications": "Withdrawn",
+    "noApplicationsYet": "No Applications Yet",
+    "noApplicationsDescription": "You haven't submitted any rental applications yet. Start by browsing available properties and submitting your first application.",
+    "browseProperties": "Browse Properties",
+    "noPendingApplications": "No pending applications",
+    "noPendingApplicationsDescription": "You don't have any pending applications at the moment.",
+    "noAcceptedApplications": "No accepted applications",
+    "noAcceptedApplicationsDescription": "You haven't had any applications accepted yet.",
+    "noRejectedApplications": "No rejected applications",
+    "noRejectedApplicationsDescription": "You haven't had any applications rejected yet.",
+    "noWithdrawnApplications": "No withdrawn applications",
+    "noWithdrawnApplicationsDescription": "You haven't withdrawn any applications yet.",
+    "noAllApplications": "No applications",
+    "noAllApplicationsDescription": "You haven't submitted any rental applications yet."
   },
   "success": {
     "saved": "Saved successfully",

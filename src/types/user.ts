@@ -10,6 +10,8 @@ export interface User {
   uuid: string;
   firebase_uid: string;
   display_name: string;
+  first_name?: string;
+  last_name?: string;
   email: string;
   photo_url?: string;
   auth_provider: 'firebase' | 'google' | 'facebook' | 'apple';
@@ -81,6 +83,8 @@ export interface PrivacySettings {
 export interface CreateUserInput {
   firebase_uid: string;
   display_name: string;
+  first_name?: string;
+  last_name?: string;
   email: string;
   photo_url?: string;
   auth_provider?: 'firebase' | 'google' | 'facebook' | 'apple';
@@ -98,6 +102,8 @@ export interface CreateUserInput {
 
 export interface UpdateUserInput {
   display_name?: string;
+  first_name?: string;
+  last_name?: string;
   photo_url?: string;
   phone_number?: string;
   location?: string;

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { offersAPI } from '@/lib/api-client';
+import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import EmptyState from '@/components/common/EmptyState';
@@ -20,10 +21,11 @@ export default function AllOutgoingOffers({
   initiatorFirebaseUid, 
   showPropertyInfo = true 
 }: AllOutgoingOffersProps) {
+  const { t } = useLanguage();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('pending');
 
   const [toast, setToast] = useState({
     message: '',
@@ -141,9 +143,9 @@ export default function AllOutgoingOffers({
     return (
       <EmptyState
         icon="📝"
-        title="No Applications Yet"
-        description="You haven't submitted any rental applications yet. Start by browsing available properties and submitting your first application."
-        actionText="Browse Properties"
+        title={t('applications.noApplicationsYet')}
+        description={t('applications.noApplicationsDescription')}
+        actionText={t('applications.browseProperties')}
         actionHref="/search"
       />
     );
@@ -154,11 +156,11 @@ export default function AllOutgoingOffers({
       {/* Mobile Tabs */}
       <MobileTabs
         tabs={[
-          { id: 'all', name: 'All Applications', count: statusCounts.all },
-          { id: 'pending', name: 'Pending', count: statusCounts.pending },
-          { id: 'accepted', name: 'Accepted', count: statusCounts.accepted },
-          { id: 'rejected', name: 'Rejected', count: statusCounts.rejected },
-          { id: 'withdrawn', name: 'Withdrawn', count: statusCounts.withdrawn },
+          { id: 'pending', name: t('applications.pendingApplications'), count: statusCounts.pending },
+          { id: 'accepted', name: t('applications.acceptedApplications'), count: statusCounts.accepted },
+          { id: 'rejected', name: t('applications.rejectedApplications'), count: statusCounts.rejected },
+          { id: 'withdrawn', name: t('applications.withdrawnApplications'), count: statusCounts.withdrawn },
+          { id: 'all', name: t('applications.allApplications'), count: statusCounts.all },
         ]}
         activeTab={filterStatus}
         onTabChange={(tabId) => setFilterStatus(tabId as FilterStatus)}
@@ -169,11 +171,11 @@ export default function AllOutgoingOffers({
       <div className="desktop-tabs border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           {[
-            { key: 'all', label: 'All Applications', count: statusCounts.all },
-            { key: 'pending', label: 'Pending', count: statusCounts.pending },
-            { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
-            { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },
-            { key: 'withdrawn', label: 'Withdrawn', count: statusCounts.withdrawn },
+            { key: 'pending', label: t('applications.pendingApplications'), count: statusCounts.pending },
+            { key: 'accepted', label: t('applications.acceptedApplications'), count: statusCounts.accepted },
+            { key: 'rejected', label: t('applications.rejectedApplications'), count: statusCounts.rejected },
+            { key: 'withdrawn', label: t('applications.withdrawnApplications'), count: statusCounts.withdrawn },
+            { key: 'all', label: t('applications.allApplications'), count: statusCounts.all },
           ].map(({ key, label, count }) => (
             <button
               key={key}
@@ -192,35 +194,54 @@ export default function AllOutgoingOffers({
 
       {/* Applications List */}
       <div className="space-y-4">
-        {filteredOffers.map((offer) => (
-          <OfferCard
-            key={offer.id}
-            offer={offer}
-            showPropertyInfo={showPropertyInfo}
-            isIncomingOffer={false}
-            onWithdrawOffer={handleWithdrawOffer}
-            currentUserId={initiatorFirebaseUid}
-            onOfferStatusChange={() => {
-              // Refresh the offers list when an offer status changes
-              if (initiatorFirebaseUid) {
-                offersAPI.getOffersByInitiator(initiatorFirebaseUid)
-                  .then(response => {
-                    if (response.success && response.data) {
-                      setOffers(response.data);
-                    }
-                  })
-                  .catch(err => {
-                    console.error('Error refreshing offers:', err);
-                  });
-              }
-            }}
-            onCounterOffer={(offerId: string) => {
-              // Handle counter offer - open modal or navigate to counter offer form
-              console.log('Counter offer requested for:', offerId);
-              // TODO: Implement counter offer modal/form
-            }}
-          />
-        ))}
+        {filteredOffers.length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              {filterStatus === 'pending' && t('applications.noPendingApplications')}
+              {filterStatus === 'accepted' && t('applications.noAcceptedApplications')}
+              {filterStatus === 'rejected' && t('applications.noRejectedApplications')}
+              {filterStatus === 'withdrawn' && t('applications.noWithdrawnApplications')}
+              {filterStatus === 'all' && t('applications.noAllApplications')}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {filterStatus === 'pending' && t('applications.noPendingApplicationsDescription')}
+              {filterStatus === 'accepted' && t('applications.noAcceptedApplicationsDescription')}
+              {filterStatus === 'rejected' && t('applications.noRejectedApplicationsDescription')}
+              {filterStatus === 'withdrawn' && t('applications.noWithdrawnApplicationsDescription')}
+              {filterStatus === 'all' && t('applications.noAllApplicationsDescription')}
+            </p>
+          </div>
+        ) : (
+          filteredOffers.map((offer) => (
+            <OfferCard
+              key={offer.id}
+              offer={offer}
+              showPropertyInfo={showPropertyInfo}
+              isIncomingOffer={false}
+              onWithdrawOffer={handleWithdrawOffer}
+              currentUserId={initiatorFirebaseUid}
+              onOfferStatusChange={() => {
+                // Refresh the offers list when an offer status changes
+                if (initiatorFirebaseUid) {
+                  offersAPI.getOffersByInitiator(initiatorFirebaseUid)
+                    .then(response => {
+                      if (response.success && response.data) {
+                        setOffers(response.data);
+                      }
+                    })
+                    .catch(err => {
+                      console.error('Error refreshing offers:', err);
+                    });
+                }
+              }}
+              onCounterOffer={(offerId: string) => {
+                // Handle counter offer - open modal or navigate to counter offer form
+                console.log('Counter offer requested for:', offerId);
+                // TODO: Implement counter offer modal/form
+              }}
+            />
+          ))
+        )}
       </div>
 
       {/* Toast */}

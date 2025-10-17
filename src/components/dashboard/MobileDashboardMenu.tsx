@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { getSafeProfileImage } from '@/lib/utils';
 import Portal from '@/components/Portal';
 import { 
@@ -32,6 +33,7 @@ interface MobileDashboardMenuProps {
 export default memo(function MobileDashboardMenu({ isOpen, onClose }: MobileDashboardMenuProps) {
   const { user: authUser, logout } = useAuth();
   const { isMobile } = useSidebar();
+  const { t } = useLanguage();
   const [activeView, setActiveView] = useState<ViewType>('landlord');
   const [isViewChanging, setIsViewChanging] = useState(false);
   const pathname = usePathname();
@@ -77,23 +79,23 @@ export default memo(function MobileDashboardMenu({ isOpen, onClose }: MobileDash
   };
 
   const tenantNavigation = [
-    { name: 'Dashboard', icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Applications', icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
-    { name: 'Chat', icon: FiMessageCircle, href: '/dashboard/chat-mobile', current: pathname === '/dashboard/chat-mobile' },
-    { name: 'Reviews', icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
-    { name: 'Profile', icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
-    { name: 'Settings', icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    { name: t('navigation.dashboard'), icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: t('navigation.applications'), icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
+    { name: t('navigation.chat'), icon: FiMessageCircle, href: '/dashboard/chat-mobile', current: pathname === '/dashboard/chat-mobile' },
+    { name: t('navigation.reviews'), icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: t('navigation.profile'), icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: t('navigation.settings'), icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
   ];
 
   const landlordNavigation = [
-    { name: 'Dashboard', icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Offers', icon: FiClock, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
-    { name: 'Properties', icon: FiHome, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
-    { name: 'Add Property', icon: FiPlus, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
-    { name: 'Chat', icon: FiMessageCircle, href: '/dashboard/chat-mobile', current: pathname === '/dashboard/chat-mobile' },
-    { name: 'Reviews', icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
-    { name: 'Profile', icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
-    { name: 'Settings', icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    { name: t('navigation.dashboard'), icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: t('navigation.offers'), icon: FiClock, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
+    { name: t('navigation.properties'), icon: FiHome, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
+    { name: t('navigation.addProperty'), icon: FiPlus, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
+    { name: t('navigation.chat'), icon: FiMessageCircle, href: '/dashboard/chat-mobile', current: pathname === '/dashboard/chat-mobile' },
+    { name: t('navigation.reviews'), icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: t('navigation.profile'), icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: t('navigation.settings'), icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
   ];
 
   const currentNavigation = activeView === 'tenant' ? tenantNavigation : landlordNavigation;
@@ -138,7 +140,7 @@ export default memo(function MobileDashboardMenu({ isOpen, onClose }: MobileDash
 
           {/* View Toggle */}
           <div className="mobile-dashboard-menu-view-toggle">
-            <p className="mobile-dashboard-menu-view-title">View Mode</p>
+            <p className="mobile-dashboard-menu-view-title">{t('dashboard.viewMode')}</p>
             <button
               onClick={() => handleViewChange(activeView === 'tenant' ? 'landlord' : 'tenant')}
               disabled={isViewChanging}
@@ -147,17 +149,17 @@ export default memo(function MobileDashboardMenu({ isOpen, onClose }: MobileDash
               {isViewChanging ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                  <span>Switching...</span>
+                  <span>{t('dashboard.switching')}</span>
                 </>
               ) : activeView === 'tenant' ? (
                 <>
                   <FiUser className="h-5 w-5 mr-2" />
-                  <span>Tenant View</span>
+                  <span>{t('dashboard.tenantView')}</span>
                 </>
               ) : (
                 <>
                   <FiHome className="h-5 w-5 mr-2" />
-                  <span>Landlord View</span>
+                  <span>{t('dashboard.landlordView')}</span>
                 </>
               )}
             </button>
@@ -190,7 +192,7 @@ export default memo(function MobileDashboardMenu({ isOpen, onClose }: MobileDash
               className="mobile-dashboard-menu-logout"
             >
               <FiLogOut className="h-5 w-5 mr-3" />
-              <span>Log Out</span>
+              <span>{t('navigation.signOut')}</span>
             </button>
             <p className="mobile-dashboard-menu-copyright">
               © 2025 dropiti. All rights reserved.

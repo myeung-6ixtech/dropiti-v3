@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
 import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
 
 export default function OnboardingPhoto() {
   const { user } = useAuth();
-  const router = useRouter();
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -57,8 +55,8 @@ export default function OnboardingPhoto() {
         onboarding_complete: true,
       });
 
-      // Redirect to dashboard
-      router.replace('/dashboard');
+      // Redirect to dashboard with full page reload to refresh user data
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('Error completing onboarding:', error);
       // You might want to show a toast error here
@@ -76,8 +74,8 @@ export default function OnboardingPhoto() {
         onboarding_complete: true,
       });
 
-      // Redirect to dashboard
-      router.replace('/dashboard');
+      // Redirect to dashboard with full page reload to refresh user data
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('Error completing onboarding:', error);
     } finally {
@@ -95,7 +93,7 @@ export default function OnboardingPhoto() {
       </div>
 
       {/* Profile Photo Upload */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white rounded-2xl p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Photo</h2>
         
         <div className="flex justify-center mb-8">
@@ -109,11 +107,11 @@ export default function OnboardingPhoto() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center space-x-4 pt-6 border-t border-gray-200">
+        <div className="flex flex-col space-y-3 pt-6 border-t border-gray-200">
           <button
             onClick={onFinish}
             disabled={saving}
-            className="btn-primary disabled:opacity-50"
+            className="btn-primary disabled:opacity-50 w-full py-4 rounded-xl font-semibold text-base"
           >
             {saving ? 'Finishing...' : 'Finish'}
           </button>
@@ -121,7 +119,7 @@ export default function OnboardingPhoto() {
             type="button"
             onClick={onSkip}
             disabled={saving}
-            className="btn-secondary disabled:opacity-50"
+            className="btn-secondary disabled:opacity-50 w-full py-4 rounded-xl font-semibold text-base"
           >
             Skip for now
           </button>

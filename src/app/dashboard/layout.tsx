@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { useLanguage } from '@/context/LanguageContext';
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
 import { FullScreenLoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -33,6 +34,7 @@ type ViewType = 'tenant' | 'landlord';
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user: authUser, isAuthenticated, isLoading, logout } = useAuth();
   const { sidebarOpen, setSidebarOpen, isMobile } = useSidebar();
+  const { t } = useLanguage();
   const [activeView, setActiveView] = useState<ViewType>('landlord');
   const [isViewChanging, setIsViewChanging] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
@@ -97,26 +99,26 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   const tenantNavigation = [
-    { name: 'Dashboard', icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Applications', icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
-    { name: 'Chat', icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
-    { name: 'Reviews', icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: t('navigation.dashboard'), icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: t('navigation.applications'), icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
+    { name: t('navigation.chat'), icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
+    { name: t('navigation.reviews'), icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
     // { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
-    { name: 'Profile', icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
-    { name: 'Settings', icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    { name: t('navigation.profile'), icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: t('navigation.settings'), icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
     // { name: 'Recent Activity', icon: ChartBarIcon, href: '/dashboard/activity', current: pathname === '/dashboard/activity' },
   ];
 
   const landlordNavigation = [
-    { name: 'Dashboard', icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
-    { name: 'Offers', icon: FiClock, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
-    { name: 'Properties', icon: FiHome, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
-    { name: 'Add Property', icon: FiPlus, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
-    { name: 'Chat', icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
-    { name: 'Reviews', icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
-    { name: 'Profile', icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
-    { name: 'Settings', icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
+    { name: t('navigation.dashboard'), icon: FiLayers, href: '/dashboard', current: pathname === '/dashboard' },
+    { name: t('navigation.offers'), icon: FiClock, href: '/dashboard/offers', current: pathname === '/dashboard/offers' },
+    { name: t('navigation.properties'), icon: FiHome, href: '/dashboard/properties', current: pathname === '/dashboard/properties' },
+    { name: t('navigation.addProperty'), icon: FiPlus, href: '/dashboard/add-property', current: pathname === '/dashboard/add-property' },
+    { name: t('navigation.chat'), icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
+    { name: t('navigation.reviews'), icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: t('navigation.profile'), icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
+    { name: t('navigation.settings'), icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
     // { name: 'Notifications', icon: BellIcon, href: '/dashboard/notifications', current: pathname === '/dashboard/notifications' },
     // { name: 'Analytics', icon: ChartBarIcon, href: '/dashboard/analytics', current: pathname === '/dashboard/analytics' },
   ];

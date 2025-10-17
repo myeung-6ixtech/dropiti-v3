@@ -1,11 +1,13 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import AllIncomingOffers from '@/components/common/AllIncomingOffers';
 
 export default function OffersPage() {
   const { user: authUser } = useAuth();
+  const { t } = useLanguage();
 
   if (!authUser?.id) {
     return <CenteredLoadingSpinner size="lg" />;
@@ -16,9 +18,9 @@ export default function OffersPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="border-b border-gray-200 pb-4">
-          <h1 className="text-3xl font-bold text-gray-900">Incoming Offers</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('offers.incomingOffers')}</h1>
           <p className="text-gray-600 mt-2">
-            Manage all offers received for your properties
+            {t('offers.manageOffersDescription')}
           </p>
         </div>
       </div>

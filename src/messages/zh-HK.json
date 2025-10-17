@@ -53,7 +53,12 @@
     "analytics": "分析",
     "applications": "申請",
     "savedProperties": "已儲存物業",
-    "addProperty": "新增物業"
+    "addProperty": "新增物業",
+    "explore": "探索",
+    "myProfile": "個人資料",
+    "loggingOut": "登出中...",
+    "loginSignUp": "登入 / 註冊",
+    "login": "登入"
   },
   "hero": {
     "title": "尋找您的完美家園",
@@ -72,7 +77,11 @@
     "onDropiti": "在 Dropiti",
     "recentActivity": "最近活動",
     "upcomingEvents": "即將到來的事件",
-    "quickActions": "快速操作"
+    "quickActions": "快速操作",
+    "viewMode": "檢視模式",
+    "switching": "切換中...",
+    "tenantView": "租客檢視",
+    "landlordView": "業主檢視"
   },
   "property": {
     "addProperty": "新增物業",
@@ -135,7 +144,26 @@
     "security": "安全",
     "billing": "帳單",
     "data": "數據與私隱",
-    "help": "幫助與支援"
+    "help": "幫助與支援",
+    "manageAccountSettings": "管理您的帳戶設定和偏好",
+    "personalInformation": "個人資訊",
+    "updatePersonalDetails": "更新您的個人詳細資料和聯絡資訊",
+    "firstName": "名字",
+    "lastName": "姓氏",
+    "emailCannotBeChanged": "電郵無法更改，因為它已連結到您的帳戶",
+    "phonePlaceholder": "1234 5678",
+    "phoneInstructions": "輸入您的電話號碼（不包括國家代碼）",
+    "saving": "儲存中...",
+    "saveChanges": "儲存變更",
+    "securitySettings": "安全設定",
+    "manageAccountSecurity": "管理您的帳戶安全和私隱",
+    "currentPassword": "現有密碼",
+    "newPassword": "新密碼",
+    "enterCurrentPassword": "輸入現有密碼",
+    "enterNewPassword": "輸入新密碼",
+    "confirmNewPassword": "確認新密碼",
+    "updatePassword": "更新密碼",
+    "customizeExperience": "自訂您的體驗和應用程式設定"
   },
   "auth": {
     "signIn": "登入",
@@ -204,7 +232,52 @@
       "failedToUpdate": "更新物業失敗",
       "failedToDelete": "刪除物業失敗",
       "invalidData": "提供的物業數據無效"
+    },
+    "settings": {
+      "failedToLoad": "載入設定數據失敗",
+      "failedToSave": "儲存設定失敗",
+      "failedToUpdate": "更新設定失敗"
     }
+  },
+  "offers": {
+    "incomingOffers": "收到的出價",
+    "manageOffersDescription": "管理您物業收到的所有出價",
+    "allOffers": "所有出價",
+    "pendingOffers": "待處理",
+    "acceptedOffers": "已接受",
+    "rejectedOffers": "已拒絕",
+    "noOffersYet": "暫無出價",
+    "noOffersDescription": "您尚未收到任何物業出價。當租客對您的物業感興趣時，他們的出價將在此顯示。",
+    "noPendingOffers": "暫無待處理出價",
+    "noPendingOffersDescription": "您目前沒有任何待處理的出價。",
+    "noAcceptedOffers": "暫無已接受出價",
+    "noAcceptedOffersDescription": "您尚未接受任何出價。",
+    "noRejectedOffers": "暫無已拒絕出價",
+    "noRejectedOffersDescription": "您尚未拒絕任何出價。",
+    "noAllOffers": "暫無出價",
+    "noAllOffersDescription": "您尚未收到任何物業出價。"
+  },
+  "applications": {
+    "yourApplications": "您的申請",
+    "trackApplicationsDescription": "追蹤和管理您的租賃申請",
+    "allApplications": "所有申請",
+    "pendingApplications": "待處理",
+    "acceptedApplications": "已接受",
+    "rejectedApplications": "已拒絕",
+    "withdrawnApplications": "已撤回",
+    "noApplicationsYet": "暫無申請",
+    "noApplicationsDescription": "您尚未提交任何租賃申請。請先瀏覽可用物業並提交您的第一份申請。",
+    "browseProperties": "瀏覽物業",
+    "noPendingApplications": "暫無待處理申請",
+    "noPendingApplicationsDescription": "您目前沒有任何待處理的申請。",
+    "noAcceptedApplications": "暫無已接受申請",
+    "noAcceptedApplicationsDescription": "您尚未有任何申請被接受。",
+    "noRejectedApplications": "暫無已拒絕申請",
+    "noRejectedApplicationsDescription": "您尚未有任何申請被拒絕。",
+    "noWithdrawnApplications": "暫無已撤回申請",
+    "noWithdrawnApplicationsDescription": "您尚未撤回任何申請。",
+    "noAllApplications": "暫無申請",
+    "noAllApplicationsDescription": "您尚未提交任何租賃申請。"
   },
   "success": {
     "saved": "儲存成功",

@@ -192,7 +192,7 @@ export default function Navigation() {
                   : navigationStyles.linkInactive
               }`}
             >
-              <span>Home</span>
+              <span>{t('navigation.home')}</span>
             </Link>
             
             <Link
@@ -203,7 +203,7 @@ export default function Navigation() {
                   : navigationStyles.linkInactive
               }`}
             >
-              <span>Explore</span>
+              <span>{t('navigation.explore')}</span>
             </Link>
             
             
@@ -217,7 +217,7 @@ export default function Navigation() {
                     : navigationStyles.linkInactive
                 }`}
               >
-                <span>My Profile</span>
+                <span>{t('navigation.myProfile')}</span>
             </Link>
             
             {/* Desktop Notification Center */}
@@ -274,7 +274,7 @@ export default function Navigation() {
                     >
                       {isLoggingOut ? (
                         <>
-                          Logging out...
+                          {t('navigation.loggingOut')}
                         </>
                       ) : (
                         <>
@@ -291,8 +291,8 @@ export default function Navigation() {
                 href="/auth/signin"
                 className={navigationStyles.authButton}
               >
-                <span className={navigationStyles.authText}>Login / Sign Up</span>
-                <span className={navigationStyles.authTextMobile}>Login</span>
+                <span className={navigationStyles.authText}>{t('navigation.loginSignUp')}</span>
+                <span className={navigationStyles.authTextMobile}>{t('navigation.login')}</span>
               </Link>
             )}
           </div>

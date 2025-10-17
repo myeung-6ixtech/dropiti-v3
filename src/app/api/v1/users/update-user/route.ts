@@ -11,6 +11,8 @@ const UPDATE_USER_MUTATION = `
       returning {
         firebase_uid
         display_name
+        first_name
+        last_name
         email
         photo_url
         auth_provider
@@ -58,6 +60,8 @@ export async function PUT(request: NextRequest) {
     // Validate update fields
     const allowedFields = [
       'display_name',
+      'first_name',
+      'last_name',
       'photo_url',
       'phone_number',
       'location',

@@ -6,10 +6,10 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { usersAPI } from '@/lib/api-client';
 import { 
-  UserIcon, 
-  ShieldCheckIcon, 
-  CogIcon
-} from '@heroicons/react/24/outline';
+  FiUser, 
+  FiShield, 
+  FiSettings
+} from 'react-icons/fi';
 
 // Area code options for supported regions
 const AREA_CODES = [
@@ -121,8 +121,8 @@ export default function SettingsPage() {
             
             // Handle missing fields gracefully with fallbacks - ensure all values are defined
             const newSettings: UserSettings = {
-              firstName: userData.first_name || userData.display_name?.split(' ')[0] || 'John',
-              lastName: userData.last_name || userData.display_name?.split(' ').slice(1).join(' ') || 'Doe',
+              firstName: userData.first_name || '',
+              lastName: userData.last_name || '',
               email: userData.email || 'demo@example.com',
               phone: phoneNumber,
               areaCode: parsedAreaCode,
@@ -137,13 +137,13 @@ export default function SettingsPage() {
             setTempSettings(newSettings);
           } else {
             console.error('Failed to load user settings:', response.error);
-            showToast('error', response.error || 'Failed to load settings data');
+            showToast('error', response.error || t('errors.settings.failedToLoad'));
             // Keep default settings if API fails
             console.log('Keeping default settings due to API failure');
           }
         } catch (error) {
           console.error('Failed to load user settings:', error);
-          showToast('error', 'Failed to load settings data');
+          showToast('error', t('errors.settings.failedToLoad'));
           // Keep default settings if API fails
           console.log('Keeping default settings due to API error');
         } finally {
@@ -202,13 +202,13 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     if (!authUser?.id) {
-      showToast('error', 'You must be logged in to save changes');
+      showToast('error', t('errors.auth.unauthorized'));
       return;
     }
 
     // Validate phone number
     if (!validatePhone(tempSettings.phone, areaCode)) {
-      showToast('error', 'Please enter a valid phone number for the selected country');
+      showToast('error', t('forms.validation.phone'));
       return;
     }
 
@@ -219,7 +219,8 @@ export default function SettingsPage() {
       
       // Prepare updates for the API
       const updates: Record<string, unknown> = {
-        display_name: `${tempSettings.firstName} ${tempSettings.lastName}`.trim(),
+        first_name: tempSettings.firstName?.trim() || null,
+        last_name: tempSettings.lastName?.trim() || null,
         phone_number: `${areaCode} ${tempSettings.phone}`.trim(), // Combine area code and phone
       };
 
@@ -251,13 +252,13 @@ export default function SettingsPage() {
           await setLocale(tempLanguage);
         }
         
-        showToast('success', 'Settings updated successfully!');
+        showToast('success', t('success.settingsUpdated'));
       } else {
-        throw new Error(updateResponse.error || 'Failed to update settings');
+        throw new Error(updateResponse.error || t('errors.settings.failedToUpdate'));
       }
     } catch (error) {
       console.error('Failed to save settings:', error);
-      showToast('error', error instanceof Error ? error.message : 'Failed to save settings');
+      showToast('error', error instanceof Error ? error.message : t('errors.settings.failedToSave'));
     } finally {
       setIsLoading(false);
     }
@@ -269,9 +270,9 @@ export default function SettingsPage() {
   };
 
   const tabs = [
-    { id: 'profile', name: 'Profile', icon: UserIcon },
-    { id: 'security', name: 'Security', icon: ShieldCheckIcon },
-    { id: 'preferences', name: 'Preferences', icon: CogIcon },
+    { id: 'profile', name: t('settings.profile'), icon: FiUser },
+    { id: 'security', name: t('settings.security'), icon: FiShield },
+    { id: 'preferences', name: t('settings.preferences'), icon: FiSettings },
   ];
 
   const renderTabContent = () => {
@@ -280,14 +281,14 @@ export default function SettingsPage() {
         return (
           <div>
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Personal Information</h2>
-              <p className="text-gray-600">Update your personal details and contact information.</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('settings.personalInformation')}</h2>
+              <p className="text-gray-600">{t('settings.updatePersonalDetails')}</p>
             </div>
             <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="form-label">First Name</label>
+                    <label className="form-label">{t('settings.firstName')}</label>
                     <input
                       type="text"
                       value={tempSettings.firstName}
@@ -296,7 +297,7 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">Last Name</label>
+                    <label className="form-label">{t('settings.lastName')}</label>
                     <input
                       type="text"
                       value={tempSettings.lastName}
@@ -305,17 +306,17 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">Email</label>
+                    <label className="form-label">{t('profile.email')}</label>
                     <input
                       type="email"
                       value={tempSettings.email}
                       disabled
-                      className="form-input bg-gray-50 text-gray-500 cursor-not-allowed"
+                      className="form-input text-gray-500 cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-500">Email cannot be changed as it's linked to your account</p>
+                    <p className="text-xs text-gray-500">{t('settings.emailCannotBeChanged')}</p>
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">Phone</label>
+                    <label className="form-label">{t('profile.phoneNumber')}</label>
                     <div className="flex space-x-2">
                       <select
                         value={areaCode}
@@ -332,12 +333,12 @@ export default function SettingsPage() {
                         type="tel"
                         value={tempSettings.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
-                        className="form-input flex-1"
-                        placeholder="1234 5678"
+                        className="form-input text-gray-500"
+                        placeholder={t('settings.phonePlaceholder')}
                       />
                     </div>
                     <p className="text-xs text-gray-500">
-                      Enter your phone number without the country code
+                      {t('settings.phoneInstructions')}
                     </p>
                   </div>
                 </div>
@@ -352,7 +353,7 @@ export default function SettingsPage() {
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                   }`}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleSave}
@@ -366,10 +367,10 @@ export default function SettingsPage() {
                   {isLoading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Saving...
+                      {t('settings.saving')}
                     </div>
                   ) : (
-                    'Save Changes'
+                    t('settings.saveChanges')
                   )}
                 </button>
               </div>
@@ -382,46 +383,46 @@ export default function SettingsPage() {
         return (
           <div>
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Security Settings</h2>
-              <p className="text-gray-600">Manage your account security and privacy.</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('settings.securitySettings')}</h2>
+              <p className="text-gray-600">{t('settings.manageAccountSecurity')}</p>
             </div>
             <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label className="form-label">Current Password</label>
+                    <label className="form-label">{t('settings.currentPassword')}</label>
                     <input
                       type="password"
                       value={securityForm.currentPassword}
                       onChange={(e) => handleSecurityChange('currentPassword', e.target.value)}
                       className="form-input"
-                      placeholder="Enter current password"
+                      placeholder={t('settings.enterCurrentPassword')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">New Password</label>
+                    <label className="form-label">{t('settings.newPassword')}</label>
                     <input
                       type="password"
                       value={securityForm.newPassword}
                       onChange={(e) => handleSecurityChange('newPassword', e.target.value)}
                       className="form-input"
-                      placeholder="Enter new password"
+                      placeholder={t('settings.enterNewPassword')}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">Confirm New Password</label>
+                    <label className="form-label">{t('auth.confirmPassword')}</label>
                     <input
                       type="password"
                       value={securityForm.confirmPassword}
                       onChange={(e) => handleSecurityChange('confirmPassword', e.target.value)}
                       className="form-input"
-                      placeholder="Confirm new password"
+                      placeholder={t('settings.confirmNewPassword')}
                     />
                   </div>
                 </div>
                 <div className="flex justify-end pt-6 border-t border-gray-200">
                   <button className="btn-primary px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors">
-                    Update Password
+                    {t('settings.updatePassword')}
                   </button>
                 </div>
               </div>
@@ -433,8 +434,8 @@ export default function SettingsPage() {
         return (
           <div>
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Preferences</h2>
-              <p className="text-gray-600">Customize your experience and app settings.</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('settings.preferences')}</h2>
+              <p className="text-gray-600">{t('settings.customizeExperience')}</p>
             </div>
             <div className="bg-white rounded-lg p-6">
               <div className="space-y-6">
@@ -452,7 +453,7 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">Time Zone</label>
+                    <label className="form-label">{t('settings.timezone')}</label>
                     <select 
                       value={tempSettings.preferences.timezone}
                       onChange={(e) => handlePreferenceChange('timezone', e.target.value)}
@@ -462,7 +463,7 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="form-label">Currency</label>
+                    <label className="form-label">{t('settings.currency')}</label>
                     <select 
                       value={tempSettings.preferences.currency}
                       onChange={(e) => handlePreferenceChange('currency', e.target.value)}
@@ -483,7 +484,7 @@ export default function SettingsPage() {
                       : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                   }`}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleSave}
@@ -497,10 +498,10 @@ export default function SettingsPage() {
                   {isLoading ? (
                     <div className="flex items-center">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Saving...
+                      {t('settings.saving')}
                     </div>
                   ) : (
-                    'Save Changes'
+                    t('settings.saveChanges')
                   )}
                 </button>
               </div>
@@ -518,9 +519,9 @@ export default function SettingsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('navigation.settings')}</h1>
           <p className="mt-2 text-gray-600">
-            Manage your account settings and preferences
+            {t('settings.manageAccountSettings')}
           </p>
         </div>
         {/* Tab Navigation */}

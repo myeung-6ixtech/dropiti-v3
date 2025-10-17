@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { offersAPI, propertiesAPI } from '@/lib/api-client';
+import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import EmptyState from '@/components/common/EmptyState';
-import { Offer } from '@/types/offer';import MobileTabs from '@/components/common/MobileTabs';
+import { Offer } from '@/types/offer';
+import MobileTabs from '@/components/common/MobileTabs';
 interface AllIncomingOffersProps {
   recipientFirebaseUid: string;
 }
@@ -27,12 +29,13 @@ interface PropertyGroup {
 }
 
 export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingOffersProps) {
+  const { t } = useLanguage();
   const [offers, setOffers] = useState<OfferWithProperty[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCounterOfferModalOpen, setIsCounterOfferModalOpen] = useState(false);
   const [selectedOfferForCounter, setSelectedOfferForCounter] = useState<OfferWithProperty | null>(null);
-  const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>('pending');
 
   // Fetch all offers for the recipient (landlord)
   useEffect(() => {
@@ -288,8 +291,8 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
     return (
       <EmptyState
         icon="📬"
-        title="No Offers Yet"
-        description="You haven't received any offers for your properties yet. When tenants are interested in your listings, their offers will appear here."
+        title={t('offers.noOffersYet')}
+        description={t('offers.noOffersDescription')}
       />
     );
   }
@@ -299,10 +302,10 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
       {/* Mobile Tabs */}
       <MobileTabs
         tabs={[
-          { id: 'all', name: 'All Offers', count: statusCounts.all },
-          { id: 'pending', name: 'Pending', count: statusCounts.pending },
-          { id: 'accepted', name: 'Accepted', count: statusCounts.accepted },
-          { id: 'rejected', name: 'Rejected', count: statusCounts.rejected },
+          { id: 'pending', name: t('offers.pendingOffers'), count: statusCounts.pending },
+          { id: 'accepted', name: t('offers.acceptedOffers'), count: statusCounts.accepted },
+          { id: 'rejected', name: t('offers.rejectedOffers'), count: statusCounts.rejected },
+          { id: 'all', name: t('offers.allOffers'), count: statusCounts.all },
         ]}
         activeTab={filterStatus}
         onTabChange={(tabId) => setFilterStatus(tabId as FilterStatus)}
@@ -313,10 +316,10 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
       <div className="desktop-tabs border-b border-gray-200">
         <nav className="-mb-px flex space-x-8">
           {[
-            { key: 'all', label: 'All Offers', count: statusCounts.all },
-            { key: 'pending', label: 'Pending', count: statusCounts.pending },
-            { key: 'accepted', label: 'Accepted', count: statusCounts.accepted },
-            { key: 'rejected', label: 'Rejected', count: statusCounts.rejected },
+            { key: 'pending', label: t('offers.pendingOffers'), count: statusCounts.pending },
+            { key: 'accepted', label: t('offers.acceptedOffers'), count: statusCounts.accepted },
+            { key: 'rejected', label: t('offers.rejectedOffers'), count: statusCounts.rejected },
+            { key: 'all', label: t('offers.allOffers'), count: statusCounts.all },
           ].map(({ key, label, count }) => (
             <button
               key={key}
@@ -335,29 +338,46 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
 
       {/* Offers by Property */}
       <div className="space-y-8">
-        {Object.entries(groupedOffers).map(([propertyUuid, propertyGroup]) => (
-          <div key={propertyUuid} className="space-y-4">
-            {/* Offers for this Property */}
-            <div className="space-y-4">
-              {propertyGroup.offers.map((offer) => (
-                <OfferCard
-                  key={offer.id}
-                  offer={offer}
-                  showPropertyInfo={true} // Now show property info in individual cards
-                  isIncomingOffer={true}
-                  onAcceptOffer={handleAcceptOffer}
-                  onRejectOffer={handleRejectOffer}
-                  onCounterOffer={handleCounterOffer}
-                  currentUserId={recipientFirebaseUid}
-                  onOfferStatusChange={() => {
-                    // Refresh offers when status changes
-                    window.location.reload();
-                  }}
-                />
-              ))}
-            </div>
+        {Object.keys(groupedOffers).length === 0 ? (
+          <div className="text-center py-12">
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              {filterStatus === 'pending' && t('offers.noPendingOffers')}
+              {filterStatus === 'accepted' && t('offers.noAcceptedOffers')}
+              {filterStatus === 'rejected' && t('offers.noRejectedOffers')}
+              {filterStatus === 'all' && t('offers.noAllOffers')}
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              {filterStatus === 'pending' && t('offers.noPendingOffersDescription')}
+              {filterStatus === 'accepted' && t('offers.noAcceptedOffersDescription')}
+              {filterStatus === 'rejected' && t('offers.noRejectedOffersDescription')}
+              {filterStatus === 'all' && t('offers.noAllOffersDescription')}
+            </p>
           </div>
-        ))}
+        ) : (
+          Object.entries(groupedOffers).map(([propertyUuid, propertyGroup]) => (
+            <div key={propertyUuid} className="space-y-4">
+              {/* Offers for this Property */}
+              <div className="space-y-4">
+                {propertyGroup.offers.map((offer) => (
+                  <OfferCard
+                    key={offer.id}
+                    offer={offer}
+                    showPropertyInfo={true} // Now show property info in individual cards
+                    isIncomingOffer={true}
+                    onAcceptOffer={handleAcceptOffer}
+                    onRejectOffer={handleRejectOffer}
+                    onCounterOffer={handleCounterOffer}
+                    currentUserId={recipientFirebaseUid}
+                    onOfferStatusChange={() => {
+                      // Refresh offers when status changes
+                      window.location.reload();
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Counter Offer Modal */}
