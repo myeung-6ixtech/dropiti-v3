@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { 
@@ -10,6 +10,7 @@ import {
 import { Bed, Bathtub, Clock } from '@/assets/icons';
 import { getAmenityIcon } from '@/constants/amenity-icons';
 import PropertyMap from '@/components/common/PropertyMap';
+import { useResponsiveModal } from '@/hooks/useResponsiveModal';
 
 interface MobilePropertyPageProps {
   property: {
@@ -53,6 +54,24 @@ export default function MobilePropertyPage({
   formatAddressDisplay
 }: MobilePropertyPageProps) {
   const router = useRouter();
+  const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+
+  // Description modal
+  const { ModalComponent: DescriptionModal } = useResponsiveModal({
+    isOpen: isDescriptionModalOpen,
+    onClose: () => setIsDescriptionModalOpen(false),
+    mobileTitle: 'About this place',
+    mobileHeight: 'large'
+  });
+
+  // Helper function to truncate description
+  const truncateDescription = (text: string, maxLength: number = 300) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength).trim() + '...';
+  };
+
+  const truncatedDescription = truncateDescription(property.description);
+  const shouldShowSeeMore = property.description.length > 300;
 
   // Share functionality
   const handleShare = async () => {
@@ -246,8 +265,16 @@ export default function MobilePropertyPage({
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">About this place</h2>
           <div className="text-gray-600 leading-relaxed font-medium">
-            {property.description}
+            {truncatedDescription}
           </div>
+          {shouldShowSeeMore && (
+            <button
+              onClick={() => setIsDescriptionModalOpen(true)}
+              className="btn-secondary w-full mt-4 py-3 rounded-xl font-medium text-sm hover:bg-gray-100 transition-colors"
+            >
+              See More
+            </button>
+          )}
         </div>
       </div>
 
@@ -325,6 +352,15 @@ export default function MobilePropertyPage({
           </div>
         </div>
       )}
+
+      {/* Description Modal */}
+      <DescriptionModal>
+        <div className="p-6">
+          <div className="text-gray-600 leading-relaxed font-medium whitespace-pre-wrap">
+            {property.description}
+          </div>
+        </div>
+      </DescriptionModal>
     </div>
   );
 }
