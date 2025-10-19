@@ -276,6 +276,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               totalGuests: userData.total_guests || 0,
               userSince: userData.created_at,
               phoneNumber: userData.phone_number,
+              onboarding_complete: userData.onboarding_complete || false,
               preferences: parsePreferences(userData.preferences),
               notificationSettings: parseNotificationSettings(userData.notification_settings),
               privacySettings: parsePrivacySettings(userData.privacy_settings),

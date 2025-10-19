@@ -23,6 +23,7 @@ const GET_USER_BY_FIREBASE_UID_QUERY = `
       rating
       review_count
       response_rate
+      onboarding_complete
       preferences
       notification_settings
       privacy_settings
@@ -66,6 +67,7 @@ const GET_USER_BY_ID_QUERY = `
       rating
       review_count
       response_rate
+      onboarding_complete
       preferences
       notification_settings
       privacy_settings
@@ -145,6 +147,7 @@ export async function GET(request: NextRequest) {
         rating: number;
         review_count: number;
         response_rate: number;
+        onboarding_complete: boolean;
         preferences: Record<string, unknown>;
         notification_settings: Record<string, unknown>;
         privacy_settings: Record<string, unknown>;
