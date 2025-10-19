@@ -12,6 +12,7 @@ import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
 import { groupAmenitiesByCategory } from '@/constants/amenities';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
 import DesktopPropertyPage from '@/components/property/DesktopPropertyPage';
+import SEO, { createPropertySchema } from '@/components/SEO';
 
 interface PropertyData {
   id: string;
@@ -424,6 +425,45 @@ export default function PropertyDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* SEO Component with Structured Data */}
+      <SEO
+        title={`${property.title} - ${new Intl.NumberFormat('en-HK', {
+          style: 'currency',
+          currency: 'HKD',
+          minimumFractionDigits: 0,
+        }).format(property.price)} | Dropiti`}
+        description={`${property.title} - ${property.description?.substring(0, 150)}... Find this and more properties on Dropiti.`}
+        canonical={`/property/${property.property_uuid}`}
+        image={property.display_image || property.image_url}
+        type="website"
+        keywords={[
+          'property rental',
+          'apartment',
+          'house',
+          'rent',
+          'Hong Kong',
+          'real estate',
+          property.title,
+          `${property.bedrooms} bedroom`,
+          `${property.bathrooms} bathroom`,
+        ]}
+        structuredData={createPropertySchema({
+          id: property.property_uuid,
+          title: property.title,
+          description: property.description || '',
+          price: property.price,
+          currency: 'HKD',
+          address: typeof property.address === 'string' ? property.address : JSON.stringify(property.address),
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          images: allImages,
+          landlord: {
+            name: landlord?.name || 'Property Owner',
+            email: landlord?.email || '',
+          },
+        })}
+      />
+
       {/* Mobile Property Page */}
       <MobilePropertyPage
         property={property}

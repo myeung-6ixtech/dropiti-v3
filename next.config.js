@@ -1,5 +1,37 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // SEO optimizations
+  trailingSlash: true, // Better for SEO consistency
+  compress: true,
+  
+  // Security headers for SEO
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY'
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block'
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin'
+          }
+        ],
+      },
+    ];
+  },
+
+  // Image optimization
   images: {
     remotePatterns: [
       {

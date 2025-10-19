@@ -12,6 +12,7 @@ import { getSafeProfileImage } from '@/lib/utils';
 import { navigationStyles } from '@/styles/index';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import { useMobileChat } from '@/context/MobileChatContext';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -139,6 +140,7 @@ export default function Navigation() {
             {/* Mobile Icons */}
             {isAuthenticated && (
               <div className="flex items-center space-x-2">
+                <LanguageSwitcher variant="icon" size="sm" />
                 <NotificationCenter />
                 <button
                   onClick={openBottomSheet}
@@ -221,7 +223,8 @@ export default function Navigation() {
             </Link>
             
             {/* Desktop Notification Center */}
-            <div className="hidden sm:block">
+            <div className="hidden sm:flex items-center space-x-2">
+              <LanguageSwitcher variant="icon" />
               <NotificationCenter />
             </div>
             
@@ -287,13 +290,16 @@ export default function Navigation() {
               </div>
               </>
             ) : (
-              <Link
-                href="/auth/signin"
-                className={navigationStyles.authButton}
-              >
-                <span className={navigationStyles.authText}>{t('navigation.loginSignUp')}</span>
-                <span className={navigationStyles.authTextMobile}>{t('navigation.login')}</span>
-              </Link>
+              <div className="flex items-center space-x-3">
+                <LanguageSwitcher variant="icon" />
+                <Link
+                  href="/auth/signin"
+                  className={navigationStyles.authButton}
+                >
+                  <span className={navigationStyles.authText}>{t('navigation.loginSignUp')}</span>
+                  <span className={navigationStyles.authTextMobile}>{t('navigation.login')}</span>
+                </Link>
+              </div>
             )}
           </div>
         </div>

@@ -1,0 +1,25 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /onboarding/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Bingbot
+User-agent: Bingbot
+Allow: /
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /onboarding/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Host
+Host: https://dropiti.com
+
+# Sitemaps
+Sitemap: https://dropiti.com/sitemap.xml
