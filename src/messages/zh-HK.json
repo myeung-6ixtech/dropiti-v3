@@ -279,6 +279,28 @@
     "noAllApplications": "暫無申請",
     "noAllApplicationsDescription": "您尚未提交任何租賃申請。"
   },
+  "welcomeHeader": {
+    "hi": "您好，{name}",
+    "propertiesAndReviews": "{properties} 物業 | {reviews} 評論",
+    "manageProperties": "管理物業",
+    "addNewProperty": "新增物業",
+    "viewOffers": "查看出價",
+    "viewApplications": "查看申請",
+    "exploreProperties": "探索物業"
+  },
+  "dashboardPage": {
+    "error": "錯誤",
+    "yourReviews": "您的評論",
+    "viewAll": "查看全部 →",
+    "noReviewsYet": "暫無評論",
+    "reviewsWillAppear": "當您收到評論時，評論將在此顯示",
+    "reviewOpportunities": "評論機會",
+    "noReviewOpportunities": "目前沒有評論機會",
+    "reviewsBecomeAvailable": "評論在接受出價後可用，並在 {days} 天後過期",
+    "reviewSubmittedSuccessfully": "您的評論已成功提交。",
+    "failedToSubmitReview": "提交評論失敗。請重試。",
+    "failedToFetchData": "載入部分儀表板數據失敗。請重新整理頁面。"
+  },
   "success": {
     "saved": "儲存成功",
     "updated": "更新成功",

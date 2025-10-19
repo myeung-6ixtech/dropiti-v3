@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { REVIEW_CONSTANTS } from '@/constants/review';
 import { offersAPI } from '@/lib/api-client';
@@ -15,6 +16,7 @@ export default function ReviewOpportunities() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<ReviewOpportunity | null>(null);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const { user: authUser } = useAuth();
+  const { t } = useLanguage();
   const { showToast } = useToast();
 
   const loadReviewOpportunities = useCallback(async () => {
@@ -72,11 +74,11 @@ export default function ReviewOpportunities() {
         setIsReviewModalOpen(false);
         setSelectedOpportunity(null);
         // Success toast
-        showToast('success', 'Your review has been submitted successfully.');
+        showToast('success', t('dashboardPage.reviewSubmittedSuccessfully'));
       }
     } catch (error) {
       console.error('Error creating review:', error);
-      showToast('error', 'Failed to submit review. Please try again.');
+      showToast('error', t('dashboardPage.failedToSubmitReview'));
     }
   };
 
@@ -98,7 +100,7 @@ export default function ReviewOpportunities() {
     <>
       <div className="dashboard-card mb-8">
         <div className="dashboard-card-header">
-          <h2 className="dashboard-card-title">Review Opportunities</h2>
+          <h2 className="dashboard-card-title">{t('dashboardPage.reviewOpportunities')}</h2>
         </div>
         
         {opportunities.length === 0 ? (
@@ -108,9 +110,9 @@ export default function ReviewOpportunities() {
                 <svg className="dashboard-review-empty-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p className="dashboard-review-empty-text">No review opportunities at this time</p>
+                <p className="dashboard-review-empty-text">{t('dashboardPage.noReviewOpportunities')}</p>
                 <p className="dashboard-review-empty-subtext">
-                  Reviews become available after accepting offers and expire in {REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS} days
+                  {t('dashboardPage.reviewsBecomeAvailable', { days: REVIEW_CONSTANTS.REVIEW_WINDOW_DAYS })}
                 </p>
               </div>
             </div>

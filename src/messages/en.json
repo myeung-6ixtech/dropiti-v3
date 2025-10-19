@@ -279,6 +279,28 @@
     "noAllApplications": "No applications",
     "noAllApplicationsDescription": "You haven't submitted any rental applications yet."
   },
+  "welcomeHeader": {
+    "hi": "Hi, {name}",
+    "propertiesAndReviews": "{properties} Properties | {reviews} Reviews",
+    "manageProperties": "Manage Properties",
+    "addNewProperty": "Add New Property",
+    "viewOffers": "View Offers",
+    "viewApplications": "View Applications",
+    "exploreProperties": "Explore Properties"
+  },
+  "dashboardPage": {
+    "error": "Error",
+    "yourReviews": "Your Reviews",
+    "viewAll": "View All →",
+    "noReviewsYet": "No reviews yet",
+    "reviewsWillAppear": "Reviews will appear here once you receive them",
+    "reviewOpportunities": "Review Opportunities",
+    "noReviewOpportunities": "No review opportunities at this time",
+    "reviewsBecomeAvailable": "Reviews become available after accepting offers and expire in {days} days",
+    "reviewSubmittedSuccessfully": "Your review has been submitted successfully.",
+    "failedToSubmitReview": "Failed to submit review. Please try again.",
+    "failedToFetchData": "Failed to fetch some dashboard data. Please refresh the page."
+  },
   "success": {
     "saved": "Saved successfully",
     "updated": "Updated successfully",

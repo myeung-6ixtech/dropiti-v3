@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import DropitiPassport from '@/components/common/DropitiPassport';
 import { 
   StarIcon
@@ -18,6 +19,7 @@ import { getTotalPropertyCount, getPublishedPropertyCountByStatus, getAverageUse
 
 export default function DashboardPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
+  const { t } = useLanguage();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +106,7 @@ export default function DashboardPage() {
         if (err && typeof err === 'object' && 'message' in err) {
           const errorMessage = (err as Error).message;
           if (!errorMessage.includes('relation') && !errorMessage.includes('does not exist')) {
-            setError('Failed to fetch some dashboard data. Please refresh the page.');
+            setError(t('dashboardPage.failedToFetchData'));
           }
         }
       } finally {
@@ -190,7 +192,7 @@ export default function DashboardPage() {
     return (
       <div className="text-center py-12">
         <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-          <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
+          <h3 className="text-lg font-medium text-red-800 mb-2">{t('dashboardPage.error')}</h3>
           <p className="text-red-600 mb-4">{error}</p>
         </div>
       </div>
@@ -220,12 +222,12 @@ export default function DashboardPage() {
           {/* Recent Reviews */}
           <div className="dashboard-card">
             <div className="dashboard-card-header">
-              <h2 className="dashboard-card-title">Your Reviews</h2>
+              <h2 className="dashboard-card-title">{t('dashboardPage.yourReviews')}</h2>
               <Link
                 href="/dashboard/reviews"
                 className="dashboard-card-link"
               >
-                View All →
+                {t('dashboardPage.viewAll')}
               </Link>
             </div>
             
@@ -238,8 +240,8 @@ export default function DashboardPage() {
                 <div className="dashboard-review-empty">
                   <div className="text-gray-500">
                     <StarIcon className="dashboard-review-empty-icon" />
-                    <p className="dashboard-review-empty-text">No reviews yet</p>
-                    <p className="dashboard-review-empty-subtext">Reviews will appear here once you receive them</p>
+                    <p className="dashboard-review-empty-text">{t('dashboardPage.noReviewsYet')}</p>
+                    <p className="dashboard-review-empty-subtext">{t('dashboardPage.reviewsWillAppear')}</p>
                   </div>
                 </div>
               )}

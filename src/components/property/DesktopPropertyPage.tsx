@@ -302,7 +302,7 @@ export default function DesktopPropertyPage({
 
             {/* Map */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Where you'll be</h2>
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Where you'll be</h2>
               <div className="rounded-lg overflow-hidden border border-gray-200">
                 <PropertyMap 
                   address={(() => {
