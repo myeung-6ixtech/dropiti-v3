@@ -15,6 +15,18 @@ const CREATE_USER_MUTATION = `
   }
 `;
 
+const CHECK_USER_BY_EMAIL = `
+  query CheckUserByEmail($email: String!) {
+    real_estate_user(where: { email: { _eq: $email } }, limit: 1) {
+      uuid
+      firebase_uid
+      email
+      auth_provider
+      photo_url
+    }
+  }
+`;
+
 export async function POST(request: NextRequest) {
   try {
     // Check environment variables
@@ -42,7 +54,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check if user already exists
+    // Check if user already exists by firebase_uid
     const CHECK_USER_EXISTS = `
       query CheckUserExists($firebase_uid: String!) {
         real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
@@ -51,17 +63,36 @@ export async function POST(request: NextRequest) {
       }
     `;
 
-    const existingUser = await executeQuery(CHECK_USER_EXISTS, { firebase_uid: userData.firebase_uid });
+    const existingById = await executeQuery(CHECK_USER_EXISTS, { firebase_uid: userData.firebase_uid });
     
     // Type assertion for the response data
-    const typedExistingUser = existingUser as {
+    const typedExistingById = existingById as {
       real_estate_user?: Array<{ uuid: string }>;
     };
     
-    if (typedExistingUser?.real_estate_user && typedExistingUser.real_estate_user.length > 0) {
+    if (typedExistingById?.real_estate_user && typedExistingById.real_estate_user.length > 0) {
       return NextResponse.json(
         { error: 'User already exists with this Firebase UID' },
         { status: 409 }
+      );
+    }
+
+    // Check if user already exists by email
+    const existingByEmail = await executeQuery(CHECK_USER_BY_EMAIL, { email: userData.email.toLowerCase() }).catch(() => null);
+    const typedExistingByEmail = existingByEmail as {
+      real_estate_user?: Array<{ uuid: string; firebase_uid: string; email: string; auth_provider: string; photo_url?: string }>;
+    };
+    
+    if (typedExistingByEmail?.real_estate_user && typedExistingByEmail.real_estate_user.length > 0) {
+      const existingUser = typedExistingByEmail.real_estate_user[0];
+      console.log('User already exists by email, returning existing user:', existingUser);
+      return NextResponse.json(
+        { 
+          success: true, 
+          data: existingUser, 
+          message: 'User already exists by email. Not creating duplicate.' 
+        },
+        { status: 200 }
       );
     }
 

@@ -1,7 +1,9 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { executeQuery, executeMutation } from '@/app/api/graphql/serverClient';
 
 // Extend the built-in session types
 declare module "next-auth" {
@@ -35,6 +37,33 @@ declare module "next-auth/jwt" {
 if (!process.env.NEXTAUTH_SECRET) {
   console.error('NEXTAUTH_SECRET is not set');
 }
+
+// GraphQL queries and mutations for user management
+const GET_USER_BY_EMAIL = `
+  query GetUserByEmail($email: String!) {
+    real_estate_user(where: { email: { _eq: $email } }, limit: 1) {
+      uuid
+      firebase_uid
+      display_name
+      email
+      photo_url
+      auth_provider
+    }
+  }
+`;
+
+const INSERT_USER = `
+  mutation InsertUser($user: real_estate_user_insert_input!) {
+    insert_real_estate_user_one(object: $user) {
+      uuid
+      firebase_uid
+      display_name
+      email
+      photo_url
+      auth_provider
+    }
+  }
+`;
 
 export const authOptions: NextAuthOptions = {
   debug: true, // Enable debug mode
@@ -92,6 +121,18 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
       }
+    }),
+    // Google OAuth Provider using existing NEXT_PUBLIC_ env vars
+    GoogleProvider({
+      clientId: process.env.NEXT_PUBLIC_FIREBASE_GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.NEXT_PUBLIC_FIREBASE_GOOGLE_CLIENT_SECRET || '',
+      authorization: {
+        params: {
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
+        },
+      },
     })
   ],
   secret: process.env.NEXTAUTH_SECRET,
@@ -103,6 +144,56 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days (default)
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Handle Google OAuth account linking
+      if (account?.provider === 'google') {
+        const email = (user.email || profile?.email || '').toLowerCase();
+        if (!email) {
+          console.error('Google sign-in: No email provided');
+          return false;
+        }
+
+        try {
+          // 1) Try to find existing user by email
+          const existing = await executeQuery(GET_USER_BY_EMAIL, { email }).catch(() => null);
+          const existingUser = (existing as { real_estate_user?: Array<{ uuid: string; firebase_uid: string; display_name: string; email: string; photo_url?: string; auth_provider: string }> })?.real_estate_user?.[0];
+
+          if (existingUser) {
+            // 2) Reuse existing DB identity by setting a stable token id
+            console.log('Google sign-in: Found existing user by email, linking accounts');
+            user.id = existingUser.firebase_uid; // map token/session id to existing firebase_uid
+            return true;
+          }
+
+          // 3) No existing email — create a new DB user, using providerAccountId as firebase_uid
+          console.log('Google sign-in: Creating new user for email:', email);
+          const displayName = user.name || (profile as { name?: string })?.name || email.split('@')[0] || 'Google User';
+          const photoUrl = user.image || (profile as { picture?: string })?.picture || '/images/Portrait_Placeholder.png';
+
+          const newUser = {
+            firebase_uid: account.providerAccountId, // use Google subject as the id in DB
+            display_name: displayName,
+            email,
+            photo_url: photoUrl,
+            auth_provider: 'google',
+          };
+
+          await executeMutation(INSERT_USER, { user: newUser }).catch((err) => {
+            console.error('Failed to create Google user in DB:', err);
+          });
+
+          // Set id to what we stored in DB for consistency
+          user.id = account.providerAccountId;
+          return true;
+        } catch (error) {
+          console.error('Google sign-in error:', error);
+          return false;
+        }
+      }
+
+      // For credentials provider, continue as normal
+      return true;
+    },
     async jwt({ token, user, trigger, session }) {
       try {
         if (user) {

@@ -8,6 +8,7 @@ import { usersAPI } from '@/lib/api-client';
 import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 // Validation utilities
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
@@ -337,6 +338,13 @@ export default function SignUpForm() {
             </button>
           </div>
         </form>
+
+        {/* Social sign-up */}
+        <div className="auth-divider">
+          <span className="auth-divider-text">or</span>
+        </div>
+
+        <GoogleSignInButton mode="signup" />
 
         <div className={`${authClasses.sectionSpacing} text-center`}>
           <p className={authClasses.textCenter}>

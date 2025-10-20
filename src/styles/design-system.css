@@ -1070,6 +1070,40 @@
     @apply bg-white text-purple-600 border-2 border-purple-600 px-4 py-3 rounded-lg text-sm font-medium hover:bg-purple-600 hover:text-white transition-all duration-200 shadow-sm w-full;
   }
 
+  /* Google Button (purple stroke) */
+  .google-signin-button {
+    @apply bg-white text-purple-600 border-2 border-purple-600 px-4 py-3 rounded-lg text-sm font-medium hover:bg-purple-50 transition-all duration-200 shadow-sm w-full flex items-center justify-center;
+  }
+  .google-signin-button:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+  .google-signin-content {
+    @apply flex items-center;
+    gap: 12px;
+  }
+  .google-icon {
+    flex-shrink: 0;
+  }
+  .google-text {
+    @apply text-sm font-medium;
+  }
+
+  /* Divider */
+  .auth-divider {
+    @apply relative my-6;
+  }
+  .auth-divider::before {
+    content: '';
+    @apply absolute top-1/2 left-0 right-0 h-px bg-gray-300;
+    transform: translateY(-50%);
+  }
+  .auth-divider-text {
+    @apply relative bg-white px-4 text-sm text-gray-500;
+    display: inline-block;
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
+
   /* Form Elements */
   .auth-input {
     @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black text-gray-900 transition-colors placeholder:text-sm placeholder:text-gray-400;

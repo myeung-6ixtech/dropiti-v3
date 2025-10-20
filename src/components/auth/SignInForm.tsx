@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
+import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -153,6 +154,12 @@ export default function SignInForm() {
             </button>
           </div>
         </form>
+        {/* Social sign-in */}
+        <div className="auth-divider">
+          <span className="auth-divider-text">or</span>
+        </div>
+
+        <GoogleSignInButton mode="signin" />
 
         <div className={`${authClasses.sectionSpacing} text-center`}>
           <p className={authClasses.textCenter}>
