@@ -83,6 +83,7 @@ export default memo(function MobileDashboardMenu({ isOpen, onClose }: MobileDash
     { name: t('navigation.applications'), icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
     { name: t('navigation.chat'), icon: FiMessageCircle, href: '/dashboard/chat-mobile', current: pathname === '/dashboard/chat-mobile' },
     { name: t('navigation.reviews'), icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: t('navigation.tenantProfile'), icon: FiUser, href: '/dashboard/tenant-profile', current: pathname === '/dashboard/tenant-profile' },
     { name: t('navigation.profile'), icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: t('navigation.settings'), icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },
   ];

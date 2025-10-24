@@ -4,3 +4,4 @@ export { default as ChatContactSkeleton } from './ChatContactSkeleton';
 export { default as MessageSkeleton } from './MessageSkeleton';
 export { default as PropertyCardSkeleton } from './PropertyCardSkeleton';
 export { default as NotificationSkeleton } from './NotificationSkeleton';
+export { default as TenantProfileCardSkeleton, TenantProfileCardSkeletonGrid } from './TenantProfileCardSkeleton';

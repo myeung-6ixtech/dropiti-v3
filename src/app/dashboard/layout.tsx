@@ -103,6 +103,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: t('navigation.applications'), icon: FiClock, href: '/dashboard/applications', current: pathname === '/dashboard/applications' },
     { name: t('navigation.chat'), icon: FiMessageCircle, href: isMobile ? '/dashboard/chat-mobile' : '/dashboard/chat', current: pathname === '/dashboard/chat' || pathname === '/dashboard/chat-mobile' },
     { name: t('navigation.reviews'), icon: FiStar, href: '/dashboard/reviews', current: pathname === '/dashboard/reviews' },
+    { name: t('navigation.tenantProfile'), icon: FiUser, href: '/dashboard/tenant-profile', current: pathname === '/dashboard/tenant-profile' },
     // { name: 'Saved Properties', icon: HeartIcon, href: '/dashboard/saved-properties', current: pathname === '/dashboard/saved-properties' },
     { name: t('navigation.profile'), icon: FiUsers, href: '/dashboard/profile', current: pathname === '/dashboard/profile' },
     { name: t('navigation.settings'), icon: FiSettings, href: '/dashboard/settings', current: pathname === '/dashboard/settings' },

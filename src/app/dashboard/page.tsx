@@ -205,8 +205,8 @@ export default function DashboardPage() {
       <DashboardWelcomeHeader 
         userName={authUser.displayName || authUser.name || 'User'}
         stats={{
-          totalProperties: userData.stats.totalProperties,
-          totalReviews: userData.reviewCount
+          totalProperties: userData.stats.totalProperties || 0,
+          totalReviews: userData.reviewCount || 0
         }}
       />
 

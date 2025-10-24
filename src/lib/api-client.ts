@@ -364,6 +364,34 @@ export const usersAPI = {
   },
 };
 
+// Tenants API (Tenant Profile)
+export const tenantsAPI = {
+  getTenantProfile: async (firebaseUid: string) => {
+    const response = await apiClient.get('/tenants/profile', { params: { firebase_uid: firebaseUid } });
+    return response.data;
+  },
+  upsertTenantProfile: async (payload: Record<string, unknown> & { user_firebase_uid: string }) => {
+    const response = await apiClient.post('/tenants/profile', payload);
+    return response.data;
+  },
+  updateTenantProfile: async (firebaseUid: string, updates: Record<string, unknown>) => {
+    const response = await apiClient.put('/tenants/profile', { user_firebase_uid: firebaseUid, updates });
+    return response.data;
+  },
+  getTenantProfiles: async (params: {
+    limit?: number;
+    offset?: number;
+    budget_min?: string;
+    budget_max?: string;
+    location?: string;
+    move_in_date?: string;
+    property_type?: string;
+  } = {}) => {
+    const response = await apiClient.get('/tenants', { params });
+    return response.data;
+  },
+};
+
 // Offers API
 export const offersAPI = {
   // Create a new offer

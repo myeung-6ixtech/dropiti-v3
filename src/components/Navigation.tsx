@@ -208,6 +208,17 @@ export default function Navigation() {
               <span>{t('navigation.explore')}</span>
             </Link>
             
+            <Link
+              href="/tenant-marketplace"
+              className={`${navigationStyles.link} ${
+                isActive('/tenant-marketplace') 
+                  ? navigationStyles.linkActive
+                  : navigationStyles.linkInactive
+              }`}
+            >
+              <span>{t('navigation.findTenants')}</span>
+            </Link>
+            
             
             {isAuthenticated ? (
               <>
