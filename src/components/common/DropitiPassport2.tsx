@@ -141,7 +141,7 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
             <div className="flex items-center space-x-1">
               <FiStar className="h-4 w-4 text-gray-900" />
               <span className="text-sm font-semibold text-gray-900">
-                {isLoadingRating ? "..." : userRating.averageRating}
+                {isLoadingRating ? "..." : (userRating.averageRating === 0 ? "No Rating" : userRating.averageRating)}
               </span>
               <span className="text-gray-500">•</span>
               <span className="text-sm text-gray-600">

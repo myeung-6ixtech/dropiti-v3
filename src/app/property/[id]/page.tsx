@@ -95,7 +95,7 @@ export default function PropertyDetailPage() {
 
   // Function to check if the current user has existing offers for this property
   const checkExistingOffer = useCallback(async (propertyUuid: string, userId: string) => {
-    if (!userId || !propertyUuid) return;
+    if (!userId || !propertyUuid || !isAuthenticated) return;
     
     console.log('Frontend: Checking existing offers for user:', userId, 'property:', propertyUuid);
     
@@ -122,7 +122,7 @@ export default function PropertyDetailPage() {
     } catch (error) {
       console.error('Failed to check existing offers:', error);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   // Image navigation functions - defined at top level to avoid conditional hook calls
   const nextImage = useCallback(() => {

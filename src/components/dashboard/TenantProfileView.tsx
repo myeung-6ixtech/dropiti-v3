@@ -24,7 +24,6 @@ export default function TenantProfileView() {
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState<TenantProfileData>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const firebaseUid = authUser?.id || '';
@@ -81,7 +80,6 @@ export default function TenantProfileView() {
 
   const updateProfileData = (data: Partial<TenantProfileData>) => {
     setProfileData(prev => ({ ...prev, ...data }));
-    if (submitError) setSubmitError(null);
   };
 
   const nextStep = () => {
@@ -96,39 +94,29 @@ export default function TenantProfileView() {
     }
   };
 
-  const saveDraft = async () => {
-    if (!firebaseUid) return;
-    try {
-      setIsSubmitting(true);
-      await tenantsAPI.upsertTenantProfile({ 
-        user_firebase_uid: firebaseUid, 
-        ...profileData, 
-        tenant_listing_status: 'draft' as TenantListingStatus 
-      });
-      showToast('success', 'Draft saved successfully!');
-    } catch {
-      showToast('error', 'Failed to save draft');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const publishProfile = async () => {
     if (!firebaseUid) return;
     try {
       setIsSubmitting(true);
-      setSubmitError(null);
-      
+
+      // Map client-only fields to DB schema
+      const { tenant_privacy_settings, ...rest } = profileData;
+      const payload = {
+        ...rest,
+        privacy_settings: tenant_privacy_settings || {},
+        tenant_listing_status: 'active' as TenantListingStatus,
+      } as Record<string, unknown>;
+
       await tenantsAPI.upsertTenantProfile({ 
         user_firebase_uid: firebaseUid, 
-        ...profileData, 
-        tenant_listing_status: 'active' as TenantListingStatus 
+        ...payload
       });
       
       showToast('success', 'Tenant profile published successfully!');
       router.push('/dashboard/tenant-profile');
-    } catch {
-      setSubmitError('Failed to publish profile');
+    } catch (e) {
+      console.error('Publish tenant profile failed:', e);
+      showToast('error', 'Failed to publish profile');
     } finally {
       setIsSubmitting(false);
     }
@@ -241,22 +229,6 @@ export default function TenantProfileView() {
         </div>
       </div>
 
-      {/* Error Display */}
-      {submitError && (
-        <div className="bg-red-50 border-l-4 border-red-400 p-4 mx-6 mt-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-red-700">{submitError}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Step Content */}
       <div className="flex-1 min-h-0 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -289,17 +261,6 @@ export default function TenantProfileView() {
                       <ArrowLeftIcon className="h-4 w-4" />
                       <span>Previous</span>
                     </button>
-
-                    {/* Save Draft Button - Only show after Step 1 */}
-                    {currentStep > 1 && (
-                      <button
-                        onClick={saveDraft}
-                        disabled={isSubmitting}
-                        className="btn-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span>Save Draft</span>
-                      </button>
-                    )}
                   </div>
 
                   <button

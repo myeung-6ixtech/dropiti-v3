@@ -20,12 +20,19 @@ const validateMessage = (content: string): { valid: boolean; error?: string } =>
 };
 
 const SEND_MESSAGE_MUTATION = `
-  mutation SendMessage($roomId: uuid!, $senderFirebaseUid: String!, $content: String!) {
+  mutation SendMessage(
+    $roomId: uuid!, 
+    $senderFirebaseUid: String!, 
+    $content: String!,
+    $messageType: String,
+    $metadata: jsonb
+  ) {
     insert_real_estate_chat_message_one(object: {
       room_id: $roomId,
       sender_firebase_uid: $senderFirebaseUid,
       content: $content,
-      message_type: "text"
+      message_type: $messageType,
+      metadata: $metadata
     }) {
       id
       content
@@ -33,13 +40,20 @@ const SEND_MESSAGE_MUTATION = `
       status
       created_at
       message_type
+      metadata
     }
   }
 `;
 
 export async function POST(request: NextRequest) {
   try {
-    const { roomId, senderFirebaseUid, content } = await request.json();
+    const { 
+      roomId, 
+      senderFirebaseUid, 
+      content,
+      messageType = 'text',  // Default to 'text' for backward compatibility
+      metadata = null
+    } = await request.json();
 
     if (!roomId || !senderFirebaseUid || !content) {
       return NextResponse.json(
@@ -72,7 +86,9 @@ export async function POST(request: NextRequest) {
     const data = await executeMutation(SEND_MESSAGE_MUTATION, {
       roomId,
       senderFirebaseUid,
-      content: encryptedContent // Store encrypted content
+      content: encryptedContent, // Store encrypted content
+      messageType,      // Pass messageType
+      metadata          // Pass metadata
     }) as {
       insert_real_estate_chat_message_one?: {
         id: string;
@@ -81,6 +97,7 @@ export async function POST(request: NextRequest) {
         status: string;
         created_at: string;
         message_type: string;
+        metadata: Record<string, unknown> | null;
       };
     };
 

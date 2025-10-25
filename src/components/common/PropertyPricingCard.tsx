@@ -216,14 +216,10 @@ export default function PropertyPricingCard({
 
             {/* Host Stats */}
             <div className="pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-2 gap-4 text-center">
                 <div>
                   <div className="text-base font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
                   <div className="text-xs text-gray-500">Response rate</div>
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-gray-900">{landlord.responseTime || '1h'}</div>
-                  <div className="text-xs text-gray-500">Avg. response</div>
                 </div>
                 <div>
                   <div className="text-base font-semibold text-gray-900">{landlord.totalProperties || 5}</div>

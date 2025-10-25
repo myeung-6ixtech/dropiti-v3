@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import PropertyShareCard from './PropertyShareCard';
 
 interface Message {
   id: string;
@@ -11,6 +12,8 @@ interface Message {
   avatar?: string;
   senderName: string;
   status?: 'sent' | 'delivered' | 'read';
+  messageType?: 'text' | 'property_share';
+  metadata?: Record<string, unknown>;
 }
 
 interface ChatMessageProps {
@@ -81,21 +84,38 @@ export default function ChatMessage({ message, isOwnMessage }: ChatMessageProps)
         )}
 
         {/* Message Content */}
-        <div className={`px-4 py-2 rounded-lg ${
-          isOwnMessage 
-            ? 'bg-purple-600 text-white' 
-            : 'bg-gray-100 text-gray-900'
-        }`}>
-          <div className="text-sm whitespace-pre-wrap break-words">{message.content}</div>
-          
-          {/* Message Status and Time */}
-          <div className={`flex items-center justify-between mt-1 text-xs ${
-            isOwnMessage ? 'text-purple-100' : 'text-gray-500'
-          }`}>
-            <span>{formatTime(message.timestamp)}</span>
-            {isOwnMessage && getStatusIcon(message.status)}
+        {message.messageType === 'property_share' && message.metadata?.property_data ? (
+          <div className="flex flex-col space-y-2">
+            <PropertyShareCard
+              property={message.metadata.property_data as Record<string, unknown>}
+              shareContext={message.metadata.share_context as Record<string, unknown>}
+              onViewProperty={() => {
+                console.log('Property viewed from chat:', message.metadata?.property_uuid);
+              }}
+            />
+            {/* Timestamp for property share */}
+            <div className={`text-xs ${isOwnMessage ? 'text-right text-gray-500' : 'text-left text-gray-500'}`}>
+              <span>{formatTime(message.timestamp)}</span>
+              {isOwnMessage && <span className="ml-2">{getStatusIcon(message.status)}</span>}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className={`px-4 py-2 rounded-lg ${
+            isOwnMessage 
+              ? 'bg-purple-600 text-white' 
+              : 'bg-gray-100 text-gray-900'
+          }`}>
+            <div className="text-sm whitespace-pre-wrap break-words">{message.content}</div>
+            
+            {/* Message Status and Time */}
+            <div className={`flex items-center justify-between mt-1 text-xs ${
+              isOwnMessage ? 'text-purple-100' : 'text-gray-500'
+            }`}>
+              <span>{formatTime(message.timestamp)}</span>
+              {isOwnMessage && getStatusIcon(message.status)}
+            </div>
+          </div>
+        )}
 
         {/* Avatar for own messages */}
         {isOwnMessage && (

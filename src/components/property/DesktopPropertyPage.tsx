@@ -30,6 +30,7 @@ interface DesktopPropertyPageProps {
   };
   landlord: {
     id: string;
+    uuid: string;
     name: string;
     avatar?: string;
     response_time: string;
@@ -328,7 +329,7 @@ export default function DesktopPropertyPage({
                 availableDate={property.available_date || null}
                 landlord={landlord ? {
                   id: landlord.id,
-                  uuid: landlord.id, // Use id as uuid fallback
+                  uuid: landlord.uuid, // Use the actual uuid field for user profile URL
                   name: landlord.name,
                   avatar: landlord.avatar || '',
                   rating: landlord.rating,

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { StarIcon } from '@heroicons/react/24/outline';
 import { reviewsAPI } from '@/lib/api-client';
+import { ReviewSkeleton } from '@/components/skeleton';
 import { UserReviewsProps, ReviewDisplayData, USER_PROFILE_REVIEW_TYPE_LABELS } from '@/types';
 
 export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
@@ -67,10 +68,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
         <div className="flex items-center space-x-2 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
         </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto"></div>
-          <p className="text-gray-500 mt-2">Loading reviews...</p>
-        </div>
+        <ReviewSkeleton count={3} />
       </div>
     );
   }
@@ -92,8 +90,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center space-x-2 mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews</h2>
-        <span className="text-sm text-gray-500">({reviews.length})</span>
+        <h2 className="text-xl font-semibold text-gray-900 mb-0">Reviews ({reviews.length})</h2>
       </div>
       
       {reviews.length > 0 ? (

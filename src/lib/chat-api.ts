@@ -97,12 +97,20 @@ export const chatAPI = {
   },
 
   // Send a message
-  sendMessage: async (roomId: string, senderFirebaseUid: string, content: string): Promise<ChatMessage> => {
+  sendMessage: async (
+    roomId: string, 
+    senderFirebaseUid: string, 
+    content: string,
+    messageType: 'text' | 'property_share' = 'text',
+    metadata: Record<string, unknown> | null = null
+  ): Promise<ChatMessage> => {
     try {
       const response = await apiClient.post('/chat/send-message', {
         roomId,
         senderFirebaseUid,
-        content
+        content,
+        messageType,
+        metadata
       });
       
       if (response.data.success) {
@@ -185,6 +193,8 @@ export interface UIMessage {
   senderName: string;
   avatar?: string;
   status: ChatMessage['status'];
+  messageType?: 'text' | 'property_share';
+  metadata?: Record<string, unknown>;
 }
 
 export const convertMessageToUIMessage = (
@@ -202,5 +212,7 @@ export const convertMessageToUIMessage = (
     senderName: message.sender_firebase_uid === currentUserId ? 'You' : otherUserName,
     avatar: message.sender_firebase_uid === currentUserId ? currentUserAvatar : otherUserAvatar,
     status: message.status,
+    messageType: message.message_type as 'text' | 'property_share',
+    metadata: message.metadata || undefined,
   };
 };

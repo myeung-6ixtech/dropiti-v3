@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user: authUser, isAuthenticated, isLoading, logout } = useAuth();
   const { sidebarOpen, setSidebarOpen, isMobile } = useSidebar();
   const { t } = useLanguage();
-  const [activeView, setActiveView] = useState<ViewType>('landlord');
+  const [activeView, setActiveView] = useState<ViewType>('tenant');
   const [isViewChanging, setIsViewChanging] = useState(false);
   const [hasRedirected, setHasRedirected] = useState(false);
   const pathname = usePathname();

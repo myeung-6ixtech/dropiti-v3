@@ -57,7 +57,6 @@ export default function TenantProfileCard({
           }
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error('[TenantProfileCard] fallback user fetch failed', e);
       }
     }
@@ -90,7 +89,6 @@ export default function TenantProfileCard({
   const isCurrentUser = !!(currentUserId && displayUser?.firebase_uid === currentUserId);
 
   // Debug logging to verify incoming props and resolved user
-  // eslint-disable-next-line no-console
   console.log('[TenantProfileCard] props', {
     tenant_uuid: data?.tenant_uuid,
     user_firebase_uid: data?.user_firebase_uid,
@@ -205,48 +203,46 @@ export default function TenantProfileCard({
           </div>
 
           {/* Additional Preferences */}
-          {(data.rental_space_preference || data.furnishing_preference || data.pets_allowed !== undefined) && (
+          {(data.preferred_property_types && data.preferred_property_types.length > 0) || data.rental_space_preference || data.furnishing_preference || data.pets_allowed !== undefined ? (
             <div className="pt-1 border-t border-gray-100">
               <div className="flex flex-wrap gap-1.5">
+                {data.preferred_property_types && data.preferred_property_types.length > 0 && (
+                  <span className="capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
+                    {data.preferred_property_types.map((t) => t.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())).join(', ')}
+                  </span>
+                )}
                 {data.rental_space_preference && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
                     {data.rental_space_preference.replace('_', ' ')}
                   </span>
                 )}
                 {data.furnishing_preference && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                  <span className="capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
                     {data.furnishing_preference.replace('_', ' ')}
                   </span>
                 )}
                 {data.pets_allowed !== undefined && (
-                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                  <span className={`capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
                     data.pets_allowed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
-                    {data.pets_allowed ? 'Pets OK' : 'No Pets'}
+                    {data.pets_allowed ? 'Pets Owner' : 'No Pets'}
                   </span>
                 )}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-gray-500">
-            {data.tenant_listing_status === 'active' 
-              ? 'Live and visible to landlords'
-              : 'Saved as draft'
-            }
-          </div>
-          
+        <div className="flex items-center justify-between">          
           <div className="flex items-center gap-2">
             <Link
               href={`/tenant-profile/${data.user_firebase_uid}`}
               className="btn-secondary inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md"
             >
-              View Profile
+              View
             </Link>
             
             {isCurrentUser ? (

@@ -79,7 +79,11 @@ export const useRealTimeChat = ({ roomId, pollingInterval = 2000 }: UseRealTimeC
   }, [roomId, authUser?.id, lastMessageTimestamp]);
 
   // Send a message with optimistic updates
-  const sendMessage = useCallback(async (content: string): Promise<ChatMessage | null> => {
+  const sendMessage = useCallback(async (
+    content: string, 
+    messageType: 'text' | 'property_share' = 'text',
+    metadata: Record<string, unknown> | null = null
+  ): Promise<ChatMessage | null> => {
     if (!roomId || !authUser?.id || !content.trim()) return null;
 
     // Prevent polling while sending
@@ -91,17 +95,17 @@ export const useRealTimeChat = ({ roomId, pollingInterval = 2000 }: UseRealTimeC
         id: `temp-${Date.now()}`, // Temporary ID
         sender_firebase_uid: authUser.id,
         content: content.trim(),
-        message_type: 'text',
+        message_type: messageType,
         status: 'sent',
         created_at: new Date().toISOString(),
-        metadata: null
+        metadata: metadata
       };
 
       // Add optimistic message immediately
       setMessages(prev => [...prev, optimisticMessage]);
 
       // Send the actual message
-      const sentMessage = await chatAPI.sendMessage(roomId, authUser.id, content);
+      const sentMessage = await chatAPI.sendMessage(roomId, authUser.id, content, messageType, metadata);
       
       // Replace optimistic message with real message
       setMessages(prev => 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
+import { PropertyCardSkeleton } from '@/components/skeleton';
 import { Property, UserListingsProps, ApiProperty, PropertyCardTransformation } from '@/types';
 
 export default function UserListings({ userFirebaseUid }: UserListingsProps) {
@@ -99,9 +100,8 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
         <div className="flex items-center space-x-2 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
         </div>
-        <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-gray-500 mt-2">Loading properties...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <PropertyCardSkeleton count={6} />
         </div>
       </div>
     );
@@ -125,8 +125,7 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
     <>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
         <div className="flex items-center space-x-2 mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings</h2>
-          <span className="text-sm text-gray-500">({properties.length})</span>
+          <h2 className="text-xl font-semibold text-gray-900 mb-0">Current Listings ({properties.length})</h2>
         </div>
         
         {properties.length > 0 ? (

@@ -284,6 +284,8 @@
   "welcomeHeader": {
     "hi": "您好，{name}",
     "propertiesAndReviews": "{properties} 物業 | {reviews} 評論",
+    "noPropertiesYet": "暫無物業",
+    "noReviewsYet": "暫無評論",
     "manageProperties": "管理物業",
     "addNewProperty": "新增物業",
     "viewOffers": "查看出價",

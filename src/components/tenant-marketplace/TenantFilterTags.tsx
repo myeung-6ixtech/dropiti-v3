@@ -74,36 +74,37 @@ export default function TenantFilterTags({ filters, onRemoveFilter, onClearAll }
   }
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-gray-700">Active Filters</h3>
-        <button
-          onClick={onClearAll}
-          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-        >
-          Clear All
-        </button>
-      </div>
-      
-      <div className="flex flex-wrap gap-2">
+    <div className="mb-8">
+      <div className="flex items-center flex-wrap gap-3">
+        <span className="text-sm font-medium text-gray-700 mr-2">Active filters:</span>
+        
         {activeFilters.map((filter) => {
           const IconComponent = filter.icon;
           return (
             <div
               key={filter.key}
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-800"
+              className="inline-flex items-center gap-2 px-3 py-2 bg-white border border-black rounded-lg text-sm font-medium text-gray-900"
             >
               <IconComponent className="h-4 w-4" />
               <span>{filter.label}</span>
               <button
                 onClick={() => onRemoveFilter(filter.key)}
-                className="text-blue-600 hover:text-blue-800 transition-colors"
+                className="ml-1 p-0.5 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label={`Remove ${filter.label} filter`}
               >
-                <XMarkIcon className="h-4 w-4" />
+                <XMarkIcon className="h-3 w-3" />
               </button>
             </div>
           );
         })}
+        
+        <button
+          onClick={onClearAll}
+          className="inline-flex items-center gap-1 px-3 py-2 bg-white border border-black rounded-lg text-sm font-medium text-gray-900 hover:bg-gray-50 transition-colors"
+        >
+          <XMarkIcon className="h-4 w-4" />
+          <span>Clear All</span>
+        </button>
       </div>
     </div>
   );

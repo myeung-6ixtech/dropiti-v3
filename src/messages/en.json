@@ -64,7 +64,7 @@
   },
   "hero": {
     "title": "Find Your Perfect Home",
-    "subtitle": "Discover thousands of properties for rent and sale. Search by location, bedrooms, and price to find your ideal home.",
+    "subtitle": "Discover thousands of properties for rent. Search by location, bedrooms, and price to find your ideal home.",
     "searchPlaceholder": "Search by keyword or location...",
     "searchButton": "Search",
     "popularSearches": "Popular Searches"
@@ -284,6 +284,8 @@
   "welcomeHeader": {
     "hi": "Hi, {name}",
     "propertiesAndReviews": "{properties} Properties | {reviews} Reviews",
+    "noPropertiesYet": "No Properties Yet",
+    "noReviewsYet": "No Reviews Yet",
     "manageProperties": "Manage Properties",
     "addNewProperty": "Add New Property",
     "viewOffers": "View Offers",

@@ -129,7 +129,7 @@ export default function ModernFilter({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-3 pt-6 border-t border-gray-200 flex-shrink-0">
+          <div className="flex space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
             <button
               onClick={handleClear}
               className="btn-outline flex-1"

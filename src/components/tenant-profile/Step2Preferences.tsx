@@ -149,13 +149,6 @@ export default function Step2Preferences({ data, onUpdate }: Step2PreferencesPro
           </div>
         </div>
       </div>
-
-      <div className="bg-green-50 border border-green-200 rounded-md p-4">
-        <h4 className="text-sm font-medium text-green-900 mb-2">✅ What's next?</h4>
-        <p className="text-xs text-green-800">
-          After setting your preferences, you'll review everything before publishing your profile to the marketplace.
-        </p>
-      </div>
     </div>
   );
 }

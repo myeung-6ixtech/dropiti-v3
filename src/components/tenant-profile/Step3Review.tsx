@@ -48,14 +48,6 @@ export default function Step3Review({ data, user, onSubmit, isSubmitting }: Step
           )}
         </button>
       </div>
-
-      {/* Help Text */}
-      <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-        <h4 className="text-sm font-medium text-yellow-900 mb-2">📝 Note</h4>
-        <p className="text-xs text-yellow-800">
-          You can always edit your profile after publishing. Published profiles are visible to landlords who can contact you about available properties.
-        </p>
-      </div>
     </div>
   );
 }

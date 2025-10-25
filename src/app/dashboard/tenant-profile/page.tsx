@@ -15,6 +15,7 @@ export default function TenantProfilePage() {
   const [profileData, setProfileData] = useState<TenantProfileData>({});
   const [loading, setLoading] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [isUnpublishing, setIsUnpublishing] = useState(false);
 
   const firebaseUid = authUser?.id || '';
 
@@ -76,18 +77,47 @@ export default function TenantProfilePage() {
     if (!firebaseUid) return;
     try {
       setIsPublishing(true);
+      const { tenant_privacy_settings, ...rest } = profileData;
       await tenantsAPI.upsertTenantProfile({ 
         user_firebase_uid: firebaseUid, 
-        ...profileData, 
+        ...rest,
+        privacy_settings: tenant_privacy_settings || {},
         tenant_listing_status: 'active' as TenantListingStatus
       });
       showToast('success', 'Tenant profile published successfully!');
-      // Refresh the data
-      window.location.reload();
+      // Update local state instead of reloading
+      setProfileData(prev => ({
+        ...prev,
+        tenant_listing_status: 'active' as TenantListingStatus
+      }));
     } catch {
       showToast('error', 'Failed to publish profile');
     } finally {
       setIsPublishing(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!firebaseUid) return;
+    try {
+      setIsUnpublishing(true);
+      const { tenant_privacy_settings, ...rest } = profileData;
+      await tenantsAPI.upsertTenantProfile({ 
+        user_firebase_uid: firebaseUid, 
+        ...rest,
+        privacy_settings: tenant_privacy_settings || {},
+        tenant_listing_status: 'inactive' as TenantListingStatus
+      });
+      showToast('success', 'Tenant profile has been unpublished');
+      // Update local state instead of reloading
+      setProfileData(prev => ({
+        ...prev,
+        tenant_listing_status: 'inactive' as TenantListingStatus
+      }));
+    } catch {
+      showToast('error', 'Failed to unpublish profile');
+    } finally {
+      setIsUnpublishing(false);
     }
   };
 
@@ -136,21 +166,31 @@ export default function TenantProfilePage() {
           </div>
           
           <div className="flex items-center gap-3">
-            {hasProfile && profileData.tenant_listing_status !== 'active' && (
-              <button
-                onClick={handlePublish}
-                disabled={isPublishing}
-                className="form-button inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isPublishing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Publishing...
-                  </>
-                ) : (
-                  'Publish Profile'
-                )}
-              </button>
+            {hasProfile && (
+              profileData.tenant_listing_status === 'active' ? (
+                <button
+                  onClick={handleUnpublish}
+                  disabled={isUnpublishing}
+                  className="btn-secondary inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isUnpublishing ? 'Unpublishing...' : 'Unpublish'}
+                </button>
+              ) : (
+                <button
+                  onClick={handlePublish}
+                  disabled={isPublishing}
+                  className="form-button inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isPublishing ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Publishing...
+                    </>
+                  ) : (
+                    'Publish Profile'
+                  )}
+                </button>
+              )
             )}
             
             <button
@@ -177,7 +217,8 @@ export default function TenantProfilePage() {
               showActions={true}
               onEdit={handleModify}
               onPublish={handlePublish}
-              isSubmitting={isPublishing}
+              onUnpublish={handleUnpublish}
+              isSubmitting={isPublishing || isUnpublishing}
             />
           ) : (
             <div className="text-center py-12">

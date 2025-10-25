@@ -20,12 +20,26 @@ interface DashboardWelcomeHeaderProps {
 
 export default function DashboardWelcomeHeader({ userName, stats }: DashboardWelcomeHeaderProps) {
   const { t } = useLanguage();
+  
+  // Helper function to format stats with better UX for empty states
+  const formatStats = () => {
+    const propertiesText = stats.totalProperties > 0 
+      ? `${stats.totalProperties} Properties` 
+      : t('welcomeHeader.noPropertiesYet');
+    
+    const reviewsText = stats.totalReviews > 0 
+      ? `${stats.totalReviews} Reviews` 
+      : t('welcomeHeader.noReviewsYet');
+    
+    return `${propertiesText} | ${reviewsText}`;
+  };
+
   return (
     <div className="welcome-header-container">
       {/* Thin Welcome Section */}
       <div className="welcome-greeting-section">
         <h1 className="welcome-greeting">{t('welcomeHeader.hi', { name: userName })}</h1>
-        <p className="welcome-stats">{t('welcomeHeader.propertiesAndReviews', { properties: stats.totalProperties, reviews: stats.totalReviews })}</p>
+        <p className="welcome-stats">{formatStats()}</p>
       </div>
 
       {/* App-Style Quick Actions */}

@@ -2,12 +2,15 @@
 
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, PlusIcon } from '@heroicons/react/24/outline';
 import ChatMessage from './ChatMessage';
 import ChatSidebar from './ChatSidebar';
+import PropertyShareModal from './PropertyShareModal';
+import ShareActionMenu from './ShareActionMenu';
 import { useRealTimeChat } from '@/hooks/useRealTimeChat';
 import { convertMessageToUIMessage } from '@/lib/chat-api';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { MessageSkeleton } from '@/components/skeleton';
 
 interface Message {
@@ -42,8 +45,11 @@ interface ChatInterfaceProps {
 
 export default function ChatInterface({ contacts, userType, isLoadingContacts = false, selectedRoomId, hideSidebar = false }: ChatInterfaceProps) {
   const { user: authUser } = useAuth();
+  const { showToast } = useToast();
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(contacts[0] || null);
   const [newMessage, setNewMessage] = useState('');
+  const [showShareActionMenu, setShowShareActionMenu] = useState(false);
+  const [showPropertyShareModal, setShowPropertyShareModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lastMessageCountRef = useRef<number>(0);
@@ -163,6 +169,40 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
     }
   }, [handleSendMessage]);
 
+  // Handle property sharing
+  const handleShareProperty = useCallback(async (property: Record<string, unknown>, customMessage: string) => {
+    try {
+      const messageContent = customMessage || `Check out this property: ${property.title}`;
+      
+      await sendRealTimeMessage(messageContent, 'property_share', {
+        property_uuid: property.id || property.property_uuid,
+        property_data: {
+          id: property.id || property.property_uuid,
+          property_uuid: property.property_uuid || property.id,
+          title: property.title,
+          price: property.price,
+          currency: property.currency || 'HKD',
+          location: property.location || property.district,
+          bedrooms: property.bedrooms,
+          bathrooms: property.bathrooms,
+          image_url: property.imageUrl || property.display_image || (Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0 ? property.uploaded_images[0] : ''),
+          images: Array.isArray(property.uploaded_images) ? property.uploaded_images : [],
+          property_type: property.property_type,
+          availability_date: property.availability_date
+        },
+        share_context: {
+          reason: 'general',
+          personalized_message: customMessage
+        }
+      });
+      
+      showToast('success', 'Property shared successfully!');
+    } catch (error) {
+      console.error('Error sharing property:', error);
+      showToast('error', 'Failed to share property');
+    }
+  }, [sendRealTimeMessage, showToast]);
+
   if (isLoadingContacts) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -253,10 +293,21 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
             </div>
 
             {/* Message Input */}
-            <div className="border-t border-gray-200 p-4">
+            <div className="border-t border-gray-200 p-4 relative">
+              {/* Share Action Menu */}
+              <ShareActionMenu
+                isOpen={showShareActionMenu}
+                onClose={() => setShowShareActionMenu(false)}
+                onSelectProperty={() => setShowPropertyShareModal(true)}
+              />
+
               <div className="flex space-x-2">
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0">
-                  <PaperClipIcon className="h-5 w-5" />
+                <button 
+                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+                  onClick={() => setShowShareActionMenu(!showShareActionMenu)}
+                  title="Share content"
+                >
+                  <PlusIcon className="h-5 w-5" />
                 </button>
                 <div className="flex-1">
                   <textarea
@@ -279,6 +330,16 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
                 </button>
               </div>
             </div>
+
+            {/* Property Share Modal */}
+            {showPropertyShareModal && (
+              <PropertyShareModal
+                isOpen={showPropertyShareModal}
+                onClose={() => setShowPropertyShareModal(false)}
+                onShareProperty={handleShareProperty}
+                roomId={activeRoomId || ''}
+              />
+            )}
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center">

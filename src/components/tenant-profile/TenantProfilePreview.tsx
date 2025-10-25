@@ -14,6 +14,7 @@ interface TenantProfilePreviewProps {
   showActions?: boolean;
   onEdit?: () => void;
   onPublish?: () => void;
+  onUnpublish?: () => void;
   isSubmitting?: boolean;
   className?: string;
 }
@@ -22,8 +23,9 @@ export default function TenantProfilePreview({
   data, 
   user,
   showActions = false, 
-  onEdit, 
-  onPublish, 
+  onEdit,
+  onPublish,
+  onUnpublish,
   isSubmitting = false,
   className = ''
 }: TenantProfilePreviewProps) {
@@ -132,29 +134,34 @@ export default function TenantProfilePreview({
           </div>
 
           {/* Additional Preferences */}
-          {(data.rental_space_preference || data.furnishing_preference || data.pets_allowed !== undefined) && (
+          {(data.preferred_property_types && data.preferred_property_types.length > 0) || data.rental_space_preference || data.furnishing_preference || data.pets_allowed !== undefined ? (
             <div className="pt-1 border-t border-gray-100">
               <div className="flex flex-wrap gap-1.5">
+                {data.preferred_property_types && data.preferred_property_types.length > 0 && (
+                  <span className="capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
+                    {data.preferred_property_types.map((t) => t.replace('-', ' ').replace(/\b\w/g, (l) => l.toUpperCase())).join(', ')}
+                  </span>
+                )}
                 {data.rental_space_preference && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                  <span className="capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
                     {data.rental_space_preference.replace('_', ' ')}
                   </span>
                 )}
                 {data.furnishing_preference && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
+                  <span className="capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-800">
                     {data.furnishing_preference.replace('_', ' ')}
                   </span>
                 )}
                 {data.pets_allowed !== undefined && (
-                  <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
+                  <span className={`capitalize inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${
                     data.pets_allowed ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                   }`}>
-                    {data.pets_allowed ? 'Pets OK' : 'No Pets'}
+                    {data.pets_allowed ? 'Pets Owner' : 'No Pets'}
                   </span>
                 )}
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -165,7 +172,7 @@ export default function TenantProfilePreview({
             <div className="text-xs text-gray-500">
               {data.tenant_listing_status === 'active' 
                 ? 'Live and visible to landlords'
-                : 'Saved as draft'
+                : 'Saved as draft or inactive'
               }
             </div>
             
@@ -179,21 +186,34 @@ export default function TenantProfilePreview({
                 </button>
               )}
               
-              {onPublish && data.tenant_listing_status !== 'active' && (
-                <button
-                  onClick={onPublish}
-                  disabled={isSubmitting}
-                  className="form-button inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
-                      Publishing...
-                    </>
-                  ) : (
-                    'Publish'
-                  )}
-                </button>
+              {/* Toggle publish/unpublish */}
+              {data.tenant_listing_status === 'active' ? (
+                onUnpublish && (
+                  <button
+                    onClick={onUnpublish}
+                    disabled={isSubmitting}
+                    className="btn-secondary inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? 'Unpublishing...' : 'Unpublish'}
+                  </button>
+                )
+              ) : (
+                onPublish && (
+                  <button
+                    onClick={onPublish}
+                    disabled={isSubmitting}
+                    className="form-button inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                        Publishing...
+                      </>
+                    ) : (
+                      'Publish'
+                    )}
+                  </button>
+                )
               )}
             </div>
           </div>

@@ -113,7 +113,6 @@ export default function SearchPageContent() {
         // Filter by exact bedrooms
         if (filters.bedrooms && filters.bedrooms.trim()) {
           const bedroomFilter = parseInt(filters.bedrooms);
-          console.log('Search page: Filtering properties for bedrooms:', bedroomFilter);
           
           allProperties = allProperties.filter((property: { bedrooms?: number; title?: string }) => {
             const propertyBedrooms = property.bedrooms || 0;

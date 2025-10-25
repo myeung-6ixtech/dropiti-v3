@@ -23,10 +23,10 @@ const LOCATION_OPTIONS = [
   'Sheung Wan', 'Mid-Levels', 'Happy Valley', 'North Point', 'Quarry Bay',
   'Tai Koo', 'Sai Wan Ho', 'Shau Kei Wan', 'Chai Wan', 'Aberdeen',
   'Pok Fu Lam', 'Kennedy Town', 'Sai Ying Pun', 'Mong Kok', 'Yau Ma Tei',
-  'Jordan', 'Tsim Sha Tsui', 'Hung Hom', 'To Kwa Wan', 'Ma Tau Wai',
+  'Jordan', 'Hung Hom', 'To Kwa Wan', 'Ma Tau Wai',
   'Ho Man Tin', 'Kowloon Tong', 'Lok Fu', 'Wong Tai Sin', 'Diamond Hill',
   'Choi Hung', 'Ngau Chi Wan', 'Lam Tin', 'Kwun Tong', 'Ngau Tau Kok',
-  'Kowloon Bay', 'Choi Hung', 'Diamond Hill', 'Wong Tai Sin', 'Lok Fu'
+  'Kowloon Bay'
 ];
 
 const PROPERTY_TYPE_OPTIONS = [
@@ -77,51 +77,58 @@ export default function TenantMarketplaceFilter({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={onToggle}
-      />
-      
-      {/* Filter Panel */}
-      <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-        <div className="flex flex-col h-full">
+    <>
+      {/* Slide-in Filter Panel - Fixed overlay that doesn't affect layout */}
+      <div className={`fixed inset-0 z-50 transition-opacity duration-300 ${
+        isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}>
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300"
+          onClick={onToggle}
+        />
+        
+        {/* Filter Panel - Slides in from right */}
+        <div className={`absolute right-0 top-0 h-screen w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}>
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Filter Tenant Profiles</h2>
+          <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+            <h2 className="text-xl font-semibold text-gray-900">Filter Tenant Profiles</h2>
             <button
               onClick={onToggle}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <XMarkIcon className="h-6 w-6" />
+              <XMarkIcon className="h-6 w-6 text-gray-500" />
             </button>
           </div>
 
           {/* Filter Content */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="p-6 space-y-6 overflow-y-auto flex-1">
             {/* Budget Range */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Budget Range (HKD)</h3>
+              <label className="form-label">
+                <div className="flex items-center space-x-2">
+                  <span>Budget Range (HKD)</span>
+                </div>
+              </label>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Min Budget</label>
                   <input
                     type="number"
                     value={tempFilters.budget_min}
                     onChange={(e) => handleTempFilterChange('budget_min', e.target.value)}
-                    placeholder="e.g. 10000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Min Budget"
+                    className="form-input"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">Max Budget</label>
                   <input
                     type="number"
                     value={tempFilters.budget_max}
                     onChange={(e) => handleTempFilterChange('budget_max', e.target.value)}
-                    placeholder="e.g. 50000"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Max Budget"
+                    className="form-input"
                   />
                 </div>
               </div>
@@ -129,11 +136,15 @@ export default function TenantMarketplaceFilter({
 
             {/* Preferred Location */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Preferred Location</h3>
+              <label className="form-label">
+                <div className="flex items-center space-x-2">
+                  <span>Preferred Location</span>
+                </div>
+              </label>
               <select
                 value={tempFilters.location}
                 onChange={(e) => handleTempFilterChange('location', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="form-select"
               >
                 <option value="">Any location</option>
                 {LOCATION_OPTIONS.map((location) => (
@@ -146,22 +157,30 @@ export default function TenantMarketplaceFilter({
 
             {/* Move-in Date */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Preferred Move-in Date</h3>
+              <label className="form-label">
+                <div className="flex items-center space-x-2">
+                  <span>Preferred Move-in Date</span>
+                </div>
+              </label>
               <input
                 type="date"
                 value={tempFilters.move_in_date}
                 onChange={(e) => handleTempFilterChange('move_in_date', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="form-input"
               />
             </div>
 
             {/* Property Type */}
             <div>
-              <h3 className="text-sm font-medium text-gray-900 mb-3">Preferred Property Type</h3>
+              <label className="form-label">
+                <div className="flex items-center space-x-2">
+                  <span>Preferred Property Type</span>
+                </div>
+              </label>
               <select
                 value={tempFilters.property_type}
                 onChange={(e) => handleTempFilterChange('property_type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="form-select"
               >
                 <option value="">Any type</option>
                 {PROPERTY_TYPE_OPTIONS.map((type) => (
@@ -173,23 +192,25 @@ export default function TenantMarketplaceFilter({
             </div>
           </div>
 
-          {/* Footer Actions */}
-          <div className="p-6 border-t border-gray-200 space-y-3">
-            <button
-              onClick={handleApply}
-              className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors font-medium"
-            >
-              Apply Filters
-            </button>
+          {/* Action Buttons */}
+          <div className="flex space-x-3 p-6 border-t border-gray-200 flex-shrink-0">
             <button
               onClick={handleClear}
-              className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors font-medium"
+              className="btn-outline flex-1"
+              type="button"
             >
               Clear All
+            </button>
+            <button
+              onClick={handleApply}
+              className="btn-primary flex-1"
+              type="button"
+            >
+              Apply Filters
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
