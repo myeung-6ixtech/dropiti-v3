@@ -87,22 +87,6 @@ export default function ModernHeroSection() {
                 Explore Properties
               </button>
             </div>
-
-            {/* Stats - Scaled down */}
-            <div className="grid grid-cols-3 gap-6 pt-6 border-t border-gray-200">
-              <div className="text-center">
-                <div className="text-lg font-bold text-gray-900">10K+</div>
-                <div className="text-xs text-gray-600">Properties</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-gray-900">5K+</div>
-                <div className="text-xs text-gray-600">Happy Renters</div>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-gray-900">50+</div>
-                <div className="text-xs text-gray-600">Cities</div>
-              </div>
-            </div>
           </div>
 
           {/* Right side - Image without container box */}
