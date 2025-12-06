@@ -6,6 +6,9 @@
    DROPITI DESIGN SYSTEM
    ======================================== */
 
+/* Import dashboard tabs styles - must be at top */
+@import './dashboard-tabs.css';
+
 /* ========================================
    CSS CUSTOM PROPERTIES (DESIGN TOKENS)
    ======================================== */
@@ -2597,8 +2600,6 @@
   background-color: var(--color-brand-icon-bg);
   color: var(--color-brand-icon-text);
 }
-/* Dashboard Tab Styles */
-@import './dashboard-tabs.css';
 
 /* ========================================
    MOBILE BOTTOM NAVIGATION
