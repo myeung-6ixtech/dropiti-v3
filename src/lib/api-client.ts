@@ -89,6 +89,7 @@ const transformPropertyData = async (propertyData: PropertyDataForAPI, ownerId: 
     bedrooms: propertyData.unitDetails?.bedrooms || 0,
     bathrooms: propertyData.unitDetails?.bathrooms || 0,
     imageUrl,
+    photos: propertyData.photos || [], // Pass photos array to API
     details,
     rules: [], // Can be added in future steps
     amenities: propertyData.amenities || [],

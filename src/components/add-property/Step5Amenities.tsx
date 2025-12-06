@@ -93,7 +93,7 @@ export default function Step5Amenities({ data, onUpdate }: Step5AmenitiesProps) 
                 
                 {/* Label */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 text-sm truncate">{amenity.name}</p>
+                  <p className="font-medium text-gray-900 text-sm truncate mb-0">{amenity.name}</p>
                 </div>
 
                 {/* Checkmark */}
