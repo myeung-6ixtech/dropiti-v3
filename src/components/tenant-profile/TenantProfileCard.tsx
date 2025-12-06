@@ -3,13 +3,16 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { TenantProfileData } from '@/types/tenant';
 import { getSafeProfileImage } from '@/lib/utils';
+import { useAuth } from '@/context/AuthContext';
 
 interface TenantProfileCardProps {
   data: TenantProfileData;
   user?: {
     firebase_uid?: string;
+    uuid?: string;
     display_name?: string;
     name?: string;
     photo_url?: string;
@@ -28,32 +31,52 @@ export default function TenantProfileCard({
   currentUserId,
   className = ''
 }: TenantProfileCardProps) {
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  
   // Local state for resolved user (fallback when API doesn't provide user data)
   const [resolvedUser, setResolvedUser] = useState<{
     firebase_uid?: string;
+    uuid?: string;
     display_name?: string;
     name?: string;
     photo_url?: string;
     avatar?: string;
   } | null>(user ?? null);
+  
+  // State for user UUID
+  const [userUuid, setUserUuid] = useState<string | null>(user?.uuid || null);
 
-  // Fetch fallback user if not provided by API
+  // Fetch fallback user if not provided by API, and get UUID
   useEffect(() => {
     let cancelled = false;
     async function loadUser() {
       try {
-        if (!user && data?.user_firebase_uid) {
-          // Request user by firebase uid
-          const res = await fetch(`/api/v1/users/get-user-by-id?firebase_uid=${encodeURIComponent(data.user_firebase_uid)}`);
+        const firebaseUid = data?.user_firebase_uid || user?.firebase_uid;
+        
+        if (firebaseUid) {
+          // If we already have UUID from user prop, use it
+          if (user?.uuid) {
+            setUserUuid(user.uuid);
+            return;
+          }
+          
+          // Request user by firebase uid to get UUID
+          const res = await fetch(`/api/v1/users/get-user-by-id?firebase_uid=${encodeURIComponent(firebaseUid)}`);
           const json = await res.json();
           if (!cancelled && json?.success && json?.data) {
             setResolvedUser({
               firebase_uid: json.data.firebase_uid,
+              uuid: json.data.uuid,
               display_name: json.data.display_name,
               name: json.data.name,
               photo_url: json.data.photo_url,
               avatar: json.data.avatar,
             });
+            // Set UUID for View button
+            if (json.data.uuid) {
+              setUserUuid(json.data.uuid);
+            }
           }
         }
       } catch (e) {
@@ -63,6 +86,22 @@ export default function TenantProfileCard({
     loadUser();
     return () => { cancelled = true; };
   }, [user, data?.user_firebase_uid]);
+  
+  // Handle Contact button click with authentication check
+  const handleContactClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
+      // Redirect to login with callback URL
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/auth/signin?callbackUrl=${encodeURIComponent(currentPath)}`);
+      return;
+    }
+    
+    // TODO: Implement contact functionality for authenticated users
+    // For now, we'll just show an alert or navigate to chat
+    console.log('Contact user:', userUuid || data?.user_firebase_uid);
+  };
 
   const formatCurrency = (amount: number | undefined, currency: string = 'HKD') => {
     if (!amount) return 'Not specified';
@@ -238,12 +277,21 @@ export default function TenantProfileCard({
       <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">          
           <div className="flex items-center gap-2">
-            <Link
-              href={`/tenant-profile/${data.user_firebase_uid}`}
-              className="btn-secondary inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md"
-            >
-              View
-            </Link>
+            {userUuid ? (
+              <Link
+                href={`/user/${userUuid}`}
+                className="btn-secondary inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md"
+              >
+                View
+              </Link>
+            ) : (
+              <button
+                disabled
+                className="btn-secondary inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md opacity-50 cursor-not-allowed"
+              >
+                View
+              </button>
+            )}
             
             {isCurrentUser ? (
               <Link
@@ -253,7 +301,10 @@ export default function TenantProfileCard({
                 Edit Profile
               </Link>
             ) : (
-              <button className="form-button inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md">
+              <button 
+                onClick={handleContactClick}
+                className="form-button inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md"
+              >
                 Contact
               </button>
             )}

@@ -48,6 +48,7 @@ const GET_TENANT_PROFILES_QUERY = `
 const GET_TENANT_PROFILE_WITH_USER_QUERY = `
   query GetTenantProfileWithUser($firebaseUid: String!) {
     real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+      uuid
       firebase_uid
       display_name
       name

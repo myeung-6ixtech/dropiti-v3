@@ -87,13 +87,19 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
         value = (value as Record<string, unknown>)[k];
       } else {
         // Fallback to key if translation not found
-        console.warn(`Translation key not found: ${key}`);
+        // Only warn in development/client-side, not during build/SSR
+        if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+          console.warn(`Translation key not found: ${key}`);
+        }
         return key;
       }
     }
 
     if (typeof value !== 'string') {
-      console.warn(`Translation value is not a string for key: ${key}`);
+      // Only warn in development/client-side, not during build/SSR
+      if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+        console.warn(`Translation value is not a string for key: ${key}`);
+      }
       return key;
     }
 

@@ -14,6 +14,7 @@ import { TenantProfileData } from '@/types/tenant';
 
 interface TenantProfileWithUser extends TenantProfileData {
   user?: {
+    uuid?: string;
     firebase_uid: string;
     display_name?: string;
     name?: string;
