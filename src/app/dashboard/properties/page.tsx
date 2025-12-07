@@ -9,7 +9,7 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import EmptyState from '@/components/common/EmptyState';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 
@@ -36,11 +36,24 @@ interface Draft {
 export default function PropertiesPage() {
   const { user: authUser, isAuthenticated } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [drafts, setDrafts] = useState<Draft[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'published' | 'drafts'>('published');
+  
+  // Get initial tab from URL parameter, default to 'published'
+  const tabParam = searchParams.get('tab');
+  const initialTab = (tabParam === 'drafts' || tabParam === 'published') ? tabParam : 'published';
+  const [activeTab, setActiveTab] = useState<'published' | 'drafts'>(initialTab);
+  
+  // Update active tab when URL parameter changes
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'drafts' || tabParam === 'published') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   // Fetch user's properties and drafts
   useEffect(() => {
@@ -119,7 +132,10 @@ export default function PropertiesPage() {
       <div className="bg-white border-b border-gray-200 px-6">
         <div className="flex space-x-8">
           <button
-            onClick={() => setActiveTab('published')}
+            onClick={() => {
+              setActiveTab('published');
+              router.push('/dashboard/properties?tab=published');
+            }}
             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'published'
                 ? 'border-purple-500 text-purple-600'
@@ -134,7 +150,10 @@ export default function PropertiesPage() {
             )}
           </button>
           <button
-            onClick={() => setActiveTab('drafts')}
+            onClick={() => {
+              setActiveTab('drafts');
+              router.push('/dashboard/properties?tab=drafts');
+            }}
             className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
               activeTab === 'drafts'
                 ? 'border-purple-500 text-purple-600'

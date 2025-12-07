@@ -153,11 +153,10 @@ export function BasicInfoSection({
               Listing Status
             </label>
             <select
-              value={tempData.status || (tempData.isPublic ? 'published' : 'draft')}
+              value={tempData.status || 'draft'}
               onChange={(e) => {
                 const newStatus = e.target.value as 'draft' | 'published' | 'archived' | 'expired';
                 onUpdateField('', 'status', newStatus);
-                onUpdateField('', 'isPublic', newStatus === 'published');
               }}
               className="form-select w-full"
             >
@@ -167,7 +166,7 @@ export function BasicInfoSection({
               <option value="expired">Expired</option>
             </select>
             <p className="mt-1 text-sm text-gray-500">
-              {tempData.status === 'published' || tempData.isPublic 
+              {tempData.status === 'published'
                 ? 'Your listing is visible to the public' 
                 : 'Your listing is saved as a draft and not visible to the public'}
             </p>
@@ -197,11 +196,11 @@ export function BasicInfoSection({
               <span className="text-sm text-gray-500">Status</span>
               <div className="flex items-center space-x-2">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  data.status === 'published' || data.isPublic
+                  data.status === 'published'
                     ? 'bg-green-100 text-green-800'
                     : 'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {data.status === 'published' || data.isPublic ? 'Published' : 'Draft'}
+                  {data.status === 'published' ? 'Published' : 'Draft'}
                 </span>
               </div>
             </div>

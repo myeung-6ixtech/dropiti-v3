@@ -27,7 +27,6 @@ const GET_PROPERTY_BY_UUID_QUERY = `
       rental_price
       rental_price_currency
       availability_date
-      is_public
       status
     }
   }
@@ -101,7 +100,6 @@ export async function GET(request: NextRequest) {
         rental_price: number;
         rental_price_currency: string;
         availability_date: string;
-        is_public: boolean;
         status: string;
       }>;
     };
@@ -233,8 +231,8 @@ export async function GET(request: NextRequest) {
         image_url: property.display_image || (property.uploaded_images && property.uploaded_images.length > 0 ? property.uploaded_images[0] : ''),
         display_image: property.display_image || '',
         uploaded_images: property.uploaded_images || [],
-        available: property.is_public || false,
-        status: property.status || (property.is_public ? 'published' : 'draft'),
+        available: property.status === 'published',
+        status: property.status || 'draft',
         created_at: property.created_at,
         updated_at: property.created_at, // Using created_at as fallback
         details: {

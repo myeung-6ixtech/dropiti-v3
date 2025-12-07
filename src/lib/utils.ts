@@ -281,25 +281,21 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
       const properties = Array.isArray(response.data) ? response.data : response.data.properties || [];
       
       console.log('getPublishedPropertyCountByStatus - All properties from listings:', properties.length);
-      console.log('getPublishedPropertyCountByStatus - Property details:', properties.map((p: { id: string; status: string; is_public: boolean; available: boolean }) => ({ 
+      console.log('getPublishedPropertyCountByStatus - Property details:', properties.map((p: { id: string; status: string; available: boolean }) => ({ 
         id: p.id, 
         status: p.status, 
-        is_public: p.is_public,
         available: p.available 
       })));
       
-      // Filter for published properties - check multiple possible status indicators
-      const publishedProperties = properties.filter((property: { status: string; is_public: boolean; available: boolean }) => 
-        property.status === 'published' || 
-        property.is_public === true ||
-        property.available === true
+      // Filter for published properties - use status as single source of truth
+      const publishedProperties = properties.filter((property: { status: string; available: boolean }) => 
+        property.status === 'published'
       );
       
       console.log('getPublishedPropertyCountByStatus - Published properties after filtering:', publishedProperties.length);
-      console.log('getPublishedPropertyCountByStatus - Published property details:', publishedProperties.map((p: { id: string; status: string; is_public: boolean; available: boolean }) => ({ 
+      console.log('getPublishedPropertyCountByStatus - Published property details:', publishedProperties.map((p: { id: string; status: string; available: boolean }) => ({ 
         id: p.id, 
         status: p.status, 
-        is_public: p.is_public,
         available: p.available 
       })));
       

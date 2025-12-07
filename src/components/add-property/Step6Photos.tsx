@@ -71,8 +71,7 @@ export default function Step6Photos({ data, onUpdate }: Step6PhotosProps) {
           Upload photos of your property
         </h3>
         <p className="text-gray-600 mb-6">
-          High-quality photos help tenants visualize your property. Upload at least 5 photos for the best results. 
-          Photos will be automatically uploaded to S3 when you create the listing.
+          High-quality photos help tenants visualize your property. Upload at least 5 photos for the best results.
         </p>
 
         {/* Upload Area */}

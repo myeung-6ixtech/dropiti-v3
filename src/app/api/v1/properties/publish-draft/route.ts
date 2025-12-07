@@ -7,7 +7,6 @@ const PUBLISH_DRAFT_MUTATION = `
       where: { property_uuid: { _eq: $property_uuid } }
       _set: { 
         status: "published",
-        is_public: true,
         updated_at: "now()",
         last_saved_at: "now()",
         completion_percentage: 100
@@ -19,7 +18,6 @@ const PUBLISH_DRAFT_MUTATION = `
         property_uuid
         title
         status
-        is_public
         updated_at
         last_saved_at
         completion_percentage
@@ -54,7 +52,6 @@ export async function POST(request: NextRequest) {
           property_uuid: string;
           title: string;
           status: string;
-          is_public: boolean;
           updated_at: string;
           last_saved_at: string;
           completion_percentage: number;

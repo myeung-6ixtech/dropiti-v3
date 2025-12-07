@@ -19,7 +19,6 @@ const GET_DRAFTS_QUERY = `
       updated_at
       last_saved_at
       status
-      is_public
       property_type
       rental_space
       address
@@ -65,7 +64,6 @@ export async function GET(request: NextRequest) {
         updated_at: string;
         last_saved_at: string;
         status: string;
-        is_public: boolean;
         property_type: string;
         rental_space: string;
         address: string;

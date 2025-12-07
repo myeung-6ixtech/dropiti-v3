@@ -93,9 +93,9 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
               <HomeIcon className="h-5 w-5 text-purple-600" />
               <h4 className="font-medium text-gray-900">Property Type</h4>
             </div>
-            <p className="text-gray-600">{getPropertyTypeDisplay()}</p>
+            <p className="text-gray-900">{getPropertyTypeDisplay()}</p>
             {data?.rentalSpace && (
-              <p className="text-gray-500 text-sm mt-1">Space: {getRentalSpaceDisplay()}</p>
+              <p className="text-gray-700 text-sm mt-1">Space: {getRentalSpaceDisplay()}</p>
             )}
           </div>
 
@@ -106,7 +106,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
               <h4 className="font-medium text-gray-900">Address</h4>
             </div>
             {data?.address ? (
-              <div className="text-gray-600 text-sm space-y-1">
+              <div className="text-gray-900 text-sm space-y-1">
                 {data.address.unit && <p>Unit {data.address.unit}</p>}
                 {data.address.floor && <p>Floor {data.address.floor}</p>}
                 {data.address.buildingName && <p>{data.address.buildingName}</p>}
@@ -125,7 +125,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
               <h4 className="font-medium text-gray-900">Unit Details</h4>
             </div>
             {data?.unitDetails ? (
-              <div className="text-gray-600 text-sm space-y-1">
+              <div className="text-gray-900 text-sm space-y-1">
                 {data.unitDetails.bedrooms !== undefined && (
                   <p>Bedrooms: {data.unitDetails.bedrooms === 0 ? 'Studio' : data.unitDetails.bedrooms}</p>
                 )}
@@ -150,15 +150,15 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
               <h4 className="font-medium text-gray-900">Rental Details</h4>
             </div>
             {data?.rentalDetails ? (
-              <div className="text-gray-600 text-sm space-y-1">
-                {data.rentalDetails.listingName && <p className="font-medium">{data.rentalDetails.listingName}</p>}
+              <div className="text-gray-900 text-sm space-y-1">
+                {data.rentalDetails.listingName && <p className="font-medium text-gray-900">{data.rentalDetails.listingName}</p>}
                 {data.rentalDetails.rentalPrice && (
                   <p className="text-lg font-semibold text-purple-600">
                     {formatCurrency(data.rentalDetails.rentalPrice)}/month
                   </p>
                 )}
                 {data.rentalDetails.availableDate && (
-                  <p>Available: {(() => {
+                  <p className="text-gray-900">Available: {(() => {
                     try {
                       const date = new Date(data.rentalDetails.availableDate);
                       if (isNaN(date.getTime())) return 'Invalid date';
@@ -227,7 +227,7 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
         {data?.rentalDetails?.listingDescription && (
           <div className="bg-white border border-gray-200 rounded-lg p-4 mt-6">
             <h4 className="font-medium text-gray-900 mb-3">Description</h4>
-            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+            <p className="text-gray-900 text-sm leading-relaxed whitespace-pre-wrap">
               {data.rentalDetails.listingDescription}
             </p>
           </div>

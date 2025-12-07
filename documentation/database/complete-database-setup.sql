@@ -87,7 +87,6 @@ CREATE TABLE IF NOT EXISTS real_estate.property_listing (
     rental_price DECIMAL(12,2) NOT NULL CHECK (rental_price > 0),
     rental_price_currency VARCHAR(10) CHECK (rental_price_currency IN ('HKD', 'USD', 'EUR', 'GBP', 'SGD')) DEFAULT 'HKD',
     availability_date DATE,
-    is_public BOOLEAN DEFAULT false,
     status VARCHAR(20) CHECK (status IN ('draft', 'published', 'archived', 'expired', 'available')) DEFAULT 'draft',
     deposit_amount DECIMAL(12,2) DEFAULT 0 CHECK (deposit_amount >= 0),
     utilities_included JSONB DEFAULT '[]',
@@ -310,7 +309,6 @@ CREATE INDEX IF NOT EXISTS idx_user_rating ON real_estate.user(rating);
 CREATE INDEX IF NOT EXISTS idx_property_uuid ON real_estate.property_listing(property_uuid);
 CREATE INDEX IF NOT EXISTS idx_property_landlord ON real_estate.property_listing(landlord_firebase_uid);
 CREATE INDEX IF NOT EXISTS idx_property_status ON real_estate.property_listing(status);
-CREATE INDEX IF NOT EXISTS idx_property_is_public ON real_estate.property_listing(is_public);
 CREATE INDEX IF NOT EXISTS idx_property_type ON real_estate.property_listing(property_type);
 CREATE INDEX IF NOT EXISTS idx_property_rental_price ON real_estate.property_listing(rental_price);
 CREATE INDEX IF NOT EXISTS idx_property_location ON real_estate.property_listing(address);

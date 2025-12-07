@@ -28,7 +28,6 @@ const UPDATE_PROPERTY_MUTATION = `
         rental_price
         rental_price_currency
         availability_date
-        is_public
         status
         created_at
         updated_at
@@ -79,7 +78,6 @@ export async function PUT(request: NextRequest) {
       rental_price?: number;
       rental_price_currency?: string;
       availability_date?: string | null;
-      is_public?: boolean;
       status?: string;
       updated_at?: string;
     } = {};
@@ -104,9 +102,8 @@ export async function PUT(request: NextRequest) {
     if (updates.rental_price) preparedUpdates.rental_price = parseFloat(updates.rental_price);
     if (updates.rental_price_currency) preparedUpdates.rental_price_currency = updates.rental_price_currency;
     if (updates.availability_date) preparedUpdates.availability_date = updates.availability_date;
-    if (updates.is_public !== undefined) preparedUpdates.is_public = updates.is_public;
     
-    // Validate and set status
+    // Validate and set status (status is the single source of truth)
     if (updates.status) {
       const validStatuses = ['draft', 'published', 'archived', 'expired'];
       if (validStatuses.includes(updates.status)) {
@@ -156,7 +153,6 @@ export async function PUT(request: NextRequest) {
           rental_price: number;
           rental_price_currency: string;
           availability_date: string | null;
-          is_public: boolean;
           status: string;
           created_at: string;
           updated_at: string;

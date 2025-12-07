@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 import { v4 as uuidv4 } from 'uuid';
+import { getDefaultStatus } from '@/lib/utils/propertyStatus';
 
 const CREATE_PROPERTY_MUTATION = `
   mutation CreateProperty($property: real_estate_property_listing_insert_input!) {
@@ -27,7 +28,6 @@ const CREATE_PROPERTY_MUTATION = `
       rental_price
       rental_price_currency
       availability_date
-      is_public
       status
       last_saved_at
       completion_percentage
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       gross_area_size: propertyData.details?.grossArea || 0, // Use 0 instead of null for drafts
       gross_area_size_unit: 'sqft', // Default unit
       availability_date: propertyData.availableDate || new Date().toISOString(), // Use current date as default for drafts
-      is_public: !isDraft, // Drafts are private, published properties are public
+      status: getDefaultStatus(isDraft), // Use status as single source of truth
       landlord_firebase_uid: propertyData.ownerId, // Use the authenticated user's Firebase UID
       show_specific_location: propertyData.address?.showSpecificLocation ?? false, // Add the show specific location boolean
       last_saved_at: new Date().toISOString(), // Set current timestamp
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
         rental_price: number;
         rental_price_currency: string;
         availability_date: string;
-        is_public: boolean;
+        status: string;
       };
     };
 

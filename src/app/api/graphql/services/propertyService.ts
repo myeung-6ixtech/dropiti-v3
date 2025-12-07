@@ -21,7 +21,7 @@ interface HasuraFilters {
   property_type?: { _eq: string };
   furnished?: { _eq: string };
   pets_allowed?: { _eq: boolean };
-  is_public?: { _eq: boolean };
+  status?: { _eq: string };
   landlord_firebase_uid?: { _eq: string };
 }
 
@@ -59,7 +59,7 @@ export class PropertyService {
             display_image
             uploaded_images
             availability_date
-            is_public
+            status
             landlord_firebase_uid
             created_at
           }
@@ -116,7 +116,7 @@ export class PropertyService {
             id
             title
             address
-            is_public
+            status
             created_at
           }
           real_estate_property_listing_aggregate {
@@ -197,7 +197,7 @@ export class PropertyService {
           rental_price
           rental_price_currency
           availability_date
-          is_public
+          status
         }
       }
     `;
@@ -234,7 +234,7 @@ export class PropertyService {
           rental_price
           rental_price_currency
           availability_date
-          is_public
+          status
         }
       }
     `;
@@ -257,8 +257,8 @@ export class PropertyService {
   private static buildFilters(filters: PropertyFilters) {
     const hasuraFilters: HasuraFilters = {};
 
-    // Only show public properties by default
-    hasuraFilters.is_public = { _eq: true };
+    // Only show published properties by default (status is the single source of truth)
+    hasuraFilters.status = { _eq: 'published' };
 
     // Add other filters if they exist
     if (filters.minPrice || filters.maxPrice) {

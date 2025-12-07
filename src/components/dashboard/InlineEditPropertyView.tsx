@@ -82,8 +82,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
         rentalPrice: apiProperty.price as number || 0,
         availableDate: apiProperty.availableDate as string || null,
       },
-      status: apiProperty.status as 'draft' | 'published' | 'archived' | 'expired' || (apiProperty.is_public ? 'published' : 'draft'),
-      isPublic: apiProperty.is_public as boolean || false,
+      status: apiProperty.status as 'draft' | 'published' | 'archived' | 'expired' || 'draft',
     };
   }, [normalizeAmenities]);
 
@@ -245,7 +244,6 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       availability_date: propertyData.rentalDetails?.availableDate 
         ? new Date(propertyData.rentalDetails.availableDate).toISOString()
         : null,
-      is_public: propertyData.isPublic || propertyData.status === 'published',
       status: propertyData.status || 'draft',
       display_image: propertyData.displayImage || '',
       uploaded_images: propertyData.uploadedImages || [],
@@ -258,7 +256,6 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
     console.log('InlineEditPropertyView: propertyData.propertyType:', propertyData.propertyType);
     console.log('InlineEditPropertyView: propertyData.rentalSpace:', propertyData.rentalSpace);
     console.log('InlineEditPropertyView: propertyData.status:', propertyData.status);
-    console.log('InlineEditPropertyView: propertyData.isPublic:', propertyData.isPublic);
     
     return apiData;
   };

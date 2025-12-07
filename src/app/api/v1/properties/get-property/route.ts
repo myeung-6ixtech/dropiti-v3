@@ -24,7 +24,6 @@ const GET_PROPERTY_QUERY = `
       rental_price
       rental_price_currency
       availability_date
-      is_public
       status
       created_at
       updated_at
@@ -69,7 +68,6 @@ export async function GET(request: NextRequest) {
         rental_price: number;
         rental_price_currency: string;
         availability_date: string | null;
-        is_public: boolean;
         status: string;
         created_at: string;
         updated_at: string;

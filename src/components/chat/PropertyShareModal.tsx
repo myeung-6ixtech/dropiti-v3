@@ -76,11 +76,9 @@ export default function PropertyShareModal({
         const activeProperties = publishedProperties.filter(
           (property: Record<string, unknown>) => {
             const isPublished = property.status === 'published' || 
-                               property.property_status === 'published' ||
-                               property.is_public === true ||
-                               property.available === true;
+                               property.property_status === 'published';
             
-            console.log(`[PropertyShareModal] Property "${property.title}" - status: ${property.status}, property_status: ${property.property_status}, is_public: ${property.is_public}, available: ${property.available}, isPublished: ${isPublished}`);
+            console.log(`[PropertyShareModal] Property "${property.title}" - status: ${property.status}, property_status: ${property.property_status}, isPublished: ${isPublished}`);
             
             return isPublished;
           }

@@ -106,6 +106,9 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
         
         // Show success message
         showToast('success', 'Draft saved successfully!');
+        
+        // Redirect to properties page with drafts tab active
+        router.push('/dashboard/properties?tab=drafts');
       } else {
         throw new Error(response.error || 'Failed to save draft');
       }

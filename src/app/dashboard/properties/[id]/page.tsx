@@ -92,8 +92,7 @@ export default function PropertyDetailPage() {
             amenities: propertyData.amenities || [],
             display_image: propertyData.display_image || '',
             uploaded_images: propertyData.uploaded_images || [],
-            is_public: propertyData.available || false,
-            status: propertyData.status || (propertyData.available ? 'published' : 'draft'),
+            status: propertyData.status || 'draft',
             created_at: propertyData.created_at,
             updated_at: propertyData.updated_at,
             owner_id: propertyData.owner_id,
@@ -302,11 +301,11 @@ export default function PropertyDetailPage() {
           {/* Status Indicator */}
           <div className="flex items-center space-x-4">
             <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-              property.status === 'published' || property.is_public
+              property.status === 'published'
                 ? 'bg-green-100 text-green-800'
                 : 'bg-yellow-100 text-yellow-800'
             }`}>
-              {property.status === 'published' || property.is_public ? 'Active' : 'Draft'}
+              {property.status === 'published' ? 'Active' : 'Draft'}
             </div>
             
             {isOwner && (
