@@ -4,14 +4,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
-import DraftCard from '@/components/dashboard/DraftCard';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { DraftCard } from '@/components/dashboard/DraftCard';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
-import EmptyState from '@/components/common/EmptyState';
-import Link from 'next/link';
+import { EmptyState } from '@/components/common/EmptyState';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
+import { PropertiesHeader } from './_components/properties-header';
+import { PropertiesTabs } from './_components/properties-tabs';
 
 interface Draft {
   id: string;
@@ -115,60 +115,16 @@ export default function PropertiesPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-0">Properties</h1>
-            <p className="text-gray-600 mt-1">Manage your property listings</p>
-          </div>
-          <Link href="/dashboard/add-property" className="btn-primary flex items-center">
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Add Property
-          </Link>
-        </div>
-      </div>
-      {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 px-6">
-        <div className="flex space-x-8">
-          <button
-            onClick={() => {
-              setActiveTab('published');
-              router.push('/dashboard/properties?tab=published');
-            }}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'published'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Published Properties
-            {properties.length > 0 && (
-              <span className="ml-2 bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                {properties.length}
-              </span>
-            )}
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('drafts');
-              router.push('/dashboard/properties?tab=drafts');
-            }}
-            className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-              activeTab === 'drafts'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Drafts
-            {drafts.length > 0 && (
-              <span className="ml-2 bg-purple-100 text-purple-700 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                {drafts.length}
-              </span>
-            )}
-          </button>
-        </div>
-      </div>
+      <PropertiesHeader 
+        propertyCount={properties.length}
+        draftCount={drafts.length}
+      />
+      <PropertiesTabs
+        activeTab={activeTab}
+        propertyCount={properties.length}
+        draftCount={drafts.length}
+        onTabChange={setActiveTab}
+      />
 
       {/* Loading State */}
       {isLoading && (

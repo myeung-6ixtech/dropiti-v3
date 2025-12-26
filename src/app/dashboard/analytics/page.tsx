@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChartBarIcon, UsersIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { AnalyticsHeader } from './_components/analytics-header';
 
 export default function AnalyticsPage() {
   const [stats] = useState([
@@ -41,13 +42,7 @@ export default function AnalyticsPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-gray-600 mt-1">Track your property performance</p>
-        </div>
-      </div>
+      <AnalyticsHeader />
 
       {/* Stats Grid */}
       <div className="p-6">

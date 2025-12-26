@@ -6,7 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
-import EmptyState from '@/components/common/EmptyState';
+import { EmptyState } from '@/components/common/EmptyState';
 import { Offer } from '@/types/offer';
 import MobileTabs from '@/components/common/MobileTabs';
 interface AllIncomingOffersProps {

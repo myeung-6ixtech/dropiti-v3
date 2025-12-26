@@ -18,7 +18,7 @@ interface DashboardWelcomeHeaderProps {
   };
 }
 
-export default function DashboardWelcomeHeader({ userName, stats }: DashboardWelcomeHeaderProps) {
+export function DashboardWelcomeHeader({ userName, stats }: DashboardWelcomeHeaderProps) {
   const { t } = useLanguage();
   
   // Helper function to format stats with better UX for empty states
@@ -31,19 +31,19 @@ export default function DashboardWelcomeHeader({ userName, stats }: DashboardWel
       ? `${stats.totalReviews} Reviews` 
       : t('welcomeHeader.noReviewsYet');
     
-    return `${propertiesText} | ${reviewsText}`;
+    return `${propertiesText} · ${reviewsText}`;
   };
 
   return (
-    <div className="welcome-header-container">
+    <div data-slot="dashboard-welcome-header" className="welcome-header-container">
       {/* Thin Welcome Section */}
-      <div className="welcome-greeting-section">
-        <h1 className="welcome-greeting">{t('welcomeHeader.hi', { name: userName })}</h1>
-        <p className="welcome-stats">{formatStats()}</p>
+      <div data-slot="welcome-greeting-section" className="welcome-greeting-section">
+        <h1 data-slot="welcome-greeting" className="welcome-greeting">{t('welcomeHeader.hi', { name: userName })}</h1>
+        <p data-slot="welcome-stats" className="welcome-stats">{formatStats()}</p>
       </div>
 
       {/* App-Style Quick Actions */}
-      <div className="welcome-actions-grid">
+      <div data-slot="welcome-actions-grid" className="welcome-actions-grid">
         <Link href="/dashboard/properties" className="welcome-action-button">
           <BuildingOfficeIcon className="welcome-action-icon" />
           <span className="welcome-action-label">{t('welcomeHeader.manageProperties')}</span>

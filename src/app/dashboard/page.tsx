@@ -6,7 +6,6 @@ import DropitiPassport from '@/components/common/DropitiPassport';
 import { 
   StarIcon
 } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import { getSafeProfileImage } from '@/lib/utils';
 import ReviewItem from '@/components/reviews/ReviewItem';
 import { reviewsAPI } from '@/lib/api-client';
@@ -14,8 +13,9 @@ import { useState, useEffect } from 'react';
 import { Review } from '@/types/review';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import ReviewOpportunities from '@/components/dashboard/ReviewOpportunities';
-import DashboardWelcomeHeader from '@/components/dashboard/DashboardWelcomeHeader';
+import { DashboardWelcomeHeader } from '@/components/dashboard/DashboardWelcomeHeader';
 import { getTotalPropertyCount, getPublishedPropertyCountByStatus, getAverageUserRating } from '@/lib/utils';
+import { DashboardReviewsSection } from './_components/dashboard-reviews-section';
 
 export default function DashboardPage() {
   const { user: authUser, isAuthenticated, isLoading } = useAuth();
@@ -220,33 +220,14 @@ export default function DashboardPage() {
         {/* Right Column - Content */}
         <div className="dashboard-right-column">
           {/* Recent Reviews */}
-          <div className="dashboard-card">
-            <div className="dashboard-card-header">
-              <h2 className="dashboard-card-title">{t('dashboardPage.yourReviews')}</h2>
-              <Link
-                href="/dashboard/reviews"
-                className="dashboard-card-link"
-              >
-                {t('dashboardPage.viewAll')}
-              </Link>
-            </div>
-            
-            <div className="dashboard-card-content">
-              {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <ReviewItem key={review.id} review={review} renderStars={renderStars} />
-                ))
-              ) : (
-                <div className="dashboard-review-empty">
-                  <div className="text-gray-500">
-                    <StarIcon className="dashboard-review-empty-icon" />
-                    <p className="dashboard-review-empty-text">{t('dashboardPage.noReviewsYet')}</p>
-                    <p className="dashboard-review-empty-subtext">{t('dashboardPage.reviewsWillAppear')}</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <DashboardReviewsSection
+            reviews={reviews}
+            renderStars={renderStars}
+            viewAllText={t('dashboardPage.viewAll')}
+            yourReviewsText={t('dashboardPage.yourReviews')}
+            noReviewsYetText={t('dashboardPage.noReviewsYet')}
+            reviewsWillAppearText={t('dashboardPage.reviewsWillAppear')}
+          />
 
           {/* Review Opportunities */}
           <ReviewOpportunities />

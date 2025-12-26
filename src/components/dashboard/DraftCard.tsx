@@ -31,7 +31,7 @@ interface DraftCardProps {
   onDelete: (draftId: string) => void;
 }
 
-export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProps) {
+export function DraftCard({ draft, onContinue, onDelete }: DraftCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -67,16 +67,16 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
   };
 
   return (
-    <div className={propertyCardClasses.container}>
+    <div data-slot="draft-card" className={propertyCardClasses.container}>
       {/* Draft Status Badge - Top Left */}
-      <div className="absolute top-3 left-3 z-10">
+      <div data-slot="draft-badge" className="absolute top-3 left-3 z-10">
         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
           Draft
         </span>
       </div>
 
       {/* Edit Icon - Top Right (matching PropertyCard design) */}
-      <div className={propertyCardClasses.editIcon.container}>
+      <div data-slot="draft-edit-icon" className={propertyCardClasses.editIcon.container}>
         <button
           onClick={() => onContinue(draft.property_uuid)}
           className={propertyCardClasses.editIcon.link}
@@ -87,7 +87,7 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
       </div>
 
       {/* Property Image */}
-      <div className={propertyCardClasses.image.container}>
+      <div data-slot="draft-image" className={propertyCardClasses.image.container}>
         {draft.display_image && draft.display_image.trim() !== '' ? (
           <Image
             src={draft.display_image}
@@ -106,7 +106,7 @@ export default function DraftCard({ draft, onContinue, onDelete }: DraftCardProp
       </div>
 
       {/* Property Details */}
-      <div className={propertyCardClasses.details}>
+      <div data-slot="draft-details" className={propertyCardClasses.details}>
         <h3 className={propertyCardClasses.title}>
           {draft.title || 'Untitled Draft'}
         </h3>

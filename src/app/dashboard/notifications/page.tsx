@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { 
-  BellIcon, 
   CheckIcon, 
   XMarkIcon,
   ClockIcon,
@@ -10,6 +9,9 @@ import {
   InformationCircleIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import { NotificationsHeader } from './_components/notifications-header';
+import { NotificationsFilters } from './_components/notifications-filters';
+import { NotificationsEmptyState } from './_components/notifications-empty-state';
 
 interface Notification {
   id: string;
@@ -141,81 +143,23 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-            <p className="text-gray-600">Stay updated with your latest activities and updates.</p>
-          </div>
-          <div className="flex items-center space-x-3">
-            <span className="text-sm text-gray-500">
-              {unreadCount} unread
-            </span>
-            {unreadCount > 0 && (
-              <button
-                onClick={markAllAsRead}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                Mark all as read
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <NotificationsHeader
+        unreadCount={unreadCount}
+        onMarkAllAsRead={markAllAsRead}
+      />
 
-      {/* Filter Tabs */}
-      <div className="mb-6">
-        <div className="border-b border-gray-200">
-          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-            <button
-              onClick={() => setFilter('all')}
-              className={`${
-                filter === 'all'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
-            >
-              All ({notifications.length})
-            </button>
-            <button
-              onClick={() => setFilter('unread')}
-              className={`${
-                filter === 'unread'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
-            >
-              Unread ({unreadCount})
-            </button>
-            <button
-              onClick={() => setFilter('read')}
-              className={`${
-                filter === 'read'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
-            >
-              Read ({notifications.filter(n => n.read).length})
-            </button>
-          </nav>
-        </div>
-      </div>
+      <NotificationsFilters
+        filter={filter}
+        onFilterChange={setFilter}
+        totalCount={notifications.length}
+        unreadCount={unreadCount}
+        readCount={notifications.filter(n => n.read).length}
+      />
 
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications.length === 0 ? (
-          <div className="text-center py-12">
-            <BellIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No notifications</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {filter === 'all' 
-                ? 'You\'re all caught up! No notifications yet.'
-                : filter === 'unread' 
-                  ? 'No unread notifications.'
-                  : 'No read notifications.'
-              }
-            </p>
-          </div>
+          <NotificationsEmptyState filter={filter} />
         ) : (
           filteredNotifications.map((notification) => (
             <div

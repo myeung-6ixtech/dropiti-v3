@@ -10,6 +10,8 @@ import {
   FiShield, 
   FiSettings
 } from 'react-icons/fi';
+import { SettingsHeader } from './_components/settings-header';
+import { SettingsTabs } from './_components/settings-tabs';
 
 // Area code options for supported regions
 const AREA_CODES = [
@@ -517,34 +519,16 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">{t('navigation.settings')}</h1>
-          <p className="mt-2 text-gray-600">
-            {t('settings.manageAccountSettings')}
-          </p>
-        </div>
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <tab.icon className="h-5 w-5" />
-                  <span>{tab.name}</span>
-                </div>
-              </button>
-            ))}
-          </nav>
-        </div>
+        <SettingsHeader
+          title={t('navigation.settings')}
+          description={t('settings.manageAccountSettings')}
+        />
+        
+        <SettingsTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
         {/* Tab Content */}
         <div className="space-y-6">

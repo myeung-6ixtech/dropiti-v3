@@ -8,6 +8,7 @@ import {
   DocumentTextIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
+import { ActivityHeader } from './_components/activity-header';
 
 export default function ActivityPage() {
   const [activities] = useState([
@@ -62,13 +63,7 @@ export default function ActivityPage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Recent Activity</h1>
-          <p className="text-gray-600 mt-1">Your recent actions and updates</p>
-        </div>
-      </div>
+      <ActivityHeader />
 
       {/* Activity List */}
       <div className="flex-1 overflow-auto p-6">

@@ -1,14 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { offersAPI } from '@/lib/api-client';
-import ReviewCard from '@/components/reviews/ReviewCard';
-import ReviewOpportunityCard from '@/components/reviews/ReviewOpportunityCard';
 import CreateReviewModal from '@/components/common/CreateReviewModal';
 import { FullScreenLoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Review, ReviewOpportunity, ReviewTabType, ReviewTab } from '@/types/review';
+import { ReviewsHeader } from './_components/reviews-header';
+import { ReviewsTabs } from './_components/reviews-tabs';
+import { UpcomingReviewsSection } from './_components/upcoming-reviews-section';
+import { ReviewsGivenSection } from './_components/reviews-given-section';
+import { ReviewsReceivedSection } from './_components/reviews-received-section';
 
 export default function ReviewsPage() {
   const { user: authUser } = useAuth();
@@ -147,138 +150,29 @@ export default function ReviewsPage() {
   return (
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Reviews</h1>
-          <p className="mt-2 text-gray-600">
-            Manage your reviews and see what others are saying about you
-          </p>
-        </div>
+        <ReviewsHeader />
 
-        {/* Tab Navigation */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-2 px-1 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? 'border-purple-500 text-purple-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <div className="flex items-center space-x-2">
-                  <span>{tab.name}</span>
-                  {tab.count > 0 && (
-                    <span className="bg-gray-100 text-gray-900 py-0.5 px-2.5 rounded-full text-xs font-medium">
-                      {tab.count}
-                    </span>
-                  )}
-                </div>
-              </button>
-            ))}
-          </nav>
-        </div>
+        <ReviewsTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
         {/* Tab Content */}
         <div className="space-y-6">
           {activeTab === 'upcoming' && (
-            <div>
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Upcoming Reviews
-                </h2>
-                <p className="text-gray-600">
-                  You can submit reviews for these completed offers. Reviews help the community make better decisions.
-                </p>
-              </div>
-
-              {reviewOpportunities.length === 0 ? (
-                <div className="text-center py-12">
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No upcoming reviews</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    You don't have any offers that are ready for review yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {reviewOpportunities.map((opportunity) => (
-                    <ReviewOpportunityCard
-                      key={opportunity.id}
-                      opportunity={opportunity}
-                      onCreateReview={() => handleCreateReview(opportunity)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <UpcomingReviewsSection
+              opportunities={reviewOpportunities}
+              onCreateReview={handleCreateReview}
+            />
           )}
 
           {activeTab === 'given' && (
-            <div>
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Reviews You've Given
-                </h2>
-                <p className="text-gray-600">
-                  Reviews you have written for other users and properties.
-                </p>
-              </div>
-
-              {reviewsGiven.length === 0 ? (
-                <div className="text-center py-12">
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No reviews given</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    You haven't written any reviews yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {reviewsGiven.map((review) => (
-                    <ReviewCard
-                      key={review.reviewUuid}
-                      review={review}
-                      showPropertyInfo={true}
-                      showActions={true}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <ReviewsGivenSection reviews={reviewsGiven} />
           )}
 
           {activeTab === 'received' && (
-            <div>
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Reviews You've Received
-                </h2>
-                <p className="text-gray-600">
-                  What others are saying about you and your properties.
-                </p>
-              </div>
-
-              {reviewsReceived.length === 0 ? (
-                <div className="text-center py-12">
-                  <h3 className="mt-2 text-sm font-medium text-gray-900">No reviews received</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    You haven't received any reviews yet.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {reviewsReceived.map((review) => (
-                    <ReviewCard
-                      key={review.reviewUuid}
-                      review={review}
-                      showPropertyInfo={true}
-                      showActions={false}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            <ReviewsReceivedSection reviews={reviewsReceived} />
           )}
         </div>
       </div>

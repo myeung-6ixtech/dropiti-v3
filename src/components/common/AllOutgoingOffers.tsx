@@ -5,7 +5,7 @@ import { offersAPI } from '@/lib/api-client';
 import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
-import EmptyState from '@/components/common/EmptyState';
+import { EmptyState } from '@/components/common/EmptyState';
 import Toast from '@/components/ui/Toast';
 import { Offer } from '@/types/offer';
 import MobileTabs from '@/components/common/MobileTabs';

@@ -2,6 +2,16 @@
  * Utility functions for the Dropiti application
  */
 
+import { twMerge } from 'tailwind-merge';
+
+/**
+ * Utility function to merge Tailwind CSS classes
+ * Handles conditional classes and deduplicates Tailwind classes
+ */
+export function cn(...inputs: (string | undefined | null | boolean)[]) {
+  return twMerge(inputs.filter(Boolean).join(' '));
+}
+
 // Address interface for type safety
 interface AddressObject {
   unit?: string;

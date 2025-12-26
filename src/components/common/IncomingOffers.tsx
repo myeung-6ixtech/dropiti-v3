@@ -5,7 +5,7 @@ import { offersAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import OfferCard from '@/components/common/OfferCard';
-import EmptyState from '@/components/common/EmptyState';
+import { EmptyState } from '@/components/common/EmptyState';
 import { Offer } from '@/types/offer';
 
 

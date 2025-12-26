@@ -7,6 +7,8 @@ import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
 import TenantProfilePreview from '@/components/tenant-profile/TenantProfilePreview';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
+import { TenantProfileHeader } from './_components/tenant-profile-header';
+import { TenantProfileEmptyState } from './_components/tenant-profile-empty-state';
 
 export default function TenantProfilePage() {
   const { user: authUser, isAuthenticated } = useAuth();
@@ -152,56 +154,15 @@ export default function TenantProfilePage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">My Tenant Profile</h1>
-            <p className="text-sm text-gray-500 mt-1">
-              {hasProfile 
-                ? 'Manage your tenant marketplace profile' 
-                : 'Create your tenant marketplace profile'
-              }
-            </p>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {hasProfile && (
-              profileData.tenant_listing_status === 'active' ? (
-                <button
-                  onClick={handleUnpublish}
-                  disabled={isUnpublishing}
-                  className="btn-secondary inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isUnpublishing ? 'Unpublishing...' : 'Unpublish'}
-                </button>
-              ) : (
-                <button
-                  onClick={handlePublish}
-                  disabled={isPublishing}
-                  className="form-button inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isPublishing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Publishing...
-                    </>
-                  ) : (
-                    'Publish Profile'
-                  )}
-                </button>
-              )
-            )}
-            
-            <button
-              onClick={handleModify}
-              className="btn-secondary inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-md"
-            >
-              {hasProfile ? 'Modify' : 'Create Profile'}
-            </button>
-          </div>
-        </div>
-      </div>
+      <TenantProfileHeader
+        hasProfile={hasProfile}
+        isPublished={profileData.tenant_listing_status === 'active'}
+        isPublishing={isPublishing}
+        isUnpublishing={isUnpublishing}
+        onPublish={handlePublish}
+        onUnpublish={handleUnpublish}
+        onModify={handleModify}
+      />
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-auto">
@@ -221,20 +182,7 @@ export default function TenantProfilePage() {
               isSubmitting={isPublishing || isUnpublishing}
             />
           ) : (
-            <div className="text-center py-12">
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Profile Created Yet</h3>
-                <p className="text-gray-600 mb-6">
-                  Create your tenant profile to start connecting with landlords and finding your perfect rental.
-                </p>
-                <button
-                  onClick={handleModify}
-                  className="form-button inline-flex items-center justify-center px-6 py-3 text-base font-medium rounded-md"
-                >
-                  Create Your Profile
-                </button>
-              </div>
-            </div>
+            <TenantProfileEmptyState onCreateProfile={handleModify} />
           )}
         </div>
       </div>
