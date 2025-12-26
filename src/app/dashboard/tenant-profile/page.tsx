@@ -150,13 +150,13 @@ export default function TenantProfilePage() {
   }
 
   // Check if profile exists
-  const hasProfile = profileData.tenant_listing_title || profileData.tenant_listing_description;
+  const hasProfile = Boolean(profileData.tenant_listing_title || profileData.tenant_listing_description);
 
   return (
     <div className="h-full flex flex-col">
       <TenantProfileHeader
         hasProfile={hasProfile}
-        isPublished={profileData.tenant_listing_status === 'active'}
+        isPublished={Boolean(profileData.tenant_listing_status === 'active')}
         isPublishing={isPublishing}
         isUnpublishing={isUnpublishing}
         onPublish={handlePublish}

@@ -10,7 +10,6 @@ import { EditPropertyError } from './_components/edit-property-error';
 
 export default function EditPropertyPage() {
   const params = useParams();
-  const router = useRouter();
   const { user: authUser } = useAuth();
   const [property, setProperty] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);

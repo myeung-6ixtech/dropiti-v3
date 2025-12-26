@@ -26,7 +26,7 @@ const loadingSpinnerVariants = cva(
 );
 
 interface LoadingSpinnerProps
-  extends React.ComponentProps<'div'>,
+  extends Omit<React.ComponentProps<'div'>, 'color'>,
     VariantProps<typeof loadingSpinnerVariants> {}
 
 export function LoadingSpinner({ 

@@ -7,7 +7,7 @@ import { propertiesAPI } from '@/lib/api-client';
 import IncomingOffers from '@/components/common/IncomingOffers';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import { IncomingOffersHeader } from './_components/incoming-offers-header';
-import { PropertyErrorState } from '../[id]/_components/property-error-state';
+import { PropertyErrorState } from '../../[id]/_components/property-error-state';
 
 interface Property {
   id: string;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
@@ -96,6 +96,7 @@ export default function PropertyDetailPage() {
             amenities: propertyData.amenities || [],
             display_image: propertyData.display_image || '',
             uploaded_images: propertyData.uploaded_images || [],
+            is_public: propertyData.is_public ?? false,
             status: propertyData.status || 'draft',
             created_at: propertyData.created_at,
             updated_at: propertyData.updated_at,
