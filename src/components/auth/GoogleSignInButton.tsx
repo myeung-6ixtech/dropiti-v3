@@ -27,7 +27,12 @@ export default function GoogleSignInButton({ mode, className = '' }: GoogleSignI
       });
 
       if (result?.error) {
-        showToast('error', 'Failed to sign in with Google');
+        // Check if the error is due to user not existing (Google sign-up disabled)
+        if (result.error === 'Callback') {
+          showToast('error', 'No account found. Please create an account using email/password first, then link your Google account in Settings.');
+        } else {
+          showToast('error', 'Failed to sign in with Google. Please ensure you have an account or create one first.');
+        }
       } else if (result?.ok) {
         showToast('success', `Successfully ${mode === 'signin' ? 'signed in' : 'signed up'} with Google`);
         router.push(callbackUrl);

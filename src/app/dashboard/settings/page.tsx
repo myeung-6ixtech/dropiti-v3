@@ -10,8 +10,10 @@ import {
   FiShield, 
   FiSettings
 } from 'react-icons/fi';
+import { signIn } from 'next-auth/react';
 import { SettingsHeader } from './_components/settings-header';
 import { SettingsTabs } from './_components/settings-tabs';
+import PhoneInput from '@/components/common/PhoneInput';
 
 // Area code options for supported regions
 const AREA_CODES = [
@@ -67,6 +69,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [areaCode, setAreaCode] = useState('+852'); // Default to Hong Kong
+  const [authProvider, setAuthProvider] = useState<string>('firebase'); // Track auth provider
   
   const [settings, setSettings] = useState<UserSettings>({
     firstName: 'John',
@@ -117,6 +120,9 @@ export default function SettingsPage() {
           if (response.success && response.data) {
             const userData = response.data;
             console.log('User data received:', userData);
+            
+            // Store auth provider
+            setAuthProvider(userData.auth_provider || 'firebase');
             
             // Parse existing phone number
             const { areaCode: parsedAreaCode, number: phoneNumber } = parsePhoneNumber(userData.phone_number || '+852 1234 5678');
@@ -427,6 +433,156 @@ export default function SettingsPage() {
                     {t('settings.updatePassword')}
                   </button>
                 </div>
+              </div>
+            </div>
+
+            {/* Google Account Linking Section */}
+            <div className="bg-white rounded-lg p-6 mt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">Connected Accounts</h3>
+                <p className="text-sm text-gray-600">Link your Google account for quick sign-in</p>
+              </div>
+
+              <div className="border-t border-gray-200 pt-4">
+                {authProvider === 'google' ? (
+                  <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center space-x-3">
+                      <svg className="h-6 w-6" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                      </svg>
+                      <div>
+                        <p className="font-medium text-gray-900">Google Account</p>
+                        <p className="text-sm text-gray-600">{authUser?.email}</p>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                      Connected
+                    </span>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <div className="flex items-center space-x-3">
+                        <svg className="h-6 w-6" viewBox="0 0 24 24">
+                          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <div>
+                          <p className="font-medium text-gray-900">Google Account</p>
+                          <p className="text-sm text-gray-600">Sign in faster with Google</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const result = await signIn('google', {
+                              redirect: false,
+                              callbackUrl: '/dashboard/settings',
+                            });
+                            
+                            if (result?.ok) {
+                              showToast('success', 'Google account linked successfully!');
+                              setAuthProvider('google');
+                              setTimeout(() => window.location.reload(), 1000);
+                            } else {
+                              showToast('error', 'Failed to link Google account. Please try again.');
+                            }
+                          } catch (error) {
+                            console.error('Google linking error:', error);
+                            showToast('error', 'An error occurred while linking your Google account.');
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Connect
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Once connected, you&apos;ll be able to sign in using your Google account instead of entering your password.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Phone Verification Section */}
+            <div className="bg-white rounded-lg p-6 mt-6">
+              <div className="mb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">Phone Verification</h3>
+                    <p className="text-sm text-gray-600">
+                      Verify your phone number to unlock premium features and get a verified badge
+                    </p>
+                  </div>
+                  {tempSettings.phone && (
+                    <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full flex items-center">
+                      <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      {tempSettings.phone ? 'Added' : 'Verified'}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t border-gray-200 pt-4">
+                {tempSettings.phone ? (
+                  <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div className="flex items-center space-x-3">
+                      <svg className="h-6 w-6 text-green-600" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                      </svg>
+                      <div>
+                        <p className="font-medium text-gray-900">{areaCode} {tempSettings.phone}</p>
+                        <p className="text-sm text-gray-600">Your phone number is on file</p>
+                      </div>
+                    </div>
+                    <div className="mt-3">
+                      <button
+                        onClick={async () => {
+                          showToast('info', 'Phone verification coming soon! This will enable SMS verification and a verified badge.');
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        Verify this number →
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-sm text-blue-800 mb-3">
+                        <strong>Benefits of phone verification:</strong>
+                      </p>
+                      <ul className="text-sm text-blue-700 space-y-1 ml-4 list-disc">
+                        <li>Get a &quot;Verified&quot; badge on your profile</li>
+                        <li>Build trust with landlords/tenants</li>
+                        <li>Access to premium features</li>
+                        <li>Priority support and faster response times</li>
+                      </ul>
+                    </div>
+                    
+                    <PhoneInput
+                      areaCode={areaCode}
+                      phoneNumber={tempSettings.phone}
+                      onAreaCodeChange={setAreaCode}
+                      onPhoneNumberChange={(value) => handleInputChange('phone', value)}
+                      required={false}
+                      placeholder="1234 5678"
+                      showLabel={false}
+                    />
+                    
+                    <p className="text-xs text-gray-500">
+                      Add your phone number above and save changes. You&apos;ll be able to verify it to get your badge.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

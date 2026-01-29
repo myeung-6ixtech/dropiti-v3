@@ -1,5 +1,15 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth, sendPasswordResetEmail, confirmPasswordReset, verifyPasswordResetCode, applyActionCode } from 'firebase/auth';
+import { 
+  getAuth, 
+  sendPasswordResetEmail, 
+  confirmPasswordReset, 
+  verifyPasswordResetCode, 
+  applyActionCode,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  PhoneAuthProvider,
+  linkWithCredential
+} from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -24,11 +34,28 @@ console.log('Firebase Config:', {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const auth = getAuth(app);
 
+// Initialize reCAPTCHA for phone authentication
+export const setupRecaptcha = (elementId: string): RecaptchaVerifier => {
+  return new RecaptchaVerifier(auth, elementId, {
+    size: 'invisible',
+    callback: () => {
+      console.log('reCAPTCHA verified');
+    },
+    'expired-callback': () => {
+      console.log('reCAPTCHA expired');
+    }
+  });
+};
+
 export { 
   app, 
   auth, 
   sendPasswordResetEmail, 
   confirmPasswordReset, 
   verifyPasswordResetCode,
-  applyActionCode
+  applyActionCode,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  PhoneAuthProvider,
+  linkWithCredential
 };

@@ -8,7 +8,7 @@ import { usersAPI } from '@/lib/api-client';
 import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
-import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import PhoneInput, { validatePhone } from '@/components/common/PhoneInput';
 
 // Validation utilities
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
@@ -63,6 +63,12 @@ export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // Phone number states
+  const [areaCode, setAreaCode] = useState('+852');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [includePhone, setIncludePhone] = useState(false);
+  
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});
   
@@ -135,16 +141,24 @@ export default function SignUpForm() {
     const confirmPasswordValidation = validateConfirmPassword(password, confirmPassword);
 
     // Set all field errors
-    setFieldErrors({
+    const errors: FieldError = {
       name: nameValidation.isValid ? '' : nameValidation.message,
       email: emailValidation.isValid ? '' : emailValidation.message,
       password: passwordValidation.isValid ? '' : passwordValidation.message,
       confirmPassword: confirmPasswordValidation.isValid ? '' : confirmPasswordValidation.message,
-    });
+    };
+
+    // Validate phone if user opted to include it
+    if (includePhone && phoneNumber && !validatePhone(phoneNumber, areaCode)) {
+      errors.phone = 'Please enter a valid phone number for the selected region';
+    }
+
+    setFieldErrors(errors);
 
     // Check if any validation failed
     if (!nameValidation.isValid || !emailValidation.isValid || 
-        !passwordValidation.isValid || !confirmPasswordValidation.isValid) {
+        !passwordValidation.isValid || !confirmPasswordValidation.isValid ||
+        (includePhone && phoneNumber && errors.phone)) {
       showToast('error', 'Please fix the errors below');
       return;
     }
@@ -176,13 +190,17 @@ export default function SignUpForm() {
 
       // Step 4: Create user in Hasura database
       try {
+        const fullPhoneNumber = includePhone && phoneNumber 
+          ? `${areaCode} ${phoneNumber}` 
+          : undefined;
+
         const user = {
           firebase_uid: userCredential.user.uid,
           display_name: name,
           email: email,
+          phone_number: fullPhoneNumber,
           photo_url: '/images/Portrait_Placeholder.png', // Set default profile photo
           auth_provider: 'firebase' as const,
-          phone_number: undefined,
           location: undefined,
           about: undefined,
           education: undefined,
@@ -275,6 +293,38 @@ export default function SignUpForm() {
               <p className="text-red-500 text-sm mt-1 text-left">{fieldErrors.email}</p>
             )}
           </div>
+
+          {/* Phone Number (Optional with Toggle) */}
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="include-phone"
+                checked={includePhone}
+                onChange={(e) => setIncludePhone(e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="include-phone" className="text-sm font-medium text-gray-700">
+                Add phone number (optional)
+              </label>
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                Get Verified Badge
+              </span>
+            </div>
+
+            {includePhone && (
+              <PhoneInput
+                areaCode={areaCode}
+                phoneNumber={phoneNumber}
+                onAreaCodeChange={setAreaCode}
+                onPhoneNumberChange={setPhoneNumber}
+                error={fieldErrors.phone}
+                required={false}
+                placeholder="1234 5678"
+                showLabel={false}
+              />
+            )}
+          </div>
           
           <div className={authFormPatterns.fieldWithIcon.container}>
             <label className={authFormPatterns.fieldWithIcon.label}>
@@ -338,13 +388,6 @@ export default function SignUpForm() {
             </button>
           </div>
         </form>
-
-        {/* Social sign-up */}
-        <div className="auth-divider">
-          <span className="auth-divider-text">or</span>
-        </div>
-
-        <GoogleSignInButton mode="signup" />
 
         <div className={`${authClasses.sectionSpacing} text-center`}>
           <p className={authClasses.textCenter}>

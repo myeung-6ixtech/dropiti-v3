@@ -165,26 +165,10 @@ export const authOptions: NextAuthOptions = {
             return true;
           }
 
-          // 3) No existing email — create a new DB user, using providerAccountId as firebase_uid
-          console.log('Google sign-in: Creating new user for email:', email);
-          const displayName = user.name || (profile as { name?: string })?.name || email.split('@')[0] || 'Google User';
-          const photoUrl = user.image || (profile as { picture?: string })?.picture || '/images/Portrait_Placeholder.png';
-
-          const newUser = {
-            firebase_uid: account.providerAccountId, // use Google subject as the id in DB
-            display_name: displayName,
-            email,
-            photo_url: photoUrl,
-            auth_provider: 'google',
-          };
-
-          await executeMutation(INSERT_USER, { user: newUser }).catch((err) => {
-            console.error('Failed to create Google user in DB:', err);
-          });
-
-          // Set id to what we stored in DB for consistency
-          user.id = account.providerAccountId;
-          return true;
+          // 3) No existing email — BLOCK new user creation via Google OAuth
+          console.log('Google sign-in: User does not exist. Google sign-up is disabled.');
+          // Return false to prevent sign-in/sign-up for non-existing users
+          return false;
         } catch (error) {
           console.error('Google sign-in error:', error);
           return false;

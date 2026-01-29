@@ -22,6 +22,7 @@ export const AUTH_ERRORS = {
   PASSWORD_TOO_WEAK: "Password is too weak",
   SIGNUP_ERROR: "An error occurred during signup",
   ACCOUNT_CREATED_SUCCESS: "Account created successfully! Please check your email to verify your account before signing in.",
+  GOOGLE_SIGNUP_DISABLED: "Google sign-up is disabled. Please create an account using email/password first, then link your Google account in Settings.",
   
   // Password Reset Errors
   INVALID_ACTION_LINK: "Invalid action link. Please check your email for the correct link.",
