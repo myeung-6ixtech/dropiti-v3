@@ -11,7 +11,7 @@ export interface PropertyFilters {
   furnished?: string;
   petsAllowed?: boolean;
   parking?: boolean;
-  landlordFirebaseUid?: string; // Add landlord filter
+  landlordUserId?: string; // Add landlord filter
 }
 
 // Hasura filter interface for GraphQL queries
@@ -22,7 +22,7 @@ interface HasuraFilters {
   furnished?: { _eq: string };
   pets_allowed?: { _eq: boolean };
   status?: { _eq: string };
-  landlord_firebase_uid?: { _eq: string };
+  landlord_user_id?: { _eq: string };
 }
 
 // Re-export types for backward compatibility
@@ -60,7 +60,7 @@ export class PropertyService {
             uploaded_images
             availability_date
             status
-            landlord_firebase_uid
+            landlord_user_id
             created_at
           }
           real_estate_property_listing_aggregate(where: $filters) {
@@ -143,7 +143,7 @@ export class PropertyService {
         real_estate_property_listing_by_pk(id: $id) {
           id
           property_uuid
-          landlord_firebase_uid
+          landlord_user_id
           title
           description
           created_at
@@ -177,7 +177,7 @@ export class PropertyService {
         insert_real_estate_property_listing_one(object: $property) {
           id
           property_uuid
-          landlord_firebase_uid
+          landlord_user_id
           title
           description
           created_at
@@ -214,7 +214,7 @@ export class PropertyService {
         ) {
           id
           property_uuid
-          landlord_firebase_uid
+          landlord_user_id
           title
           description
           created_at
@@ -283,8 +283,8 @@ export class PropertyService {
       hasuraFilters.pets_allowed = { _eq: filters.petsAllowed };
     }
 
-    if (filters.landlordFirebaseUid) {
-      hasuraFilters.landlord_firebase_uid = { _eq: filters.landlordFirebaseUid };
+    if (filters.landlordUserId) {
+      hasuraFilters.landlord_user_id = { _eq: filters.landlordUserId };
     }
 
     console.log('PropertyService: Built filters:', JSON.stringify(hasuraFilters, null, 2));

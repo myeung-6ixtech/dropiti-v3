@@ -6,7 +6,7 @@ const CREATE_USER_MUTATION = `
   mutation CreateUser($user: real_estate_user_insert_input!) {
     insert_real_estate_user_one(object: $user) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       email
       auth_provider
@@ -19,7 +19,7 @@ const CHECK_USER_BY_EMAIL = `
   query CheckUserByEmail($email: String!) {
     real_estate_user(where: { email: { _eq: $email } }, limit: 1) {
       uuid
-      firebase_uid
+      nhost_user_id
       email
       auth_provider
       photo_url
@@ -27,103 +27,68 @@ const CHECK_USER_BY_EMAIL = `
   }
 `;
 
+const CHECK_USER_EXISTS = `
+  query CheckUserExists($nhost_user_id: uuid!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhost_user_id } }, limit: 1) {
+      uuid
+    }
+  }
+`;
+
 export async function POST(request: NextRequest) {
   try {
-    // Check environment variables
-    console.log('Environment check:');
-    console.log('HASURA_ENDPOINT:', process.env.HASURA_ENDPOINT ? '✅ Set' : '❌ Missing');
-    console.log('HASURA_ADMIN_SECRET:', process.env.HASURA_ADMIN_SECRET ? '✅ Set' : '❌ Missing');
-    
-    if (!process.env.HASURA_ENDPOINT || !process.env.HASURA_ADMIN_SECRET) {
+    if (!process.env.NEXT_PUBLIC_HASURA_GRAPHQL_API_URL || !process.env.HASURA_GRAPHQL_ADMIN_SECRET) {
       return NextResponse.json(
         { error: 'Missing required environment variables' },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     const userData: CreateUserInput = await request.json();
 
-    // Validate required fields
-    const requiredFields = ['firebase_uid', 'display_name', 'email'] as const;
+    const requiredFields = ['nhost_user_id', 'display_name', 'email'] as const;
     for (const field of requiredFields) {
       if (!userData[field]) {
-        return NextResponse.json(
-          { error: `${field} is required` },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: `${field} is required` }, { status: 400 });
       }
     }
 
-    // Check if user already exists by firebase_uid
-    const CHECK_USER_EXISTS = `
-      query CheckUserExists($firebase_uid: String!) {
-        real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
-          uuid
-        }
-      }
-    `;
-
-    const existingById = await executeQuery(CHECK_USER_EXISTS, { firebase_uid: userData.firebase_uid });
-    
-    // Type assertion for the response data
-    const typedExistingById = existingById as {
-      real_estate_user?: Array<{ uuid: string }>;
-    };
-    
-    if (typedExistingById?.real_estate_user && typedExistingById.real_estate_user.length > 0) {
+    // Check if user already exists by nhost_user_id
+    const existingById = await executeQuery(CHECK_USER_EXISTS, { nhost_user_id: userData.nhost_user_id });
+    const typedExistingById = existingById as { real_estate_user?: Array<{ uuid: string }> };
+    if (typedExistingById?.real_estate_user?.length) {
       return NextResponse.json(
-        { error: 'User already exists with this Firebase UID' },
-        { status: 409 }
+        { error: 'User already exists with this Nhost user ID' },
+        { status: 409 },
       );
     }
 
     // Check if user already exists by email
     const existingByEmail = await executeQuery(CHECK_USER_BY_EMAIL, { email: userData.email.toLowerCase() }).catch(() => null);
     const typedExistingByEmail = existingByEmail as {
-      real_estate_user?: Array<{ uuid: string; firebase_uid: string; email: string; auth_provider: string; photo_url?: string }>;
+      real_estate_user?: Array<{ uuid: string; nhost_user_id: string; email: string; auth_provider: string; photo_url?: string }>;
     };
-    
-    if (typedExistingByEmail?.real_estate_user && typedExistingByEmail.real_estate_user.length > 0) {
-      const existingUser = typedExistingByEmail.real_estate_user[0];
-      console.log('User already exists by email, returning existing user:', existingUser);
+    if (typedExistingByEmail?.real_estate_user?.length) {
       return NextResponse.json(
-        { 
-          success: true, 
-          data: existingUser, 
-          message: 'User already exists by email. Not creating duplicate.' 
-        },
-        { status: 200 }
+        { success: true, data: typedExistingByEmail.real_estate_user[0], message: 'User already exists by email.' },
+        { status: 200 },
       );
     }
 
-    // Prepare the user object for Hasura
     const user = {
-      firebase_uid: userData.firebase_uid,
+      nhost_user_id: userData.nhost_user_id,
       display_name: userData.display_name,
-      email: userData.email,
-      photo_url: userData.photo_url || '/images/Portrait_Placeholder.png', // Set default profile photo
-      auth_provider: userData.auth_provider || 'firebase',
-      // Only include fields that are guaranteed to exist in the database
-      // Remove fields that might not exist or cause parsing errors
+      email: userData.email.toLowerCase(),
+      photo_url: userData.photo_url || '/images/Portrait_Placeholder.png',
+      auth_provider: userData.auth_provider || 'email',
     };
 
-    console.log('Creating user with data:', JSON.stringify(user, null, 2));
+    const data = await executeMutation(CREATE_USER_MUTATION, { user });
 
-    let data;
-    try {
-      console.log('Executing GraphQL mutation...');
-      data = await executeMutation(CREATE_USER_MUTATION, { user });
-      console.log('GraphQL mutation successful, response:', JSON.stringify(data, null, 2));
-    } catch (mutationError) {
-      console.error('GraphQL mutation failed:', mutationError);
-      throw mutationError;
-    }
-
-    // Type assertion for the response data
     const typedData = data as {
       insert_real_estate_user_one: {
         uuid: string;
-        firebase_uid: string;
+        nhost_user_id: string;
         display_name: string;
         email: string;
         auth_provider: string;
@@ -142,25 +107,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Create user error:', error);
-    
-    // Log more detailed error information
-    if (error instanceof Error) {
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
-    }
-    
-    // Check if it's a GraphQL error
-    if (error && typeof error === 'object' && 'graphqlErrors' in error) {
-      console.error('GraphQL errors:', (error as Record<string, unknown>).graphqlErrors);
-    }
-    
     return NextResponse.json(
-      { 
-        error: 'Failed to create user',
-        details: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date().toISOString()
-      },
-      { status: 500 }
+      { error: 'Failed to create user', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 },
     );
   }
 }

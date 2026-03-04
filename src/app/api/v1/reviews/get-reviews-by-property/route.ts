@@ -5,8 +5,8 @@ import { executeQuery } from '@/app/api/graphql/serverClient';
 interface GraphQLReview {
   id: string;
   review_uuid: string;
-  reviewer_firebase_uid: string;
-  reviewee_firebase_uid: string;
+  reviewer_user_id: string;
+  reviewee_user_id: string;
   review_type: string;
   rating: number;
   title?: string | null;
@@ -22,7 +22,7 @@ interface GraphQLReview {
 
 interface GraphQLUser {
   uuid: string;
-  firebase_uid: string;
+  nhost_user_id: string;
   display_name: string;
   email: string;
   photo_url?: string | null;
@@ -51,8 +51,8 @@ const GET_REVIEWS_BY_PROPERTY_QUERY = `
     ) {
       id
       review_uuid
-      reviewer_firebase_uid
-      reviewee_firebase_uid
+      reviewer_user_id
+      reviewee_user_id
       review_type
       rating
       title
@@ -82,8 +82,8 @@ const GET_REVIEWS_BY_PROPERTY_NO_TYPE_QUERY = `
     ) {
       id
       review_uuid
-      reviewer_firebase_uid
-      reviewee_firebase_uid
+      reviewer_user_id
+      reviewee_user_id
       review_type
       rating
       title
@@ -101,10 +101,10 @@ const GET_REVIEWS_BY_PROPERTY_NO_TYPE_QUERY = `
 
 // GraphQL query to get user details by Firebase UID
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+  query GetUserByFirebaseUid($nhostUserId: String!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       email
       photo_url
@@ -168,15 +168,15 @@ export async function GET(request: NextRequest) {
 
     // Collect unique user IDs to fetch additional data
     const uniqueUserIds = [...new Set([
-      ...reviewsData.real_estate_review.map(review => review.reviewer_firebase_uid),
-      ...reviewsData.real_estate_review.map(review => review.reviewee_firebase_uid)
+      ...reviewsData.real_estate_review.map(review => review.reviewer_user_id),
+      ...reviewsData.real_estate_review.map(review => review.reviewee_user_id)
     ])];
 
     // Fetch user details for all unique users
     const userDetails: Record<string, GraphQLUser> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { firebaseUid: userId }) as GraphQLUserResponse;
+        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
         if (userResponse?.real_estate_user?.[0]) {
           userDetails[userId] = userResponse.real_estate_user[0];
         }
@@ -187,14 +187,14 @@ export async function GET(request: NextRequest) {
 
     // Transform and combine data
     const transformedReviews = reviewsData.real_estate_review.map((review: GraphQLReview) => {
-      const reviewer = userDetails[review.reviewer_firebase_uid];
-      const reviewee = userDetails[review.reviewee_firebase_uid];
+      const reviewer = userDetails[review.reviewer_user_id];
+      const reviewee = userDetails[review.reviewee_user_id];
 
       return {
         id: review.id,
         reviewUuid: review.review_uuid,
-        reviewerFirebaseUid: review.reviewer_firebase_uid,
-        revieweeFirebaseUid: review.reviewee_firebase_uid,
+        reviewerFirebaseUid: review.reviewer_user_id,
+        revieweeFirebaseUid: review.reviewee_user_id,
         reviewType: review.review_type,
         rating: review.rating,
         title: review.title || undefined,

@@ -11,7 +11,7 @@ const GET_TENANT_PROFILES_QUERY = `
     ) {
       id
       tenant_uuid
-      user_firebase_uid
+      user_id
       tenant_listing_title
       tenant_listing_description
       budget_min
@@ -46,10 +46,10 @@ const GET_TENANT_PROFILES_QUERY = `
 `;
 
 const GET_TENANT_PROFILE_WITH_USER_QUERY = `
-  query GetTenantProfileWithUser($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+  query GetTenantProfileWithUser($nhostUserId: String!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       name
       photo_url
@@ -89,17 +89,17 @@ export async function GET(request: NextRequest) {
         try {
           // Log the uid we will lookup by
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const uidForLookup = (profile as any)?.user_firebase_uid;
+          const uidForLookup = (profile as any)?.user_nhost_user_id;
           console.log('[TenantMarketplace API] Looking up user for profile', { uidForLookup });
           const userData = await executeQuery(GET_TENANT_PROFILE_WITH_USER_QUERY, {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            firebaseUid: (profile as any)?.user_firebase_uid,
+            nhostUserId: (profile as any)?.user_nhost_user_id,
           }) as {
             real_estate_user?: Array<Record<string, unknown>>;
           };
           
           const user = userData?.real_estate_user?.[0];
-          console.log('[TenantMarketplace API] User lookup result:', user ? { firebase_uid: (user as Record<string, unknown>)?.firebase_uid, name: (user as Record<string, unknown>)?.display_name || (user as Record<string, unknown>)?.name } : null);
+          console.log('[TenantMarketplace API] User lookup result:', user ? { nhost_user_id: (user as Record<string, unknown>)?.nhost_user_id, name: (user as Record<string, unknown>)?.display_name || (user as Record<string, unknown>)?.name } : null);
           
           return {
             ...profile,
@@ -120,9 +120,9 @@ export async function GET(request: NextRequest) {
       const first = profilesWithUsers[0] as Record<string, unknown>;
       console.log('[TenantMarketplace API] First profile snapshot:', {
         tenant_uuid: first?.tenant_uuid,
-        user_firebase_uid: first?.user_firebase_uid,
+        user_id: first?.user_nhost_user_id,
         user: (first?.user as Record<string, unknown>) ? {
-          firebase_uid: (first?.user as Record<string, unknown>)?.firebase_uid,
+          nhost_user_id: (first?.user as Record<string, unknown>)?.nhost_user_id,
           display_name: (first?.user as Record<string, unknown>)?.display_name,
           name: (first?.user as Record<string, unknown>)?.name,
           avatar: (first?.user as Record<string, unknown>)?.avatar,

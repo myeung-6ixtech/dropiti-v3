@@ -12,7 +12,7 @@ export type TenantListingStatus = 'draft' | 'active' | 'inactive' | 'paused';
 export interface TenantProfileData {
   // Database fields
   tenant_uuid?: string;
-  user_firebase_uid?: string;
+  user_id?: string;
   created_at?: string;
   updated_at?: string;
   

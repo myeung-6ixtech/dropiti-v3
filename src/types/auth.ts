@@ -2,8 +2,6 @@
 // AUTHENTICATION TYPES
 // ========================================
 
-import { User as NextAuthUser } from 'next-auth';
-
 // ========================================
 // AUTH CONTEXT TYPES
 // ========================================
@@ -13,6 +11,7 @@ export interface AuthContextType {
   isLoading: boolean;
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ error?: string }>;
   logout: () => void;
 }
 
@@ -22,34 +21,6 @@ export interface AuthUser {
   name?: string;
   avatar?: string;
   role?: string;
-}
-
-// ========================================
-// NEXT-AUTH EXTENSIONS
-// ========================================
-
-export interface ExtendedUser extends Omit<NextAuthUser, 'name'> {
-  id: string;
-  email: string;
-  name: string;
-  image?: string;
-  role: string;
-  first_name?: string;
-  last_name?: string;
-}
-
-export interface ExtendedSession {
-  user: ExtendedUser;
-  expires: string;
-}
-
-export interface ExtendedJWT {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  first_name?: string;
-  last_name?: string;
 }
 
 // ========================================

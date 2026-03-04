@@ -3,7 +3,7 @@ import apiClient from './api-client';
 export interface ChatRoom {
   id: string;
   room_id: string;
-  user_firebase_uid: string;
+  user_id: string;
   role: string;
   joined_at: string;
   last_read_at: string;
@@ -20,15 +20,15 @@ export interface ChatRoom {
   last_message: {
     room_id: string;
     content: string;
-    sender_firebase_uid: string;
+    sender_user_id: string;
     created_at: string;
   } | null;
   other_participant: {
     room_id: string;
-    user_firebase_uid: string;
+    user_id: string;
     role: string;
     user_details: {
-      firebase_uid: string;
+      nhost_user_id: string;
       display_name: string | null;
       photo_url: string | null;
       email: string | null;
@@ -39,7 +39,7 @@ export interface ChatRoom {
 export interface ChatMessage {
   id: string;
   content: string;
-  sender_firebase_uid: string;
+  sender_user_id: string;
   status: 'sent' | 'delivered' | 'read';
   created_at: string;
   message_type: string;
@@ -55,16 +55,16 @@ export interface ChatContact {
   unreadCount: number;
   isOnline: boolean;
   role: 'landlord' | 'tenant' | 'support';
-  firebaseUid: string;
+  nhostUserId: string;
 }
 
 // Chat API functions
 export const chatAPI = {
   // Get user's chat rooms
-  getUserChatRooms: async (userFirebaseUid: string): Promise<ChatRoom[]> => {
+  getUserChatRooms: async (userId: string): Promise<ChatRoom[]> => {
     try {
       const response = await apiClient.get('/chat/get-chat-rooms', {
-        params: { userFirebaseUid }
+        params: { userId }
       });
       
       if (response.data.success) {
@@ -99,7 +99,7 @@ export const chatAPI = {
   // Send a message
   sendMessage: async (
     roomId: string, 
-    senderFirebaseUid: string, 
+    senderUserId: string, 
     content: string,
     messageType: 'text' | 'property_share' = 'text',
     metadata: Record<string, unknown> | null = null
@@ -107,7 +107,7 @@ export const chatAPI = {
     try {
       const response = await apiClient.post('/chat/send-message', {
         roomId,
-        senderFirebaseUid,
+        senderUserId,
         content,
         messageType,
         metadata
@@ -180,7 +180,7 @@ export const convertChatRoomToContact = (chatRoom: ChatRoom): ChatContact => {
     unreadCount: 0, // We'll need to calculate this separately for now
     isOnline: false, // This would need to be implemented with presence tracking
     role: otherParticipant?.role as 'landlord' | 'tenant' | 'support' || chatRoom.role as 'landlord' | 'tenant' | 'support',
-    firebaseUid: otherParticipant?.user_firebase_uid || chatRoom.user_firebase_uid
+    nhostUserId: otherParticipant?.user_id || chatRoom.user_id
   };
 };
 
@@ -207,10 +207,10 @@ export const convertMessageToUIMessage = (
   return {
     id: message.id,
     content: message.content,
-    sender: message.sender_firebase_uid === currentUserId ? 'user' : 'other',
+    sender: message.sender_user_id === currentUserId ? 'user' : 'other',
     timestamp: new Date(message.created_at),
-    senderName: message.sender_firebase_uid === currentUserId ? 'You' : otherUserName,
-    avatar: message.sender_firebase_uid === currentUserId ? currentUserAvatar : otherUserAvatar,
+    senderName: message.sender_user_id === currentUserId ? 'You' : otherUserName,
+    avatar: message.sender_user_id === currentUserId ? currentUserAvatar : otherUserAvatar,
     status: message.status,
     messageType: message.message_type as 'text' | 'property_share',
     metadata: message.metadata || undefined,

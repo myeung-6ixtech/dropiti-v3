@@ -4,28 +4,28 @@ import { NotificationService } from '@/lib/notification-service';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userFirebaseUid = searchParams.get('userFirebaseUid');
+    const userId = searchParams.get('userId');
     const isRead = searchParams.get('isRead');
     const category = searchParams.get('category');
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = parseInt(searchParams.get('offset') || '0');
 
     console.log('Notifications API: Received request with params:', {
-      userFirebaseUid,
+      userId,
       isRead,
       category,
       limit,
       offset
     });
 
-    if (!userFirebaseUid) {
+    if (!userId) {
       return NextResponse.json(
         { error: 'User Firebase UID is required' },
         { status: 400 }
       );
     }
 
-    const notifications = await NotificationService.getUserNotifications(userFirebaseUid, {
+    const notifications = await NotificationService.getUserNotifications(userId, {
       isRead: isRead ? isRead === 'true' : undefined,
       category: category || undefined,
       limit,

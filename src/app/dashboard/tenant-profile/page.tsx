@@ -19,11 +19,11 @@ export default function TenantProfilePage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
 
-  const firebaseUid = authUser?.id || '';
+  const nhostUserId = authUser?.id || '';
 
   // Load existing profile data
   useEffect(() => {
-    if (!firebaseUid) {
+    if (!nhostUserId) {
       setLoading(false);
       return;
     }
@@ -31,7 +31,7 @@ export default function TenantProfilePage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await tenantsAPI.getTenantProfile(firebaseUid);
+        const res = await tenantsAPI.getTenantProfile(nhostUserId);
         const profile = res?.data || null;
         if (profile) {
           // Map API payload directly to state
@@ -73,15 +73,15 @@ export default function TenantProfilePage() {
         setLoading(false);
       }
     })();
-  }, [firebaseUid, showToast]);
+  }, [nhostUserId, showToast]);
 
   const handlePublish = async () => {
-    if (!firebaseUid) return;
+    if (!nhostUserId) return;
     try {
       setIsPublishing(true);
       const { tenant_privacy_settings, ...rest } = profileData;
       await tenantsAPI.upsertTenantProfile({ 
-        user_firebase_uid: firebaseUid, 
+        user_id: nhostUserId, 
         ...rest,
         privacy_settings: tenant_privacy_settings || {},
         tenant_listing_status: 'active' as TenantListingStatus
@@ -100,12 +100,12 @@ export default function TenantProfilePage() {
   };
 
   const handleUnpublish = async () => {
-    if (!firebaseUid) return;
+    if (!nhostUserId) return;
     try {
       setIsUnpublishing(true);
       const { tenant_privacy_settings, ...rest } = profileData;
       await tenantsAPI.upsertTenantProfile({ 
-        user_firebase_uid: firebaseUid, 
+        user_id: nhostUserId, 
         ...rest,
         privacy_settings: tenant_privacy_settings || {},
         tenant_listing_status: 'inactive' as TenantListingStatus

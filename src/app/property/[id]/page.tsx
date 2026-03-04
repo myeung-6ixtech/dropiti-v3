@@ -41,7 +41,7 @@ interface PropertyData {
 interface LandlordData {
   id: string;
   uuid: string; // Add uuid for navigation
-  firebase_uid: string;
+  nhost_user_id: string;
   name: string;
   email: string;
   avatar?: string;
@@ -183,14 +183,14 @@ export default function PropertyDetailPage() {
   const fetchLandlordDetails = async (ownerId: string) => {
     try {
       console.log('Fetching landlord details for owner_id:', ownerId);
-      const landlordResponse = await usersAPI.getUserByFirebaseUid(ownerId);
+      const landlordResponse = await usersAPI.getUserByNhostUserId(ownerId);
       
       if (landlordResponse.success && landlordResponse.data) {
         console.log('Landlord details fetched successfully:', landlordResponse.data);
         return {
           id: landlordResponse.data.id,
           uuid: landlordResponse.data.uuid, // Add uuid for navigation
-          firebase_uid: landlordResponse.data.firebase_uid,
+          nhost_user_id: landlordResponse.data.nhost_user_id,
           name: landlordResponse.data.display_name || 'Unknown Landlord',
           email: landlordResponse.data.email || '',
           avatar: landlordResponse.data.photo_url || '',
@@ -228,7 +228,7 @@ export default function PropertyDetailPage() {
             console.log('Property object keys:', Object.keys(response.data.property));
             console.log('Property object:', response.data.property);
             
-            // Check for landlord_firebase_uid specifically
+            // Check for landlord_user_id specifically
             console.log('=== LANDLORD FIREBASE UID CHECK ===');
             console.log('Property owner_id:', response.data.property.owner_id);
             console.log('Property has owner_id:', !!response.data.property.owner_id);
@@ -256,7 +256,7 @@ export default function PropertyDetailPage() {
             
             if (combinedData.landlord) {
               console.log('Landlord object keys:', Object.keys(combinedData.landlord));
-              console.log('Landlord firebase_uid:', combinedData.landlord.firebase_uid);
+              console.log('Landlord nhost_user_id:', combinedData.landlord.nhost_user_id);
             }
             
             console.log('=== END DEBUG ===');
@@ -308,7 +308,7 @@ export default function PropertyDetailPage() {
       }
 
       // Check if we have property and landlord data
-      if (!propertyData?.property?.property_uuid || !propertyData?.landlord?.firebase_uid) {
+      if (!propertyData?.property?.property_uuid || !propertyData?.landlord?.nhost_user_id) {
         alert('Unable to create offer: Missing property or landlord information');
         return;
       }
@@ -317,7 +317,7 @@ export default function PropertyDetailPage() {
       const response = await offersAPI.createOffer({
         propertyId: propertyData.property.property_uuid,
         initiatorFirebaseUid: authUser.id,
-        recipientFirebaseUid: propertyData.landlord?.firebase_uid || '',
+        recipientFirebaseUid: propertyData.landlord?.nhost_user_id || '',
         proposingRentPrice: offerData.rentalPrice,
         numLeasingMonths: offerData.leaseDuration,
         paymentFrequency: offerData.paymentFrequency,
@@ -503,7 +503,7 @@ export default function PropertyDetailPage() {
         onClose={() => setIsCreateOfferModalOpen(false)}
         propertyId={property.property_uuid}
         currentPrice={property.price}
-        recipientFirebaseUid={landlord?.firebase_uid}
+        recipientFirebaseUid={landlord?.nhost_user_id}
         onOfferSubmit={handleOfferSubmit}
       />
 

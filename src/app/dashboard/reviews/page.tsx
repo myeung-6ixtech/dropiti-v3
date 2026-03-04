@@ -38,7 +38,7 @@ export default function ReviewsPage() {
       }
 
       // Fetch all reviews for the user
-      const reviewsResponse = await fetch(`/api/v1/reviews/get-reviews-by-user?userFirebaseUid=${authUser.id}`);
+      const reviewsResponse = await fetch(`/api/v1/reviews/get-reviews-by-user?userId=${authUser.id}`);
       if (reviewsResponse.ok) {
         const reviewsData = await reviewsResponse.json();
         const allReviews = reviewsData.data || [];

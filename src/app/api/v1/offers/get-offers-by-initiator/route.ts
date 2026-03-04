@@ -6,8 +6,8 @@ interface GraphQLOffer {
   id: string;
   offer_key: string;
   property_uuid: string;
-  initiator_firebase_uid: string;
-  recipient_firebase_uid: string;
+  initiator_user_id: string;
+  recipient_user_id: string;
   proposing_rent_price?: number;
   proposing_rent_price_currency?: string;
   num_leasing_months?: number;
@@ -37,7 +37,7 @@ interface GraphQLOffer {
 
 interface GraphQLUser {
   uuid: string;
-  firebase_uid: string;
+  nhost_user_id: string;
   display_name: string;
   email: string;
   phone_number: string;
@@ -86,13 +86,13 @@ interface GraphQLPropertyResponse {
 // GraphQL query to get offers by initiator (user who created the offers)
 const GET_OFFERS_BY_INITIATOR_QUERY = `
   query GetOffersByInitiator($initiatorFirebaseUid: String!) {
-    real_estate_offer(where: { initiator_firebase_uid: { _eq: $initiatorFirebaseUid } }, order_by: { created_at: desc }) {
+    real_estate_offer(where: { initiator_user_id: { _eq: $initiatorFirebaseUid } }, order_by: { created_at: desc }) {
       id
       offer_key
       offer_uuid
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       proposing_rent_price
       proposing_rent_price_currency
       num_leasing_months
@@ -124,10 +124,10 @@ const GET_OFFERS_BY_INITIATOR_QUERY = `
 
 // GraphQL query to get user details by Firebase UID
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }, limit: 1) {
+  query GetUserByFirebaseUid($nhostUserId: String!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }, limit: 1) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       email
       phone_number
@@ -185,14 +185,14 @@ export async function GET(request: NextRequest) {
     console.log('Offers fetched:', offersData.real_estate_offer.length);
 
     // Collect unique user IDs and property UUIDs to fetch additional data
-    const uniqueUserIds = [...new Set(offersData.real_estate_offer.map((offer: GraphQLOffer) => offer.recipient_firebase_uid))];
+    const uniqueUserIds = [...new Set(offersData.real_estate_offer.map((offer: GraphQLOffer) => offer.recipient_user_id))];
     const uniquePropertyUuids = [...new Set(offersData.real_estate_offer.map((offer: GraphQLOffer) => offer.property_uuid))];
 
     // Fetch user details for all unique recipients (landlords)
     const userDetails: Record<string, GraphQLUser> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { firebaseUid: userId }) as GraphQLUserResponse;
+        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
         if (userResponse?.real_estate_user?.[0]) {
           userDetails[userId] = userResponse.real_estate_user[0];
         }
@@ -216,15 +216,15 @@ export async function GET(request: NextRequest) {
 
     // Transform and combine data
     const transformedOffers = offersData.real_estate_offer.map((offer: GraphQLOffer) => {
-      const recipient = userDetails[offer.recipient_firebase_uid];
+      const recipient = userDetails[offer.recipient_user_id];
       const property = propertyDetails[offer.property_uuid];
 
       return {
         id: offer.id,
         offerKey: offer.offer_key,
         propertyUuid: offer.property_uuid,
-        initiatorFirebaseUid: offer.initiator_firebase_uid,
-        recipientFirebaseUid: offer.recipient_firebase_uid,
+        initiatorFirebaseUid: offer.initiator_user_id,
+        recipientFirebaseUid: offer.recipient_user_id,
         proposingRentPrice: offer.proposing_rent_price || 0,
         proposingRentPriceCurrency: offer.proposing_rent_price_currency || 'HKD',
         numLeasingMonths: offer.num_leasing_months || 12,

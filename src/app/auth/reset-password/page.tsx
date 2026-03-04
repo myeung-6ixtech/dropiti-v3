@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import Link from 'next/link';
-import { auth, sendPasswordResetEmail } from '@/lib/firebase';
+import { nhost } from '@/lib/nhost';
 import { authClasses, authFormPatterns } from '@/styles/auth';
 
 export default function ResetPasswordPage() {
@@ -19,32 +19,20 @@ export default function ResetPasswordPage() {
     setIsLoading(true);
 
     try {
-      // Configure the action URL to redirect to your universal auth action page
-      const actionCodeSettings = {
-        url: `${window.location.origin}/auth/`,
-        handleCodeInApp: true,
-      };
-      
-      await sendPasswordResetEmail(auth, email, actionCodeSettings);
-      setSuccess(true);
+      const redirectTo = `${window.location.origin}/auth/change-password`;
+      const { error: nhostError } = await nhost.auth.resetPassword({
+        email,
+        options: { redirectTo },
+      });
+
+      if (nhostError) {
+        setError('Failed to send reset email. Please try again.');
+      } else {
+        setSuccess(true);
+      }
     } catch (error: unknown) {
       console.error('Password reset error:', error);
-      
-      // Handle specific Firebase error codes
-      const firebaseError = error as { code?: string };
-      switch (firebaseError.code) {
-        case 'auth/user-not-found':
-          setError('No account found with this email address.');
-          break;
-        case 'auth/invalid-email':
-          setError('Please enter a valid email address.');
-          break;
-        case 'auth/too-many-requests':
-          setError('Too many reset attempts. Please try again later.');
-          break;
-        default:
-          setError('Failed to send reset email. Please try again.');
-      }
+      setError('Failed to send reset email. Please try again.');
     } finally {
       setIsLoading(false);
     }

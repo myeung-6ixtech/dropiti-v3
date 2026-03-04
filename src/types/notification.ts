@@ -17,8 +17,8 @@ export interface NotificationType {
 export interface Notification {
   id: string;
   typeId: string;
-  recipientFirebaseUid: string;
-  senderFirebaseUid?: string;
+  recipientUserId: string;
+  senderUserId?: string;
   title: string;
   message: string;
   data: Record<string, unknown>;
@@ -40,7 +40,7 @@ export interface Notification {
 
 export interface NotificationPreference {
   id: string;
-  userFirebaseUid: string;
+  userId: string;
   typeId: string;
   isEnabled: boolean;
   deliveryMethod: 'in_app' | 'email' | 'push' | 'all';
@@ -51,8 +51,8 @@ export interface NotificationPreference {
 
 export interface CreateNotificationInput {
   typeKey: string;
-  recipientFirebaseUid: string;
-  senderFirebaseUid?: string;
+  recipientUserId: string;
+  senderUserId?: string;
   data: Record<string, unknown>;
   priority?: 'low' | 'normal' | 'high' | 'urgent';
   expiresAt?: string;

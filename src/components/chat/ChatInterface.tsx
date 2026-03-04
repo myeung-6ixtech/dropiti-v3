@@ -32,7 +32,7 @@ interface ChatContact {
   unreadCount: number;
   isOnline: boolean;
   role: 'landlord' | 'tenant' | 'support';
-  firebaseUid: string;
+  nhostUserId: string;
 }
 
 interface ChatInterfaceProps {
@@ -102,7 +102,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
       unreadCount: contact.unreadCount,
       isOnline: contact.isOnline,
       role: contact.role,
-      firebaseUid: contact.firebaseUid
+      nhostUserId: contact.nhostUserId
     }));
   }, [contacts]);
 
@@ -131,7 +131,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
           unreadCount: 0,
           isOnline: false,
           role: 'landlord',
-          firebaseUid: selectedRoomId
+          nhostUserId: selectedRoomId
         });
       }
     }

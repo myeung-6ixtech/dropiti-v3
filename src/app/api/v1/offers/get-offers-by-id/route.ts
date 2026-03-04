@@ -7,8 +7,8 @@ interface GraphQLOffer {
   offer_key: string;
   offer_uuid?: string;
   property_uuid: string;
-  initiator_firebase_uid: string;
-  recipient_firebase_uid: string;
+  initiator_user_id: string;
+  recipient_user_id: string;
   proposing_rent_price: number;
   proposing_rent_price_currency: string;
   num_leasing_months: number;
@@ -90,7 +90,7 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
   query GetOffersByRecipient($recipientFirebaseUid: String!, $propertyUuid: String) {
     real_estate_offer(
       where: {
-        recipient_firebase_uid: {_eq: $recipientFirebaseUid}
+        recipient_user_id: {_eq: $recipientFirebaseUid}
         property_uuid: {_eq: $propertyUuid}
       }, 
       order_by: {created_at: desc}
@@ -99,8 +99,8 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
       offer_key
       offer_uuid
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       proposing_rent_price
       proposing_rent_price_currency
       num_leasing_months
@@ -137,7 +137,7 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
   query GetOffersByRecipient($recipientFirebaseUid: String!) {
     real_estate_offer(
       where: {
-        recipient_firebase_uid: {_eq: $recipientFirebaseUid}
+        recipient_user_id: {_eq: $recipientFirebaseUid}
       }, 
       order_by: {created_at: desc}
     ) {
@@ -145,8 +145,8 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
       offer_key
       offer_uuid
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       proposing_rent_price
       proposing_rent_price_currency
       num_leasing_months
@@ -180,8 +180,8 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
 `;
 
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }, limit: 1) {
+  query GetUserByFirebaseUid($nhostUserId: String!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }, limit: 1) {
       uuid
       display_name
       email
@@ -253,7 +253,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Collect unique user IDs and property UUIDs to fetch additional data
-    const uniqueUserIds = [...new Set(offersData.real_estate_offer.map(offer => offer.initiator_firebase_uid))];
+    const uniqueUserIds = [...new Set(offersData.real_estate_offer.map(offer => offer.initiator_user_id))];
     const uniquePropertyUuids = [...new Set(offersData.real_estate_offer.map(offer => offer.property_uuid))];
 
     console.log('Get Offers API: Unique user IDs:', uniqueUserIds);
@@ -263,7 +263,7 @@ export async function GET(request: NextRequest) {
     const userDetails: Record<string, GraphQLUser> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userData = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { firebaseUid: userId }) as GraphQLUserResponse;
+        const userData = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
         if (userData?.real_estate_user) { // Changed from real_estate_user_by_pk to real_estate_user
           userDetails[userId] = userData.real_estate_user[0]; // Access the first user if multiple exist
         }
@@ -296,15 +296,15 @@ export async function GET(request: NextRequest) {
 
     // Transform the data to match frontend expectations
     const transformedOffers = offersData.real_estate_offer.map((offer: GraphQLOffer) => {
-      const initiator = userDetails[offer.initiator_firebase_uid];
+      const initiator = userDetails[offer.initiator_user_id];
       const property = propertyDetails[offer.property_uuid];
 
       return {
         id: offer.id,
         offerKey: offer.offer_key,
         propertyUuid: offer.property_uuid,
-        initiatorFirebaseUid: offer.initiator_firebase_uid,
-        recipientFirebaseUid: offer.recipient_firebase_uid,
+        initiatorFirebaseUid: offer.initiator_user_id,
+        recipientFirebaseUid: offer.recipient_user_id,
         proposingRentPrice: offer.proposing_rent_price,
         proposingRentPriceCurrency: offer.proposing_rent_price_currency,
         numLeasingMonths: offer.num_leasing_months,

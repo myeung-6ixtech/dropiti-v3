@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const maxPrice = searchParams.get('maxPrice');
   const bedrooms = searchParams.get('bedrooms');
   const type = searchParams.get('type');
-  const landlordFirebaseUid = searchParams.get('landlord_firebase_uid');
+  const landlordUserId = searchParams.get('landlord_user_id');
   
   try {
     // Build filters object using PropertyService filter interface
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
       maxPrice?: number;
       bedrooms?: number;
       type?: string;
-      landlordFirebaseUid?: string;
+      landlordUserId?: string;
     } = {};
     
     if (minPrice) {
@@ -38,8 +38,8 @@ export async function GET(request: NextRequest) {
       filters.type = type;
     }
 
-    if (landlordFirebaseUid) {
-      filters.landlordFirebaseUid = landlordFirebaseUid;
+    if (landlordUserId) {
+      filters.landlordUserId = landlordUserId;
     }
 
     // Get properties from PropertyService

@@ -10,7 +10,7 @@ const CREATE_PROPERTY_MUTATION = `
       property_uuid
       title
       description
-      landlord_firebase_uid
+      landlord_user_id
       created_at
       property_type
       rental_space
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       gross_area_size_unit: 'sqft', // Default unit
       availability_date: propertyData.availableDate || new Date().toISOString(), // Use current date as default for drafts
       status: getDefaultStatus(isDraft), // Use status as single source of truth
-      landlord_firebase_uid: propertyData.ownerId, // Use the authenticated user's Firebase UID
+      landlord_user_id: propertyData.ownerId, // Use the authenticated user's Firebase UID
       show_specific_location: propertyData.address?.showSpecificLocation ?? false, // Add the show specific location boolean
       last_saved_at: new Date().toISOString(), // Set current timestamp
       completion_percentage: isDraft ? 0 : 100, // Drafts start at 0%, published at 100%
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         property_uuid: string;
         title: string;
         description: string;
-        landlord_firebase_uid: string;
+        landlord_user_id: string;
         created_at: string;
         property_type: string;
         rental_space: string;

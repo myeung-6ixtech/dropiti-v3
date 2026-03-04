@@ -1,6 +1,7 @@
 'use client';
 
-import { SessionProvider } from "next-auth/react";
+import { NhostProvider } from "@nhost/nextjs";
+import { nhost } from "@/lib/nhost";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { SidebarProvider } from "@/context/SidebarContext";
@@ -12,7 +13,7 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
-      <SessionProvider>
+      <NhostProvider nhost={nhost}>
         <AuthProvider>
           <ToastProvider>
             <LanguageProvider>
@@ -26,7 +27,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
             </LanguageProvider>
           </ToastProvider>
         </AuthProvider>
-      </SessionProvider>
+      </NhostProvider>
     </ErrorBoundary>
   );
 }

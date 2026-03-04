@@ -6,8 +6,8 @@ export const executeGraphQLRequest = async <T = unknown>(
 ): Promise<T> => {
   try {
     // Use provided endpoint or fallback to environment variable
-    const hasuraEndpoint = endpoint || process.env.HASURA_ENDPOINT;
-    const hasuraAdminSecret = process.env.HASURA_ADMIN_SECRET;
+    const hasuraEndpoint = endpoint || process.env.HASURA_ENDPOINT || process.env.NEXT_PUBLIC_HASURA_GRAPHQL_API_URL;
+    const hasuraAdminSecret = process.env.HASURA_ADMIN_SECRET || process.env.HASURA_GRAPHQL_ADMIN_SECRET;
     
     if (!hasuraEndpoint) {
       throw new Error('Hasura endpoint not configured');

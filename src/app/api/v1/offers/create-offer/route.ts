@@ -6,7 +6,7 @@ const CHECK_EXISTING_OFFER_QUERY = `
     real_estate_offer(
       where: {
         property_uuid: { _eq: $propertyUuid }
-        initiator_firebase_uid: { _eq: $initiatorFirebaseUid }
+        initiator_user_id: { _eq: $initiatorFirebaseUid }
         offer_status: { _in: ["pending", "accepted"] }
         is_active: { _eq: true }
       }
@@ -24,8 +24,8 @@ const CREATE_OFFER_MUTATION = `
       id
       offer_key
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       proposing_rent_price
       proposing_rent_price_currency
       num_leasing_months
@@ -119,8 +119,8 @@ export async function POST(request: NextRequest) {
     const offer = {
       offer_key: offerKey,
       property_uuid: offerData.propertyId,
-      initiator_firebase_uid: offerData.initiatorFirebaseUid,
-      recipient_firebase_uid: offerData.recipientFirebaseUid,
+      initiator_user_id: offerData.initiatorFirebaseUid,
+      recipient_user_id: offerData.recipientFirebaseUid,
       proposing_rent_price: parseFloat(offerData.proposingRentPrice),
       proposing_rent_price_currency: offerData.currency || 'HKD',
       num_leasing_months: parseInt(offerData.numLeasingMonths),
@@ -138,8 +138,8 @@ export async function POST(request: NextRequest) {
           id: string;
           offer_key: string;
           property_uuid: string;
-          initiator_firebase_uid: string;
-          recipient_firebase_uid: string;
+          initiator_user_id: string;
+          recipient_user_id: string;
           proposing_rent_price: number;
           proposing_rent_price_currency: string;
           num_leasing_months: number;
@@ -176,8 +176,8 @@ export async function POST(request: NextRequest) {
         
         // Get initiator details for notification
         const GET_USER_QUERY = `
-          query GetUser($firebaseUid: String!) {
-            real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+          query GetUser($nhostUserId: String!) {
+            real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
               display_name
               name
             }
@@ -185,13 +185,13 @@ export async function POST(request: NextRequest) {
         `;
         
         const initiatorData = await executeQuery(GET_USER_QUERY, { 
-          firebaseUid: offerData.initiatorFirebaseUid 
+          nhostUserId: offerData.initiatorFirebaseUid 
         }) as { real_estate_user: Array<{ display_name?: string; name?: string }> };
 
         await NotificationService.createNotification({
           typeKey: 'offer_created',
-          recipientFirebaseUid: offerData.recipientFirebaseUid,
-          senderFirebaseUid: offerData.initiatorFirebaseUid,
+          recipientUserId: offerData.recipientFirebaseUid,
+          senderUserId: offerData.initiatorFirebaseUid,
           data: {
             offer_id: data.insert_real_estate_offer_one.id,
             property_title: propertyData.real_estate_property_listing[0]?.title || 'Property',

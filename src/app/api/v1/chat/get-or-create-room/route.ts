@@ -6,12 +6,12 @@ const GET_EXISTING_ROOM_QUERY = `
   query GetExistingRoom($user1FirebaseUid: String!) {
     real_estate_chat_room_participant(
       where: {
-        user_firebase_uid: { _eq: $user1FirebaseUid }
+        user_id: { _eq: $user1FirebaseUid }
       }
     ) {
       id
       room_id
-      user_firebase_uid
+      user_id
       role
       joined_at
       last_read_at
@@ -36,15 +36,15 @@ const CREATE_ROOM_MUTATION = `
 `;
 
 const ADD_PARTICIPANT_MUTATION = `
-  mutation AddParticipant($roomId: uuid!, $userFirebaseUid: String!, $role: String!) {
+  mutation AddParticipant($roomId: uuid!, $userId: String!, $role: String!) {
     insert_real_estate_chat_room_participant_one(object: {
       room_id: $roomId,
-      user_firebase_uid: $userFirebaseUid,
+      user_id: $userId,
       role: $role
     }) {
       id
       room_id
-      user_firebase_uid
+      user_id
       role
       joined_at
     }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
       real_estate_chat_room_participant?: Array<{
         id: string;
         room_id: string;
-        user_firebase_uid: string;
+        user_id: string;
         role: string;
         joined_at: string;
         last_read_at: string | null;
@@ -128,12 +128,12 @@ export async function POST(request: NextRequest) {
               real_estate_chat_room_participant(
                 where: {
                   room_id: { _eq: $roomId },
-                  user_firebase_uid: { _eq: $user2FirebaseUid }
+                  user_id: { _eq: $user2FirebaseUid }
                 }
               ) {
                 id
                 room_id
-                user_firebase_uid
+                user_id
                 role
               }
             }
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
             real_estate_chat_room_participant?: Array<{
               id: string;
               room_id: string;
-              user_firebase_uid: string;
+              user_id: string;
               role: string;
             }>;
           };
@@ -197,14 +197,14 @@ export async function POST(request: NextRequest) {
     // Add both users as participants
     const participant1Result = await executeMutation(ADD_PARTICIPANT_MUTATION, {
       roomId: newRoomId,
-      userFirebaseUid: user1FirebaseUid,
+      userId: user1FirebaseUid,
       role: user1Role
     }) as unknown;
     console.log('Participant 1 added:', participant1Result);
 
     const participant2Result = await executeMutation(ADD_PARTICIPANT_MUTATION, {
       roomId: newRoomId,
-      userFirebaseUid: user2FirebaseUid,
+      userId: user2FirebaseUid,
       role: user2Role
     }) as unknown;
     console.log('Participant 2 added:', participant2Result);

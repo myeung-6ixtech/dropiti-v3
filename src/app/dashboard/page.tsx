@@ -35,9 +35,9 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       // Use id from the user object, which contains the Firebase UID
-      const firebaseUid = authUser?.id;
+      const nhostUserId = authUser?.id;
       
-      if (!firebaseUid) {
+      if (!nhostUserId) {
         console.warn('Dashboard: No Firebase UID available for fetching data');
         setReviews([]);
         setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
@@ -49,17 +49,17 @@ export default function DashboardPage() {
         setLoading(true);
         setError(null);
         
-        console.log('Dashboard: Fetching data for Firebase UID:', firebaseUid);
+        console.log('Dashboard: Fetching data for Firebase UID:', nhostUserId);
         
         // Fetch reviews, property counts, and average rating in parallel with individual error handling
         const [reviewsResponse, totalCount, publishedCount, ratingData] = await Promise.allSettled([
           reviewsAPI.getReviewsByUser({
-            userFirebaseUid: firebaseUid,
+            userId: nhostUserId,
             limit: 5 // Show only 5 recent reviews on dashboard
           }),
-          getTotalPropertyCount(firebaseUid),
-          getPublishedPropertyCountByStatus(firebaseUid),
-          getAverageUserRating(firebaseUid)
+          getTotalPropertyCount(nhostUserId),
+          getPublishedPropertyCountByStatus(nhostUserId),
+          getAverageUserRating(nhostUserId)
         ]);
         
         // Handle reviews response
@@ -214,7 +214,7 @@ export default function DashboardPage() {
       <div className="dashboard-content-grid">
         {/* Left Column - DropitiPassport */}
         <div className="dashboard-left-column">
-          <DropitiPassport user={userData} firebaseUid={authUser?.id || ""} />
+          <DropitiPassport user={userData} nhostUserId={authUser?.id || ""} />
         </div>
 
         {/* Right Column - Content */}

@@ -6,7 +6,7 @@ import PropertyCard from '@/components/PropertyCard';
 import { PropertyCardSkeleton } from '@/components/skeleton';
 import { Property, UserListingsProps, ApiProperty, PropertyCardTransformation } from '@/types';
 
-export default function UserListings({ userFirebaseUid }: UserListingsProps) {
+export default function UserListings({ userId }: UserListingsProps) {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +18,7 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
         setError(null);
         
         const response = await propertiesAPI.getListings({
-          landlord_firebase_uid: userFirebaseUid,
+          landlord_user_id: userId,
           limit: 20,
           offset: 0
         });
@@ -47,7 +47,7 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
               availableDate: apiProperty.availableDate || null,
               createdAt: apiProperty.createdAt || '',
               updatedAt: apiProperty.updatedAt || '',
-              ownerId: userFirebaseUid
+              ownerId: userId
             };
             
             console.log('Transformed property:', transformed);
@@ -66,10 +66,10 @@ export default function UserListings({ userFirebaseUid }: UserListingsProps) {
       }
     };
 
-    if (userFirebaseUid) {
+    if (userId) {
       fetchUserProperties();
     }
-  }, [userFirebaseUid]);
+  }, [userId]);
 
   // Transform property data for PropertyCard component
   const transformPropertyForCard = (property: Property): PropertyCardTransformation => {

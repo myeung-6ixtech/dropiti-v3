@@ -9,7 +9,7 @@ const GET_PROPERTY_BY_UUID_QUERY = `
       property_uuid
       title
       description
-      landlord_firebase_uid
+      landlord_user_id
       created_at
       property_type
       rental_space
@@ -33,10 +33,10 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 `;
 
 const GET_LANDLORD_BY_FIREBASE_UID_QUERY = `
-  query GetLandlordByFirebaseUid($firebase_uid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
+  query GetLandlordByFirebaseUid($nhost_user_id: uuid!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhost_user_id } }, limit: 1) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       email
       photo_url
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
         property_uuid: string;
         title: string;
         description: string;
-        landlord_firebase_uid: string;
+        landlord_user_id: string;
         created_at: string;
         property_type: string;
         rental_space: string;
@@ -120,15 +120,15 @@ export async function GET(request: NextRequest) {
     console.log('Property data retrieved:', {
       id: property.id,
       property_uuid: property.property_uuid,
-      landlord_firebase_uid: property.landlord_firebase_uid,
-      has_landlord_firebase_uid: !!property.landlord_firebase_uid
+      landlord_user_id: property.landlord_user_id,
+      has_landlord_user_id: !!property.landlord_user_id
     });
 
-    // Get landlord information if landlord_firebase_uid exists
+    // Get landlord information if landlord_user_id exists
     let landlord = null;
-    if (property.landlord_firebase_uid) {
+    if (property.landlord_user_id) {
       try {
-        console.log('Fetching landlord data for firebase_uid:', property.landlord_firebase_uid);
+        console.log('Fetching landlord data for nhost_user_id:', property.landlord_user_id);
         console.log('GraphQL query to execute:', GET_LANDLORD_BY_FIREBASE_UID_QUERY);
         
         // First, let's test if we can query the real_estate_user table at all
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
           query TestRealEstateUserTable {
             real_estate_user(limit: 5) {
               uuid
-              firebase_uid
+              nhost_user_id
               display_name
               email
             }
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
         }
         
         const landlordData = await executeQuery(GET_LANDLORD_BY_FIREBASE_UID_QUERY, { 
-          firebase_uid: property.landlord_firebase_uid 
+          nhost_user_id: property.landlord_user_id 
         });
 
         console.log('Raw landlord data from GraphQL:', landlordData);
@@ -161,7 +161,7 @@ export async function GET(request: NextRequest) {
         const typedLandlordData = landlordData as {
           real_estate_user?: Array<{
             uuid: string;
-            firebase_uid: string;
+            nhost_user_id: string;
             display_name: string;
             email: string;
             photo_url?: string;
@@ -188,10 +188,10 @@ export async function GET(request: NextRequest) {
           landlord = typedLandlordData.real_estate_user[0];
           console.log('Processed landlord data:', landlord);
         } else {
-          console.log('No landlord data found for firebase_uid:', property.landlord_firebase_uid);
+          console.log('No landlord data found for nhost_user_id:', property.landlord_user_id);
           console.log('This could mean:');
           console.log('1. The user does not exist in real_estate_user table');
-          console.log('2. The firebase_uid does not match any records');
+          console.log('2. The nhost_user_id does not match any records');
           console.log('3. The GraphQL query returned empty results');
         }
       } catch (error) {
@@ -203,7 +203,7 @@ export async function GET(request: NextRequest) {
         // Continue without landlord data
       }
     } else {
-      console.log('No landlord_firebase_uid found in property data');
+      console.log('No landlord_user_id found in property data');
       console.log('Property object keys:', Object.keys(property));
       console.log('Property object:', property);
     }
@@ -244,11 +244,11 @@ export async function GET(request: NextRequest) {
         amenities: Array.isArray(property.amenities) ? property.amenities : [], // Ensure amenities is an array
         minimum_lease: 12, // Default value
         available_date: property.availability_date,
-        owner_id: property.landlord_firebase_uid, // This maps to the frontend's owner_id field
+        owner_id: property.landlord_user_id, // This maps to the frontend's owner_id field
       },
       landlord: landlord ? {
         id: landlord.uuid, // Map uuid to id for frontend compatibility
-        firebase_uid: landlord.firebase_uid,
+        nhost_user_id: landlord.nhost_user_id,
         name: landlord.display_name,
         email: landlord.email,
         avatar: landlord.photo_url,
@@ -273,10 +273,10 @@ export async function GET(request: NextRequest) {
     console.log('Final API response data:', {
       property_id: response.property.id,
       property_uuid: response.property.property_uuid,
-      landlord_firebase_uid: property.landlord_firebase_uid,
+      landlord_user_id: property.landlord_user_id,
       landlord_data: response.landlord ? {
         id: response.landlord.id, // This is now mapped from uuid
-        firebase_uid: response.landlord.firebase_uid,
+        nhost_user_id: response.landlord.nhost_user_id,
         name: response.landlord.name,
         verified: response.landlord.verified,
         rating: response.landlord.rating,

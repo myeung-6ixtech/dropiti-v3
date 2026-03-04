@@ -110,9 +110,9 @@ export default function SettingsPage() {
       if (authUser?.id) {
         try {
           setIsLoading(true);
-          console.log('Loading user settings for Firebase UID:', authUser.id);
+          console.log('Loading user settings for Nhost user ID:', authUser.id);
           
-          const response = await usersAPI.getUserByFirebaseUid(authUser.id);
+          const response = await usersAPI.getUserByNhostUserId(authUser.id);
           
           if (response.success && response.data) {
             const userData = response.data;
@@ -217,7 +217,7 @@ export default function SettingsPage() {
     try {
       setIsLoading(true);
 
-      console.log('Saving settings for Firebase UID:', authUser.id);
+      console.log('Saving settings for Nhost user ID:', authUser.id);
       
       // Prepare updates for the API
       const updates: Record<string, unknown> = {
@@ -243,7 +243,7 @@ export default function SettingsPage() {
 
       console.log('Updating user with data:', updates);
 
-      // Call the update API using the firebase_uid directly
+      // Call the update API using the nhost_user_id directly
       const updateResponse = await usersAPI.updateUser(authUser.id, updates);
 
       if (updateResponse.success) {

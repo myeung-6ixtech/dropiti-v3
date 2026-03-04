@@ -9,7 +9,7 @@ import {
 import { passportStyles } from '@/styles/index';
 
 interface DropitiPassportProps {
-  firebaseUid: string;
+  nhostUserId: string;
   user: {
     name: string;
     avatar: string;
@@ -33,7 +33,7 @@ interface DropitiPassportProps {
   };
 }
 
-export default function DropitiPassport({ user, firebaseUid }: DropitiPassportProps) {
+export default function DropitiPassport({ user, nhostUserId }: DropitiPassportProps) {
   const [publishedProperties, setPublishedProperties] = useState(0);
   const [userRating, setUserRating] = useState({
     averageRating: 0,
@@ -49,8 +49,8 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
         setIsLoadingRating(true);
         
         const [publishedCount, ratingData] = await Promise.all([
-          getPublishedPropertyCountByStatus(firebaseUid),
-          getAverageUserRating(firebaseUid)
+          getPublishedPropertyCountByStatus(nhostUserId),
+          getAverageUserRating(nhostUserId)
         ]);
         
         setPublishedProperties(publishedCount);
@@ -69,10 +69,10 @@ export default function DropitiPassport({ user, firebaseUid }: DropitiPassportPr
       }
     };
 
-    if (firebaseUid) {
+    if (nhostUserId) {
       fetchData();
     }
-  }, [firebaseUid]);
+  }, [nhostUserId]);
 
   return (
     <div className={passportStyles.container}>

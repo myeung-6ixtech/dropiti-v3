@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_REVIEW_OPPORTUNITIES_QUERY = `
-  query GetReviewOpportunities($userId: String!, $minEnd: timestamp!) {
+  query GetReviewOpportunities($userId: String!, $minEnd: timestamptz!) {
     real_estate_offer(
       where: {
         _and: [
           {
             _or: [
-              { initiator_firebase_uid: { _eq: $userId } },
-              { recipient_firebase_uid: { _eq: $userId } }
+              { initiator_user_id: { _eq: $userId } },
+              { recipient_user_id: { _eq: $userId } }
             ]
           },
           { offer_status: { _eq: "accepted" } },
@@ -22,8 +22,8 @@ const GET_REVIEW_OPPORTUNITIES_QUERY = `
       offer_key
       offer_uuid
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       created_at
       review_window_start
       review_window_end
@@ -43,8 +43,8 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 `;
 
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+  query GetUserByFirebaseUid($nhostUserId: String!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       display_name
       photo_url
     }
@@ -75,8 +75,8 @@ export async function GET(request: NextRequest) {
         offer_key: string;
         offer_uuid: string;
         property_uuid: string;
-        initiator_firebase_uid: string;
-        recipient_firebase_uid: string;
+        initiator_user_id: string;
+        recipient_user_id: string;
         created_at: string;
         review_window_start: string;
         review_window_end: string;
@@ -97,8 +97,8 @@ export async function GET(request: NextRequest) {
     // First, collect unique property UUIDs and user IDs to batch fetch
     const uniquePropertyUuids = [...new Set(result.real_estate_offer.map(offer => offer.property_uuid))];
     const uniqueUserIds = [...new Set([
-      ...result.real_estate_offer.map(offer => offer.initiator_firebase_uid),
-      ...result.real_estate_offer.map(offer => offer.recipient_firebase_uid)
+      ...result.real_estate_offer.map(offer => offer.initiator_user_id),
+      ...result.real_estate_offer.map(offer => offer.recipient_user_id)
     ])];
 
     // Batch fetch property details
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
     const userDetails: Record<string, { display_name: string; photo_url: string }> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { firebaseUid: userId }) as {
+        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as {
           real_estate_user: Array<{
             display_name: string;
             photo_url: string;
@@ -139,10 +139,10 @@ export async function GET(request: NextRequest) {
 
     // Now transform the offers using the cached data
     const opportunities = result.real_estate_offer.map(offer => {
-      const isInitiator = offer.initiator_firebase_uid === userId;
+      const isInitiator = offer.initiator_user_id === userId;
       const property = propertyDetails[offer.property_uuid];
-      const initiator = userDetails[offer.initiator_firebase_uid];
-      const recipient = userDetails[offer.recipient_firebase_uid];
+      const initiator = userDetails[offer.initiator_user_id];
+      const recipient = userDetails[offer.recipient_user_id];
 
       // Determine the other party (the one the current user needs to review)
       const otherParty = isInitiator ? recipient : initiator;
@@ -168,7 +168,7 @@ export async function GET(request: NextRequest) {
         propertyTitle: property?.title || 'Property',
         otherPartyName: otherParty?.display_name || 'Unknown User',
         otherPartyPhotoUrl: otherParty?.photo_url || undefined, // Add photo URL
-        otherPartyId: isInitiator ? offer.recipient_firebase_uid : offer.initiator_firebase_uid,
+        otherPartyId: isInitiator ? offer.recipient_user_id : offer.initiator_user_id,
         reviewType: isInitiator ? 'tenant_to_landlord' : 'landlord_to_tenant',
         reviewWindowEnd: offer.review_window_end, // Use the actual review window end date
         status: statusForUser || 'pending'

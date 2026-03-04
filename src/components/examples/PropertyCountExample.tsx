@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { getTotalPropertyCount, getPublishedPropertyCountByStatus } from '@/lib/utils';
 
 interface PropertyCountExampleProps {
-  landlordFirebaseUid: string;
+  landlordUserId: string;
 }
 
-export default function PropertyCountExample({ landlordFirebaseUid }: PropertyCountExampleProps) {
+export default function PropertyCountExample({ landlordUserId }: PropertyCountExampleProps) {
   const [propertyCounts, setPropertyCounts] = useState({
     totalProperties: 0,
     publishedProperties: 0
@@ -22,8 +22,8 @@ export default function PropertyCountExample({ landlordFirebaseUid }: PropertyCo
         setError(null);
         
         const [totalCount, publishedCount] = await Promise.all([
-          getTotalPropertyCount(landlordFirebaseUid),
-          getPublishedPropertyCountByStatus(landlordFirebaseUid)
+          getTotalPropertyCount(landlordUserId),
+          getPublishedPropertyCountByStatus(landlordUserId)
         ]);
         
         setPropertyCounts({
@@ -38,10 +38,10 @@ export default function PropertyCountExample({ landlordFirebaseUid }: PropertyCo
       }
     };
 
-    if (landlordFirebaseUid) {
+    if (landlordUserId) {
       fetchPropertyCounts();
     }
-  }, [landlordFirebaseUid]);
+  }, [landlordUserId]);
 
   if (isLoading) {
     return (

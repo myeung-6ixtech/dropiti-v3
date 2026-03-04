@@ -10,11 +10,11 @@ import { Review } from './review';
 // ========================================
 
 export interface UserListingsProps {
-  userFirebaseUid: string;
+  userId: string;
 }
 
 export interface UserReviewsProps {
-  userFirebaseUid: string;
+  userId: string;
 }
 
 // ========================================
@@ -133,13 +133,13 @@ export const USER_PROFILE_REVIEW_TYPE_LABELS: ReviewTypeMapping = {
 // ========================================
 
 export interface UserListingsFilters {
-  landlord_firebase_uid: string;
+  landlord_user_id: string;
   limit?: number;
   offset?: number;
 }
 
 export interface UserReviewsFilters {
-  userFirebaseUid: string;
+  userId: string;
   reviewType?: string;
   limit?: number;
   offset?: number;

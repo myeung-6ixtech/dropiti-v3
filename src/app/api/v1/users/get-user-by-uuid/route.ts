@@ -5,7 +5,7 @@ const GET_USER_BY_UUID_QUERY = `
   query GetUserByUuid($uuid: uuid!) {
     real_estate_user(where: { uuid: { _eq: $uuid } }, limit: 1) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       email
       photo_url
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const typedUserData = userData as {
       real_estate_user?: Array<{
         uuid: string;
-        firebase_uid: string;
+        nhost_user_id: string;
         display_name: string;
         email: string;
         photo_url?: string;

@@ -11,7 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 interface TenantProfileCardProps {
   data: TenantProfileData;
   user?: {
-    firebase_uid?: string;
+    nhost_user_id?: string;
     uuid?: string;
     display_name?: string;
     name?: string;
@@ -36,7 +36,7 @@ export default function TenantProfileCard({
   
   // Local state for resolved user (fallback when API doesn't provide user data)
   const [resolvedUser, setResolvedUser] = useState<{
-    firebase_uid?: string;
+    nhost_user_id?: string;
     uuid?: string;
     display_name?: string;
     name?: string;
@@ -52,9 +52,9 @@ export default function TenantProfileCard({
     let cancelled = false;
     async function loadUser() {
       try {
-        const firebaseUid = data?.user_firebase_uid || user?.firebase_uid;
+        const nhostUserId = data?.user_id || user?.nhost_user_id;
         
-        if (firebaseUid) {
+        if (nhostUserId) {
           // If we already have UUID from user prop, use it
           if (user?.uuid) {
             setUserUuid(user.uuid);
@@ -62,11 +62,11 @@ export default function TenantProfileCard({
           }
           
           // Request user by firebase uid to get UUID
-          const res = await fetch(`/api/v1/users/get-user-by-id?firebase_uid=${encodeURIComponent(firebaseUid)}`);
+          const res = await fetch(`/api/v1/users/get-user-by-id?nhost_user_id=${encodeURIComponent(nhostUserId)}`);
           const json = await res.json();
           if (!cancelled && json?.success && json?.data) {
             setResolvedUser({
-              firebase_uid: json.data.firebase_uid,
+              nhost_user_id: json.data.nhost_user_id,
               uuid: json.data.uuid,
               display_name: json.data.display_name,
               name: json.data.name,
@@ -85,7 +85,7 @@ export default function TenantProfileCard({
     }
     loadUser();
     return () => { cancelled = true; };
-  }, [user, data?.user_firebase_uid]);
+  }, [user, data?.user_id]);
   
   // Handle Contact button click with authentication check
   const handleContactClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -100,7 +100,7 @@ export default function TenantProfileCard({
     
     // TODO: Implement contact functionality for authenticated users
     // For now, we'll just show an alert or navigate to chat
-    console.log('Contact user:', userUuid || data?.user_firebase_uid);
+    console.log('Contact user:', userUuid || data?.user_id);
   };
 
   const formatCurrency = (amount: number | undefined, currency: string = 'HKD') => {
@@ -125,28 +125,28 @@ export default function TenantProfileCard({
   const displayUser = resolvedUser ?? user ?? null;
   const userName = displayUser?.display_name || displayUser?.name || 'User';
   const userAvatar = displayUser?.avatar || displayUser?.photo_url;
-  const isCurrentUser = !!(currentUserId && displayUser?.firebase_uid === currentUserId);
+  const isCurrentUser = !!(currentUserId && displayUser?.nhost_user_id === currentUserId);
 
   // Debug logging to verify incoming props and resolved user
   console.log('[TenantProfileCard] props', {
     tenant_uuid: data?.tenant_uuid,
-    user_firebase_uid: data?.user_firebase_uid,
+    user_id: data?.user_id,
     user: user ? {
-      firebase_uid: user?.firebase_uid,
+      nhost_user_id: user?.nhost_user_id,
       display_name: user?.display_name,
       name: user?.name,
       avatar: user?.avatar,
       photo_url: user?.photo_url,
     } : null,
     resolvedUser: resolvedUser ? {
-      firebase_uid: resolvedUser?.firebase_uid,
+      nhost_user_id: resolvedUser?.nhost_user_id,
       display_name: resolvedUser?.display_name,
       name: resolvedUser?.name,
       avatar: resolvedUser?.avatar,
       photo_url: resolvedUser?.photo_url,
     } : null,
     displayUser: displayUser ? {
-      firebase_uid: displayUser?.firebase_uid,
+      nhost_user_id: displayUser?.nhost_user_id,
       display_name: displayUser?.display_name,
       name: displayUser?.name,
       avatar: displayUser?.avatar,

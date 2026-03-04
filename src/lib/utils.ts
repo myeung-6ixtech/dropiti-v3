@@ -224,20 +224,20 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
 
 /**
  * Get the total number of properties (all statuses) created by a user
- * @param landlordFirebaseUid - The Firebase UID of the landlord
+ * @param landlordUserId - The Firebase UID of the landlord
  * @returns Promise<number> - The count of all properties (drafts, published, archived, etc.)
  */
-export async function getTotalPropertyCount(landlordFirebaseUid: string): Promise<number> {
+export async function getTotalPropertyCount(landlordUserId: string): Promise<number> {
   try {
     const { propertiesAPI } = await import('./api-client');
     
     // Fetch both published properties and drafts in parallel
     const [publishedResponse, draftsResponse] = await Promise.all([
       propertiesAPI.getListings({
-        landlord_firebase_uid: landlordFirebaseUid,
+        landlord_user_id: landlordUserId,
         limit: 1000
       }),
-      propertiesAPI.getDrafts(landlordFirebaseUid)
+      propertiesAPI.getDrafts(landlordUserId)
     ]);
     
     let totalCount = 0;
@@ -263,16 +263,16 @@ export async function getTotalPropertyCount(landlordFirebaseUid: string): Promis
 
 /**
  * Get the count of properties with 'published' status for a user
- * @param landlordFirebaseUid - The Firebase UID of the landlord
+ * @param landlordUserId - The Firebase UID of the landlord
  * @returns Promise<number> - The count of published properties
  */
-export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: string): Promise<number> {
+export async function getPublishedPropertyCountByStatus(landlordUserId: string): Promise<number> {
   try {
     const { propertiesAPI } = await import('./api-client');
     
     // First try the dedicated API endpoint for published property count
     try {
-      const countResponse = await propertiesAPI.getPropertyCountByUser(landlordFirebaseUid);
+      const countResponse = await propertiesAPI.getPropertyCountByUser(landlordUserId);
       if (countResponse.success && countResponse.data) {
         console.log('getPublishedPropertyCountByStatus - Using dedicated API, count:', countResponse.data.count);
         return countResponse.data.count || 0;
@@ -283,7 +283,7 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
     
     // Fallback to getListings API if dedicated count API fails
     const response = await propertiesAPI.getListings({
-      landlord_firebase_uid: landlordFirebaseUid,
+      landlord_user_id: landlordUserId,
       limit: 1000
     });
     
@@ -322,16 +322,16 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
 
 /**
  * Calculate the average rating received by a user from all reviews
- * @param userFirebaseUid - The Firebase UID of the user
+ * @param userId - The Firebase UID of the user
  * @returns Promise<{ averageRating: number; reviewCount: number }> - The average rating and total review count
  */
-export async function getAverageUserRating(userFirebaseUid: string): Promise<{ averageRating: number; reviewCount: number }> {
+export async function getAverageUserRating(userId: string): Promise<{ averageRating: number; reviewCount: number }> {
   try {
     const { reviewsAPI } = await import('./api-client');
     
     // Fetch all reviews received by the user (where they are the reviewed user)
     const response = await reviewsAPI.getReviewsByUser({
-      userFirebaseUid: userFirebaseUid,
+      userId: userId,
       limit: 1000 // Get all reviews to calculate accurate average
     });
     
@@ -340,7 +340,7 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
       
       // Filter for reviews where the user is the reviewed user (not the reviewer)
       const receivedReviews = reviews.filter((review: { revieweeFirebaseUid: string }) => 
-        review.revieweeFirebaseUid === userFirebaseUid
+        review.revieweeFirebaseUid === userId
       );
       
       if (receivedReviews.length === 0) {

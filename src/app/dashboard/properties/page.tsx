@@ -73,7 +73,7 @@ export default function PropertiesPage() {
         const [propertiesResponse, draftsResponse] = await Promise.all([
           propertiesAPI.getListings({
             limit: 50, // Get up to 50 properties
-            landlord_firebase_uid: authUser.id, // Filter by current user's Firebase UID
+            landlord_user_id: authUser.id, // Filter by current user's Firebase UID
           }),
           propertiesAPI.getDrafts(authUser.id)
         ]);

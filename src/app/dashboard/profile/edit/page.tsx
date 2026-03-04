@@ -85,7 +85,7 @@ export default function EditProfilePage() {
       if (authUser?.id) {
         try {
           setIsLoading(true);
-          const response = await usersAPI.getUserByFirebaseUid(authUser.id);
+          const response = await usersAPI.getUserByNhostUserId(authUser.id);
           
           if (response.success && response.data) {
             const userData = response.data;

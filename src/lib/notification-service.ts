@@ -9,8 +9,8 @@ export class NotificationService {
         insert_real_estate_notification_one(object: $notification) {
           id
           type_id
-          recipient_firebase_uid
-          sender_firebase_uid
+          recipient_user_id
+          sender_user_id
           title
           message
           data
@@ -36,8 +36,8 @@ export class NotificationService {
 
     const notification = {
       type_id: type.id,
-      recipient_firebase_uid: input.recipientFirebaseUid,
-      sender_firebase_uid: input.senderFirebaseUid,
+      recipient_user_id: input.recipientUserId,
+      sender_user_id: input.senderUserId,
       title,
       message,
       data: input.data,
@@ -52,12 +52,12 @@ export class NotificationService {
 
   // Get notifications for a user
   static async getUserNotifications(
-    userFirebaseUid: string,
+    userId: string,
     filters: NotificationFilters = {}
   ): Promise<Notification[]> {
     // Build the where clause dynamically
     const whereConditions: Record<string, unknown> = {
-      recipient_firebase_uid: { _eq: userFirebaseUid },
+      recipient_user_id: { _eq: userId },
       is_archived: { _eq: false }
     };
 
@@ -80,8 +80,8 @@ export class NotificationService {
         ) {
           id
           type_id
-          recipient_firebase_uid
-          sender_firebase_uid
+          recipient_user_id
+          sender_user_id
           title
           message
           data
@@ -122,12 +122,12 @@ export class NotificationService {
   }
 
   // Mark all notifications as read
-  static async markAllAsRead(userFirebaseUid: string): Promise<void> {
+  static async markAllAsRead(userId: string): Promise<void> {
     const MARK_ALL_AS_READ_MUTATION = `
-      mutation MarkAllAsRead($userFirebaseUid: String!) {
+      mutation MarkAllAsRead($userId: String!) {
         update_real_estate_notification(
           where: { 
-            recipient_firebase_uid: { _eq: $userFirebaseUid }
+            recipient_user_id: { _eq: $userId }
             is_read: { _eq: false }
           }
           _set: { is_read: true, read_at: "now()" }
@@ -137,7 +137,7 @@ export class NotificationService {
       }
     `;
 
-    await executeMutation(MARK_ALL_AS_READ_MUTATION, { userFirebaseUid });
+    await executeMutation(MARK_ALL_AS_READ_MUTATION, { userId });
   }
 
   // Archive notification
@@ -157,12 +157,12 @@ export class NotificationService {
   }
 
   // Get unread count
-  static async getUnreadCount(userFirebaseUid: string): Promise<number> {
+  static async getUnreadCount(userId: string): Promise<number> {
     const GET_UNREAD_COUNT_QUERY = `
-      query GetUnreadCount($userFirebaseUid: String!) {
+      query GetUnreadCount($userId: String!) {
         real_estate_notification_aggregate(
           where: {
-            recipient_firebase_uid: { _eq: $userFirebaseUid }
+            recipient_user_id: { _eq: $userId }
             is_read: { _eq: false }
             is_archived: { _eq: false }
           }
@@ -174,7 +174,7 @@ export class NotificationService {
       }
     `;
 
-    const result = await executeQuery(GET_UNREAD_COUNT_QUERY, { userFirebaseUid }) as { real_estate_notification_aggregate: { aggregate: { count: number } } };
+    const result = await executeQuery(GET_UNREAD_COUNT_QUERY, { userId }) as { real_estate_notification_aggregate: { aggregate: { count: number } } };
     return result.real_estate_notification_aggregate.aggregate.count;
   }
 

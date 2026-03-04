@@ -27,7 +27,7 @@ const GET_PROPERTY_QUERY = `
       status
       created_at
       updated_at
-      landlord_firebase_uid
+      landlord_user_id
     }
   }
 `;
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         status: string;
         created_at: string;
         updated_at: string;
-        landlord_firebase_uid: string;
+        landlord_user_id: string;
       }[];
     };
 

@@ -1,31 +1,28 @@
-import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export default withAuth(
-  function middleware(req) {
-    // Add any additional middleware logic here
-    // For dashboard routes, let the layout handle authentication
-    // This prevents redirect loops between middleware and layout
-    if (req.nextUrl.pathname.startsWith('/dashboard')) {
-      return NextResponse.next();
-    }
-    
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // For dashboard routes, always allow (layout will handle auth)
-        if (req.nextUrl.pathname.startsWith('/dashboard')) {
-          return true;
-        }
-        // For other protected routes, check token
-        return !!token;
-      },
-    },
+const PROTECTED_PATHS = ['/dashboard', '/profile'];
+
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  const isProtected = PROTECTED_PATHS.some((path) => pathname.startsWith(path));
+  if (!isProtected) return NextResponse.next();
+
+  // Nhost stores the refresh token in a cookie named "nhostRefreshToken"
+  const refreshToken =
+    req.cookies.get('nhostRefreshToken')?.value ||
+    req.cookies.get('nhost-refresh-token')?.value;
+
+  if (!refreshToken) {
+    const signInUrl = new URL('/auth/signin', req.url);
+    signInUrl.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(signInUrl);
   }
-);
+
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*"]
+  matcher: ['/dashboard/:path*', '/profile/:path*'],
 };

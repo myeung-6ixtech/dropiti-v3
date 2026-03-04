@@ -11,8 +11,8 @@ const CREATE_REVIEW_MUTATION = `
       review_type
       rating
       comment
-      reviewer_firebase_uid
-      reviewee_firebase_uid
+      reviewer_user_id
+      reviewee_user_id
       property_uuid
       is_public
       is_verified
@@ -87,8 +87,8 @@ export async function POST(request: NextRequest) {
           offer_key
           offer_uuid
           property_uuid
-          initiator_firebase_uid
-          recipient_firebase_uid
+          initiator_user_id
+          recipient_user_id
         }
       }
     `;
@@ -99,8 +99,8 @@ export async function POST(request: NextRequest) {
         offer_key: string;
         offer_uuid: string;
         property_uuid: string;
-        initiator_firebase_uid: string;
-        recipient_firebase_uid: string;
+        initiator_user_id: string;
+        recipient_user_id: string;
       };
     };
 
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     // Prevent duplicate reviews: if current user's corresponding review status is already completed, block
     // Fetch the current review statuses for this offer
-    const reviewerIsInitiator = offerDetails.real_estate_offer_by_pk.initiator_firebase_uid === reviewerId;
+    const reviewerIsInitiator = offerDetails.real_estate_offer_by_pk.initiator_user_id === reviewerId;
     const GET_REVIEW_STATUS_QUERY = `
       query GetReviewStatus($offerId: Int!) {
         real_estate_offer_by_pk(id: $offerId) {
@@ -161,8 +161,8 @@ export async function POST(request: NextRequest) {
       review_type: reviewType,
       rating: rating,
       comment: comment,
-      reviewer_firebase_uid: reviewerId,
-      reviewee_firebase_uid: reviewedUserId,
+      reviewer_user_id: reviewerId,
+      reviewee_user_id: reviewedUserId,
       property_uuid: actualPropertyUuid, // Use the actual UUID from the offer
       is_public: true, // Default to public
       is_verified: false, // Default to not verified
@@ -183,8 +183,8 @@ export async function POST(request: NextRequest) {
         review_type: string;
         rating: number;
         comment: string;
-        reviewer_firebase_uid: string;
-        reviewee_firebase_uid: string;
+        reviewer_user_id: string;
+        reviewee_user_id: string;
         property_uuid: string;
         is_public: boolean;
         is_verified: boolean;
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     // Determine if the reviewer is the initiator or recipient
     console.log('Create Review API: Updating offer review status...');
     
-    const isInitiator = offerDetails.real_estate_offer_by_pk.initiator_firebase_uid === reviewerId;
+    const isInitiator = offerDetails.real_estate_offer_by_pk.initiator_user_id === reviewerId;
     console.log('Create Review API: Updating offer review status. Is initiator:', isInitiator);
     
     try {
