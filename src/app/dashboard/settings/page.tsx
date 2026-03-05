@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useToast } from '@/context/ToastContext';
 import { usersAPI } from '@/lib/api-client';
+import { nhost } from '@/lib/nhost';
 import { 
   FiUser, 
   FiShield, 
@@ -271,6 +272,64 @@ export default function SettingsPage() {
     setTempLanguage(locale);
   };
 
+  const handlePasswordUpdate = async () => {
+    if (!authUser?.id || !authUser?.email) {
+      showToast('error', t('errors.auth.unauthorized'));
+      return;
+    }
+
+    // Block Google OAuth users — they have no password
+    if ((authUser as { auth_provider?: string }).auth_provider === 'google') {
+      showToast('error', 'Password changes are not available for Google sign-in accounts.');
+      return;
+    }
+
+    if (!securityForm.currentPassword) {
+      showToast('error', t('settings.enterCurrentPassword'));
+      return;
+    }
+    if (securityForm.newPassword.length < 8) {
+      showToast('error', 'New password must be at least 8 characters.');
+      return;
+    }
+    if (securityForm.newPassword !== securityForm.confirmPassword) {
+      showToast('error', 'New passwords do not match.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Verify current password by re-authenticating
+      const { error: signInError } = await nhost.auth.signIn({
+        email: authUser.email,
+        password: securityForm.currentPassword,
+      });
+
+      if (signInError) {
+        showToast('error', 'Current password is incorrect.');
+        return;
+      }
+
+      // Change to the new password
+      const { error: changeError } = await nhost.auth.changePassword({
+        newPassword: securityForm.newPassword,
+      });
+
+      if (changeError) {
+        showToast('error', changeError.message || 'Failed to update password.');
+        return;
+      }
+
+      setSecurityForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      showToast('success', 'Password updated successfully.');
+    } catch (err) {
+      console.error('Password update error:', err);
+      showToast('error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const tabs = [
     { id: 'profile', name: t('settings.profile'), icon: FiUser },
     { id: 'security', name: t('settings.security'), icon: FiShield },
@@ -423,8 +482,23 @@ export default function SettingsPage() {
                   </div>
                 </div>
                 <div className="flex justify-end pt-6 border-t border-gray-200">
-                  <button className="btn-primary px-4 py-2 bg-black text-white rounded-md font-medium hover:bg-gray-800 transition-colors">
-                    {t('settings.updatePassword')}
+                  <button
+                    onClick={handlePasswordUpdate}
+                    disabled={isLoading}
+                    className={`btn-primary px-4 py-2 rounded-md font-medium transition-colors ${
+                      isLoading
+                        ? 'bg-gray-400 cursor-not-allowed text-white'
+                        : 'bg-black text-white hover:bg-gray-800'
+                    }`}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Updating...
+                      </div>
+                    ) : (
+                      t('settings.updatePassword')
+                    )}
                   </button>
                 </div>
               </div>

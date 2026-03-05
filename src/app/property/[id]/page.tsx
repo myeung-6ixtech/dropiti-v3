@@ -8,7 +8,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
-import { usersAPI } from '@/lib/api-client'; // Added import for usersAPI
 import { groupAmenitiesByCategory } from '@/constants/amenities';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
 import DesktopPropertyPage from '@/components/property/DesktopPropertyPage';
@@ -96,14 +95,10 @@ export default function PropertyDetailPage() {
   // Function to check if the current user has existing offers for this property
   const checkExistingOffer = useCallback(async (propertyUuid: string, userId: string) => {
     if (!userId || !propertyUuid || !isAuthenticated) return;
-    
-    console.log('Frontend: Checking existing offers for user:', userId, 'property:', propertyUuid);
-    
+
     try {
       const response = await offersAPI.getOffersByInitiator(userId);
-      
-      console.log('Frontend: Offers response:', response);
-      
+
       if (response.success && response.data) {
         // Check if any of the user's active offers are for this property
         const hasOffer = response.data.some((offer: { 
@@ -115,8 +110,7 @@ export default function PropertyDetailPage() {
           offer.is_active && 
           (offer.offer_status === 'pending' || offer.offer_status === 'accepted')
         );
-        
-        console.log('Frontend: Has existing offer:', hasOffer);
+
         setHasExistingOffer(hasOffer);
       }
     } catch (error) {
@@ -179,91 +173,18 @@ export default function PropertyDetailPage() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isGalleryModalOpen, closeGallery, nextImage, previousImage]);
 
-  // Function to fetch landlord details using owner_id
-  const fetchLandlordDetails = async (ownerId: string) => {
-    try {
-      console.log('Fetching landlord details for owner_id:', ownerId);
-      const landlordResponse = await usersAPI.getUserByNhostUserId(ownerId);
-      
-      if (landlordResponse.success && landlordResponse.data) {
-        console.log('Landlord details fetched successfully:', landlordResponse.data);
-        return {
-          id: landlordResponse.data.id,
-          uuid: landlordResponse.data.uuid, // Add uuid for navigation
-          nhost_user_id: landlordResponse.data.nhost_user_id,
-          name: landlordResponse.data.display_name || 'Unknown Landlord',
-          email: landlordResponse.data.email || '',
-          avatar: landlordResponse.data.photo_url || '',
-          verified: landlordResponse.data.verified || false,
-          rating: landlordResponse.data.rating || 0,
-          review_count: landlordResponse.data.review_count || 0,
-          response_time: landlordResponse.data.response_time || 'Unknown',
-          response_rate: landlordResponse.data.response_rate || 98,
-          total_properties: landlordResponse.data.total_properties || 1,
-          total_guests: landlordResponse.data.total_guests || 0,
-        };
-      } else {
-        console.log('Failed to fetch landlord details:', landlordResponse.error);
-        return null;
-      }
-    } catch (error) {
-      console.error('Error fetching landlord details:', error);
-      return null;
-    }
-  };
-
   useEffect(() => {
     const loadProperty = async () => {
       if (params.id) {
         try {
           setIsLoading(true);
           setError(null);
-          
+
           const response = await propertiesAPI.getPropertyByUuid(params.id as string);
-          
+
           if (response.success && response.data) {
-            console.log('=== PROPERTY DATA DEBUG ===');
-            console.log('Full API response:', response);
-            console.log('Property data received:', response.data);
-            console.log('Property object keys:', Object.keys(response.data.property));
-            console.log('Property object:', response.data.property);
-            
-            // Check for landlord_user_id specifically
-            console.log('=== LANDLORD FIREBASE UID CHECK ===');
-            console.log('Property owner_id:', response.data.property.owner_id);
-            console.log('Property has owner_id:', !!response.data.property.owner_id);
-            console.log('Property owner_id type:', typeof response.data.property.owner_id);
-            
-            // Fetch landlord details if we have an owner_id
-            let landlordData = null;
-            if (response.data.property.owner_id) {
-              console.log('=== FETCHING LANDLORD DETAILS ===');
-              landlordData = await fetchLandlordDetails(response.data.property.owner_id);
-              console.log('Landlord data fetched:', landlordData);
-            }
-            
-            // Combine property data with landlord data
-            const combinedData = {
-              property: response.data.property,
-              landlord: landlordData
-            };
-            
-            console.log('=== LANDLORD DATA CHECK ===');
-            console.log('Combined data:', combinedData);
-            console.log('Landlord data:', combinedData.landlord);
-            console.log('Landlord data type:', typeof combinedData.landlord);
-            console.log('Landlord is null:', combinedData.landlord === null);
-            
-            if (combinedData.landlord) {
-              console.log('Landlord object keys:', Object.keys(combinedData.landlord));
-              console.log('Landlord nhost_user_id:', combinedData.landlord.nhost_user_id);
-            }
-            
-            console.log('=== END DEBUG ===');
-            
-            setPropertyData(combinedData);
-            
-            // Check if the current user has existing offers for this property
+            setPropertyData(response.data);
+
             if (authUser?.id) {
               checkExistingOffer(response.data.property.property_uuid, authUser.id);
             }
