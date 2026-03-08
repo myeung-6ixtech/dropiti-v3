@@ -47,10 +47,8 @@ interface LandlordData {
   verified: boolean;
   rating: number;
   review_count: number;
-  response_time: string;
+  avg_response_time: string;
   response_rate: number;
-  total_properties: number;
-  total_guests: number;
 }
 
 interface PropertyWithLandlord {

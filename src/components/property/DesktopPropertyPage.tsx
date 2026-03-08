@@ -33,7 +33,7 @@ interface DesktopPropertyPageProps {
     uuid: string;
     name: string;
     avatar?: string;
-    response_time: string;
+    avg_response_time?: string;
     rating: number;
     review_count: number;
   } | null;
@@ -289,7 +289,7 @@ export default function DesktopPropertyPage({
                     />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-sm font-medium text-gray-900 mb-0">{landlord.name}</h3>
+                    <h3 className="font-semibold text-sm font-medium text-gray-900 mb-0">{landlord.name || 'Landlord'}</h3>
                     <div className="flex items-center mt-1 mb-5">
                       <StarIcon className="h-4 w-4 text-yellow-400" />
                       <span className="text-xs text-gray-600 ml-1">
@@ -330,11 +330,11 @@ export default function DesktopPropertyPage({
                 landlord={landlord ? {
                   id: landlord.id,
                   uuid: landlord.uuid, // Use the actual uuid field for user profile URL
-                  name: landlord.name,
+                  name: landlord.name || 'Landlord',
                   avatar: landlord.avatar || '',
                   rating: landlord.rating,
                   reviewCount: landlord.review_count,
-                  responseTime: landlord.response_time,
+                  responseTime: landlord.avg_response_time || 'Unknown',
                   verified: false, // Default value
                   responseRate: 98, // Default value
                   totalProperties: 1, // Default value

@@ -29,7 +29,7 @@ interface MobilePropertyPageProps {
   landlord: {
     name: string;
     avatar?: string;
-    response_time: string;
+    avg_response_time?: string;
     rating: number;
     review_count: number;
   } | null;

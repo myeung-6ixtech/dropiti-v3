@@ -28,30 +28,24 @@ const GET_PROPERTY_BY_UUID_QUERY = `
       rental_price_currency
       availability_date
       status
-      user {
-        uuid
+      landlord_details {
         nhost_user_id
         display_name
         first_name
         last_name
         email
         photo_url
-        verified
-        rating
-        review_count
         about
-        location
         phone_number
         languages
         education
         occupation
-        marital_status
-        response_time
-        response_rate
         avg_response_time
-        total_properties
-        total_guests
-        updated_at
+      }
+      landlord_user {
+        avatarUrl
+        email
+        createdAt
       }
     }
   }
@@ -96,30 +90,24 @@ export async function GET(request: NextRequest) {
         rental_price_currency: string;
         availability_date: string;
         status: string;
-        user?: {
-          uuid: string;
+        landlord_details?: {
           nhost_user_id: string;
           display_name: string;
           first_name?: string;
           last_name?: string;
           email: string;
           photo_url?: string;
-          verified: boolean;
-          rating: number;
-          review_count: number;
           about?: string;
-          location?: string;
           phone_number?: string;
           languages?: string[];
           education?: string;
           occupation?: string;
-          marital_status?: string;
-          response_time?: string;
-          response_rate?: number;
           avg_response_time?: string;
-          total_properties?: number;
-          total_guests?: number;
-          updated_at?: string;
+        };
+        landlord_user?: {
+          avatarUrl?: string;
+          email?: string;
+          createdAt?: string;
         };
       }>;
     };
@@ -132,7 +120,8 @@ export async function GET(request: NextRequest) {
     }
 
     const property = typedPropertyData.real_estate_property_listing[0];
-    const landlordUser = property.user ?? null;
+    const details = property.landlord_details ?? null;
+    const authUser = property.landlord_user ?? null;
 
     const response = {
       property: {
@@ -170,29 +159,27 @@ export async function GET(request: NextRequest) {
         available_date: property.availability_date,
         owner_id: property.landlord_user_id,
       },
-      landlord: landlordUser ? {
-        id: landlordUser.uuid,
-        uuid: landlordUser.uuid,
-        nhost_user_id: landlordUser.nhost_user_id,
-        name: landlordUser.display_name,
-        email: landlordUser.email,
-        avatar: landlordUser.photo_url,
-        verified: landlordUser.verified,
-        rating: landlordUser.rating,
-        review_count: landlordUser.review_count,
-        response_time: landlordUser.response_time || 'Unknown',
-        response_rate: landlordUser.response_rate || 0,
-        avg_response_time: landlordUser.avg_response_time || 'Unknown',
-        total_properties: landlordUser.total_properties || 0,
-        total_guests: landlordUser.total_guests || 0,
-        user_since: landlordUser.updated_at,
-        about: landlordUser.about,
-        location: landlordUser.location,
-        phone_number: landlordUser.phone_number,
-        languages: landlordUser.languages,
-        education: landlordUser.education,
-        occupation: landlordUser.occupation,
-        marital_status: landlordUser.marital_status,
+      // Always return a landlord object if we have any identity info
+      landlord: (details || authUser || property.landlord_user_id) ? {
+        id: details?.nhost_user_id || property.landlord_user_id,
+        uuid: details?.nhost_user_id || property.landlord_user_id,
+        nhost_user_id: details?.nhost_user_id || property.landlord_user_id,
+        name: details?.display_name || authUser?.email?.split('@')[0] || 'Landlord',
+        email: details?.email || authUser?.email || '',
+        avatar: details?.photo_url || authUser?.avatarUrl,
+        verified: false,
+        rating: 0,
+        review_count: 0,
+        response_rate: 0,
+        avg_response_time: details?.avg_response_time || 'Unknown',
+        user_since: authUser?.createdAt,
+        about: details?.about,
+        location: null,
+        phone_number: details?.phone_number,
+        languages: details?.languages,
+        education: details?.education,
+        occupation: details?.occupation,
+        marital_status: null,
       } : null,
     };
 
