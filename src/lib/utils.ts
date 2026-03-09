@@ -346,8 +346,8 @@ export async function getAverageUserRating(userId: string): Promise<{ averageRat
       const reviews = Array.isArray(response.data) ? response.data : [response.data];
       
       // Filter for reviews where the user is the reviewed user (not the reviewer)
-      const receivedReviews = reviews.filter((review: { revieweeFirebaseUid: string }) => 
-        review.revieweeFirebaseUid === userId
+      const receivedReviews = reviews.filter((review: { revieweeUserId: string }) =>
+        review.revieweeUserId === userId
       );
       
       if (receivedReviews.length === 0) {

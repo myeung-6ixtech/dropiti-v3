@@ -75,11 +75,11 @@ export async function GET(request: NextRequest) {
 
     // Get other participants for each room
     const GET_OTHER_PARTICIPANTS_QUERY = `
-      query GetOtherParticipants($roomIds: [uuid!]!, $currentUserFirebaseUid: String!) {
+      query GetOtherParticipants($roomIds: [uuid!]!, $currentUserId: uuid!) {
         real_estate_chat_room_participant(
-          where: { 
+          where: {
             room_id: { _in: $roomIds },
-            user_id: { _neq: $currentUserFirebaseUid }
+            user_id: { _neq: $currentUserId }
           }
         ) {
           room_id
@@ -102,9 +102,9 @@ export async function GET(request: NextRequest) {
     };
 
     // Get other participants for each room
-    const otherParticipantsData = await executeQuery(GET_OTHER_PARTICIPANTS_QUERY, { 
-      roomIds, 
-      currentUserFirebaseUid: userId 
+    const otherParticipantsData = await executeQuery(GET_OTHER_PARTICIPANTS_QUERY, {
+      roomIds,
+      currentUserId: userId
     }) as {
       real_estate_chat_room_participant?: Array<{
         room_id: string;
@@ -114,10 +114,10 @@ export async function GET(request: NextRequest) {
     };
 
     // Get user details for other participants
-    const otherUserFirebaseUids = otherParticipantsData.real_estate_chat_room_participant?.map(p => p.user_id) || [];
-    
+    const otherUserIds = otherParticipantsData.real_estate_chat_room_participant?.map(p => p.user_id) || [];
+
     const GET_USER_DETAILS_QUERY = `
-      query GetUserDetails($nhostUserIds: [String!]!) {
+      query GetUserDetails($nhostUserIds: [uuid!]!) {
         real_estate_user(
           where: { nhost_user_id: { _in: $nhostUserIds } }
         ) {
@@ -129,8 +129,8 @@ export async function GET(request: NextRequest) {
       }
     `;
 
-    const userDetailsData = otherUserFirebaseUids.length > 0 ? await executeQuery(GET_USER_DETAILS_QUERY, { 
-      nhostUserIds: otherUserFirebaseUids 
+    const userDetailsData = otherUserIds.length > 0 ? await executeQuery(GET_USER_DETAILS_QUERY, {
+      nhostUserIds: otherUserIds
     }) as {
       real_estate_user?: Array<{
         nhost_user_id: string;

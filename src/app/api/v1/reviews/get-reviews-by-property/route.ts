@@ -99,9 +99,8 @@ const GET_REVIEWS_BY_PROPERTY_NO_TYPE_QUERY = `
   }
 `;
 
-// GraphQL query to get user details by Firebase UID
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($nhostUserId: String!) {
+  query GetUserByNhostUserId($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       uuid
       nhost_user_id
@@ -120,15 +119,8 @@ export async function GET(request: NextRequest) {
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!, 10) : 50;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!, 10) : 0;
 
-    console.log('Get Reviews by Property API: Received request with params:', { 
-      propertyUuid, 
-      reviewType, 
-      limit, 
-      offset 
-    });
 
     if (!propertyUuid) {
-      console.log('Get Reviews by Property API: Missing propertyUuid parameter');
       return NextResponse.json(
         { error: 'propertyUuid parameter is required' },
         { status: 400 }
@@ -152,10 +144,7 @@ export async function GET(request: NextRequest) {
     }
 
     // First, fetch the reviews
-    console.log('Get Reviews by Property API: Executing GraphQL query for property:', propertyUuid);
     const reviewsData = await executeQuery(query, variables) as GraphQLReviewsResponse;
-
-    console.log('Get Reviews by Property API: Raw GraphQL response:', reviewsData);
 
     if (!reviewsData?.real_estate_review || reviewsData.real_estate_review.length === 0) {
       return NextResponse.json({
@@ -193,8 +182,8 @@ export async function GET(request: NextRequest) {
       return {
         id: review.id,
         reviewUuid: review.review_uuid,
-        reviewerFirebaseUid: review.reviewer_user_id,
-        revieweeFirebaseUid: review.reviewee_user_id,
+        reviewerUserId: review.reviewer_user_id,
+        revieweeUserId: review.reviewee_user_id,
         reviewType: review.review_type,
         rating: review.rating,
         title: review.title || undefined,
@@ -231,7 +220,6 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Get Reviews by Property API: Error:', error);
     return NextResponse.json(
       { error: 'Failed to fetch reviews' },
       { status: 500 }

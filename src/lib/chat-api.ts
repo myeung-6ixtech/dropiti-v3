@@ -126,15 +126,15 @@ export const chatAPI = {
 
   // Get or create a direct chat room between two users
   getOrCreateRoom: async (
-    user1FirebaseUid: string, 
-    user2FirebaseUid: string, 
-    user1Role: string = 'tenant', 
+    user1UserId: string,
+    user2UserId: string,
+    user1Role: string = 'tenant',
     user2Role: string = 'landlord'
   ): Promise<{ roomId: string; room: ChatRoom['room']; isNew: boolean }> => {
     try {
       const response = await apiClient.post('/chat/get-or-create-room', {
-        user1FirebaseUid,
-        user2FirebaseUid,
+        user1UserId,
+        user2UserId,
         user1Role,
         user2Role
       });

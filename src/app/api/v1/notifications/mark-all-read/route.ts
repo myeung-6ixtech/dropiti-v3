@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
 
     if (!userId) {
       return NextResponse.json(
-        { error: 'User Firebase UID is required' },
+        { error: 'userId is required' },
         { status: 400 }
       );
     }

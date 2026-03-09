@@ -74,8 +74,8 @@ export interface PropertyCardTransformation extends Property {
 export interface ReviewDisplayData {
   id: string;
   reviewUuid: string;
-  reviewerFirebaseUid: string;
-  revieweeFirebaseUid: string;
+  reviewerUserId: string;
+  revieweeUserId: string;
   reviewType: string;
   rating: number;
   title?: string;
