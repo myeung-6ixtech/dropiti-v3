@@ -1,5 +1,6 @@
 import { nhost } from '@/lib/nhost';
 import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
+import { DEFAULT_AVATAR_URL } from '@/constants/images';
 
 // ---------------------------------------------------------------------------
 // GraphQL — user profile management
@@ -86,7 +87,7 @@ class NhostAuthService {
       nhost_user_id: session.user.id,
       display_name: displayName,
       email,
-      photo_url: '/images/Portrait_Placeholder.png',
+      photo_url: DEFAULT_AVATAR_URL,
       auth_provider: 'email',
     });
 
@@ -114,7 +115,7 @@ class NhostAuthService {
       nhost_user_id: session.user.id,
       display_name: session.user.displayName || email.split('@')[0],
       email,
-      photo_url: session.user.avatarUrl || '/images/Portrait_Placeholder.png',
+      photo_url: session.user.avatarUrl || DEFAULT_AVATAR_URL,
       auth_provider: 'email',
     });
 
@@ -183,7 +184,7 @@ class NhostAuthService {
           nhost_user_id: userData.nhost_user_id,
           display_name: userData.display_name,
           email: userData.email,
-          photo_url: userData.photo_url || '/images/Portrait_Placeholder.png',
+          photo_url: userData.photo_url || DEFAULT_AVATAR_URL,
           auth_provider: userData.auth_provider || 'email',
         },
       })) as { insert_real_estate_user_one?: NhostUserProfile };

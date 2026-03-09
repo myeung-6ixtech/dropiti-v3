@@ -133,7 +133,7 @@ export const USER_PROFILE_REVIEW_TYPE_LABELS: ReviewTypeMapping = {
 // ========================================
 
 export interface UserListingsFilters {
-  landlord_user_id: string;
+  landlord_user_id: string | null;
   limit?: number;
   offset?: number;
 }

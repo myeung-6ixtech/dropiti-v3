@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface Landlord {
   id: string;
@@ -50,7 +51,7 @@ export default function PropertyPricingCard({
   const { isAuthenticated } = useAuth();
 
   // Fallback image URL for when no landlord avatar is available
-  const fallbackAvatar = "/images/Portrait_Placeholder.png";
+  const fallbackAvatar = DEFAULT_AVATAR_URL;
 
   // Get the landlord avatar or fallback, ensuring it's a valid URL
   const landlordAvatar = landlord.avatar && landlord.avatar.trim() !== '' ? landlord.avatar : fallbackAvatar;

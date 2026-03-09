@@ -410,6 +410,7 @@ export default function PropertyDetailPage() {
         setIsDescriptionExpanded={setIsDescriptionExpanded}
         amenitiesList={amenitiesList}
         groupedAmenities={groupedAmenities}
+        isOwner={authUser?.id === property.owner_id}
       />
 
 

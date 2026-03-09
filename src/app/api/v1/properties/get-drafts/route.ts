@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_DRAFTS_QUERY = `
-  query GetDrafts($landlord_user_id: String!) {
+  query GetDrafts($landlord_user_id: uuid!) {
     real_estate_property_listing(
       where: { 
         landlord_user_id: { _eq: $landlord_user_id },
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         property_uuid: string;
         title: string;
         description: string;
-        landlord_user_id: string;
+        landlord_user_id: string | null;
         created_at: string;
         updated_at: string;
         last_saved_at: string;

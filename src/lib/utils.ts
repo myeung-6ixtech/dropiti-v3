@@ -3,6 +3,7 @@
  */
 
 import { twMerge } from 'tailwind-merge';
+import { DEFAULT_AVATAR_URL } from '@/constants/images';
 
 /**
  * Utility function to merge Tailwind CSS classes
@@ -75,7 +76,7 @@ export function formatPropertyLocation(location: unknown): string {
  */
 export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: string): string => {
   if (!imageUrl) {
-    return fallbackUrl || '/images/Portrait_Placeholder.png';
+    return fallbackUrl || DEFAULT_AVATAR_URL;
   }
 
   // Check if the URL is valid
@@ -112,7 +113,10 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
       'cdn.digitaloceanspaces.com',
       'nyc3.digitaloceanspaces.com',
       'fra1.digitaloceanspaces.com',
-      'sgp1.digitaloceanspaces.com'
+      'sgp1.digitaloceanspaces.com',
+      // Gravatar (used by Nhost as default avatars)
+      'www.gravatar.com',
+      'gravatar.com',
     ];
 
     // Check if the hostname is in the allowed list
@@ -142,7 +146,7 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
 
     // For other external URLs, log and return fallback
     console.warn(`Profile image hostname not allowed: ${url.hostname}`, { imageUrl });
-    return fallbackUrl || '/images/Portrait_Placeholder.png';
+    return fallbackUrl || DEFAULT_AVATAR_URL;
   } catch (error) {
     // If URL parsing fails, it might be a relative path
     if (imageUrl.startsWith('/') || imageUrl.startsWith('./')) {
@@ -151,7 +155,7 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
     
     // Log the error for debugging
     console.warn(`Invalid profile image URL: ${imageUrl}`, { error });
-    return fallbackUrl || '/images/Portrait_Placeholder.png';
+    return fallbackUrl || DEFAULT_AVATAR_URL;
   }
 };
 
@@ -193,7 +197,10 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
       'cdn.digitaloceanspaces.com',
       'nyc3.digitaloceanspaces.com',
       'fra1.digitaloceanspaces.com',
-      'sgp1.digitaloceanspaces.com'
+      'sgp1.digitaloceanspaces.com',
+      // Gravatar (used by Nhost as default avatars)
+      'www.gravatar.com',
+      'gravatar.com',
     ];
 
     // Check if the hostname is in the allowed list

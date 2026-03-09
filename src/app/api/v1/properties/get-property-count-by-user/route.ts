@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_PROPERTY_COUNT_BY_USER_QUERY = `
-  query GetPropertyCountByUser($landlordUserId: String!) {
+  query GetPropertyCountByUser($landlordUserId: uuid!) {
     real_estate_property_listing_aggregate(
       where: { 
         landlord_user_id: { _eq: $landlordUserId }

@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_USER_BY_UUID_QUERY = `
-  query GetUserByUuid($uuid: uuid!) {
-    real_estate_user(where: { uuid: { _eq: $uuid } }, limit: 1) {
+  query GetUserByUuid($id: uuid!) {
+    real_estate_user(
+      where: { nhost_user_id: { _eq: $id } }
+      limit: 1
+    ) {
       uuid
       nhost_user_id
       display_name
@@ -33,23 +36,16 @@ const GET_USER_BY_UUID_QUERY = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userUuid = searchParams.get('uuid');
-
-    console.log('Get User by UUID API: Received request with uuid:', userUuid);
+    const userUuid = searchParams.get('uuid') || searchParams.get('id');
 
     if (!userUuid) {
-      console.log('Get User by UUID API: Missing uuid parameter');
       return NextResponse.json(
         { error: 'UUID parameter is required' },
         { status: 400 }
       );
     }
 
-    // Get user by UUID
-    console.log('Get User by UUID API: Executing GraphQL query for uuid:', userUuid);
-    const userData = await executeQuery(GET_USER_BY_UUID_QUERY, { uuid: userUuid });
-
-    console.log('Get User by UUID API: Raw GraphQL response:', userData);
+    const userData = await executeQuery(GET_USER_BY_UUID_QUERY, { id: userUuid });
 
     // Type assertion for the response data
     const typedUserData = userData as {
@@ -79,8 +75,7 @@ export async function GET(request: NextRequest) {
       }>;
     };
 
-    if (!typedUserData.real_estate_user || typedUserData.real_estate_user.length === 0) {
-      console.log('Get User by UUID API: No user found for UUID:', userUuid);
+    if (!typedUserData.real_estate_user?.length) {
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
@@ -88,17 +83,14 @@ export async function GET(request: NextRequest) {
     }
 
     const user = typedUserData.real_estate_user[0];
-    console.log('Get User by UUID API: Found user:', user.display_name);
 
-    // Return the user data
     return NextResponse.json({
       success: true,
       data: user,
       message: 'User retrieved successfully',
     });
   } catch (error) {
-    console.error('Get User by UUID API: Error:', error);
-    console.error('Get User by UUID API: Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Get user by UUID error:', error);
     return NextResponse.json(
       { error: 'Failed to retrieve user', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         status: string;
         created_at: string;
         updated_at: string;
-        landlord_user_id: string;
+        landlord_user_id: string | null;
       }[];
     };
 

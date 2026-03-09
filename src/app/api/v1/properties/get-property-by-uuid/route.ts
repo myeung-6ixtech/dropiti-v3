@@ -43,8 +43,10 @@ const GET_PROPERTY_BY_UUID_QUERY = `
         avg_response_time
       }
       landlord_user {
+        id
         avatarUrl
         email
+        lastSeen
         createdAt
       }
     }
@@ -105,8 +107,10 @@ export async function GET(request: NextRequest) {
           avg_response_time?: string;
         };
         landlord_user?: {
+          id?: string;
           avatarUrl?: string;
           email?: string;
+          lastSeen?: string;
           createdAt?: string;
         };
       }>;
@@ -161,9 +165,9 @@ export async function GET(request: NextRequest) {
       },
       // Always return a landlord object if we have any identity info
       landlord: (details || authUser || property.landlord_user_id) ? {
-        id: details?.nhost_user_id || property.landlord_user_id,
-        uuid: details?.nhost_user_id || property.landlord_user_id,
-        nhost_user_id: details?.nhost_user_id || property.landlord_user_id,
+        id: details?.nhost_user_id || authUser?.id || property.landlord_user_id,
+        uuid: details?.nhost_user_id || authUser?.id || property.landlord_user_id,
+        nhost_user_id: details?.nhost_user_id || authUser?.id || property.landlord_user_id,
         name: details?.display_name || authUser?.email?.split('@')[0] || 'Landlord',
         email: details?.email || authUser?.email || '',
         avatar: details?.photo_url || authUser?.avatarUrl,

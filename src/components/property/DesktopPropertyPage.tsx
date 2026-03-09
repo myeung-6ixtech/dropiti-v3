@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Bed, Bathtub, Clock } from '@/assets/icons';
 import { getAmenityIcon } from '@/constants/amenity-icons';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 import PropertyPricingCard from '@/components/common/PropertyPricingCard';
 import PropertyMap from '@/components/common/PropertyMap';
 
@@ -47,6 +48,7 @@ interface DesktopPropertyPageProps {
   setIsDescriptionExpanded: (expanded: boolean) => void;
   amenitiesList: string[];
   groupedAmenities: Record<string, Array<{ id: string; name: string }>>;
+  isOwner?: boolean;
 }
 
 export default function DesktopPropertyPage({
@@ -61,7 +63,8 @@ export default function DesktopPropertyPage({
   isDescriptionExpanded,
   setIsDescriptionExpanded,
   amenitiesList,
-  groupedAmenities
+  groupedAmenities,
+  isOwner = false,
 }: DesktopPropertyPageProps) {
   const router = useRouter();
 
@@ -281,7 +284,7 @@ export default function DesktopPropertyPage({
                 <div className="flex items-center space-x-4">
                   <div className="w-16 h-16 rounded-full overflow-hidden">
                     <Image
-                      src={landlord.avatar || '/images/Portrait_Placeholder.png'}
+                      src={landlord.avatar || DEFAULT_AVATAR_URL}
                       alt={landlord.name}
                       width={64}
                       height={64}
@@ -351,8 +354,8 @@ export default function DesktopPropertyPage({
                   totalProperties: 1,
                 }}
                 onCreateOffer={handleCreateOffer}
-                onChatWithLandlord={() => {}} // Empty function for now
-                isOwner={false} // Default value
+                onChatWithLandlord={() => {}}
+                isOwner={isOwner}
                 hasExistingOffer={hasExistingOffer}
               />
             </div>

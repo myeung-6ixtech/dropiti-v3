@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
 import type { CreateUserInput } from '@/types';
+import { DEFAULT_AVATAR_URL } from '@/constants/images';
 
 const CREATE_USER_MUTATION = `
   mutation CreateUser($user: real_estate_user_insert_input!) {
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
       nhost_user_id: userData.nhost_user_id,
       display_name: userData.display_name,
       email: userData.email.toLowerCase(),
-      photo_url: userData.photo_url || '/images/Portrait_Placeholder.png',
+      photo_url: userData.photo_url || DEFAULT_AVATAR_URL,
       auth_provider: userData.auth_provider || 'email',
     };
 

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatformDuration } from "@/lib/utils";
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { 
@@ -85,7 +86,7 @@ export default function DropitiPassport2({ user, nhostUserId }: DropitiPassport2
         <div className="relative">
           <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden ring-4 ring-gray-100">
             <Image
-              src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')}
+              src={getSafeProfileImage(user.avatar, DEFAULT_AVATAR_URL)}
               alt={user.displayName}
               width={128}
               height={128}

@@ -12,3 +12,6 @@ export * from './amenity-icons';
 
 // Review Constants
 export * from './review';
+
+// Image Constants
+export * from './images';

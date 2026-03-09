@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { nhost } from '@/lib/nhost';
 import { usersAPI } from '@/lib/api-client';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
@@ -127,7 +128,7 @@ export default function SignUpForm() {
           nhost_user_id: session.user.id,
           display_name: name,
           email,
-          photo_url: '/images/Portrait_Placeholder.png',
+          photo_url: DEFAULT_AVATAR_URL,
           auth_provider: 'email',
         });
       } catch (dbErr) {

@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Bed, Bathtub, Clock } from '@/assets/icons';
 import { getAmenityIcon } from '@/constants/amenity-icons';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 import PropertyMap from '@/components/common/PropertyMap';
 import { useResponsiveModal } from '@/hooks/useResponsiveModal';
 
@@ -329,7 +330,7 @@ export default function MobilePropertyPage({
             <div className="flex items-center space-x-4">
               <div className="w-16 h-16 rounded-full overflow-hidden">
                 <Image
-                  src={landlord.avatar || '/images/Portrait_Placeholder.png'}
+                  src={landlord.avatar || DEFAULT_AVATAR_URL}
                   alt={landlord.name}
                   width={64}
                   height={64}

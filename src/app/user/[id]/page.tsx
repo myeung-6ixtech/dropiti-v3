@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 import { UserListings, UserReviews } from '@/components/user-profile';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface User {
   uuid: string;
@@ -42,11 +43,9 @@ export default function UserProfilePage() {
           setIsLoading(true);
           setError(null);
           
-          console.log('Fetching user data for UUID:', uuid);
           const response = await usersAPI.getUserByUuid(uuid);
           
           if (response.success && response.data) {
-            console.log('User data received:', response.data);
             
             // Transform API data to match our User interface
             const transformedUser: User = {
@@ -92,7 +91,7 @@ export default function UserProfilePage() {
   // Map User to DropitiPassport2 format
   const mapToPassportFormat = (user: User) => ({
     displayName: user.display_name,
-    avatar: user.photo_url || '/images/placeholder.png', // Fallback avatar
+    avatar: user.photo_url || DEFAULT_AVATAR_URL,
     email: user.email,
     location: user.location,
     created_at: user.created_at,
