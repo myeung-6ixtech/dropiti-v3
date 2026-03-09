@@ -147,8 +147,8 @@ export async function POST(request: NextRequest) {
       id: offer.id,
       offerKey: offer.offer_key,
       propertyUuid: offer.property_uuid,
-      initiatorFirebaseUid: offer.initiator_user_id,
-      recipientFirebaseUid: offer.recipient_user_id,
+      initiatorUserId: offer.initiator_user_id,
+      recipientUserId: offer.recipient_user_id,
       proposingRentPrice: offer.proposing_rent_price,
       proposingRentPriceCurrency: offer.proposing_rent_price_currency,
       numLeasingMonths: offer.num_leasing_months,
@@ -178,8 +178,6 @@ export async function POST(request: NextRequest) {
 
     console.log('Counter Offer API: Transformed offer:', transformedOffer);
     console.log('Counter Offer API: Current user ID:', currentUserId);
-    console.log('Counter Offer API: Offer initiator:', transformedOffer.initiatorFirebaseUid);
-    console.log('Counter Offer API: Offer recipient:', transformedOffer.recipientFirebaseUid);
 
     // Validate counter offer data
     const validation = validateOfferAction(transformedOffer, 'INITIATOR_COUNTERED', currentUserId);

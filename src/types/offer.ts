@@ -10,8 +10,8 @@ export interface Offer {
   id: string;
   offerKey: string;
   propertyUuid: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
+  initiatorUserId: string;
+  recipientUserId: string;
   proposingRentPrice: number;
   proposingRentPriceCurrency: string;
   numLeasingMonths: number;
@@ -140,8 +140,8 @@ export interface OfferProperty {
 
 export interface CreateOfferInput {
   propertyId: string;
-  initiatorFirebaseUid: string;
-  recipientFirebaseUid: string;
+  initiatorUserId: string;
+  recipientUserId: string;
   proposingRentPrice: number;
   numLeasingMonths: number;
   paymentFrequency: string;
@@ -191,8 +191,8 @@ export interface OfferListResponse {
 
 export interface OfferFilters {
   status?: OfferStatus;
-  initiatorFirebaseUid?: string;
-  recipientFirebaseUid?: string;
+  initiatorUserId?: string;
+  recipientUserId?: string;
   propertyUuid?: string;
   limit?: number;
   offset?: number;
@@ -278,6 +278,6 @@ export interface OfferNotification {
   offerKey: string;
   propertyUuid: string;
   message: string;
-  recipientFirebaseUid: string;
+  recipientUserId: string;
   createdAt: string;
 }

@@ -405,12 +405,12 @@ export const offersAPI = {
   },
 
   // Get offers by recipient (landlord)
-  getOffersByRecipient: async (recipientFirebaseUid: string, propertyUuid?: string) => {
+  getOffersByRecipient: async (recipientUserId: string, propertyUuid?: string) => {
     try {
-      const url = propertyUuid 
-        ? `/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}&propertyUuid=${propertyUuid}`
-        : `/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}`;
-      
+      const url = propertyUuid
+        ? `/offers/get-offers-by-id?recipientUserId=${recipientUserId}&propertyUuid=${propertyUuid}`
+        : `/offers/get-offers-by-id?recipientUserId=${recipientUserId}`;
+
       const response = await apiClient.get(url);
       return response.data;
     } catch (error) {
@@ -420,9 +420,9 @@ export const offersAPI = {
   },
 
   // Get offers by initiator (tenant)
-  getOffersByInitiator: async (initiatorFirebaseUid: string) => {
+  getOffersByInitiator: async (initiatorUserId: string) => {
     try {
-      const response = await apiClient.get(`/offers/get-offers-by-initiator?initiatorFirebaseUid=${initiatorFirebaseUid}`);
+      const response = await apiClient.get(`/offers/get-offers-by-initiator?initiatorUserId=${initiatorUserId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching offers by initiator:', error);

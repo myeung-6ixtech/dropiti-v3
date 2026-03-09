@@ -43,7 +43,7 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 `;
 
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($nhostUserId: String!) {
+  query GetUserByFirebaseUid($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       display_name
       photo_url

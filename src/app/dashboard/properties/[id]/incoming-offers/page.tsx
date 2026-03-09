@@ -93,7 +93,7 @@ export default function IncomingOffersPage() {
 
       {/* Incoming Offers Component */}
       <IncomingOffers
-        recipientFirebaseUid={authUser.id}
+        recipientUserId={authUser.id}
         propertyUuid={property.property_uuid}
         title={`Offers for ${property.title}`}
         showPropertyInfo={false}

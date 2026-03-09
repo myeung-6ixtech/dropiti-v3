@@ -13,7 +13,7 @@ interface CreateOfferModalProps {
   onClose: () => void;
   propertyId?: string;
   currentPrice?: number;
-  recipientFirebaseUid?: string; // Add recipient (landlord) Firebase UID
+  recipientUserId?: string;
   onOfferSubmit?: (offerData: OfferData) => void;
   // New props for counter offer mode
   mode?: 'create' | 'counter';

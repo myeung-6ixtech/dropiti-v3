@@ -101,24 +101,9 @@ export default function TenantMarketplaceContent() {
         ...(filters.move_in_date && { move_in_date: filters.move_in_date }),
         ...(filters.property_type && { property_type: filters.property_type }),
       };
-      console.log('[TenantMarketplace Client] Fetching with params:', params);
       const result = await tenantsAPI.getTenantProfiles(params);
-      console.log('[TenantMarketplace Client] API result:', result);
-      
+
       if (result.success && result.data) {
-        if (Array.isArray(result.data) && result.data.length > 0) {
-          console.log('[TenantMarketplace Client] First result snapshot:', {
-            tenant_uuid: result.data[0]?.tenant_uuid,
-            user_id: result.data[0]?.user_id,
-            user: result.data[0]?.user ? {
-              nhost_user_id: result.data[0]?.user?.nhost_user_id,
-              display_name: result.data[0]?.user?.display_name,
-              name: result.data[0]?.user?.name,
-              avatar: result.data[0]?.user?.avatar,
-              photo_url: result.data[0]?.user?.photo_url,
-            } : null,
-          });
-        }
         setTenantProfiles(result.data);
       } else {
         console.error('Failed to fetch tenant profiles:', result.error);

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { TenantProfileData } from '@/types/tenant';
 import { getSafeProfileImage } from '@/lib/utils';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
 
 interface TenantProfileCardProps {
@@ -39,13 +40,11 @@ export default function TenantProfileCard({
     nhost_user_id?: string;
     uuid?: string;
     display_name?: string;
-    name?: string;
     photo_url?: string;
-    avatar?: string;
   } | null>(user ?? null);
   
-  // State for user UUID
-  const [userUuid, setUserUuid] = useState<string | null>(user?.uuid || null);
+  // State for user nhost_user_id (used for /user/[id] profile links)
+  const [userUuid, setUserUuid] = useState<string | null>(user?.nhost_user_id || data?.user_id || null);
 
   // Fetch fallback user if not provided by API, and get UUID
   useEffect(() => {
@@ -69,13 +68,11 @@ export default function TenantProfileCard({
               nhost_user_id: json.data.nhost_user_id,
               uuid: json.data.uuid,
               display_name: json.data.display_name,
-              name: json.data.name,
               photo_url: json.data.photo_url,
-              avatar: json.data.avatar,
             });
-            // Set UUID for View button
-            if (json.data.uuid) {
-              setUserUuid(json.data.uuid);
+            // Use nhost_user_id for the /user/[id] profile link
+            if (json.data.nhost_user_id) {
+              setUserUuid(json.data.nhost_user_id);
             }
           }
         }
@@ -99,8 +96,6 @@ export default function TenantProfileCard({
     }
     
     // TODO: Implement contact functionality for authenticated users
-    // For now, we'll just show an alert or navigate to chat
-    console.log('Contact user:', userUuid || data?.user_id);
   };
 
   const formatCurrency = (amount: number | undefined, currency: string = 'HKD') => {
@@ -123,40 +118,10 @@ export default function TenantProfileCard({
 
   // Use resolved user data (fallback to API-provided user)
   const displayUser = resolvedUser ?? user ?? null;
-  const userName = displayUser?.display_name || displayUser?.name || 'User';
-  const userAvatar = displayUser?.avatar || displayUser?.photo_url;
+  const userName = displayUser?.display_name || user?.name || 'User';
+  const userAvatar = user?.avatar || displayUser?.photo_url;
   const isCurrentUser = !!(currentUserId && displayUser?.nhost_user_id === currentUserId);
 
-  // Debug logging to verify incoming props and resolved user
-  console.log('[TenantProfileCard] props', {
-    tenant_uuid: data?.tenant_uuid,
-    user_id: data?.user_id,
-    user: user ? {
-      nhost_user_id: user?.nhost_user_id,
-      display_name: user?.display_name,
-      name: user?.name,
-      avatar: user?.avatar,
-      photo_url: user?.photo_url,
-    } : null,
-    resolvedUser: resolvedUser ? {
-      nhost_user_id: resolvedUser?.nhost_user_id,
-      display_name: resolvedUser?.display_name,
-      name: resolvedUser?.name,
-      avatar: resolvedUser?.avatar,
-      photo_url: resolvedUser?.photo_url,
-    } : null,
-    displayUser: displayUser ? {
-      nhost_user_id: displayUser?.nhost_user_id,
-      display_name: displayUser?.display_name,
-      name: displayUser?.name,
-      avatar: displayUser?.avatar,
-      photo_url: displayUser?.photo_url,
-    } : null,
-    userName,
-    userAvatar,
-    currentUserId,
-    isCurrentUser,
-  });
 
   return (
     <div className={`bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 relative ${className}`}>
@@ -180,7 +145,7 @@ export default function TenantProfileCard({
           <div className="flex items-start gap-3 pr-20">
             <div className="flex-shrink-0">
               <Image
-                src={getSafeProfileImage(userAvatar, '/images/Portrait_Placeholder.png')}
+                src={getSafeProfileImage(userAvatar, DEFAULT_AVATAR_URL)}
                 alt={userName}
                 width={48}
                 height={48}

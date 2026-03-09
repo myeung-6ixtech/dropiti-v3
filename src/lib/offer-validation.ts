@@ -129,7 +129,7 @@ export function getOfferValidationSummary(
   // Check for duplicate offers from same user
   const duplicateOffers = allOffers.filter(o => 
     o.propertyUuid === offer.propertyUuid &&
-    o.initiatorFirebaseUid === offer.initiatorFirebaseUid &&
+    o.initiatorUserId === offer.initiatorUserId &&
     o.id !== offer.id &&
     o.offerStatus === 'pending'
   );

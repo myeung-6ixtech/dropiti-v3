@@ -85,7 +85,7 @@ interface GraphQLPropertyResponse {
 
 // GraphQL query to get offers by initiator (user who created the offers)
 const GET_OFFERS_BY_INITIATOR_QUERY = `
-  query GetOffersByInitiator($initiatorFirebaseUid: String!) {
+  query GetOffersByInitiator($initiatorFirebaseUid: uuid!) {
     real_estate_offer(where: { initiator_user_id: { _eq: $initiatorFirebaseUid } }, order_by: { created_at: desc }) {
       id
       offer_key
@@ -124,7 +124,7 @@ const GET_OFFERS_BY_INITIATOR_QUERY = `
 
 // GraphQL query to get user details by Firebase UID
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($nhostUserId: String!) {
+  query GetUserByFirebaseUid($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }, limit: 1) {
       uuid
       nhost_user_id
@@ -158,16 +158,14 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const initiatorFirebaseUid = searchParams.get('initiatorFirebaseUid');
+    const initiatorFirebaseUid = searchParams.get('initiatorUserId') || searchParams.get('initiatorFirebaseUid');
 
     if (!initiatorFirebaseUid) {
       return NextResponse.json(
-        { success: false, error: 'initiatorFirebaseUid is required' },
+        { success: false, error: 'initiatorUserId is required' },
         { status: 400 }
       );
     }
-
-    console.log('Fetching offers for initiator:', initiatorFirebaseUid);
 
     // First, fetch the offers
     const query = GET_OFFERS_BY_INITIATOR_QUERY;
@@ -224,7 +222,7 @@ export async function GET(request: NextRequest) {
         offerKey: offer.offer_key,
         propertyUuid: offer.property_uuid,
         initiatorFirebaseUid: offer.initiator_user_id,
-        recipientFirebaseUid: offer.recipient_user_id,
+        recipientUserId: offer.recipient_user_id,
         proposingRentPrice: offer.proposing_rent_price || 0,
         proposingRentPriceCurrency: offer.proposing_rent_price_currency || 'HKD',
         numLeasingMonths: offer.num_leasing_months || 12,

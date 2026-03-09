@@ -16,8 +16,8 @@ interface OfferCardStatusProps {
     paymentFrequency: string;
     offerKey?: string;
     propertyUuid?: string;
-    initiatorFirebaseUid?: string;
-    recipientFirebaseUid?: string;
+    initiatorUserId?: string;
+    recipientUserId?: string;
     isActive?: boolean;
     createdAt?: string;
     updatedAt?: string;

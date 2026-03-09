@@ -235,8 +235,8 @@ export default function PropertyDetailPage() {
       // Call the create-offer API
       const response = await offersAPI.createOffer({
         propertyId: propertyData.property.property_uuid,
-        initiatorFirebaseUid: authUser.id,
-        recipientFirebaseUid: propertyData.landlord?.nhost_user_id || '',
+        initiatorUserId: authUser.id,
+        recipientUserId: propertyData.landlord?.nhost_user_id || '',
         proposingRentPrice: offerData.rentalPrice,
         numLeasingMonths: offerData.leaseDuration,
         paymentFrequency: offerData.paymentFrequency,
@@ -423,7 +423,7 @@ export default function PropertyDetailPage() {
         onClose={() => setIsCreateOfferModalOpen(false)}
         propertyId={property.property_uuid}
         currentPrice={property.price}
-        recipientFirebaseUid={landlord?.nhost_user_id}
+        recipientUserId={landlord?.nhost_user_id}
         onOfferSubmit={handleOfferSubmit}
       />
 

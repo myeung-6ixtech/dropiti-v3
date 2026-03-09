@@ -11,13 +11,13 @@ import { Offer } from '@/types/offer';
 
 
 interface OutgoingOffersProps {
-  initiatorFirebaseUid: string;
+  initiatorUserId: string;
   title?: string;
   showPropertyInfo?: boolean;
 }
 
 export default function OutgoingOffers({ 
-  initiatorFirebaseUid, 
+  initiatorUserId, 
   title = "Your Applications",
   showPropertyInfo = true 
 }: OutgoingOffersProps) {
@@ -50,7 +50,7 @@ export default function OutgoingOffers({
         setLoading(true);
         setError(null);
                 
-        const response = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
+        const response = await offersAPI.getOffersByInitiator(initiatorUserId);
 
         if (response.success && response.data) {
           setOffers(response.data);
@@ -68,10 +68,10 @@ export default function OutgoingOffers({
       }
     };
 
-    if (initiatorFirebaseUid) {
+    if (initiatorUserId) {
       fetchOffers();
     }
-  }, [initiatorFirebaseUid]);
+  }, [initiatorUserId]);
 
   if (loading) {
     return <CenteredLoadingSpinner />;
@@ -136,11 +136,11 @@ export default function OutgoingOffers({
               // TODO: Make API call to withdraw the offer
               console.log('Withdrawing offer:', offer.id);
             }}
-            currentUserId={initiatorFirebaseUid}
+            currentUserId={initiatorUserId}
             onOfferStatusChange={() => {
               // Refresh the offers list when an offer status changes
-              if (initiatorFirebaseUid) {
-                offersAPI.getOffersByInitiator(initiatorFirebaseUid)
+              if (initiatorUserId) {
+                offersAPI.getOffersByInitiator(initiatorUserId)
                   .then(response => {
                     if (response.success && response.data) {
                       setOffers(response.data);
@@ -158,11 +158,11 @@ export default function OutgoingOffers({
             }}
             onAcceptOffer={async (offerId: string) => {
               try {
-                const response = await offersAPI.acceptOffer(offerId, initiatorFirebaseUid);
+                const response = await offersAPI.acceptOffer(offerId, initiatorUserId);
                 if (response.success) {
                   showToast('Offer accepted successfully!', 'success');
                   // Refresh offers list
-                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
+                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorUserId);
                   if (refreshResponse.success && refreshResponse.data) {
                     setOffers(refreshResponse.data);
                   }
@@ -176,11 +176,11 @@ export default function OutgoingOffers({
             }}
             onRejectOffer={async (offerId: string) => {
               try {
-                const response = await offersAPI.rejectOffer(offerId, initiatorFirebaseUid);
+                const response = await offersAPI.rejectOffer(offerId, initiatorUserId);
                 if (response.success) {
                   showToast('Offer rejected successfully!', 'success');
                   // Refresh offers list
-                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
+                  const refreshResponse = await offersAPI.getOffersByInitiator(initiatorUserId);
                   if (refreshResponse.success && refreshResponse.data) {
                     setOffers(refreshResponse.data);
                   }

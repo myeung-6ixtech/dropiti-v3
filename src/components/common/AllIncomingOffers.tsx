@@ -10,7 +10,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Offer } from '@/types/offer';
 import MobileTabs from '@/components/common/MobileTabs';
 interface AllIncomingOffersProps {
-  recipientFirebaseUid: string;
+  recipientUserId: string;
 }
 
 interface OfferWithProperty extends Offer {
@@ -28,7 +28,7 @@ interface PropertyGroup {
   offers: OfferWithProperty[];
 }
 
-export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingOffersProps) {
+export default function AllIncomingOffers({ recipientUserId }: AllIncomingOffersProps) {
   const { t } = useLanguage();
   const [offers, setOffers] = useState<OfferWithProperty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
         setError(null);
         
         // Get all offers without property filter to get offers from all properties
-        const response = await offersAPI.getOffersByRecipient(recipientFirebaseUid);
+        const response = await offersAPI.getOffersByRecipient(recipientUserId);
 
         if (response.success && response.data) {
           if (response.data.length === 0) {
@@ -143,10 +143,10 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
       }
     };
 
-    if (recipientFirebaseUid) {
+    if (recipientUserId) {
       fetchAllOffers();
     }
-  }, [recipientFirebaseUid]);
+  }, [recipientUserId]);
 
   // Filter offers based on status - combine pending, tentatively_accepted, and countered into "pending"
   const filteredOffers = offers.filter(offer => {
@@ -174,7 +174,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
 
   const handleAcceptOffer = async (offerId: string) => {
     try {
-      const response = await offersAPI.acceptOffer(offerId, recipientFirebaseUid);
+      const response = await offersAPI.acceptOffer(offerId, recipientUserId);
       if (response.success) {
         setOffers(prev => 
           prev.map(offer => 
@@ -191,7 +191,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
 
   const handleRejectOffer = async (offerId: string) => {
     try {
-      const response = await offersAPI.rejectOffer(offerId, recipientFirebaseUid);
+      const response = await offersAPI.rejectOffer(offerId, recipientUserId);
       if (response.success) {
         setOffers(prev => 
           prev.map(offer => 
@@ -225,7 +225,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
     try {
       const response = await offersAPI.counterOffer(
         selectedOfferForCounter.id,
-        recipientFirebaseUid,
+        recipientUserId,
         {
           rentPrice: offerData.rentalPrice,
           numLeasingMonths: offerData.leaseDuration,
@@ -367,7 +367,7 @@ export default function AllIncomingOffers({ recipientFirebaseUid }: AllIncomingO
                     onAcceptOffer={handleAcceptOffer}
                     onRejectOffer={handleRejectOffer}
                     onCounterOffer={handleCounterOffer}
-                    currentUserId={recipientFirebaseUid}
+                    currentUserId={recipientUserId}
                     onOfferStatusChange={() => {
                       // Refresh offers when status changes
                       window.location.reload();

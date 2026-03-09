@@ -11,14 +11,14 @@ import { Offer } from '@/types/offer';
 import MobileTabs from '@/components/common/MobileTabs';
 
 interface AllOutgoingOffersProps {
-  initiatorFirebaseUid: string;
+  initiatorUserId: string;
   showPropertyInfo?: boolean;
 }
 
 type FilterStatus = 'all' | 'pending' | 'accepted' | 'rejected' | 'withdrawn';
 
 export default function AllOutgoingOffers({ 
-  initiatorFirebaseUid, 
+  initiatorUserId, 
   showPropertyInfo = true 
 }: AllOutgoingOffersProps) {
   const { t } = useLanguage();
@@ -52,7 +52,7 @@ export default function AllOutgoingOffers({
         setLoading(true);
         setError(null);
         
-        const response = await offersAPI.getOffersByInitiator(initiatorFirebaseUid);
+        const response = await offersAPI.getOffersByInitiator(initiatorUserId);
 
         if (response.success && response.data) {
           setOffers(response.data);
@@ -67,10 +67,10 @@ export default function AllOutgoingOffers({
       }
     };
 
-    if (initiatorFirebaseUid) {
+    if (initiatorUserId) {
       fetchOffers();
     }
-  }, [initiatorFirebaseUid]);
+  }, [initiatorUserId]);
 
   // Filter offers based on status - combine pending, tentatively_accepted, and countered into "pending"
   const filteredOffers = offers.filter(offer => {
@@ -83,7 +83,7 @@ export default function AllOutgoingOffers({
 
   const handleWithdrawOffer = async (offerId: string) => {
     try {
-      const response = await offersAPI.withdrawOffer(offerId, initiatorFirebaseUid);
+      const response = await offersAPI.withdrawOffer(offerId, initiatorUserId);
       if (response.success) {
         setOffers(prev => 
           prev.map(offer => 
@@ -219,11 +219,11 @@ export default function AllOutgoingOffers({
               showPropertyInfo={showPropertyInfo}
               isIncomingOffer={false}
               onWithdrawOffer={handleWithdrawOffer}
-              currentUserId={initiatorFirebaseUid}
+              currentUserId={initiatorUserId}
               onOfferStatusChange={() => {
                 // Refresh the offers list when an offer status changes
-                if (initiatorFirebaseUid) {
-                  offersAPI.getOffersByInitiator(initiatorFirebaseUid)
+                if (initiatorUserId) {
+                  offersAPI.getOffersByInitiator(initiatorUserId)
                     .then(response => {
                       if (response.success && response.data) {
                         setOffers(response.data);
