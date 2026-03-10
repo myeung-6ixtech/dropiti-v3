@@ -8,6 +8,8 @@ import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email.trim()) return { isValid: false, message: "Email is required" };

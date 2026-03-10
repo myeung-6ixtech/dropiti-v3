@@ -11,7 +11,6 @@ import {
   FiShield, 
   FiSettings
 } from 'react-icons/fi';
-import { signIn } from 'next-auth/react';
 import { SettingsHeader } from './_components/settings-header';
 import { SettingsTabs } from './_components/settings-tabs';
 import PhoneInput from '@/components/common/PhoneInput';
@@ -70,7 +69,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [areaCode, setAreaCode] = useState('+852'); // Default to Hong Kong
-  const [authProvider, setAuthProvider] = useState<string>('firebase'); // Track auth provider
+  const [authProvider, setAuthProvider] = useState<string>('email'); // Track auth provider
   
   const [settings, setSettings] = useState<UserSettings>({
     firstName: 'John',
@@ -554,16 +553,11 @@ export default function SettingsPage() {
                       <button
                         onClick={async () => {
                           try {
-                            const result = await signIn('google', {
-                              redirect: false,
-                              callbackUrl: '/dashboard/settings',
+                            const { error } = await nhost.auth.signIn({
+                              provider: 'google',
+                              options: { redirectTo: '/dashboard/settings' },
                             });
-                            
-                            if (result?.ok) {
-                              showToast('success', 'Google account linked successfully!');
-                              setAuthProvider('google');
-                              setTimeout(() => window.location.reload(), 1000);
-                            } else {
+                            if (error) {
                               showToast('error', 'Failed to link Google account. Please try again.');
                             }
                           } catch (error) {
