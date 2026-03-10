@@ -42,7 +42,7 @@ const GET_PROPERTY_BY_UUID_QUERY = `
   }
 `;
 
-const GET_USER_BY_FIREBASE_UID_QUERY = `
+const GET_USER_BY_NHOST_ID_QUERY = `
   query GetUserByNhostUserId($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       display_name
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
     const userDetails: Record<string, { display_name: string; photo_url: string }> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as {
+        const userResponse = await executeQuery(GET_USER_BY_NHOST_ID_QUERY, { nhostUserId: userId }) as {
           real_estate_user: Array<{
             display_name: string;
             photo_url: string;

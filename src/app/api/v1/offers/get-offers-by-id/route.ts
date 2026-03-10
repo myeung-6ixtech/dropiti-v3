@@ -87,7 +87,7 @@ interface GraphQLPropertyResponse {
 }
 
 const GET_OFFERS_BY_RECIPIENT_QUERY = `
-  query GetOffersByRecipient($recipientUserId: uuid!, $propertyUuid: String) {
+  query GetOffersByRecipient($recipientUserId: String!, $propertyUuid: String) {
     real_estate_offer(
       where: {
         recipient_user_id: {_eq: $recipientUserId}
@@ -134,7 +134,7 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
 `;
 
 const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
-  query GetOffersByRecipient($recipientUserId: uuid!) {
+  query GetOffersByRecipient($recipientUserId: String!) {
     real_estate_offer(
       where: {
         recipient_user_id: {_eq: $recipientUserId}
@@ -179,7 +179,7 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
   }
 `;
 
-const GET_USER_BY_FIREBASE_UID_QUERY = `
+const GET_USER_BY_NHOST_ID_QUERY = `
   query GetUserByNhostUserId($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }, limit: 1) {
       uuid
@@ -260,7 +260,7 @@ export async function GET(request: NextRequest) {
     const userDetails: Record<string, GraphQLUser> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userData = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
+        const userData = await executeQuery(GET_USER_BY_NHOST_ID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
         if (userData?.real_estate_user) { // Changed from real_estate_user_by_pk to real_estate_user
           userDetails[userId] = userData.real_estate_user[0]; // Access the first user if multiple exist
         }

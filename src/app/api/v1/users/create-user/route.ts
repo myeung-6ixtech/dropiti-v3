@@ -38,7 +38,7 @@ const CHECK_USER_EXISTS = `
 
 export async function POST(request: NextRequest) {
   try {
-    if (!process.env.NEXT_PUBLIC_HASURA_GRAPHQL_API_URL || !process.env.HASURA_GRAPHQL_ADMIN_SECRET) {
+    if (!process.env.HASURA_ENDPOINT || !process.env.HASURA_ADMIN_SECRET) {
       return NextResponse.json(
         { error: 'Missing required environment variables' },
         { status: 500 },

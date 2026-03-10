@@ -53,10 +53,10 @@ export default function TenantProfileCard({
       try {
         const nhostUserId = data?.user_id || user?.nhost_user_id;
         
-        if (nhostUserId) {
-          // If we already have UUID from user prop, use it
-          if (user?.uuid) {
-            setUserUuid(user.uuid);
+          if (nhostUserId) {
+          // If we already have nhost_user_id from user prop, use it for the profile link
+          if (user?.nhost_user_id) {
+            setUserUuid(user.nhost_user_id);
             return;
           }
           

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { useAuth } from "@/context/AuthContext";
+import { getSafeProfileImage } from "@/lib/utils";
 import { headerDropdownStyles } from "@/styles/index";
 
 export default function UserDropdown() {
@@ -29,8 +30,8 @@ export default function UserDropdown() {
           <Image
             width={44}
             height={44}
-            src="/images/user/owner.jpg"
-            alt="User"
+            src={getSafeProfileImage(user?.avatar, '/images/Portrait_Placeholder.png')}
+            alt={user?.name || 'User'}
           />
         </span>
 
@@ -70,7 +71,7 @@ export default function UserDropdown() {
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
-              href="/profile"
+              href="/dashboard/profile/edit"
               className={headerDropdownStyles.userDropdown.item}
             >
               <svg
@@ -95,7 +96,7 @@ export default function UserDropdown() {
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
-              href="/profile"
+              href="/dashboard/settings"
               className={headerDropdownStyles.userDropdown.item}
             >
               <svg
@@ -120,7 +121,7 @@ export default function UserDropdown() {
             <DropdownItem
               onItemClick={closeDropdown}
               tag="a"
-              href="/profile"
+              href="/dashboard/profile"
               className={headerDropdownStyles.userDropdown.item}
             >
               <svg
@@ -138,7 +139,7 @@ export default function UserDropdown() {
                   fill=""
                 />
               </svg>
-              Support
+              My Profile
             </DropdownItem>
           </li>
         </ul>

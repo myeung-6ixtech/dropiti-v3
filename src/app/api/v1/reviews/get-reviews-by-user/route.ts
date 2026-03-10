@@ -111,7 +111,7 @@ const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
   }
 `;
 
-const GET_USER_BY_FIREBASE_UID_QUERY = `
+const GET_USER_BY_NHOST_ID_QUERY = `
   query GetUserByNhostUserId($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       uuid
@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
     const userDetails: Record<string, GraphQLUser> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
+        const userResponse = await executeQuery(GET_USER_BY_NHOST_ID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
         if (userResponse?.real_estate_user?.[0]) {
           userDetails[userId] = userResponse.real_estate_user[0];
         }

@@ -40,7 +40,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
     if (path === '/profile') {
       // Check if we're on dashboard or user profile pages
       return pathname.startsWith('/dashboard') || 
-             (user?.uuid && pathname.startsWith(`/user/${user.uuid}`)) || false;
+             (user?.id && pathname.startsWith(`/user/${user.id}`)) || false;
     }
     return pathname === path;
   };
@@ -73,7 +73,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
     {
       id: 'profile',
       label: isAuthenticated ? 'Profile' : 'Sign In',
-      href: isAuthenticated && user?.uuid ? `/user/${user.uuid}` : '/auth/signin',
+      href: isAuthenticated && user?.id ? `/user/${user.id}` : '/auth/signin',
       icon: FiUser,
       isActive: () => isActive('/profile'),
       showAvatar: !!(isAuthenticated && user?.avatar)

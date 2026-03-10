@@ -8,8 +8,6 @@ import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
-import PhoneInput, { validatePhone } from '@/components/common/PhoneInput';
-
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email.trim()) return { isValid: false, message: "Email is required" };
@@ -46,11 +44,6 @@ export default function SignUpForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
-  // Phone number states
-  const [areaCode, setAreaCode] = useState('+852');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [includePhone, setIncludePhone] = useState(false);
   
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});

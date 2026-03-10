@@ -223,9 +223,9 @@ export default function Navigation() {
             {isAuthenticated ? (
               <>
                <Link
-                href={user?.uuid ? `/user/${user.uuid}` : '/dashboard'}
+                href={user?.id ? `/user/${user.id}` : '/dashboard'}
                 className={`${navigationStyles.link} ${
-                  isActive('/dashboard') || (user?.uuid && isActive(`/user/${user.uuid}`))
+                  isActive('/dashboard') || (user?.id && isActive(`/user/${user.id}`))
                     ? navigationStyles.linkActive
                     : navigationStyles.linkInactive
                 }`}

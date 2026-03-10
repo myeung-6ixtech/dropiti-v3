@@ -145,7 +145,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             updatedAt: d.updated_at,
           });
         } else {
-          // Fallback to Nhost data if DB row missing
+          // No DB profile row found — auto-create one (covers Google OAuth sign-ups)
+          const detectedProvider = nhostUser.avatarUrl?.includes('googleusercontent')
+            ? 'google' as const
+            : 'email' as const;
+          try {
+            await usersAPI.createUser({
+              nhost_user_id: nhostUser.id,
+              display_name: nhostUser.displayName || nhostUser.email?.split('@')[0] || 'User',
+              email: nhostUser.email || '',
+              photo_url: nhostUser.avatarUrl || undefined,
+              auth_provider: detectedProvider,
+            });
+          } catch (createErr) {
+            console.warn('AuthContext: could not auto-create profile row', createErr);
+          }
           setUser({
             id: nhostUser.id,
             email: nhostUser.email || '',

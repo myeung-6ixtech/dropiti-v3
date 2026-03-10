@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
 
 const CHECK_EXISTING_OFFER_QUERY = `
-  query CheckExistingOffer($propertyUuid: String!, $initiatorUserId: uuid!) {
+  query CheckExistingOffer($propertyUuid: String!, $initiatorUserId: String!) {
     real_estate_offer(
       where: {
         property_uuid: { _eq: $propertyUuid }
