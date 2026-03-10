@@ -41,11 +41,11 @@ export default function Toast({
       case 'error':
         return 'bg-black text-white border-red-500';
       case 'success':
-        return 'bg-green-600 text-white border-green-500';
+        return 'bg-black text-white border-green-500';
       case 'warning':
-        return 'bg-yellow-600 text-white border-yellow-500';
+        return 'bg-black text-white border-yellow-500';
       case 'info':
-        return 'bg-blue-600 text-white border-blue-500';
+        return 'bg-black text-white border-blue-500';
       default:
         return 'bg-black text-white border-gray-500';
     }
