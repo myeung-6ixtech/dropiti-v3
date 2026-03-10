@@ -53,7 +53,7 @@ export default function PropertyShareModal({
       console.log('[PropertyShareModal] Fetching properties for user:', authUser?.id);
       
       const response = await propertiesAPI.getListings({
-        landlord_firebase_uid: authUser?.id || '',
+        landlord_user_id: authUser?.id || '',
         limit: 50
       });
       

@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 
 const UPDATE_USER_MUTATION = `
-  mutation UpdateUser($firebase_uid: String!, $updates: real_estate_user_set_input!) {
+  mutation UpdateUser($nhost_user_id: uuid!, $updates: real_estate_user_set_input!) {
     update_real_estate_user(
-      where: { firebase_uid: { _eq: $firebase_uid } }
+      where: { nhost_user_id: { _eq: $nhost_user_id } }
       _set: $updates
     ) {
       affected_rows
       returning {
-        firebase_uid
+        nhost_user_id
         display_name
         first_name
         last_name
@@ -42,55 +42,30 @@ export async function PUT(request: NextRequest) {
   try {
     const { id, updates } = await request.json();
 
-    // Validate required fields
     if (!id) {
       return NextResponse.json(
-        { error: 'User ID (firebase_uid) is required' },
-        { status: 400 }
+        { error: 'User ID (nhost_user_id) is required' },
+        { status: 400 },
       );
     }
 
     if (!updates || Object.keys(updates).length === 0) {
-      return NextResponse.json(
-        { error: 'Update data is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Update data is required' }, { status: 400 });
     }
 
-    // Validate update fields
     const allowedFields = [
-      'display_name',
-      'first_name',
-      'last_name',
-      'photo_url',
-      'phone_number',
-      'location',
-      'about',
-      'education',
-      'occupation',
-      'marital_status',
-      'languages',
-      'verified',
-      'rating',
-      'review_count',
-      'response_rate',
-      'onboarding_complete',
-      'preferences',
-      'notification_settings',
-      'privacy_settings'
+      'display_name', 'first_name', 'last_name', 'photo_url', 'phone_number',
+      'location', 'about', 'education', 'occupation', 'marital_status', 'languages',
+      'verified', 'rating', 'review_count', 'response_rate', 'onboarding_complete',
+      'preferences', 'notification_settings', 'privacy_settings',
     ];
 
     const filteredUpdates: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(updates)) {
       if (allowedFields.includes(key)) {
-        // Special handling for array fields that need to be serialized as JSON strings
-        if (key === 'languages' && Array.isArray(value)) {
+        if ((key === 'languages') && Array.isArray(value)) {
           filteredUpdates[key] = JSON.stringify(value);
-        } else if (key === 'preferences' && typeof value === 'object') {
-          filteredUpdates[key] = JSON.stringify(value);
-        } else if (key === 'notification_settings' && typeof value === 'object') {
-          filteredUpdates[key] = JSON.stringify(value);
-        } else if (key === 'privacy_settings' && typeof value === 'object') {
+        } else if (['preferences', 'notification_settings', 'privacy_settings'].includes(key) && typeof value === 'object') {
           filteredUpdates[key] = JSON.stringify(value);
         } else {
           filteredUpdates[key] = value;
@@ -99,59 +74,25 @@ export async function PUT(request: NextRequest) {
     }
 
     if (Object.keys(filteredUpdates).length === 0) {
-      return NextResponse.json(
-        { error: 'No valid fields to update' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
-    // Add updated_at timestamp
     filteredUpdates.updated_at = new Date().toISOString();
 
-    console.log('API Route: Filtered updates before GraphQL:', filteredUpdates);
-    console.log('API Route: Languages field type:', typeof filteredUpdates.languages, 'Value:', filteredUpdates.languages);
-
-    const data = await executeMutation(UPDATE_USER_MUTATION, { 
-      firebase_uid: id, 
-      updates: filteredUpdates 
+    const data = await executeMutation(UPDATE_USER_MUTATION, {
+      nhost_user_id: id,
+      updates: filteredUpdates,
     });
 
-    // Type assertion for the response data
     const typedData = data as {
       update_real_estate_user: {
         affected_rows: number;
-        returning: Array<{
-          firebase_uid: string;
-          display_name: string;
-          email: string;
-          photo_url?: string;
-          auth_provider: string;
-          phone_number?: string;
-          location?: string;
-          about?: string;
-          education?: string;
-          occupation?: string;
-          marital_status?: string;
-          languages?: string[];
-          verified: boolean;
-          rating: number;
-          review_count: number;
-          response_rate: number;
-          onboarding_complete: boolean;
-          preferences: Record<string, unknown>;
-          notification_settings: Record<string, unknown>;
-          privacy_settings: Record<string, unknown>;
-          created_at: string;
-          updated_at: string;
-        }>;
+        returning: Array<Record<string, unknown>>;
       };
     };
 
     if (!typedData.update_real_estate_user || typedData.update_real_estate_user.affected_rows === 0) {
-      return NextResponse.json(
-        { error: 'User not found or no changes made' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found or no changes made' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -161,9 +102,6 @@ export async function PUT(request: NextRequest) {
     });
   } catch (error) {
     console.error('Update user error:', error);
-    return NextResponse.json(
-      { error: 'Failed to update user' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update user' }, { status: 500 });
   }
 }

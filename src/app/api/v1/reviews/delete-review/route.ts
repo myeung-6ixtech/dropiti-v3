@@ -8,8 +8,8 @@ const DELETE_REVIEW_MUTATION = `
       returning {
         id
         review_uuid
-        reviewer_firebase_uid
-        reviewee_firebase_uid
+        reviewer_user_id
+        reviewee_user_id
         review_type
         rating
         title
@@ -46,8 +46,8 @@ export async function DELETE(request: NextRequest) {
         returning: Array<{
           id: string;
           review_uuid: string;
-          reviewer_firebase_uid: string;
-          reviewee_firebase_uid: string;
+          reviewer_user_id: string;
+          reviewee_user_id: string;
           review_type: string;
           rating: number;
           title?: string;

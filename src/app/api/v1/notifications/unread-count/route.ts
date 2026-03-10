@@ -4,16 +4,16 @@ import { NotificationService } from '@/lib/notification-service';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userFirebaseUid = searchParams.get('userFirebaseUid');
+    const userId = searchParams.get('userId');
 
-    if (!userFirebaseUid) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'User Firebase UID is required' },
+        { error: 'userId is required' },
         { status: 400 }
       );
     }
 
-    const count = await NotificationService.getUnreadCount(userFirebaseUid);
+    const count = await NotificationService.getUnreadCount(userId);
 
     return NextResponse.json({
       success: true,

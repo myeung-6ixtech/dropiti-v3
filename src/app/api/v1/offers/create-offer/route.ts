@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
 
 const CHECK_EXISTING_OFFER_QUERY = `
-  query CheckExistingOffer($propertyUuid: String!, $initiatorFirebaseUid: String!) {
+  query CheckExistingOffer($propertyUuid: String!, $initiatorUserId: uuid!) {
     real_estate_offer(
       where: {
         property_uuid: { _eq: $propertyUuid }
-        initiator_firebase_uid: { _eq: $initiatorFirebaseUid }
+        initiator_user_id: { _eq: $initiatorUserId }
         offer_status: { _in: ["pending", "accepted"] }
         is_active: { _eq: true }
       }
@@ -24,8 +24,8 @@ const CREATE_OFFER_MUTATION = `
       id
       offer_key
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       proposing_rent_price
       proposing_rent_price_currency
       num_leasing_months
@@ -44,12 +44,12 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     const requiredFields = [
-      'propertyId', 
-      'initiatorFirebaseUid', 
-      'recipientFirebaseUid', 
-      'proposingRentPrice', 
-      'numLeasingMonths', 
-      'paymentFrequency', 
+      'propertyId',
+      'initiatorUserId',
+      'recipientUserId',
+      'proposingRentPrice',
+      'numLeasingMonths',
+      'paymentFrequency',
       'moveInDate'
     ];
     
@@ -79,12 +79,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for existing offers from the same user for this property
-    console.log('Create Offer API: Checking for existing offers for property:', offerData.propertyId, 'user:', offerData.initiatorFirebaseUid);
-    
     try {
       const existingOffersData = await executeQuery(CHECK_EXISTING_OFFER_QUERY, {
         propertyUuid: offerData.propertyId,
-        initiatorFirebaseUid: offerData.initiatorFirebaseUid
+        initiatorUserId: offerData.initiatorUserId
       }) as {
         real_estate_offer: Array<{
           id: string;
@@ -92,11 +90,8 @@ export async function POST(request: NextRequest) {
         }>;
       };
 
-      console.log('Create Offer API: Existing offers query result:', existingOffersData);
-
       if (existingOffersData.real_estate_offer && existingOffersData.real_estate_offer.length > 0) {
         const existingOffer = existingOffersData.real_estate_offer[0];
-        console.log('Create Offer API: Found existing offer:', existingOffer);
         return NextResponse.json(
           { 
             error: `You already have a ${existingOffer.offer_status} offer for this property. Only one active offer per property is allowed.`,
@@ -106,7 +101,6 @@ export async function POST(request: NextRequest) {
         );
       }
       
-      console.log('Create Offer API: No existing offers found, proceeding with creation');
     } catch (checkError) {
       console.error('Create Offer API: Error checking existing offers:', checkError);
       // Continue with offer creation if check fails (don't block on check errors)
@@ -119,8 +113,8 @@ export async function POST(request: NextRequest) {
     const offer = {
       offer_key: offerKey,
       property_uuid: offerData.propertyId,
-      initiator_firebase_uid: offerData.initiatorFirebaseUid,
-      recipient_firebase_uid: offerData.recipientFirebaseUid,
+      initiator_user_id: offerData.initiatorUserId,
+      recipient_user_id: offerData.recipientUserId,
       proposing_rent_price: parseFloat(offerData.proposingRentPrice),
       proposing_rent_price_currency: offerData.currency || 'HKD',
       num_leasing_months: parseInt(offerData.numLeasingMonths),
@@ -138,8 +132,8 @@ export async function POST(request: NextRequest) {
           id: string;
           offer_key: string;
           property_uuid: string;
-          initiator_firebase_uid: string;
-          recipient_firebase_uid: string;
+          initiator_user_id: string;
+          recipient_user_id: string;
           proposing_rent_price: number;
           proposing_rent_price_currency: string;
           num_leasing_months: number;
@@ -176,27 +170,26 @@ export async function POST(request: NextRequest) {
         
         // Get initiator details for notification
         const GET_USER_QUERY = `
-          query GetUser($firebaseUid: String!) {
-            real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+          query GetUser($nhostUserId: uuid!) {
+            real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
               display_name
-              name
             }
           }
         `;
-        
-        const initiatorData = await executeQuery(GET_USER_QUERY, { 
-          firebaseUid: offerData.initiatorFirebaseUid 
-        }) as { real_estate_user: Array<{ display_name?: string; name?: string }> };
+
+        const initiatorData = await executeQuery(GET_USER_QUERY, {
+          nhostUserId: offerData.initiatorUserId
+        }) as { real_estate_user: Array<{ display_name?: string }> };
 
         await NotificationService.createNotification({
           typeKey: 'offer_created',
-          recipientFirebaseUid: offerData.recipientFirebaseUid,
-          senderFirebaseUid: offerData.initiatorFirebaseUid,
+          recipientUserId: offerData.recipientUserId,
+          senderUserId: offerData.initiatorUserId,
           data: {
             offer_id: data.insert_real_estate_offer_one.id,
             property_title: propertyData.real_estate_property_listing[0]?.title || 'Property',
             property_id: offerData.propertyId,
-            sender_name: initiatorData.real_estate_user[0]?.display_name || initiatorData.real_estate_user[0]?.name || 'User',
+            sender_name: initiatorData.real_estate_user[0]?.display_name || 'User',
             rent_price: new Intl.NumberFormat('en-HK', {
               style: 'currency',
               currency: offerData.currency || 'HKD',

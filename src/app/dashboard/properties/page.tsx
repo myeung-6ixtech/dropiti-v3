@@ -67,28 +67,21 @@ export default function PropertiesPage() {
         setIsLoading(true);
         setError(null);
         
-        console.log('Fetching properties and drafts for user:', authUser.id);
-        
         // Fetch both properties and drafts in parallel
         const [propertiesResponse, draftsResponse] = await Promise.all([
           propertiesAPI.getListings({
-            limit: 50, // Get up to 50 properties
-            landlord_firebase_uid: authUser.id, // Filter by current user's Firebase UID
+            limit: 50,
+            landlord_user_id: authUser.id,
           }),
           propertiesAPI.getDrafts(authUser.id)
         ]);
 
-        console.log('Properties API response:', propertiesResponse);
-        console.log('Drafts API response:', draftsResponse);
-
         if (propertiesResponse.success && propertiesResponse.data) {
           setProperties(propertiesResponse.data);
-          console.log('Properties set:', propertiesResponse.data);
         }
 
         if (draftsResponse.success && draftsResponse.data) {
           setDrafts(draftsResponse.data);
-          console.log('Drafts set:', draftsResponse.data);
         }
 
         if (!propertiesResponse.success && !draftsResponse.success) {

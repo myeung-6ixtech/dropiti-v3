@@ -28,7 +28,7 @@ export function calculateNegotiationState(
   offer: Offer, 
   currentUserId: string
 ): OfferNegotiationState {
-  const isInitiator = offer.initiatorFirebaseUid === currentUserId;
+  const isInitiator = offer.initiatorUserId === currentUserId;
   
   // Determine whose turn it is
   const nextActionBy = determineNextActionBy(offer);
@@ -196,8 +196,8 @@ export function validateOfferAction(
   action: OfferActionType,
   currentUserId: string
 ): { isValid: boolean; error?: string } {
-  const isInitiator = offer.initiatorFirebaseUid === currentUserId;
-  const isRecipient = offer.recipientFirebaseUid === currentUserId;
+  const isInitiator = offer.initiatorUserId === currentUserId;
+  const isRecipient = offer.recipientUserId === currentUserId;
   
   // Check if user is involved in the offer
   if (!isInitiator && !isRecipient) {

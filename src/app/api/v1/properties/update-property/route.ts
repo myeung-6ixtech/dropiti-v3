@@ -40,11 +40,6 @@ export async function PUT(request: NextRequest) {
   try {
     const { id, updates } = await request.json();
     
-    // Debug logging
-    console.log('Update Property API: Received request:', { id, updates });
-    console.log('Update Property API: property_type value:', updates.property_type);
-    console.log('Update Property API: rental_space value:', updates.rental_space);
-
     if (!id) {
       return NextResponse.json(
         { error: 'Property ID is required' },
@@ -120,14 +115,10 @@ export async function PUT(request: NextRequest) {
     // Always update the updated_at timestamp
     preparedUpdates.updated_at = new Date().toISOString();
 
-    console.log('Update Property API: preparedUpdates before mutation:', preparedUpdates);
-
     const data = await executeMutation(UPDATE_PROPERTY_MUTATION, { 
       property_uuid: id, 
       updates: preparedUpdates 
     });
-
-    console.log('Update Property API: GraphQL mutation response:', data);
 
     // Type assertion for the response data
     const typedData = data as {
@@ -161,7 +152,6 @@ export async function PUT(request: NextRequest) {
     };
 
     if (typedData.update_real_estate_property_listing.affected_rows === 0) {
-      console.error('Update Property API: No rows were affected by the update');
       return NextResponse.json(
         { error: 'Property not found or no changes made' },
         { status: 404 }

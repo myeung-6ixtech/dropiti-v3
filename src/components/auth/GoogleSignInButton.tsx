@@ -1,9 +1,9 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { nhost } from '@/lib/nhost';
 
 interface GoogleSignInButtonProps {
   mode: 'signin' | 'signup';
@@ -13,7 +13,6 @@ interface GoogleSignInButtonProps {
 export default function GoogleSignInButton({ mode, className = '' }: GoogleSignInButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const handleGoogleSignIn = async () => {
@@ -21,26 +20,19 @@ export default function GoogleSignInButton({ mode, className = '' }: GoogleSignI
 
     try {
       const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-      const result = await signIn('google', {
-        redirect: false,
-        callbackUrl,
+      const { error } = await nhost.auth.signIn({
+        provider: 'google',
+        options: { redirectTo: `${window.location.origin}${callbackUrl}` },
       });
 
-      if (result?.error) {
-        // Check if the error is due to user not existing (Google sign-up disabled)
-        if (result.error === 'Callback') {
-          showToast('error', 'No account found. Please create an account using email/password first, then link your Google account in Settings.');
-        } else {
-          showToast('error', 'Failed to sign in with Google. Please ensure you have an account or create one first.');
-        }
-      } else if (result?.ok) {
-        showToast('success', `Successfully ${mode === 'signin' ? 'signed in' : 'signed up'} with Google`);
-        router.push(callbackUrl);
+      if (error) {
+        showToast('error', 'Failed to sign in with Google');
+        setIsLoading(false);
       }
+      // On success the browser redirects — no need to do anything else
     } catch (error) {
       console.error('Google sign-in error:', error);
       showToast('error', 'An error occurred during Google sign-in');
-    } finally {
       setIsLoading(false);
     }
   };
@@ -60,11 +52,13 @@ export default function GoogleSignInButton({ mode, className = '' }: GoogleSignI
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
         <span className="google-text">
-          {isLoading ? 'Signing in...' : 'Continue with Google'}
+          {isLoading
+            ? 'Redirecting...'
+            : mode === 'signin'
+            ? 'Continue with Google'
+            : 'Sign up with Google'}
         </span>
       </div>
     </button>
   );
 }
-
-

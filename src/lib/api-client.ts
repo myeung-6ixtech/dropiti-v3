@@ -113,7 +113,7 @@ export const propertiesAPI = {
     maxPrice?: number;
     bedrooms?: number;
     type?: string;
-    landlord_firebase_uid?: string; // Add landlord filter parameter
+    landlord_user_id?: string; // Add landlord filter parameter
   }) => {
     const response = await apiClient.get('/properties/get-listings', { params });
     return response.data;
@@ -241,11 +241,11 @@ export const propertiesAPI = {
   },
 
   // Get total count of published properties by user
-  getPropertyCountByUser: async (landlordFirebaseUid: string) => {
+  getPropertyCountByUser: async (landlordUserId: string) => {
     try {
-      console.log("API Client: Fetching property count for user:", landlordFirebaseUid);
+      console.log("API Client: Fetching property count for user:", landlordUserId);
       const response = await apiClient.get("/properties/get-property-count-by-user", { 
-        params: { landlordFirebaseUid } 
+        params: { landlordUserId } 
       });
       console.log("API Client: Property count response:", response.data);
       return response.data;
@@ -274,17 +274,17 @@ export const usersAPI = {
     }
   },
 
-  // Get user by Firebase UID
-  getUserByFirebaseUid: async (firebaseUid: string) => {
+  // Get user by Nhost User ID
+  getUserByNhostUserId: async (nhostUserId: string) => {
     try {
-      console.log('API Client: Fetching user by Firebase UID:', firebaseUid);
+      console.log('API Client: Fetching user by Nhost User ID:', nhostUserId);
       const response = await apiClient.get('/users/get-user-by-id', { 
-        params: { firebase_uid: firebaseUid } 
+        params: { nhost_user_id: nhostUserId } 
       });
       console.log('API Client: Response received:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Get user by Firebase UID error:', error);
+      console.error('Get user by Nhost User ID error:', error);
       if (error && typeof error === 'object' && 'response' in error) {
         const axiosError = error as { response: { data: unknown; status: number } };
         console.error('Error response:', axiosError.response.data);
@@ -365,16 +365,16 @@ export const usersAPI = {
 
 // Tenants API (Tenant Profile)
 export const tenantsAPI = {
-  getTenantProfile: async (firebaseUid: string) => {
-    const response = await apiClient.get('/tenants/profile', { params: { firebase_uid: firebaseUid } });
+  getTenantProfile: async (nhostUserId: string) => {
+    const response = await apiClient.get('/tenants/profile', { params: { nhost_user_id: nhostUserId } });
     return response.data;
   },
-  upsertTenantProfile: async (payload: Record<string, unknown> & { user_firebase_uid: string }) => {
+  upsertTenantProfile: async (payload: Record<string, unknown> & { user_id: string }) => {
     const response = await apiClient.post('/tenants/profile', payload);
     return response.data;
   },
-  updateTenantProfile: async (firebaseUid: string, updates: Record<string, unknown>) => {
-    const response = await apiClient.put('/tenants/profile', { user_firebase_uid: firebaseUid, updates });
+  updateTenantProfile: async (nhostUserId: string, updates: Record<string, unknown>) => {
+    const response = await apiClient.put('/tenants/profile', { user_nhost_user_id: nhostUserId, updates });
     return response.data;
   },
   getTenantProfiles: async (params: {
@@ -405,12 +405,12 @@ export const offersAPI = {
   },
 
   // Get offers by recipient (landlord)
-  getOffersByRecipient: async (recipientFirebaseUid: string, propertyUuid?: string) => {
+  getOffersByRecipient: async (recipientUserId: string, propertyUuid?: string) => {
     try {
-      const url = propertyUuid 
-        ? `/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}&propertyUuid=${propertyUuid}`
-        : `/offers/get-offers-by-id?recipientFirebaseUid=${recipientFirebaseUid}`;
-      
+      const url = propertyUuid
+        ? `/offers/get-offers-by-id?recipientUserId=${recipientUserId}&propertyUuid=${propertyUuid}`
+        : `/offers/get-offers-by-id?recipientUserId=${recipientUserId}`;
+
       const response = await apiClient.get(url);
       return response.data;
     } catch (error) {
@@ -420,9 +420,9 @@ export const offersAPI = {
   },
 
   // Get offers by initiator (tenant)
-  getOffersByInitiator: async (initiatorFirebaseUid: string) => {
+  getOffersByInitiator: async (initiatorUserId: string) => {
     try {
-      const response = await apiClient.get(`/offers/get-offers-by-initiator?initiatorFirebaseUid=${initiatorFirebaseUid}`);
+      const response = await apiClient.get(`/offers/get-offers-by-initiator?initiatorUserId=${initiatorUserId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching offers by initiator:', error);
@@ -565,14 +565,14 @@ export const searchAPI = {
 // Notifications API
 export const notificationsAPI = {
   // Get notifications for a user
-  getNotifications: async (userFirebaseUid: string, filters?: {
+  getNotifications: async (userId: string, filters?: {
     isRead?: boolean;
     category?: string;
     limit?: number;
     offset?: number;
   }) => {
     try {
-      const params = new URLSearchParams({ userFirebaseUid });
+      const params = new URLSearchParams({ userId });
       if (filters?.isRead !== undefined) params.append('isRead', filters.isRead.toString());
       if (filters?.category) params.append('category', filters.category);
       if (filters?.limit) params.append('limit', filters.limit.toString());
@@ -587,9 +587,9 @@ export const notificationsAPI = {
   },
 
   // Get unread count
-  getUnreadCount: async (userFirebaseUid: string) => {
+  getUnreadCount: async (userId: string) => {
     try {
-      const response = await apiClient.get(`/notifications/unread-count?userFirebaseUid=${userFirebaseUid}`);
+      const response = await apiClient.get(`/notifications/unread-count?userId=${userId}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching unread count:', error);
@@ -609,9 +609,9 @@ export const notificationsAPI = {
   },
 
   // Mark all notifications as read
-  markAllAsRead: async (userFirebaseUid: string) => {
+  markAllAsRead: async (userId: string) => {
     try {
-      const response = await apiClient.post('/notifications/mark-all-read', { userFirebaseUid });
+      const response = await apiClient.post('/notifications/mark-all-read', { userId });
       return response.data;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -653,7 +653,7 @@ export const reviewsAPI = {
 
   // Get reviews by user (either as reviewer or reviewed)
   getReviewsByUser: async (params: {
-    userFirebaseUid: string;
+    userId: string;
     reviewType?: string;
     limit?: number;
     offset?: number;

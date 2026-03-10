@@ -22,21 +22,21 @@ const validateMessage = (content: string): { valid: boolean; error?: string } =>
 const SEND_MESSAGE_MUTATION = `
   mutation SendMessage(
     $roomId: uuid!, 
-    $senderFirebaseUid: String!, 
+    $senderUserId: String!, 
     $content: String!,
     $messageType: String,
     $metadata: jsonb
   ) {
     insert_real_estate_chat_message_one(object: {
       room_id: $roomId,
-      sender_firebase_uid: $senderFirebaseUid,
+      sender_user_id: $senderUserId,
       content: $content,
       message_type: $messageType,
       metadata: $metadata
     }) {
       id
       content
-      sender_firebase_uid
+      sender_user_id
       status
       created_at
       message_type
@@ -47,17 +47,19 @@ const SEND_MESSAGE_MUTATION = `
 
 export async function POST(request: NextRequest) {
   try {
-    const { 
-      roomId, 
-      senderFirebaseUid, 
+    const {
+      roomId,
+      senderUserId,
       content,
-      messageType = 'text',  // Default to 'text' for backward compatibility
+      messageType = 'text',
       metadata = null
     } = await request.json();
 
-    if (!roomId || !senderFirebaseUid || !content) {
+    const resolvedSenderId = senderUserId;
+
+    if (!roomId || !resolvedSenderId || !content) {
       return NextResponse.json(
-        { error: 'roomId, senderFirebaseUid, and content are required' },
+        { error: 'roomId, senderUserId, and content are required' },
         { status: 400 }
       );
     }
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate limit per sender
-    const rate = checkRateLimit(`msg:${senderFirebaseUid}`, 20, 60_000); // 20 msgs/min
+    const rate = checkRateLimit(`msg:${resolvedSenderId}`, 20, 60_000); // 20 msgs/min
     if (!rate.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Please wait a moment before sending more messages.' },
@@ -85,15 +87,15 @@ export async function POST(request: NextRequest) {
 
     const data = await executeMutation(SEND_MESSAGE_MUTATION, {
       roomId,
-      senderFirebaseUid,
-      content: encryptedContent, // Store encrypted content
-      messageType,      // Pass messageType
-      metadata          // Pass metadata
+      senderUserId: resolvedSenderId,
+      content: encryptedContent,
+      messageType,
+      metadata,
     }) as {
       insert_real_estate_chat_message_one?: {
         id: string;
         content: string;
-        sender_firebase_uid: string;
+        sender_user_id: string;
         status: string;
         created_at: string;
         message_type: string;

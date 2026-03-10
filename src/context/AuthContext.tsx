@@ -1,46 +1,49 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useSession, signOut, signIn } from "next-auth/react";
+import { useAuthenticationStatus, useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
 import { usersAPI } from "@/lib/api-client";
+import { nhost } from "@/lib/nhost";
 import { AUTH_ERRORS } from "@/types/error-messages";
+
+interface AuthUser {
+  id: string;
+  email: string;
+  name?: string;
+  avatar?: string;
+  uuid?: string;
+  displayName?: string;
+  photoUrl?: string;
+  location?: string;
+  about?: string;
+  education?: string;
+  occupation?: string;
+  maritalStatus?: string;
+  languages?: string[];
+  responseTime?: string;
+  verified?: boolean;
+  rating?: number;
+  reviewCount?: number;
+  responseRate?: number;
+  avgResponseTime?: string;
+  totalProperties?: number;
+  totalGuests?: number;
+  userSince?: string;
+  phoneNumber?: string;
+  onboarding_complete?: boolean;
+  preferences?: Record<string, unknown>;
+  notificationSettings?: Record<string, unknown>;
+  privacySettings?: Record<string, unknown>;
+  createdAt?: string;
+  updatedAt?: string;
+}
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-    avatar?: string;
-    // Additional user profile fields
-    uuid?: string;
-    displayName?: string;
-    photoUrl?: string;
-    location?: string;
-    about?: string;
-    education?: string;
-    occupation?: string;
-    maritalStatus?: string;
-    languages?: string[];
-    responseTime?: string;
-    verified?: boolean;
-    rating?: number;
-    reviewCount?: number;
-    responseRate?: number;
-    avgResponseTime?: string;
-    totalProperties?: number;
-    totalGuests?: number;
-    userSince?: string;
-    phoneNumber?: string;
-    onboarding_complete?: boolean;
-    preferences?: Record<string, unknown>;
-    notificationSettings?: Record<string, unknown>;
-    privacySettings?: Record<string, unknown>;
-    createdAt?: string;
-    updatedAt?: string;
-  } | null;
+  user: AuthUser | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: () => Promise<{ error?: string }>;
   logout: () => void;
   isRememberMeEnabled: boolean;
 }
@@ -55,339 +58,175 @@ export const useAuth = () => {
   return context;
 };
 
-// Error mapping function for NextAuth/Firebase errors
 const mapAuthError = (error: string): string => {
   const errorMap: Record<string, string> = {
-    // NextAuth generic errors
-    'CredentialsSignin': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Invalid credentials': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'User not found': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Wrong password': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Invalid email': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'User disabled': AUTH_ERRORS.ACCOUNT_DISABLED,
-    'Too many requests': 'Too many login attempts. Please try again later.',
-    'Network error': AUTH_ERRORS.UNEXPECTED_ERROR,
-    
-    // Firebase Auth error codes
-    'Firebase: Error (auth/user-not-found)': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Firebase: Error (auth/wrong-password)': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Firebase: Error (auth/invalid-email)': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Firebase: Error (auth/user-disabled)': AUTH_ERRORS.ACCOUNT_DISABLED,
-    'Firebase: Error (auth/too-many-requests)': 'Too many login attempts. Please try again later.',
-    'Firebase: Error (auth/network-request-failed)': AUTH_ERRORS.UNEXPECTED_ERROR,
-    'Firebase: Error (auth/invalid-credential)': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'Firebase: Error (auth/operation-not-allowed)': 'This sign-in method is not enabled. Please contact support.',
-    'Firebase: Error (auth/requires-recent-login)': 'This operation requires recent authentication. Please sign in again.',
-    'Firebase: Error (auth/email-already-in-use)': AUTH_ERRORS.EMAIL_ALREADY_EXISTS,
-    'Firebase: Error (auth/weak-password)': AUTH_ERRORS.PASSWORD_TOO_WEAK,
-    'Firebase: Error (auth/invalid-verification-code)': 'Invalid verification code. Please try again.',
-    'Firebase: Error (auth/invalid-verification-id)': 'Invalid verification ID. Please try again.',
-    'Firebase: Error (auth/code-expired)': 'Verification code has expired. Please request a new one.',
-    'Firebase: Error (auth/missing-verification-code)': 'Verification code is required.',
-    'Firebase: Error (auth/missing-verification-id)': 'Verification ID is required.',
-    'Firebase: Error (auth/quota-exceeded)': 'Too many requests. Please try again later.',
-    'Firebase: Error (auth/captcha-check-failed)': 'Captcha verification failed. Please try again.',
-    'Firebase: Error (auth/invalid-phone-number)': 'Invalid phone number format.',
-    'Firebase: Error (auth/missing-phone-number)': 'Phone number is required.',
+    'invalid-email-password': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'unverified-user': 'Please verify your email before signing in.',
+    'user-not-found': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'invalid-email': AUTH_ERRORS.INVALID_CREDENTIALS,
+    'disabled-user': AUTH_ERRORS.ACCOUNT_DISABLED,
+    'too-many-requests': 'Too many login attempts. Please try again later.',
+    'network-error': AUTH_ERRORS.UNEXPECTED_ERROR,
   };
-  
   return errorMap[error] || AUTH_ERRORS.UNEXPECTED_ERROR;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const { data: session, status } = useSession();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
+const parseJSON = <T,>(value: unknown, fallback: T): T => {
+  if (value && typeof value === 'object') return value as T;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' ? (parsed as T) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+};
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading: authLoading } = useAuthenticationStatus();
+  const nhostUser = useUserData();
   const [isRememberMeEnabled, setIsRememberMeEnabled] = useState(false);
-  const [user, setUser] = useState<{
-    id: string;
-    email: string;
-    name?: string;
-    avatar?: string;
-    // Additional user profile fields
-    uuid?: string;
-    displayName?: string;
-    photoUrl?: string;
-    location?: string;
-    about?: string;
-    education?: string;
-    occupation?: string;
-    maritalStatus?: string;
-    languages?: string[];
-    responseTime?: string;
-    verified?: boolean;
-    rating?: number;
-    reviewCount?: number;
-    responseRate?: number;
-    avgResponseTime?: string;
-    totalProperties?: number;
-    totalGuests?: number;
-    userSince?: string;
-    phoneNumber?: string;
-    onboarding_complete?: boolean;
-    preferences?: Record<string, unknown>;
-    notificationSettings?: Record<string, unknown>;
-    privacySettings?: Record<string, unknown>;
-    createdAt?: string;
-    updatedAt?: string;
-  } | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
   const router = useRouter();
 
-  // Helper function to safely parse languages field
-  const parseLanguages = (languages: unknown): string[] => {
-    if (Array.isArray(languages)) {
-      return languages;
-    }
-    
-    if (typeof languages === 'string') {
-      try {
-        const parsed = JSON.parse(languages);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch {
-        return [];
-      }
-    }
-    
-    return [];
-  };
-
-  // Helper function to safely parse preferences
-  const parsePreferences = (preferences: unknown): Record<string, unknown> => {
-    if (preferences && typeof preferences === 'object') {
-      return preferences as Record<string, unknown>;
-    }
-    
-    if (typeof preferences === 'string') {
-      try {
-        const parsed = JSON.parse(preferences);
-        return typeof parsed === 'object' ? parsed : {};
-      } catch {
-        return {};
-      }
-    }
-    
-    return {};
-  };
-
-  // Helper function to safely parse notification settings
-  const parseNotificationSettings = (settings: unknown): Record<string, unknown> => {
-    if (settings && typeof settings === 'object') {
-      return settings as Record<string, unknown>;
-    }
-    
-    if (typeof settings === 'string') {
-      try {
-        const parsed = JSON.parse(settings);
-        return typeof parsed === 'object' ? parsed : {};
-      } catch {
-        return {};
-      }
-    }
-    
-    return {};
-  };
-
-  // Helper function to safely parse privacy settings
-  const parsePrivacySettings = (settings: unknown): Record<string, unknown> => {
-    if (settings && typeof settings === 'object') {
-      return settings as Record<string, unknown>;
-    }
-    
-    if (typeof settings === 'string') {
-      try {
-        const parsed = JSON.parse(settings);
-        return typeof parsed === 'object' ? parsed : {};
-      } catch {
-        return {};
-      }
-    }
-    
-    return {};
-  };
-
-  // Check if remember me is enabled from localStorage
-  const checkRememberMePreference = useCallback(() => {
-    if (typeof window !== 'undefined') {
-      const savedRememberMe = localStorage.getItem('dropiti_remember_me');
-      return savedRememberMe === 'true';
-    }
-    return false;
+  const checkRememberMe = useCallback((): boolean => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('dropiti_remember_me') === 'true';
   }, []);
 
-  // Check session expiry for remember me functionality
-  const checkSessionExpiry = useCallback(() => {
-    if (typeof window !== 'undefined' && isRememberMeEnabled) {
-      const sessionExpiry = localStorage.getItem('dropiti_session_expiry');
-      if (sessionExpiry) {
-        const expiryTime = parseInt(sessionExpiry, 10);
-        const currentTime = Date.now();
-        
-        if (currentTime > expiryTime) {
-          console.log('Session expired, logging out');
-          // Call logout directly without dependency
-          signOut({ redirect: false });
-        }
-      }
-    }
-  }, [isRememberMeEnabled]);
-
-  // Set up session expiry check interval
+  // Load DB profile whenever the Nhost user changes
   useEffect(() => {
-    const interval = setInterval(checkSessionExpiry, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, [checkSessionExpiry]);
-
-  // Load user data when session changes
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (session?.user?.id) {
-        try {
-          console.log('Loading user data for ID:', session.user.id);
-          
-          // Try to get user data from API
-          const response = await usersAPI.getUserByFirebaseUid(session.user.id);
-          
-          if (response.success && response.data) {
-            const userData = response.data;
-            console.log('User data loaded from API:', userData);
-            
-            setUser({
-              id: userData.firebase_uid || session.user.id,
-              email: userData.email || session.user.email || '',
-              name: userData.display_name || userData.name || session.user.name || 'User',
-              avatar: userData.photo_url || userData.avatar || session.user.image || undefined,
-              uuid: userData.uuid,
-              displayName: userData.display_name,
-              photoUrl: userData.photo_url,
-              location: userData.location,
-              about: userData.about,
-              education: userData.education,
-              occupation: userData.occupation,
-              maritalStatus: userData.marital_status,
-              languages: parseLanguages(userData.languages),
-              responseTime: userData.response_time,
-              verified: userData.verified || false,
-              rating: userData.rating || 0,
-              reviewCount: userData.review_count || 0,
-              responseRate: userData.response_rate || 0,
-              avgResponseTime: userData.avg_response_time || 'Not specified',
-              totalProperties: userData.total_properties || 0,
-              totalGuests: userData.total_guests || 0,
-              userSince: userData.created_at,
-              phoneNumber: userData.phone_number,
-              onboarding_complete: userData.onboarding_complete || false,
-              preferences: parsePreferences(userData.preferences),
-              notificationSettings: parseNotificationSettings(userData.notification_settings),
-              privacySettings: parsePrivacySettings(userData.privacy_settings),
-              createdAt: userData.created_at,
-              updatedAt: userData.updated_at,
-            });
-            
-            setIsAuthenticated(true);
-            
-            // Set remember me preference
-            const rememberMe = checkRememberMePreference();
-            setIsRememberMeEnabled(rememberMe);
-            
-            // Set session expiry if remember me is enabled
-            if (rememberMe) {
-              const expiryTime = Date.now() + (90 * 24 * 60 * 60 * 1000); // 90 days
-              localStorage.setItem('dropiti_session_expiry', expiryTime.toString());
-            }
-            
-          } else {
-            console.log('No user data found in API, using session data');
-            // Fallback to session data if API call fails
-            setUser({
-              id: session.user.id,
-              email: session.user.email || '',
-              name: session.user.name || 'User',
-              avatar: session.user.image || undefined,
-            });
-            setIsAuthenticated(true);
-            
-            // Set remember me preference
-            const rememberMe = checkRememberMePreference();
-            setIsRememberMeEnabled(rememberMe);
-          }
-        } catch (error) {
-          console.error('Error loading user data:', error);
-          // Fallback to session data on error
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            name: session.user.name || 'User',
-            avatar: session.user.image || undefined,
-          });
-          setIsAuthenticated(true);
-          
-          // Set remember me preference
-          const rememberMe = checkRememberMePreference();
-          setIsRememberMeEnabled(rememberMe);
-        }
-      } else {
-        console.log('No session, clearing user data');
+    const loadProfile = async () => {
+      if (!isAuthenticated || !nhostUser?.id) {
         setUser(null);
-        setIsAuthenticated(false);
         setIsRememberMeEnabled(false);
+        return;
+      }
+
+      setProfileLoading(true);
+      try {
+        const response = await usersAPI.getUserByNhostUserId(nhostUser.id);
+
+        if (response.success && response.data) {
+          const d = response.data;
+          setUser({
+            id: d.nhost_user_id || nhostUser.id,
+            email: d.email || nhostUser.email || '',
+            name: d.display_name || nhostUser.displayName || 'User',
+            avatar: d.photo_url || nhostUser.avatarUrl || undefined,
+            uuid: d.uuid,
+            displayName: d.display_name,
+            photoUrl: d.photo_url,
+            location: d.location,
+            about: d.about,
+            education: d.education,
+            occupation: d.occupation,
+            maritalStatus: d.marital_status,
+            languages: Array.isArray(d.languages) ? d.languages : [],
+            responseTime: d.response_time,
+            verified: d.verified || false,
+            rating: d.rating || 0,
+            reviewCount: d.review_count || 0,
+            responseRate: d.response_rate || 0,
+            avgResponseTime: d.avg_response_time || 'Not specified',
+            totalProperties: d.total_properties || 0,
+            totalGuests: d.total_guests || 0,
+            userSince: d.created_at,
+            phoneNumber: d.phone_number,
+            onboarding_complete: d.onboarding_complete || false,
+            preferences: parseJSON(d.preferences, {}),
+            notificationSettings: parseJSON(d.notification_settings, {}),
+            privacySettings: parseJSON(d.privacy_settings, {}),
+            createdAt: d.created_at,
+            updatedAt: d.updated_at,
+          });
+        } else {
+          // Fallback to Nhost data if DB row missing
+          setUser({
+            id: nhostUser.id,
+            email: nhostUser.email || '',
+            name: nhostUser.displayName || 'User',
+            avatar: nhostUser.avatarUrl || undefined,
+          });
+        }
+
+        const rememberMe = checkRememberMe();
+        setIsRememberMeEnabled(rememberMe);
+        if (rememberMe) {
+          const expiry = Date.now() + 90 * 24 * 60 * 60 * 1000;
+          localStorage.setItem('dropiti_session_expiry', expiry.toString());
+        }
+      } catch (err) {
+        console.error('AuthContext: profile load error', err);
+        setUser({
+          id: nhostUser.id,
+          email: nhostUser.email || '',
+          name: nhostUser.displayName || 'User',
+          avatar: nhostUser.avatarUrl || undefined,
+        });
+      } finally {
+        setProfileLoading(false);
       }
     };
 
-    loadUserData();
-  }, [session, checkRememberMePreference]);
+    loadProfile();
+  }, [isAuthenticated, nhostUser, checkRememberMe]);
 
-  // Check session expiry on mount and when remember me changes
-  useEffect(() => {
-    if (isAuthenticated && isRememberMeEnabled) {
-      checkSessionExpiry();
-    }
-  }, [isAuthenticated, isRememberMeEnabled, checkSessionExpiry]);
-
-  const login = async (email: string, password: string, rememberMe: boolean = false) => {
+  const login = async (
+    email: string,
+    password: string,
+    rememberMe: boolean = false,
+  ): Promise<{ success: boolean; error?: string }> => {
     try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        rememberMe, // Pass remember me preference to NextAuth
-        redirect: false,
-      });
+      const { session, error } = await nhost.auth.signIn({ email, password });
 
-      if (result?.error) {
-        return { success: false, error: mapAuthError(result.error) };
+      if (error || !session) {
+        const code = (error as { error?: string })?.error || '';
+        return { success: false, error: mapAuthError(code) };
       }
 
-      // If remember me is enabled, we'll handle the session duration in the NextAuth config
-      // The actual session duration is controlled by the NextAuth session.maxAge setting
-      console.log('Login successful, remember me:', rememberMe);
+      if (rememberMe) {
+        localStorage.setItem('dropiti_remember_me', 'true');
+      }
 
       return { success: true };
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error('Login error:', err);
       return { success: false, error: AUTH_ERRORS.UNEXPECTED_ERROR };
     }
   };
 
+  const loginWithGoogle = async (): Promise<{ error?: string }> => {
+    const { error } = await nhost.auth.signIn({ provider: 'google' });
+    return { error: error?.message };
+  };
+
   const logout = async () => {
     try {
-      // Clear remember me preference on logout
       localStorage.removeItem('dropiti_remember_me');
+      localStorage.removeItem('dropiti_session_expiry');
       setIsRememberMeEnabled(false);
-      
-      await signOut({ redirect: false });
+      await nhost.auth.signOut();
       router.push("/");
-    } catch (error) {
-      console.error("Logout error:", error);
+    } catch (err) {
+      console.error("Logout error:", err);
     }
   };
+
+  const isLoading = authLoading || profileLoading;
 
   return (
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        isLoading: status === 'loading',
+        isLoading,
         user,
         login,
+        loginWithGoogle,
         logout,
         isRememberMeEnabled,
       }}

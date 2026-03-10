@@ -26,15 +26,15 @@ export default function TenantProfileView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const firebaseUid = authUser?.id || '';
+  const nhostUserId = authUser?.id || '';
 
   // Load existing profile data
   useEffect(() => {
-    if (!firebaseUid) return;
+    if (!nhostUserId) return;
     (async () => {
       try {
         setLoading(true);
-        const res = await tenantsAPI.getTenantProfile(firebaseUid);
+        const res = await tenantsAPI.getTenantProfile(nhostUserId);
         const profile = res?.data || null;
         if (profile) {
           // Map API payload directly to state
@@ -76,7 +76,7 @@ export default function TenantProfileView() {
         setLoading(false);
       }
     })();
-  }, [firebaseUid, showToast]);
+  }, [nhostUserId, showToast]);
 
   const updateProfileData = (data: Partial<TenantProfileData>) => {
     setProfileData(prev => ({ ...prev, ...data }));
@@ -95,7 +95,7 @@ export default function TenantProfileView() {
   };
 
   const publishProfile = async () => {
-    if (!firebaseUid) return;
+    if (!nhostUserId) return;
     try {
       setIsSubmitting(true);
 
@@ -108,7 +108,7 @@ export default function TenantProfileView() {
       } as Record<string, unknown>;
 
       await tenantsAPI.upsertTenantProfile({ 
-        user_firebase_uid: firebaseUid, 
+        user_id: nhostUserId, 
         ...payload
       });
       

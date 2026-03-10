@@ -12,7 +12,7 @@ interface ChatContact {
   unreadCount: number;
   isOnline: boolean;
   role: 'landlord' | 'tenant' | 'support';
-  firebaseUid: string;
+  nhostUserId: string;
 }
 
 interface ChatSidebarProps {

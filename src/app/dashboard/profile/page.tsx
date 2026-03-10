@@ -68,7 +68,7 @@ export default function ProfilePage() {
       if (authUser?.id) {
         try {
           setIsLoading(true);
-          const response = await usersAPI.getUserByFirebaseUid(authUser.id);
+          const response = await usersAPI.getUserByNhostUserId(authUser.id);
           
           if (response.success && response.data) {
             const userData = response.data;
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
       <ProfilePassportPreview
         user={mapToPassportFormat(profile)}
-        firebaseUid={authUser?.id || ""}
+        nhostUserId={authUser?.id || ""}
       />
 
       <ProfileSummarySection

@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatformDuration } from "@/lib/utils";
 import Image from 'next/image';
 import { getSafeProfileImage } from '@/lib/utils';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { 
@@ -11,7 +12,7 @@ import {
 } from 'react-icons/fi';
 
 interface DropitiPassport2Props {
-  firebaseUid: string;
+  nhostUserId: string;
   user: {
     displayName: string;
     avatar: string;
@@ -32,7 +33,7 @@ interface DropitiPassport2Props {
   };
 }
 
-export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2Props) {
+export default function DropitiPassport2({ user, nhostUserId }: DropitiPassport2Props) {
   const { user: authUser } = useAuth();
   const router = useRouter();
   const [publishedProperties, setPublishedProperties] = useState(0);
@@ -44,7 +45,7 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
   const [isLoadingRating, setIsLoadingRating] = useState(true);
 
   // Check if the authenticated user is viewing their own profile
-  const isOwnProfile = authUser?.id === firebaseUid;
+  const isOwnProfile = authUser?.id === nhostUserId;
   
   useEffect(() => {
     const fetchData = async () => {
@@ -53,8 +54,8 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
         setIsLoadingRating(true);
         
         const [publishedCount, ratingData] = await Promise.all([
-          getPublishedPropertyCountByStatus(firebaseUid),
-          getAverageUserRating(firebaseUid)
+          getPublishedPropertyCountByStatus(nhostUserId),
+          getAverageUserRating(nhostUserId)
         ]);
         
         setPublishedProperties(publishedCount);
@@ -73,10 +74,10 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
       }
     };
 
-    if (firebaseUid) {
+    if (nhostUserId) {
       fetchData();
     }
-  }, [firebaseUid]);
+  }, [nhostUserId]);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
@@ -85,7 +86,7 @@ export default function DropitiPassport2({ user, firebaseUid }: DropitiPassport2
         <div className="relative">
           <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden ring-4 ring-gray-100">
             <Image
-              src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')}
+              src={getSafeProfileImage(user.avatar, DEFAULT_AVATAR_URL)}
               alt={user.displayName}
               width={128}
               height={128}

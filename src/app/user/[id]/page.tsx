@@ -5,10 +5,11 @@ import { useParams } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 import { UserListings, UserReviews } from '@/components/user-profile';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface User {
   uuid: string;
-  firebase_uid: string;
+  nhost_user_id: string;
   display_name: string;
   photo_url?: string;
   email: string;
@@ -42,16 +43,14 @@ export default function UserProfilePage() {
           setIsLoading(true);
           setError(null);
           
-          console.log('Fetching user data for UUID:', uuid);
           const response = await usersAPI.getUserByUuid(uuid);
           
           if (response.success && response.data) {
-            console.log('User data received:', response.data);
             
             // Transform API data to match our User interface
             const transformedUser: User = {
               uuid: response.data.uuid,
-              firebase_uid: response.data.firebase_uid,
+              nhost_user_id: response.data.nhost_user_id,
               display_name: response.data.display_name || 'Unknown User',
               photo_url: response.data.photo_url,
               email: response.data.email || '',
@@ -92,7 +91,7 @@ export default function UserProfilePage() {
   // Map User to DropitiPassport2 format
   const mapToPassportFormat = (user: User) => ({
     displayName: user.display_name,
-    avatar: user.photo_url || '/images/placeholder.png', // Fallback avatar
+    avatar: user.photo_url || DEFAULT_AVATAR_URL,
     email: user.email,
     location: user.location,
     created_at: user.created_at,
@@ -124,13 +123,13 @@ export default function UserProfilePage() {
   return (
     <div className="max-w-[1180px] mx-auto px-4 py-8">
       {/* Profile Header - Using DropitiPassport2 Component */}
-      <DropitiPassport2 user={mapToPassportFormat(user)} firebaseUid={user.firebase_uid} />
+      <DropitiPassport2 user={mapToPassportFormat(user)} nhostUserId={user.nhost_user_id} />
 
       {/* User Listings Component */}
-      <UserListings userFirebaseUid={user.firebase_uid} />
+      <UserListings userId={user.nhost_user_id} />
 
       {/* User Reviews Component */}
-      <UserReviews userFirebaseUid={user.firebase_uid} />
+      <UserReviews userId={user.nhost_user_id} />
     </div>
   );
 }

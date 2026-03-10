@@ -1,4 +1,18 @@
 import { Metadata } from 'next';
+import { executeQuery } from '@/app/api/graphql/serverClient';
+
+const GET_PROPERTY_META = `
+  query GetPropertyMeta($property_uuid: uuid!) {
+    real_estate_property_listing(where: { property_uuid: { _eq: $property_uuid } }, limit: 1) {
+      title
+      description
+      rental_price
+      num_bedroom
+      num_bathroom
+      display_image
+    }
+  }
+`;
 
 interface PropertyLayoutProps {
   children: React.ReactNode;
@@ -9,10 +23,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   
   try {
-    const { propertiesAPI } = await import('@/lib/api-client');
-    const response = await propertiesAPI.getPropertyByUuid(id);
-    
-    if (!response.success || !response.data) {
+    const data = await executeQuery(GET_PROPERTY_META, { property_uuid: id }) as {
+      real_estate_property_listing?: Array<{
+        title: string;
+        description: string;
+        rental_price: number;
+        num_bedroom: number;
+        num_bathroom: number;
+        display_image: string;
+      }>;
+    };
+
+    const property = data.real_estate_property_listing?.[0];
+
+    if (!property) {
       return {
         title: 'Property Not Found',
         description: 'The requested property could not be found.',
@@ -23,7 +47,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       };
     }
 
-    const property = response.data;
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://dropiti.com';
     
     // Format price for display

@@ -9,8 +9,8 @@ const GET_OFFER_QUERY = `
       offer_key
       offer_uuid
       property_uuid
-      initiator_firebase_uid
-      recipient_firebase_uid
+      initiator_user_id
+      recipient_user_id
       proposing_rent_price
       proposing_rent_price_currency
       num_leasing_months
@@ -63,8 +63,8 @@ export async function GET(request: NextRequest) {
         offer_key: string;
         offer_uuid: string;
         property_uuid: string;
-        initiator_firebase_uid: string;
-        recipient_firebase_uid: string;
+        initiator_user_id: string;
+        recipient_user_id: string;
         proposing_rent_price: number;
         proposing_rent_price_currency: string;
         num_leasing_months: number;
@@ -107,8 +107,8 @@ export async function GET(request: NextRequest) {
       id: offer.id,
       offerKey: offer.offer_key,
       propertyUuid: offer.property_uuid,
-      initiatorFirebaseUid: offer.initiator_firebase_uid,
-      recipientFirebaseUid: offer.recipient_firebase_uid,
+      initiatorUserId: offer.initiator_user_id,
+      recipientUserId: offer.recipient_user_id,
       proposingRentPrice: offer.proposing_rent_price,
       proposingRentPriceCurrency: offer.proposing_rent_price_currency,
       numLeasingMonths: offer.num_leasing_months,

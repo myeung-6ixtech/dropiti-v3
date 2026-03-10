@@ -11,14 +11,14 @@ import { Offer } from '@/types/offer';
 
 
 interface IncomingOffersProps {
-  recipientFirebaseUid: string;
+  recipientUserId: string;
   propertyUuid?: string; // Optional: filter by specific property
   title?: string;
   showPropertyInfo?: boolean;
 }
 
 export default function IncomingOffers({ 
-  recipientFirebaseUid, 
+  recipientUserId, 
   propertyUuid, 
   title = "Incoming Offers",
   showPropertyInfo = true 
@@ -36,7 +36,7 @@ export default function IncomingOffers({
         setLoading(true);
         setError(null);
         
-        const response = await offersAPI.getOffersByRecipient(recipientFirebaseUid, propertyUuid);
+        const response = await offersAPI.getOffersByRecipient(recipientUserId, propertyUuid);
 
         if (response.success && response.data) {
           setOffers(response.data);
@@ -51,10 +51,10 @@ export default function IncomingOffers({
       }
     };
 
-    if (recipientFirebaseUid) {
+    if (recipientUserId) {
       fetchOffers();
     }
-  }, [recipientFirebaseUid, propertyUuid]);
+  }, [recipientUserId, propertyUuid]);
 
   const handleAcceptOffer = (offerId: string) => {
     setOffers(prev => 
@@ -100,7 +100,7 @@ export default function IncomingOffers({
       // Call the counter offer API
       const response = await offersAPI.counterOffer(
         selectedOfferForCounter.id,
-        recipientFirebaseUid, // Current user (landlord) is countering
+        recipientUserId, // Current user (landlord) is countering
         {
           rentPrice: offerData.rentalPrice,
           numLeasingMonths: offerData.leaseDuration,
@@ -185,11 +185,11 @@ export default function IncomingOffers({
             onAcceptOffer={handleAcceptOffer}
             onRejectOffer={handleRejectOffer}
             onCounterOffer={handleCounterOffer}
-            currentUserId={recipientFirebaseUid}
+                    currentUserId={recipientUserId}
             onOfferStatusChange={() => {
               // Refresh the offers list when an offer status changes
-              if (recipientFirebaseUid) {
-                offersAPI.getOffersByRecipient(recipientFirebaseUid, propertyUuid)
+              if (recipientUserId) {
+                offersAPI.getOffersByRecipient(recipientUserId, propertyUuid)
                   .then(response => {
                     if (response.success && response.data) {
                       setOffers(response.data);

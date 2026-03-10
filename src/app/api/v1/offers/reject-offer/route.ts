@@ -13,8 +13,8 @@ const REJECT_OFFER_MUTATION = `
         id
         offer_key
         property_uuid
-        initiator_firebase_uid
-        recipient_firebase_uid
+        initiator_user_id
+        recipient_user_id
         proposing_rent_price
         proposing_rent_price_currency
         num_leasing_months
@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
           id
           offer_key
           property_uuid
-          initiator_firebase_uid
-          recipient_firebase_uid
+          initiator_user_id
+          recipient_user_id
           proposing_rent_price
           proposing_rent_price_currency
           num_leasing_months
@@ -107,8 +107,8 @@ export async function POST(request: NextRequest) {
         id: string;
         offer_key: string;
         property_uuid: string;
-        initiator_firebase_uid: string;
-        recipient_firebase_uid: string;
+        initiator_user_id: string;
+        recipient_user_id: string;
         proposing_rent_price: number;
         proposing_rent_price_currency: string;
         num_leasing_months: number;
@@ -144,8 +144,8 @@ export async function POST(request: NextRequest) {
       id: offer.id,
       offerKey: offer.offer_key,
       propertyUuid: offer.property_uuid,
-      initiatorFirebaseUid: offer.initiator_firebase_uid,
-      recipientFirebaseUid: offer.recipient_firebase_uid,
+      initiatorUserId: offer.initiator_user_id,
+      recipientUserId: offer.recipient_user_id,
       proposingRentPrice: offer.proposing_rent_price,
       proposingRentPriceCurrency: offer.proposing_rent_price_currency,
       numLeasingMonths: offer.num_leasing_months,
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Determine the action type based on who is rejecting
-    const isInitiator = offer.initiator_firebase_uid === currentUserId;
+    const isInitiator = offer.initiator_user_id === currentUserId;
     const actionType = isInitiator ? 'INITIATOR_REJECTED' : 'RECIPIENT_REJECTED';
 
     // Validate the action

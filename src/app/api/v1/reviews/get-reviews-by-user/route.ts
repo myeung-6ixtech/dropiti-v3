@@ -5,7 +5,7 @@ import { executeQuery } from '@/app/api/graphql/serverClient';
 interface GraphQLReview {
   id: string;
   review_uuid: string;
-  reviewer_firebase_uid: string;
+  reviewer_user_id: string;
   review_type: string;
   rating: number;
   title?: string | null;
@@ -21,7 +21,7 @@ interface GraphQLReview {
 
 interface GraphQLUser {
   uuid: string;
-  firebase_uid: string;
+  nhost_user_id: string;
   display_name: string;
   email: string;
   photo_url?: string | null;
@@ -54,10 +54,10 @@ interface GraphQLPropertyResponse {
 
 // GraphQL query to get reviews by user (as reviewer only - temporary fix for old database)
 const GET_REVIEWS_BY_USER_QUERY = `
-  query GetReviewsByUser($userFirebaseUid: String!, $reviewType: String, $limit: Int, $offset: Int) {
+  query GetReviewsByUser($userId: uuid!, $reviewType: String, $limit: Int, $offset: Int) {
     real_estate_review(
       where: {
-        reviewer_firebase_uid: { _eq: $userFirebaseUid }
+        reviewer_user_id: { _eq: $userId }
         review_type: { _eq: $reviewType }
       }
       order_by: { created_at: desc }
@@ -66,7 +66,7 @@ const GET_REVIEWS_BY_USER_QUERY = `
     ) {
       id
       review_uuid
-      reviewer_firebase_uid
+      reviewer_user_id
       review_type
       rating
       title
@@ -84,10 +84,10 @@ const GET_REVIEWS_BY_USER_QUERY = `
 
 // GraphQL query to get reviews by user without reviewType filter (as reviewer only - temporary fix)
 const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
-  query GetReviewsByUser($userFirebaseUid: String!, $limit: Int, $offset: Int) {
+  query GetReviewsByUser($userId: uuid!, $limit: Int, $offset: Int) {
     real_estate_review(
       where: {
-        reviewer_firebase_uid: { _eq: $userFirebaseUid }
+        reviewer_user_id: { _eq: $userId }
       }
       order_by: { created_at: desc }
       limit: $limit
@@ -95,7 +95,7 @@ const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
     ) {
       id
       review_uuid
-      reviewer_firebase_uid
+      reviewer_user_id
       review_type
       rating
       title
@@ -111,12 +111,11 @@ const GET_REVIEWS_BY_USER_NO_TYPE_QUERY = `
   }
 `;
 
-// GraphQL query to get user details by Firebase UID
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($firebaseUid: String!) {
-    real_estate_user(where: { firebase_uid: { _eq: $firebaseUid } }) {
+  query GetUserByNhostUserId($nhostUserId: uuid!) {
+    real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }) {
       uuid
-      firebase_uid
+      nhost_user_id
       display_name
       email
       photo_url
@@ -145,29 +144,22 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userFirebaseUid = searchParams.get('userFirebaseUid');
+    const userId = searchParams.get('userId');
     const reviewType = searchParams.get('reviewType'); // Optional filter
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!, 10) : 50;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!, 10) : 0;
 
-    console.log('Get Reviews by User API: Received request with params:', { 
-      userFirebaseUid, 
-      reviewType, 
-      limit, 
-      offset 
-    });
 
-    if (!userFirebaseUid) {
-      console.log('Get Reviews by User API: Missing userFirebaseUid parameter');
+    if (!userId) {
       return NextResponse.json(
-        { error: 'userFirebaseUid parameter is required' },
+        { error: 'userId parameter is required' },
         { status: 400 }
       );
     }
 
     // Build query variables
     const variables: Record<string, unknown> = {
-      userFirebaseUid,
+      userId,
       limit,
       offset
     };
@@ -182,14 +174,10 @@ export async function GET(request: NextRequest) {
     }
 
     // First, fetch the reviews
-    console.log('Get Reviews by User API: Executing GraphQL query for user:', userFirebaseUid);
     const reviewsData = await executeQuery(query, variables) as GraphQLReviewsResponse;
-
-    console.log('Get Reviews by User API: Raw GraphQL response:', reviewsData);
 
     // Handle empty or missing results gracefully (normal for new users)
     if (!reviewsData?.real_estate_review || reviewsData.real_estate_review.length === 0) {
-      console.log('Get Reviews by User API: No reviews found for user (returning empty list)');
       return NextResponse.json({
         success: true,
         data: [],
@@ -200,8 +188,8 @@ export async function GET(request: NextRequest) {
 
     // Collect unique user IDs and property UUIDs to fetch additional data
     const uniqueUserIds = [...new Set([
-      ...reviewsData.real_estate_review.map(review => review.reviewer_firebase_uid)
-      // Note: reviewee_firebase_uid not available in old database schema
+      ...reviewsData.real_estate_review.map(review => review.reviewer_user_id)
+      // Note: reviewee_user_id not available in old database schema
     ])];
     
     const uniquePropertyUuids = [...new Set(
@@ -214,7 +202,7 @@ export async function GET(request: NextRequest) {
     const userDetails: Record<string, GraphQLUser> = {};
     for (const userId of uniqueUserIds) {
       try {
-        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { firebaseUid: userId }) as GraphQLUserResponse;
+        const userResponse = await executeQuery(GET_USER_BY_FIREBASE_UID_QUERY, { nhostUserId: userId }) as GraphQLUserResponse;
         if (userResponse?.real_estate_user?.[0]) {
           userDetails[userId] = userResponse.real_estate_user[0];
         }
@@ -238,15 +226,15 @@ export async function GET(request: NextRequest) {
 
     // Transform and combine data
     const transformedReviews = reviewsData.real_estate_review.map((review: GraphQLReview) => {
-      const reviewer = userDetails[review.reviewer_firebase_uid];
-      // Note: reviewee_firebase_uid not available in old database schema
+      const reviewer = userDetails[review.reviewer_user_id];
+      // Note: reviewee_user_id not available in old database schema
       const property = review.property_uuid ? propertyDetails[review.property_uuid] : null;
 
       return {
         id: review.id,
         reviewUuid: review.review_uuid,
-        reviewerFirebaseUid: review.reviewer_firebase_uid,
-        revieweeFirebaseUid: null, // Not available in old database schema
+        reviewerUserId: review.reviewer_user_id,
+        revieweeUserId: null,
         reviewType: review.review_type,
         rating: review.rating,
         title: review.title || undefined,
@@ -290,16 +278,13 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Get Reviews by User API: Error:', error);
-    
     // Check if it's a GraphQL error or database connection issue
     if (error && typeof error === 'object') {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
       // If it's likely a database connection or schema issue, return empty results
-      if (errorMessage.includes('relation') || errorMessage.includes('does not exist') || 
+      if (errorMessage.includes('relation') || errorMessage.includes('does not exist') ||
           errorMessage.includes('connection') || errorMessage.includes('schema')) {
-        console.warn('Get Reviews by User API: Database/schema issue detected, returning empty results');
         return NextResponse.json({
           success: true,
           data: [],

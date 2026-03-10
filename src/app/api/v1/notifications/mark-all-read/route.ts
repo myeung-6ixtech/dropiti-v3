@@ -3,16 +3,16 @@ import { NotificationService } from '@/lib/notification-service';
 
 export async function POST(request: NextRequest) {
   try {
-    const { userFirebaseUid } = await request.json();
+    const { userId } = await request.json();
 
-    if (!userFirebaseUid) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'User Firebase UID is required' },
+        { error: 'userId is required' },
         { status: 400 }
       );
     }
 
-    await NotificationService.markAllAsRead(userFirebaseUid);
+    await NotificationService.markAllAsRead(userId);
 
     return NextResponse.json({
       success: true,

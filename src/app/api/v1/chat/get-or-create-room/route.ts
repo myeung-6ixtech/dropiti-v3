@@ -3,15 +3,15 @@ import { executeQuery, executeMutation } from '@/app/api/graphql/serverClient';
 import { v4 as uuidv4 } from 'uuid';
 
 const GET_EXISTING_ROOM_QUERY = `
-  query GetExistingRoom($user1FirebaseUid: String!) {
+  query GetExistingRoom($user1UserId: uuid!) {
     real_estate_chat_room_participant(
       where: {
-        user_firebase_uid: { _eq: $user1FirebaseUid }
+        user_id: { _eq: $user1UserId }
       }
     ) {
       id
       room_id
-      user_firebase_uid
+      user_id
       role
       joined_at
       last_read_at
@@ -36,15 +36,15 @@ const CREATE_ROOM_MUTATION = `
 `;
 
 const ADD_PARTICIPANT_MUTATION = `
-  mutation AddParticipant($roomId: uuid!, $userFirebaseUid: String!, $role: String!) {
+  mutation AddParticipant($roomId: uuid!, $userId: uuid!, $role: String!) {
     insert_real_estate_chat_room_participant_one(object: {
       room_id: $roomId,
-      user_firebase_uid: $userFirebaseUid,
+      user_id: $userId,
       role: $role
     }) {
       id
       room_id
-      user_firebase_uid
+      user_id
       role
       joined_at
     }
@@ -53,45 +53,34 @@ const ADD_PARTICIPANT_MUTATION = `
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('=== GET OR CREATE ROOM API CALLED ===');
-    
-    const { user1FirebaseUid, user2FirebaseUid, user1Role = 'tenant', user2Role = 'landlord' } = await request.json();
-    
-    console.log('Request data:', { user1FirebaseUid, user2FirebaseUid, user1Role, user2Role });
+    const { user1UserId, user2UserId, user1Role = 'tenant', user2Role = 'landlord' } = await request.json();
 
-    if (!user1FirebaseUid || !user2FirebaseUid) {
-      console.log('Missing required fields');
+    if (!user1UserId || !user2UserId) {
       return NextResponse.json(
-        { error: 'user1FirebaseUid and user2FirebaseUid are required' },
+        { error: 'user1UserId and user2UserId are required' },
         { status: 400 }
       );
     }
 
-    console.log('Checking for existing room...');
     // First, check if a direct room already exists between these users
     const existingRoomData = await executeQuery(GET_EXISTING_ROOM_QUERY, {
-      user1FirebaseUid
+      user1UserId
     }) as {
       real_estate_chat_room_participant?: Array<{
         id: string;
         room_id: string;
-        user_firebase_uid: string;
+        user_id: string;
         role: string;
         joined_at: string;
         last_read_at: string | null;
         is_active: boolean;
       }>;
     };
-    
-    console.log('Existing room query result:', existingRoomData);
 
-    if (existingRoomData.real_estate_chat_room_participant && 
+    if (existingRoomData.real_estate_chat_room_participant &&
         existingRoomData.real_estate_chat_room_participant.length > 0) {
-      console.log('Found rooms for user1:', existingRoomData.real_estate_chat_room_participant);
-      
       // Check if any of these rooms also have user2 as a participant (direct chat)
       for (const participant of existingRoomData.real_estate_chat_room_participant) {
-        // Get room details to check if it's a direct room
         const roomDetails = await executeQuery(`
           query GetRoomDetails($roomId: uuid!) {
             real_estate_chat_room(
@@ -119,39 +108,38 @@ export async function POST(request: NextRequest) {
             is_active: boolean;
           }>;
         };
-        
+
         const room = roomDetails.real_estate_chat_room?.[0];
         if (room && room.room_type === 'direct') {
           // Check if user2 is also in this room
           const user2ParticipantData = await executeQuery(`
-            query CheckUser2InRoom($roomId: uuid!, $user2FirebaseUid: String!) {
+            query CheckUser2InRoom($roomId: uuid!, $user2UserId: uuid!) {
               real_estate_chat_room_participant(
                 where: {
                   room_id: { _eq: $roomId },
-                  user_firebase_uid: { _eq: $user2FirebaseUid }
+                  user_id: { _eq: $user2UserId }
                 }
               ) {
                 id
                 room_id
-                user_firebase_uid
+                user_id
                 role
               }
             }
           `, {
             roomId: participant.room_id,
-            user2FirebaseUid: user2FirebaseUid
+            user2UserId
           }) as {
             real_estate_chat_room_participant?: Array<{
               id: string;
               room_id: string;
-              user_firebase_uid: string;
+              user_id: string;
               role: string;
             }>;
           };
-          
-          if (user2ParticipantData.real_estate_chat_room_participant && 
+
+          if (user2ParticipantData.real_estate_chat_room_participant &&
               user2ParticipantData.real_estate_chat_room_participant.length > 0) {
-            console.log('Found existing direct room between both users:', participant.room_id);
             return NextResponse.json({
               success: true,
               data: {
@@ -166,13 +154,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    console.log('No existing room found, creating new one...');
     // Room doesn't exist, create a new one
     const newRoomId = uuidv4();
-    console.log('Generated room ID:', newRoomId);
-    
-    console.log('Creating room with mutation...');
-    // Create the room
+
     const roomData = await executeMutation(CREATE_ROOM_MUTATION, {
       roomId: newRoomId
     }) as {
@@ -183,8 +167,6 @@ export async function POST(request: NextRequest) {
         updated_at: string;
       };
     };
-    
-    console.log('Room creation result:', roomData);
 
     if (!roomData.insert_real_estate_chat_room_one) {
       return NextResponse.json(
@@ -193,21 +175,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Adding participants to room...');
     // Add both users as participants
-    const participant1Result = await executeMutation(ADD_PARTICIPANT_MUTATION, {
+    await executeMutation(ADD_PARTICIPANT_MUTATION, {
       roomId: newRoomId,
-      userFirebaseUid: user1FirebaseUid,
+      userId: user1UserId,
       role: user1Role
-    }) as unknown;
-    console.log('Participant 1 added:', participant1Result);
+    });
 
-    const participant2Result = await executeMutation(ADD_PARTICIPANT_MUTATION, {
+    await executeMutation(ADD_PARTICIPANT_MUTATION, {
       roomId: newRoomId,
-      userFirebaseUid: user2FirebaseUid,
+      userId: user2UserId,
       role: user2Role
-    }) as unknown;
-    console.log('Participant 2 added:', participant2Result);
+    });
 
     return NextResponse.json({
       success: true,

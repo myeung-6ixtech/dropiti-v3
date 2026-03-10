@@ -103,6 +103,19 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Gravatar (used by Nhost for default avatars)
+      {
+        protocol: 'https',
+        hostname: 'www.gravatar.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'gravatar.com',
+        port: '',
+        pathname: '/**',
+      },
       // S3 and AWS CloudFront patterns
       {
         protocol: 'https',

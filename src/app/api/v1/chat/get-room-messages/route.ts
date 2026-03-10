@@ -12,7 +12,7 @@ const GET_ROOM_MESSAGES_QUERY = `
     ) {
       id
       content
-      sender_firebase_uid
+      sender_user_id
       status
       created_at
       message_type
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       real_estate_chat_message?: Array<{
         id: string;
         content: string;
-        sender_firebase_uid: string;
+        sender_user_id: string;
         status: string;
         created_at: string;
         message_type: string;

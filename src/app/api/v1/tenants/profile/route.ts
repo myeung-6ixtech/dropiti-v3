@@ -3,11 +3,11 @@ import { executeQuery, executeMutation } from '@/app/api/graphql/serverClient';
 
 // GraphQL
 const GET_TENANT_PROFILE_BY_UID = `
-  query GetTenantProfileByUid($firebase_uid: String!) {
-    real_estate_tenant_profile(where: { user_firebase_uid: { _eq: $firebase_uid } }, limit: 1) {
+  query GetTenantProfileByUid($nhost_user_id: uuid!) {
+    real_estate_tenant_profile(where: { user_id: { _eq: $nhost_user_id } }, limit: 1) {
       id
       tenant_uuid
-      user_firebase_uid
+      user_id
       tenant_listing_title
       tenant_listing_description
       budget_min
@@ -46,7 +46,7 @@ const INSERT_TENANT_PROFILE = `
     insert_real_estate_tenant_profile_one(object: $object) {
       id
       tenant_uuid
-      user_firebase_uid
+      user_id
       tenant_listing_status
       created_at
       updated_at
@@ -55,16 +55,16 @@ const INSERT_TENANT_PROFILE = `
 `;
 
 const UPDATE_TENANT_PROFILE = `
-  mutation UpdateTenantProfile($firebase_uid: String!, $updates: real_estate_tenant_profile_set_input!) {
+  mutation UpdateTenantProfile($nhost_user_id: uuid!, $updates: real_estate_tenant_profile_set_input!) {
     update_real_estate_tenant_profile(
-      where: { user_firebase_uid: { _eq: $firebase_uid } }
+      where: { user_id: { _eq: $nhost_user_id } }
       _set: $updates
     ) {
       affected_rows
       returning {
         id
         tenant_uuid
-        user_firebase_uid
+        user_id
         tenant_listing_status
         updated_at
       }
@@ -75,16 +75,16 @@ const UPDATE_TENANT_PROFILE = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const firebaseUid = searchParams.get('firebase_uid');
+    const nhostUserId = searchParams.get('nhost_user_id');
 
-    if (!firebaseUid) {
+    if (!nhostUserId) {
       return NextResponse.json(
-        { error: 'firebase_uid parameter is required' },
+        { error: 'nhost_user_id parameter is required' },
         { status: 400 }
       );
     }
 
-    const data = await executeQuery(GET_TENANT_PROFILE_BY_UID, { firebase_uid: firebaseUid }) as {
+    const data = await executeQuery(GET_TENANT_PROFILE_BY_UID, { nhost_user_id: nhostUserId }) as {
       real_estate_tenant_profile?: Array<Record<string, unknown>>;
     };
 
@@ -99,16 +99,16 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { user_firebase_uid, ...rest } = body || {};
-    if (!user_firebase_uid) {
+    const { user_nhost_user_id, ...rest } = body || {};
+    if (!user_nhost_user_id) {
       return NextResponse.json(
-        { error: 'user_firebase_uid is required' },
+        { error: 'user_nhost_user_id is required' },
         { status: 400 }
       );
     }
 
     // Check existing
-    const existing = await executeQuery(GET_TENANT_PROFILE_BY_UID, { firebase_uid: user_firebase_uid }) as {
+    const existing = await executeQuery(GET_TENANT_PROFILE_BY_UID, { nhost_user_id: user_nhost_user_id }) as {
       real_estate_tenant_profile?: Array<Record<string, unknown>>;
     };
     const hasProfile = (existing?.real_estate_tenant_profile?.length || 0) > 0;
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       // Update
       const updates = { ...rest, updated_at: new Date().toISOString() };
       const updateRes = await executeMutation(UPDATE_TENANT_PROFILE, {
-        firebase_uid: user_firebase_uid,
+        nhost_user_id: user_nhost_user_id,
         updates,
       }) as {
         update_real_estate_tenant_profile?: { affected_rows: number; returning: Array<Record<string, unknown>> };
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     // Insert
     const object = {
-      user_firebase_uid,
+      user_id: user_nhost_user_id,
       ...rest,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -146,16 +146,16 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { user_firebase_uid, updates } = body || {};
-    if (!user_firebase_uid || !updates || Object.keys(updates).length === 0) {
+    const { user_nhost_user_id, updates } = body || {};
+    if (!user_nhost_user_id || !updates || Object.keys(updates).length === 0) {
       return NextResponse.json(
-        { error: 'user_firebase_uid and updates are required' },
+        { error: 'user_nhost_user_id and updates are required' },
         { status: 400 }
       );
     }
 
     const updateRes = await executeMutation(UPDATE_TENANT_PROFILE, {
-      firebase_uid: user_firebase_uid,
+      nhost_user_id: user_nhost_user_id,
       updates: { ...updates, updated_at: new Date().toISOString() },
     }) as {
       update_real_estate_tenant_profile?: { affected_rows: number; returning: Array<Record<string, unknown>> };

@@ -38,14 +38,14 @@ export default function ReviewsPage() {
       }
 
       // Fetch all reviews for the user
-      const reviewsResponse = await fetch(`/api/v1/reviews/get-reviews-by-user?userFirebaseUid=${authUser.id}`);
+      const reviewsResponse = await fetch(`/api/v1/reviews/get-reviews-by-user?userId=${authUser.id}`);
       if (reviewsResponse.ok) {
         const reviewsData = await reviewsResponse.json();
         const allReviews = reviewsData.data || [];
         
         // Separate reviews given vs received
-        const given = allReviews.filter((review: Review) => review.reviewerFirebaseUid === authUser.id);
-        const received = allReviews.filter((review: Review) => review.revieweeFirebaseUid === authUser.id);
+        const given = allReviews.filter((review: Review) => review.reviewerUserId === authUser.id);
+        const received = allReviews.filter((review: Review) => review.revieweeUserId === authUser.id);
         
         setReviewsGiven(given);
         setReviewsReceived(received);

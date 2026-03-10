@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_PROPERTY_COUNT_BY_USER_QUERY = `
-  query GetPropertyCountByUser($landlordFirebaseUid: String!) {
+  query GetPropertyCountByUser($landlordUserId: uuid!) {
     real_estate_property_listing_aggregate(
       where: { 
-        landlord_firebase_uid: { _eq: $landlordFirebaseUid }
+        landlord_user_id: { _eq: $landlordUserId }
         status: { _eq: "published" }
       }
     ) {
@@ -27,24 +27,24 @@ interface GraphQLPropertyCountResponse {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const landlordFirebaseUid = searchParams.get('landlordFirebaseUid');
+    const landlordUserId = searchParams.get('landlordUserId');
 
     console.log('Get Property Count by User API: Received request with params:', { 
-      landlordFirebaseUid 
+      landlordUserId 
     });
 
-    if (!landlordFirebaseUid) {
-      console.log('Get Property Count by User API: Missing landlordFirebaseUid parameter');
+    if (!landlordUserId) {
+      console.log('Get Property Count by User API: Missing landlordUserId parameter');
       return NextResponse.json(
-        { error: 'landlordFirebaseUid parameter is required' },
+        { error: 'landlordUserId parameter is required' },
         { status: 400 }
       );
     }
 
     // Execute GraphQL query
-    console.log('Get Property Count by User API: Executing GraphQL query for user:', landlordFirebaseUid);
+    console.log('Get Property Count by User API: Executing GraphQL query for user:', landlordUserId);
     const result = await executeQuery(GET_PROPERTY_COUNT_BY_USER_QUERY, {
-      landlordFirebaseUid
+      landlordUserId
     }) as GraphQLPropertyCountResponse;
 
     console.log('Get Property Count by User API: Raw GraphQL response:', result);

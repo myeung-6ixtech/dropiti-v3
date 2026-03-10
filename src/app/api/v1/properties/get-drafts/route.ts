@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 
 const GET_DRAFTS_QUERY = `
-  query GetDrafts($landlord_firebase_uid: String!) {
+  query GetDrafts($landlord_user_id: uuid!) {
     real_estate_property_listing(
       where: { 
-        landlord_firebase_uid: { _eq: $landlord_firebase_uid },
+        landlord_user_id: { _eq: $landlord_user_id },
         status: { _eq: "draft" }
       },
       order_by: { last_saved_at: desc }
@@ -14,7 +14,7 @@ const GET_DRAFTS_QUERY = `
       property_uuid
       title
       description
-      landlord_firebase_uid
+      landlord_user_id
       created_at
       updated_at
       last_saved_at
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     console.log('Get Drafts API: Fetching drafts for landlord:', landlordId);
 
     const data = await executeQuery(GET_DRAFTS_QUERY, { 
-      landlord_firebase_uid: landlordId 
+      landlord_user_id: landlordId 
     });
 
     console.log('Get Drafts API: GraphQL response:', data);
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         property_uuid: string;
         title: string;
         description: string;
-        landlord_firebase_uid: string;
+        landlord_user_id: string | null;
         created_at: string;
         updated_at: string;
         last_saved_at: string;

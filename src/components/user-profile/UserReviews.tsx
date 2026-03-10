@@ -7,7 +7,7 @@ import { reviewsAPI } from '@/lib/api-client';
 import { ReviewSkeleton } from '@/components/skeleton';
 import { UserReviewsProps, ReviewDisplayData, USER_PROFILE_REVIEW_TYPE_LABELS } from '@/types';
 
-export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
+export default function UserReviews({ userId }: UserReviewsProps) {
   const [reviews, setReviews] = useState<ReviewDisplayData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +19,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
         setError(null);
         
         const response = await reviewsAPI.getReviewsByUser({
-          userFirebaseUid: userFirebaseUid,
+          userId: userId,
           // Remove reviewType filter to get ALL reviews received by the user
           limit: 20,
           offset: 0
@@ -28,7 +28,7 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
         if (response.success && response.data) {
           // Filter to only show reviews received by the user (not reviews they wrote)
           const receivedReviews = response.data.filter((review: ReviewDisplayData) => 
-            review.revieweeFirebaseUid === userFirebaseUid
+            review.revieweeUserId === userId
           );
           setReviews(receivedReviews);
         } else if (response.success && Array.isArray(response.data) && response.data.length === 0) {
@@ -45,10 +45,10 @@ export default function UserReviews({ userFirebaseUid }: UserReviewsProps) {
       }
     };
 
-    if (userFirebaseUid) {
+    if (userId) {
       fetchUserReviews();
     }
-  }, [userFirebaseUid]);
+  }, [userId]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

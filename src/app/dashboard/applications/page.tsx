@@ -27,7 +27,7 @@ export default function ApplicationsPage() {
 
       {/* All Outgoing Offers Component with Tabs */}
       <AllOutgoingOffers
-        initiatorFirebaseUid={authUser.id}
+        initiatorUserId={authUser.id}
         showPropertyInfo={true}
       />
     </div>

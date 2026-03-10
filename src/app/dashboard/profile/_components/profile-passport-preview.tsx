@@ -21,10 +21,10 @@ interface ProfilePassportPreviewProps {
       publishedProperties: number
     }
   }
-  firebaseUid: string
+  nhostUserId: string
 }
 
-export function ProfilePassportPreview({ user, firebaseUid }: ProfilePassportPreviewProps) {
+export function ProfilePassportPreview({ user, nhostUserId }: ProfilePassportPreviewProps) {
   return (
     <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
       <div className="flex items-center justify-between mb-1">
@@ -35,7 +35,7 @@ export function ProfilePassportPreview({ user, firebaseUid }: ProfilePassportPre
         This is how your Dropiti Passport appears to others. Click "Edit Profile" to make changes.
       </p>
       <div className="bg-gray-50 rounded-lg p-4">
-        <DropitiPassport2 user={user} firebaseUid={firebaseUid} />
+        <DropitiPassport2 user={user} nhostUserId={nhostUserId} />
       </div>
     </div>
   )

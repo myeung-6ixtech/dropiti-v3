@@ -3,14 +3,14 @@ import { executeQuery } from '@/app/api/graphql/serverClient';
 import { decryptMessage, isEncrypted } from '@/lib/encryption';
 
 const GET_USER_CHAT_ROOMS_QUERY = `
-  query GetUserChatRooms($userFirebaseUid: String!) {
+  query GetUserChatRooms($userUserId: String!) {
     real_estate_chat_room_participant(
-      where: { user_firebase_uid: { _eq: $userFirebaseUid } }
+      where: { user_id: { _eq: $userUserId } }
       order_by: { joined_at: desc }
     ) {
       id
       room_id
-      user_firebase_uid
+      user_id
       role
       joined_at
       last_read_at
@@ -22,21 +22,20 @@ const GET_USER_CHAT_ROOMS_QUERY = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userFirebaseUid = searchParams.get('userFirebaseUid');
+    const userId = searchParams.get('userId') || searchParams.get('userId');
 
-    if (!userFirebaseUid) {
+    if (!userId) {
       return NextResponse.json(
-        { error: 'userFirebaseUid is required' },
+        { error: 'userId is required' },
         { status: 400 }
       );
     }
 
-    // First, get the user's chat room participants
-    const participantData = await executeQuery(GET_USER_CHAT_ROOMS_QUERY, { userFirebaseUid }) as {
+    const participantData = await executeQuery(GET_USER_CHAT_ROOMS_QUERY, { userUserId: userId }) as {
       real_estate_chat_room_participant?: Array<{
         id: string;
         room_id: string;
-        user_firebase_uid: string;
+        user_id: string;
         role: string;
         joined_at: string;
         last_read_at: string | null;
@@ -76,15 +75,15 @@ export async function GET(request: NextRequest) {
 
     // Get other participants for each room
     const GET_OTHER_PARTICIPANTS_QUERY = `
-      query GetOtherParticipants($roomIds: [uuid!]!, $currentUserFirebaseUid: String!) {
+      query GetOtherParticipants($roomIds: [uuid!]!, $currentUserId: uuid!) {
         real_estate_chat_room_participant(
-          where: { 
+          where: {
             room_id: { _in: $roomIds },
-            user_firebase_uid: { _neq: $currentUserFirebaseUid }
+            user_id: { _neq: $currentUserId }
           }
         ) {
           room_id
-          user_firebase_uid
+          user_id
           role
         }
       }
@@ -103,26 +102,26 @@ export async function GET(request: NextRequest) {
     };
 
     // Get other participants for each room
-    const otherParticipantsData = await executeQuery(GET_OTHER_PARTICIPANTS_QUERY, { 
-      roomIds, 
-      currentUserFirebaseUid: userFirebaseUid 
+    const otherParticipantsData = await executeQuery(GET_OTHER_PARTICIPANTS_QUERY, {
+      roomIds,
+      currentUserId: userId
     }) as {
       real_estate_chat_room_participant?: Array<{
         room_id: string;
-        user_firebase_uid: string;
+        user_id: string;
         role: string;
       }>;
     };
 
     // Get user details for other participants
-    const otherUserFirebaseUids = otherParticipantsData.real_estate_chat_room_participant?.map(p => p.user_firebase_uid) || [];
-    
+    const otherUserIds = otherParticipantsData.real_estate_chat_room_participant?.map(p => p.user_id) || [];
+
     const GET_USER_DETAILS_QUERY = `
-      query GetUserDetails($firebaseUids: [String!]!) {
+      query GetUserDetails($nhostUserIds: [uuid!]!) {
         real_estate_user(
-          where: { firebase_uid: { _in: $firebaseUids } }
+          where: { nhost_user_id: { _in: $nhostUserIds } }
         ) {
-          firebase_uid
+          nhost_user_id
           display_name
           photo_url
           email
@@ -130,11 +129,11 @@ export async function GET(request: NextRequest) {
       }
     `;
 
-    const userDetailsData = otherUserFirebaseUids.length > 0 ? await executeQuery(GET_USER_DETAILS_QUERY, { 
-      firebaseUids: otherUserFirebaseUids 
+    const userDetailsData = otherUserIds.length > 0 ? await executeQuery(GET_USER_DETAILS_QUERY, {
+      nhostUserIds: otherUserIds
     }) as {
       real_estate_user?: Array<{
-        firebase_uid: string;
+        nhost_user_id: string;
         display_name: string | null;
         photo_url: string | null;
         email: string | null;
@@ -150,7 +149,7 @@ export async function GET(request: NextRequest) {
         ) {
           room_id
           content
-          sender_firebase_uid
+          sender_user_id
           created_at
         }
       }
@@ -160,7 +159,7 @@ export async function GET(request: NextRequest) {
       real_estate_chat_message?: Array<{
         room_id: string;
         content: string;
-        sender_firebase_uid: string;
+        sender_user_id: string;
         created_at: string;
       }>;
     };
@@ -175,7 +174,7 @@ export async function GET(request: NextRequest) {
       
       // Find the user details for the other participant
       const otherUserDetails = otherParticipant ? 
-        userDetailsData.real_estate_user?.find(u => u.firebase_uid === otherParticipant.user_firebase_uid) : null;
+        userDetailsData.real_estate_user?.find(u => u.nhost_user_id === otherParticipant.user_id) : null;
       
       // Decrypt the last message if it exists and is encrypted
       let decryptedLastMessage = lastMessage;

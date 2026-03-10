@@ -22,7 +22,7 @@ export default function OffersPage() {
       />
 
       {/* All Incoming Offers Component */}
-      <AllIncomingOffers recipientFirebaseUid={authUser.id} />
+      <AllIncomingOffers recipientUserId={authUser.id} />
     </div>
   );
 }

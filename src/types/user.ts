@@ -8,13 +8,13 @@
 
 export interface User {
   uuid: string;
-  firebase_uid: string;
+  nhost_user_id: string;
   display_name: string;
   first_name?: string;
   last_name?: string;
   email: string;
   photo_url?: string;
-  auth_provider: 'firebase' | 'google' | 'facebook' | 'apple';
+  auth_provider: 'email' | 'google' | 'facebook' | 'apple';
   phone_number?: string;
   location?: string;
   about?: string;
@@ -81,13 +81,13 @@ export interface PrivacySettings {
 // ========================================
 
 export interface CreateUserInput {
-  firebase_uid: string;
+  nhost_user_id: string;
   display_name: string;
   first_name?: string;
   last_name?: string;
   email: string;
   photo_url?: string;
-  auth_provider?: 'firebase' | 'google' | 'facebook' | 'apple';
+  auth_provider?: 'email' | 'google' | 'facebook' | 'apple';
   phone_number?: string;
   location?: string;
   about?: string;

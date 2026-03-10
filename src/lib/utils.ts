@@ -3,6 +3,7 @@
  */
 
 import { twMerge } from 'tailwind-merge';
+import { DEFAULT_AVATAR_URL } from '@/constants/images';
 
 /**
  * Utility function to merge Tailwind CSS classes
@@ -75,7 +76,7 @@ export function formatPropertyLocation(location: unknown): string {
  */
 export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: string): string => {
   if (!imageUrl) {
-    return fallbackUrl || '/images/Portrait_Placeholder.png';
+    return fallbackUrl || DEFAULT_AVATAR_URL;
   }
 
   // Check if the URL is valid
@@ -112,7 +113,10 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
       'cdn.digitaloceanspaces.com',
       'nyc3.digitaloceanspaces.com',
       'fra1.digitaloceanspaces.com',
-      'sgp1.digitaloceanspaces.com'
+      'sgp1.digitaloceanspaces.com',
+      // Gravatar (used by Nhost as default avatars)
+      'www.gravatar.com',
+      'gravatar.com',
     ];
 
     // Check if the hostname is in the allowed list
@@ -142,7 +146,7 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
 
     // For other external URLs, log and return fallback
     console.warn(`Profile image hostname not allowed: ${url.hostname}`, { imageUrl });
-    return fallbackUrl || '/images/Portrait_Placeholder.png';
+    return fallbackUrl || DEFAULT_AVATAR_URL;
   } catch (error) {
     // If URL parsing fails, it might be a relative path
     if (imageUrl.startsWith('/') || imageUrl.startsWith('./')) {
@@ -151,7 +155,7 @@ export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: stri
     
     // Log the error for debugging
     console.warn(`Invalid profile image URL: ${imageUrl}`, { error });
-    return fallbackUrl || '/images/Portrait_Placeholder.png';
+    return fallbackUrl || DEFAULT_AVATAR_URL;
   }
 };
 
@@ -193,7 +197,10 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
       'cdn.digitaloceanspaces.com',
       'nyc3.digitaloceanspaces.com',
       'fra1.digitaloceanspaces.com',
-      'sgp1.digitaloceanspaces.com'
+      'sgp1.digitaloceanspaces.com',
+      // Gravatar (used by Nhost as default avatars)
+      'www.gravatar.com',
+      'gravatar.com',
     ];
 
     // Check if the hostname is in the allowed list
@@ -224,20 +231,20 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
 
 /**
  * Get the total number of properties (all statuses) created by a user
- * @param landlordFirebaseUid - The Firebase UID of the landlord
+ * @param landlordUserId - The Nhost user ID of the landlord
  * @returns Promise<number> - The count of all properties (drafts, published, archived, etc.)
  */
-export async function getTotalPropertyCount(landlordFirebaseUid: string): Promise<number> {
+export async function getTotalPropertyCount(landlordUserId: string): Promise<number> {
   try {
     const { propertiesAPI } = await import('./api-client');
     
     // Fetch both published properties and drafts in parallel
     const [publishedResponse, draftsResponse] = await Promise.all([
       propertiesAPI.getListings({
-        landlord_firebase_uid: landlordFirebaseUid,
+        landlord_user_id: landlordUserId,
         limit: 1000
       }),
-      propertiesAPI.getDrafts(landlordFirebaseUid)
+      propertiesAPI.getDrafts(landlordUserId)
     ]);
     
     let totalCount = 0;
@@ -263,16 +270,16 @@ export async function getTotalPropertyCount(landlordFirebaseUid: string): Promis
 
 /**
  * Get the count of properties with 'published' status for a user
- * @param landlordFirebaseUid - The Firebase UID of the landlord
+ * @param landlordUserId - The Nhost user ID of the landlord
  * @returns Promise<number> - The count of published properties
  */
-export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: string): Promise<number> {
+export async function getPublishedPropertyCountByStatus(landlordUserId: string): Promise<number> {
   try {
     const { propertiesAPI } = await import('./api-client');
     
     // First try the dedicated API endpoint for published property count
     try {
-      const countResponse = await propertiesAPI.getPropertyCountByUser(landlordFirebaseUid);
+      const countResponse = await propertiesAPI.getPropertyCountByUser(landlordUserId);
       if (countResponse.success && countResponse.data) {
         console.log('getPublishedPropertyCountByStatus - Using dedicated API, count:', countResponse.data.count);
         return countResponse.data.count || 0;
@@ -283,7 +290,7 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
     
     // Fallback to getListings API if dedicated count API fails
     const response = await propertiesAPI.getListings({
-      landlord_firebase_uid: landlordFirebaseUid,
+      landlord_user_id: landlordUserId,
       limit: 1000
     });
     
@@ -322,16 +329,16 @@ export async function getPublishedPropertyCountByStatus(landlordFirebaseUid: str
 
 /**
  * Calculate the average rating received by a user from all reviews
- * @param userFirebaseUid - The Firebase UID of the user
+ * @param userId - The Nhost user ID of the user
  * @returns Promise<{ averageRating: number; reviewCount: number }> - The average rating and total review count
  */
-export async function getAverageUserRating(userFirebaseUid: string): Promise<{ averageRating: number; reviewCount: number }> {
+export async function getAverageUserRating(userId: string): Promise<{ averageRating: number; reviewCount: number }> {
   try {
     const { reviewsAPI } = await import('./api-client');
     
     // Fetch all reviews received by the user (where they are the reviewed user)
     const response = await reviewsAPI.getReviewsByUser({
-      userFirebaseUid: userFirebaseUid,
+      userId: userId,
       limit: 1000 // Get all reviews to calculate accurate average
     });
     
@@ -339,8 +346,8 @@ export async function getAverageUserRating(userFirebaseUid: string): Promise<{ a
       const reviews = Array.isArray(response.data) ? response.data : [response.data];
       
       // Filter for reviews where the user is the reviewed user (not the reviewer)
-      const receivedReviews = reviews.filter((review: { revieweeFirebaseUid: string }) => 
-        review.revieweeFirebaseUid === userFirebaseUid
+      const receivedReviews = reviews.filter((review: { revieweeUserId: string }) =>
+        review.revieweeUserId === userId
       );
       
       if (receivedReviews.length === 0) {

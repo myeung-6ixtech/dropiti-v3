@@ -59,8 +59,8 @@ export async function GET() {
             id
             offer_key
             property_uuid
-            initiator_firebase_uid
-            recipient_firebase_uid
+            initiator_user_id
+            recipient_user_id
             offer_status
             created_at
           }
