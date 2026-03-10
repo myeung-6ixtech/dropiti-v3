@@ -108,7 +108,7 @@ export default function TenantProfileView() {
       } as Record<string, unknown>;
 
       await tenantsAPI.upsertTenantProfile({ 
-        user_id: nhostUserId, 
+        user_nhost_user_id: nhostUserId, 
         ...payload
       });
       

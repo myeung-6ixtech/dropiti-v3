@@ -369,7 +369,7 @@ export const tenantsAPI = {
     const response = await apiClient.get('/tenants/profile', { params: { nhost_user_id: nhostUserId } });
     return response.data;
   },
-  upsertTenantProfile: async (payload: Record<string, unknown> & { user_id: string }) => {
+  upsertTenantProfile: async (payload: Record<string, unknown> & { user_nhost_user_id: string }) => {
     const response = await apiClient.post('/tenants/profile', payload);
     return response.data;
   },
