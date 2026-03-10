@@ -34,11 +34,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Use id from the user object, which contains the Firebase UID
       const nhostUserId = authUser?.id;
-      
+
       if (!nhostUserId) {
-        console.warn('Dashboard: No Firebase UID available for fetching data');
         setReviews([]);
         setPropertyCounts({ totalProperties: 0, publishedProperties: 0 });
         setLoading(false);
@@ -48,8 +46,6 @@ export default function DashboardPage() {
       try {
         setLoading(true);
         setError(null);
-        
-        console.log('Dashboard: Fetching data for Firebase UID:', nhostUserId);
         
         // Fetch reviews, property counts, and average rating in parallel with individual error handling
         const [reviewsResponse, totalCount, publishedCount, ratingData] = await Promise.allSettled([

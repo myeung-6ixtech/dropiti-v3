@@ -231,7 +231,7 @@ export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
 
 /**
  * Get the total number of properties (all statuses) created by a user
- * @param landlordUserId - The Firebase UID of the landlord
+ * @param landlordUserId - The Nhost user ID of the landlord
  * @returns Promise<number> - The count of all properties (drafts, published, archived, etc.)
  */
 export async function getTotalPropertyCount(landlordUserId: string): Promise<number> {
@@ -270,7 +270,7 @@ export async function getTotalPropertyCount(landlordUserId: string): Promise<num
 
 /**
  * Get the count of properties with 'published' status for a user
- * @param landlordUserId - The Firebase UID of the landlord
+ * @param landlordUserId - The Nhost user ID of the landlord
  * @returns Promise<number> - The count of published properties
  */
 export async function getPublishedPropertyCountByStatus(landlordUserId: string): Promise<number> {
@@ -329,7 +329,7 @@ export async function getPublishedPropertyCountByStatus(landlordUserId: string):
 
 /**
  * Calculate the average rating received by a user from all reviews
- * @param userId - The Firebase UID of the user
+ * @param userId - The Nhost user ID of the user
  * @returns Promise<{ averageRating: number; reviewCount: number }> - The average rating and total review count
  */
 export async function getAverageUserRating(userId: string): Promise<{ averageRating: number; reviewCount: number }> {

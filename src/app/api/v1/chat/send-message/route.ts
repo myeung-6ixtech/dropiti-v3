@@ -47,16 +47,15 @@ const SEND_MESSAGE_MUTATION = `
 
 export async function POST(request: NextRequest) {
   try {
-    const { 
-      roomId, 
+    const {
+      roomId,
       senderUserId,
-      senderFirebaseUid, // legacy alias — still accepted
       content,
       messageType = 'text',
       metadata = null
     } = await request.json();
 
-    const resolvedSenderId = senderUserId || senderFirebaseUid;
+    const resolvedSenderId = senderUserId;
 
     if (!roomId || !resolvedSenderId || !content) {
       return NextResponse.json(

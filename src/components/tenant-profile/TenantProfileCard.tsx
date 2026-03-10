@@ -60,7 +60,7 @@ export default function TenantProfileCard({
             return;
           }
           
-          // Request user by firebase uid to get UUID
+          // Request user by nhost_user_id to get profile details
           const res = await fetch(`/api/v1/users/get-user-by-id?nhost_user_id=${encodeURIComponent(nhostUserId)}`);
           const json = await res.json();
           if (!cancelled && json?.success && json?.data) {

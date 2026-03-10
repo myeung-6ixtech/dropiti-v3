@@ -87,10 +87,10 @@ interface GraphQLPropertyResponse {
 }
 
 const GET_OFFERS_BY_RECIPIENT_QUERY = `
-  query GetOffersByRecipient($recipientFirebaseUid: uuid!, $propertyUuid: String) {
+  query GetOffersByRecipient($recipientUserId: uuid!, $propertyUuid: String) {
     real_estate_offer(
       where: {
-        recipient_user_id: {_eq: $recipientFirebaseUid}
+        recipient_user_id: {_eq: $recipientUserId}
         property_uuid: {_eq: $propertyUuid}
       }, 
       order_by: {created_at: desc}
@@ -134,10 +134,10 @@ const GET_OFFERS_BY_RECIPIENT_QUERY = `
 `;
 
 const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
-  query GetOffersByRecipient($recipientFirebaseUid: uuid!) {
+  query GetOffersByRecipient($recipientUserId: uuid!) {
     real_estate_offer(
       where: {
-        recipient_user_id: {_eq: $recipientFirebaseUid}
+        recipient_user_id: {_eq: $recipientUserId}
       }, 
       order_by: {created_at: desc}
     ) {
@@ -180,7 +180,7 @@ const GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY = `
 `;
 
 const GET_USER_BY_FIREBASE_UID_QUERY = `
-  query GetUserByFirebaseUid($nhostUserId: uuid!) {
+  query GetUserByNhostUserId($nhostUserId: uuid!) {
     real_estate_user(where: { nhost_user_id: { _eq: $nhostUserId } }, limit: 1) {
       uuid
       display_name
@@ -212,21 +212,19 @@ const GET_PROPERTY_BY_UUID_QUERY = `
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const recipientFirebaseUid = searchParams.get('recipientUserId') || searchParams.get('recipientFirebaseUid');
+    const recipientUserId = searchParams.get('recipientUserId');
     const propertyUuid = searchParams.get('propertyUuid'); // Optional: filter by specific property
 
-    if (!recipientFirebaseUid) {
+    if (!recipientUserId) {
       return NextResponse.json(
         { error: 'recipientUserId is required' },
         { status: 400 }
       );
     }
 
-    console.log('Get Offers API: Property UUID filter:', propertyUuid);
-
     // Build the query variables
-    const variables: { recipientFirebaseUid: string; propertyUuid?: string } = {
-      recipientFirebaseUid
+    const variables: { recipientUserId: string; propertyUuid?: string } = {
+      recipientUserId
     };
 
     // If propertyUuid is provided, add it to the query
