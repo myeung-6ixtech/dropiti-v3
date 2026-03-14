@@ -104,6 +104,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={plusJakartaSans.variable}>
+      <head>
+        <meta name="google-adsense-account" content="ca-pub-6301512886533217" />
+      </head>
       <body className={`${plusJakartaSans.className} antialiased`}>
         <Providers>
           <ClientOnboardingGate>
