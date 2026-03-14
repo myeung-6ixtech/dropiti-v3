@@ -81,7 +81,7 @@ export default function TenantProfilePage() {
       setIsPublishing(true);
       const { tenant_privacy_settings, ...rest } = profileData;
       await tenantsAPI.upsertTenantProfile({ 
-        user_id: nhostUserId, 
+        user_nhost_user_id: nhostUserId, 
         ...rest,
         privacy_settings: tenant_privacy_settings || {},
         tenant_listing_status: 'active' as TenantListingStatus
@@ -105,7 +105,7 @@ export default function TenantProfilePage() {
       setIsUnpublishing(true);
       const { tenant_privacy_settings, ...rest } = profileData;
       await tenantsAPI.upsertTenantProfile({ 
-        user_id: nhostUserId, 
+        user_nhost_user_id: nhostUserId, 
         ...rest,
         privacy_settings: tenant_privacy_settings || {},
         tenant_listing_status: 'inactive' as TenantListingStatus
