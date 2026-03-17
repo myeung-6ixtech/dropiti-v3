@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuthenticationStatus } from '@nhost/nextjs';
 import { nhost } from '@/lib/nhost';
 import { authClasses, authFormPatterns } from '@/styles/auth';
 
 function ChangePasswordForm() {
+  const { isAuthenticated, isLoading: authLoading } = useAuthenticationStatus();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,6 +17,16 @@ function ChangePasswordForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+
+  // Clean token from URL once we have resolved auth state (so it's not left in address bar)
+  useEffect(() => {
+    if (authLoading) return;
+    if (typeof window === 'undefined') return;
+    const hasToken = window.location.search.includes('refreshToken') || window.location.search.includes('token');
+    if (hasToken && window.location.pathname === '/auth/change-password') {
+      window.history.replaceState({}, document.title, '/auth/change-password');
+    }
+  }, [authLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +59,63 @@ function ChangePasswordForm() {
       setIsLoading(false);
     }
   };
+
+  // Loading: Nhost may still be exchanging the reset-link token for a session
+  if (authLoading) {
+    return (
+      <div className={authClasses.container}>
+        <div className={authClasses.formSection}>
+          <div className="flex items-center justify-center w-full min-h-[50vh]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4" />
+              <p className="text-gray-600">Loading...</p>
+            </div>
+          </div>
+        </div>
+        <div className={authClasses.contentSection}>
+          <div className={authClasses.contentWrapper} />
+        </div>
+      </div>
+    );
+  }
+
+  // Not authenticated after loading: invalid or expired reset link
+  if (!isAuthenticated) {
+    return (
+      <div className={authClasses.container}>
+        <div className={authClasses.formSection}>
+          <div className={authClasses.formWrapper}>
+            <div className={authClasses.sectionSpacing}>
+              <Link href="/" className={authClasses.backLink}>← Back to homepage</Link>
+            </div>
+            <div className="text-center">
+              <h1 className={authClasses.title}>Invalid or expired link</h1>
+              <p className={authClasses.subtitle}>
+                This reset password link is invalid or has already expired. Please request a new reset email.
+              </p>
+              <div className="mt-6 space-y-3">
+                <Link href="/auth/reset-password" className={authClasses.button}>
+                  Request new reset email
+                </Link>
+                <br />
+                <Link href="/auth/signin" className={authClasses.link}>Back to sign in</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={authClasses.contentSection}>
+          <div className={authClasses.contentWrapper}>
+            <div className="max-w-md">
+              <h2 className={authClasses.headingWhite}>Link expired</h2>
+              <p className={authClasses.descriptionWhite}>
+                Password reset links expire for security. Request a new one and use it soon.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (success) {
     return (

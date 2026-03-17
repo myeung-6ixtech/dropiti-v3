@@ -132,10 +132,10 @@ export default function CommercialSections() {
       {/* Innovation Statement Section */}
       <div className="py-16 bg-gradient-to-br from-purple-600 to-purple-700 text-white">
         <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-white">
             Ready to revolutionize your property experience?
           </h2>
-          <p className="text-base sm:text-lg opacity-90 mb-6">
+          <p className="text-base sm:text-lg opacity-90 mb-6 text-white">
             Join thousands of users who trust Dropiti for smarter property management, 
             seamless transactions, and innovative solutions that make property ownership effortless.
           </p>

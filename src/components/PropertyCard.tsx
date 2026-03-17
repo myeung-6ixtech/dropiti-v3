@@ -9,6 +9,7 @@ import { Bed, Bathtub } from '@/assets/icons';
 import Image from 'next/image';
 import Link from 'next/link';
 import { propertyCardClasses } from '@/styles/property-card';
+import { capitalizeWords } from '@/lib/utils';
 
 interface PropertyCardProps {
   property: Property & { 
@@ -89,18 +90,18 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
       }
       
       
-      // If we have both district and country, show them
+      // If we have both district and country, show them (capitalized)
       if (district && country && district !== country) {
-        const result = `${district}, ${country}`;
+        const result = `${capitalizeWords(district)}, ${capitalizeWords(country)}`;
         return result;
       }
       
-      return parts[parts.length - 1];
+      return capitalizeWords(parts[parts.length - 1]);
     }
     
-    // For simple addresses without commas, return as is
+    // For simple addresses without commas, return capitalized
     console.log('PropertyCard: Simplified location (no commas):', location);
-    return location;
+    return capitalizeWords(location);
   };
 
   const handleViewDetails = () => {

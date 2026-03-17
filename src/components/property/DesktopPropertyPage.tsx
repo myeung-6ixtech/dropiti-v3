@@ -49,6 +49,7 @@ interface DesktopPropertyPageProps {
   amenitiesList: string[];
   groupedAmenities: Record<string, Array<{ id: string; name: string }>>;
   isOwner?: boolean;
+  isAdminListing?: boolean;
 }
 
 export default function DesktopPropertyPage({
@@ -65,6 +66,7 @@ export default function DesktopPropertyPage({
   amenitiesList,
   groupedAmenities,
   isOwner = false,
+  isAdminListing = false,
 }: DesktopPropertyPageProps) {
   const router = useRouter();
 
@@ -332,15 +334,15 @@ export default function DesktopPropertyPage({
                 availableDate={property.available_date || null}
                 landlord={landlord ? {
                   id: landlord.id,
-                  uuid: landlord.uuid, // Use the actual uuid field for user profile URL
+                  uuid: landlord.uuid,
                   name: landlord.name || 'Landlord',
                   avatar: landlord.avatar || '',
                   rating: landlord.rating,
                   reviewCount: landlord.review_count,
                   responseTime: landlord.avg_response_time || 'Unknown',
-                  verified: false, // Default value
-                  responseRate: 98, // Default value
-                  totalProperties: 1, // Default value
+                  verified: false,
+                  responseRate: 98,
+                  totalProperties: 1,
                 } : {
                   id: '',
                   uuid: '',
@@ -357,6 +359,7 @@ export default function DesktopPropertyPage({
                 onChatWithLandlord={() => {}}
                 isOwner={isOwner}
                 hasExistingOffer={hasExistingOffer}
+                isAdminListing={isAdminListing}
               />
             </div>
           </div>

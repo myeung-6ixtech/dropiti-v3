@@ -154,8 +154,14 @@ class NhostAuthService {
   // -------------------------------------------------------------------------
   // Resend verification email
   // -------------------------------------------------------------------------
-  async resendVerificationEmail(email: string): Promise<{ success: boolean; error?: string }> {
-    const { error } = await nhost.auth.sendVerificationEmail({ email });
+  async resendVerificationEmail(
+    email: string,
+    redirectTo?: string,
+  ): Promise<{ success: boolean; error?: string }> {
+    const { error } = await nhost.auth.sendVerificationEmail({
+      email,
+      ...(redirectTo && { options: { redirectTo } }),
+    });
     if (error) return { success: false, error: error.message };
     return { success: true };
   }

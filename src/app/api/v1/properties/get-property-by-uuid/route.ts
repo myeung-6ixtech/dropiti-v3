@@ -48,6 +48,7 @@ const GET_PROPERTY_BY_UUID_QUERY = `
         email
         lastSeen
         createdAt
+        defaultRole
       }
     }
   }
@@ -112,6 +113,7 @@ export async function GET(request: NextRequest) {
           email?: string;
           lastSeen?: string;
           createdAt?: string;
+          defaultRole?: string;
         };
       }>;
     };
@@ -125,7 +127,7 @@ export async function GET(request: NextRequest) {
 
     const property = typedPropertyData.real_estate_property_listing[0];
     const details = property.landlord_details ?? null;
-    const authUser = property.landlord_user ?? null;
+    const authUser = property.landlord_user ?? null; // auth.users: defaultRole used for admin listing detection
 
     const response = {
       property: {
@@ -184,6 +186,7 @@ export async function GET(request: NextRequest) {
         education: details?.education,
         occupation: details?.occupation,
         marital_status: null,
+        role: authUser?.defaultRole ?? undefined, // from auth.users.defaultRole; 'admin' => admin/claim listing
       } : null,
     };
 

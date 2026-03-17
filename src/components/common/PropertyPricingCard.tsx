@@ -34,6 +34,7 @@ interface PropertyPricingCardProps {
   isOwner: boolean;
   hasExistingOffer: boolean;
   onEditListing?: () => void;
+  isAdminListing?: boolean;
 }
 
 export default function PropertyPricingCard({
@@ -44,7 +45,8 @@ export default function PropertyPricingCard({
   onChatWithLandlord,
   isOwner,
   hasExistingOffer,
-  onEditListing
+  onEditListing,
+  isAdminListing = false,
 }: PropertyPricingCardProps) {
 
   const router = useRouter();
@@ -103,8 +105,19 @@ export default function PropertyPricingCard({
 
           {/* Action Buttons */}
           <div className="space-y-3 pt-4">
-            {isOwner ? (
-              // Owner sees Edit Your Listing button
+            {isAdminListing ? (
+              <>
+                <p className="text-xs text-gray-600 mb-2">
+                  Create an account or sign in so we can transfer this listing to you.
+                </p>
+                <button
+                  onClick={() => router.push(isAuthenticated ? '/dashboard' : '/auth/signin')}
+                  className="w-full btn-primary py-3 px-4 font-medium text-sm"
+                >
+                  Request to Claim Listing
+                </button>
+              </>
+            ) : isOwner ? (
               <button
                 onClick={onEditListing}
                 className="w-full btn-secondary py-3 px-4 font-medium text-sm"
@@ -112,7 +125,6 @@ export default function PropertyPricingCard({
                 Edit Your Listing
               </button>
             ) : !isAuthenticated ? (
-              // Not logged in - prompt to sign in
               <button
                 onClick={() => router.push('/auth/signin')}
                 className="w-full btn-primary py-3 px-4 font-medium text-sm"
@@ -120,7 +132,6 @@ export default function PropertyPricingCard({
                 Sign In to Make an Offer
               </button>
             ) : hasExistingOffer ? (
-              // User has already made an offer
               <button
                 disabled
                 className="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-medium text-sm cursor-not-allowed opacity-75"
@@ -128,7 +139,6 @@ export default function PropertyPricingCard({
                 Offer Made
               </button>
             ) : (
-              // Regular user can create offer
               <button
                 onClick={onCreateOffer}
                 className="w-full btn-primary py-3 px-4 font-medium text-sm"
@@ -141,7 +151,9 @@ export default function PropertyPricingCard({
           {/* Contact Info */}
           <div className="mt-4 pt-4 border-t border-gray-200">
             <p className="text-xs text-gray-500 text-center">
-              No booking fees • Secure payment
+              {isAdminListing
+                ? 'Claim this listing? Reach out to our Service Centre'
+                : 'No booking fees • Secure payment'}
             </p>
           </div>
         </div>
@@ -195,39 +207,38 @@ export default function PropertyPricingCard({
 
             {/* Contact Actions */}
             <div className="flex flex-col space-y-2 mb-4">
-              <button
-                onClick={onChatWithLandlord}
-                className="w-full btn-secondary py-3 px-4 font-medium text-sm"
-              >
-                Chat with Landlord
-              </button>
-              {/* <button 
-                onClick={() => setShowContactInfo(!showContactInfo)}
-                className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2"
-              >
-                <PhoneIcon className="h-4 w-4" />
-                <span>Contact</span>
-              </button>
-              <button className="flex-1 bg-gray-100 text-gray-700 py-2 px-3 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center justify-center space-x-2">
-              >
-                <EnvelopeIcon className="h-4 w-4" />
-                <span>Message</span>
-              </button> */}
+              {isAdminListing ? (
+                <a
+                  href="mailto:support@dropiti.com"
+                  className="w-full btn-secondary py-3 px-4 font-medium text-sm text-center"
+                >
+                  Reach out to Admin
+                </a>
+              ) : (
+                <button
+                  onClick={onChatWithLandlord}
+                  className="w-full btn-secondary py-3 px-4 font-medium text-sm"
+                >
+                  Chat with Landlord
+                </button>
+              )}
             </div>
 
-            {/* Host Stats */}
-            <div className="pt-4 border-t border-gray-200">
-              <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                  <div className="text-base font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
-                  <div className="text-xs text-gray-500">Response rate</div>
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
-                  <div className="text-xs text-gray-500">Properties</div>
+            {/* Host Stats - hidden for admin listings */}
+            {!isAdminListing && (
+              <div className="pt-4 border-t border-gray-200">
+                <div className="grid grid-cols-2 gap-4 text-center">
+                  <div>
+                    <div className="text-base font-semibold text-gray-900">{landlord.responseRate || 98}%</div>
+                    <div className="text-xs text-gray-500">Response rate</div>
+                  </div>
+                  <div>
+                    <div className="text-base font-semibold text-gray-900">{landlord.totalProperties || 5}</div>
+                    <div className="text-xs text-gray-500">Properties</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 

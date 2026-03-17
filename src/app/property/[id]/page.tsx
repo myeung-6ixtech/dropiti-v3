@@ -9,6 +9,7 @@ import { useToast } from '@/context/ToastContext';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
+import { capitalizeWords } from '@/lib/utils';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
 import DesktopPropertyPage from '@/components/property/DesktopPropertyPage';
 import SEO, { createPropertySchema } from '@/components/SEO';
@@ -49,6 +50,7 @@ interface LandlordData {
   review_count: number;
   avg_response_time: string;
   response_rate: number;
+  role?: string; // from auth.users.default_role (e.g. 'admin')
 }
 
 interface PropertyWithLandlord {
@@ -79,9 +81,9 @@ export default function PropertyDetailPage() {
   // Function to format address based on show_specific_location flag
   const formatAddressDisplay = (address: Record<string, unknown> | undefined, showSpecificLocation: boolean | undefined) => {
     if (!address || !showSpecificLocation) {
-      // If show_specific_location is false or undefined, only show district and country
-      const district = address?.district || 'Unknown District';
-      const country = address?.country || 'Unknown Country';
+      // If show_specific_location is false or undefined, only show district and country (capitalized)
+      const district = capitalizeWords(String(address?.district || 'Unknown District'));
+      const country = capitalizeWords(String(address?.country || 'Unknown Country'));
       return `${district}, ${country}`;
     }
     
@@ -317,6 +319,8 @@ export default function PropertyDetailPage() {
   }
 
   const { property, landlord } = propertyData;
+  // landlord.role from API (auth.users.defaultRole via get-property-by-uuid); 'admin' => show Request to Claim Listing
+  const isAdminListing = landlord?.role === 'admin';
 
   // Get the main display image or fallback
   const mainImage = property.image_url || property.display_image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
@@ -393,6 +397,7 @@ export default function PropertyDetailPage() {
         hasExistingOffer={hasExistingOffer}
         isAuthenticated={isAuthenticated}
         isOwner={authUser?.id === property.owner_id}
+        isAdminListing={isAdminListing}
         formatAddressDisplay={(address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => formatAddressDisplay(address, showSpecific) || ''}
       />
 
@@ -411,6 +416,7 @@ export default function PropertyDetailPage() {
         amenitiesList={amenitiesList}
         groupedAmenities={groupedAmenities}
         isOwner={authUser?.id === property.owner_id}
+        isAdminListing={isAdminListing}
       />
 
 

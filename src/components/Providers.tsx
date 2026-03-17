@@ -2,6 +2,7 @@
 
 import { NhostProvider } from "@nhost/nextjs";
 import { nhost } from "@/lib/nhost";
+import VerificationRedirect from "@/components/auth/VerificationRedirect";
 import { AuthProvider } from "@/context/AuthContext";
 import { ToastProvider } from "@/context/ToastContext";
 import { SidebarProvider } from "@/context/SidebarContext";
@@ -14,6 +15,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErrorBoundary>
       <NhostProvider nhost={nhost}>
+        <VerificationRedirect>
         <AuthProvider>
           <ToastProvider>
             <LanguageProvider>
@@ -21,13 +23,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 <MobileChatProvider>
                   <MobileNotificationsProvider>
                     {children}
-                  </MobileNotificationsProvider>
-                </MobileChatProvider>
-              </SidebarProvider>
-            </LanguageProvider>
-          </ToastProvider>
-        </AuthProvider>
-      </NhostProvider>
+                </MobileNotificationsProvider>
+              </MobileChatProvider>
+            </SidebarProvider>
+          </LanguageProvider>
+        </ToastProvider>
+      </AuthProvider>
+        </VerificationRedirect>
+    </NhostProvider>
     </ErrorBoundary>
   );
 }

@@ -40,6 +40,7 @@ interface MobilePropertyPageProps {
   hasExistingOffer: boolean;
   isAuthenticated: boolean;
   isOwner?: boolean;
+  isAdminListing?: boolean;
   formatAddressDisplay: (address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => string;
 }
 
@@ -52,6 +53,7 @@ export default function MobilePropertyPage({
   hasExistingOffer,
   isAuthenticated,
   isOwner = false,
+  isAdminListing = false,
   formatAddressDisplay
 }: MobilePropertyPageProps) {
   const router = useRouter();
@@ -207,55 +209,72 @@ export default function MobilePropertyPage({
         </div>
       </div>
 
-      {/* Create Offer Section - Prominent Placement */}
+      {/* Create Offer / Request to Claim Section */}
       <div className="px-4 py-6 bg-white">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-base font-semibold text-gray-900">Make an Offer</h3>
-              <p className="text-xs text-gray-600">Start your rental journey</p>
+              <h3 className="text-base font-semibold text-gray-900">
+                {isAdminListing ? 'Request to Claim Listing' : 'Make an Offer'}
+              </h3>
+              <p className="text-xs text-gray-600">
+                {isAdminListing
+                  ? 'Create an account or sign in so we can transfer this listing to you. Our team will reach out after you request.'
+                  : 'Start your rental journey'}
+              </p>
             </div>
             <div className="text-right">
               <div className="text-xl font-bold text-gray-900">${property.price}</div>
               <div className="text-xs text-gray-500">per month</div>
             </div>
           </div>
-          
-          {/* Create Offer Button with Authentication Check */}
-          {isOwner ? (
+
+          {isAdminListing ? (
             <button
-              onClick={() => router.push(`/dashboard/properties/edit/${property.property_uuid || 'unknown'}`)}
-              className="btn-secondary w-full py-4 rounded-xl font-semibold text-base hover:bg-gray-100 transition-colors"
-            >
-              Edit Your Listing
-            </button>
-          ) : !isAuthenticated ? (
-            <button
-              onClick={() => router.push('/auth/signin')}
+              onClick={() => router.push(isAuthenticated ? '/dashboard' : '/auth/signin')}
               className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
             >
-              Sign In to Make an Offer
-            </button>
-          ) : hasExistingOffer ? (
-            <button
-              disabled
-              className="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-base cursor-not-allowed opacity-75"
-            >
-              Offer Made
+              Request to Claim Listing
             </button>
           ) : (
-            <button
-              onClick={handleCreateOffer}
-              className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
-            >
-              Create Offer
-            </button>
+            <>
+              {isOwner ? (
+                <button
+                  onClick={() => router.push(`/dashboard/properties/edit/${property.property_uuid || 'unknown'}`)}
+                  className="btn-secondary w-full py-4 rounded-xl font-semibold text-base hover:bg-gray-100 transition-colors"
+                >
+                  Edit Your Listing
+                </button>
+              ) : !isAuthenticated ? (
+                <button
+                  onClick={() => router.push('/auth/signin')}
+                  className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
+                >
+                  Sign In to Make an Offer
+                </button>
+              ) : hasExistingOffer ? (
+                <button
+                  disabled
+                  className="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-base cursor-not-allowed opacity-75"
+                >
+                  Offer Made
+                </button>
+              ) : (
+                <button
+                  onClick={handleCreateOffer}
+                  className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
+                >
+                  Create Offer
+                </button>
+              )}
+            </>
           )}
-          
-          {/* Additional Info */}
+
           <div className="mt-4 text-center">
             <p className="text-xs text-gray-500">
-              No booking fees • Secure payment
+              {isAdminListing
+                ? 'Claim this listing? Reach out to our Service Centre'
+                : 'No booking fees • Secure payment'}
             </p>
           </div>
         </div>
@@ -339,15 +358,26 @@ export default function MobilePropertyPage({
               </div>
               <div className="flex-1">
                 <h3 className="text-xs font-semibold text-gray-900 mb-0">{landlord.name}</h3>
-                <div className="flex items-center mt-1 mb-5">
-                  <StarIcon className="h-4 w-4 text-yellow-400" />
-                  <span className="text-xs text-gray-600 ml-1">
-                    {landlord.rating} ({landlord.review_count} reviews)
-                  </span>
-                </div>
-                <button className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors">
-                  Chat with Landlord
-                </button>
+                {!isAdminListing && (
+                  <div className="flex items-center mt-1 mb-5">
+                    <StarIcon className="h-4 w-4 text-yellow-400" />
+                    <span className="text-xs text-gray-600 ml-1">
+                      {landlord.rating} ({landlord.review_count} reviews)
+                    </span>
+                  </div>
+                )}
+                {isAdminListing ? (
+                  <a
+                    href="mailto:support@dropiti.com"
+                    className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors inline-block text-center"
+                  >
+                    Reach out to Admin
+                  </a>
+                ) : (
+                  <button className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors">
+                    Chat with Landlord
+                  </button>
+                )}
               </div>
             </div>
           </div>

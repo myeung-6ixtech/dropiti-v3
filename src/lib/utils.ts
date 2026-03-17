@@ -28,6 +28,12 @@ interface AddressObject {
   apartmentEstate?: string;
 }
 
+/** Capitalize first letter of each word (e.g. "eastern" -> "Eastern") */
+export function capitalizeWords(str: string): string {
+  if (!str || typeof str !== 'string') return str;
+  return str.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /**
  * Safely formats an address for display
  * Handles both string addresses and address objects
@@ -50,9 +56,9 @@ export function formatAddress(address: unknown): string {
     if (addressObj.buildingName) parts.push(addressObj.buildingName);
     if (addressObj.addressLine1) parts.push(addressObj.addressLine1);
     if (addressObj.addressLine2) parts.push(addressObj.addressLine2);
-    if (addressObj.district) parts.push(addressObj.district);
-    if (addressObj.state) parts.push(addressObj.state);
-    if (addressObj.country) parts.push(addressObj.country);
+    if (addressObj.district) parts.push(capitalizeWords(addressObj.district));
+    if (addressObj.state) parts.push(capitalizeWords(addressObj.state));
+    if (addressObj.country) parts.push(capitalizeWords(addressObj.country));
 
     return parts.length > 0 ? parts.join(', ') : 'Address not specified';
   }
