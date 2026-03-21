@@ -49,7 +49,7 @@ function UserVerificationContent() {
         : undefined;
       const result = await nhostAuthService.resendVerificationEmail(email, redirectTo);
       if (result.success) {
-        showToast('success', 'Verification email sent. Please check your inbox.');
+        showToast('success', 'Verification email sent. Please check your inbox to verify your account.');
       } else {
         showToast('error', result.error ?? 'Failed to send verification email.');
       }
