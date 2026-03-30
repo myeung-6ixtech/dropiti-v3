@@ -1,6 +1,6 @@
 ## Cookie Policy
 
-Last updated: 2025-12-07
+Last updated: March 30, 2026
 
 We use cookies and similar technologies to operate and improve Dropiti.
 
@@ -57,39 +57,52 @@ These allow the Site to remember your preferences:
 
 Used to deliver relevant advertisements and measure campaign effectiveness.
 
-* Third-party marketing integrations
-* Conversion tracking
-* Remarketing (if applicable)
+* **Google AdSense** – serves targeted advertisements based on your browsing behaviour. Google uses the **DoubleClick DART cookie** to serve ads based on your visit to our site and other sites on the internet.
+* Conversion tracking and remarketing
+* Third-party advertising partners
+
+You can opt out of Google's use of advertising cookies by visiting [Google's Ad Settings](https://adssettings.google.com/) or [aboutads.info](https://www.aboutads.info/choices/).
 
 ---
 
 ## 3. Third-Party Cookies We Use
 
-We may use cookies from trusted third-party services such as:
+| Provider | Purpose | More info |
+|---|---|---|
+| **Google Analytics** | Site analytics and usage insights | [Privacy Policy](https://policies.google.com/privacy) |
+| **Google AdSense / DoubleClick** | Advertising and ad personalisation | [Ad Settings](https://adssettings.google.com/) |
+| **Cloudflare** | Security and performance | [Privacy Policy](https://www.cloudflare.com/privacypolicy/) |
 
-* Google Analytics
-* Cloudflare
-* Meta / LinkedIn (for advertising, if applicable)
-* Payment or identity verification partners
-
-Each provider has its own privacy and cookie policies.
+Each provider has its own privacy and cookie policies. For information on how Google uses data collected through our site, see: [How Google uses data when you use our partners' sites or apps](https://policies.google.com/technologies/partner-sites).
 
 ---
 
-## 4. How to Manage or Disable Cookies
+## 4. Cookie Consent
+
+When you first visit Dropiti, a consent banner will be displayed. You can:
+
+* **Accept** – enables analytics and advertising cookies
+* **Decline** – only essential cookies are used; analytics and advertising cookies are not loaded
+
+You can change your preference at any time by clearing site data for this domain in your browser settings.
+
+---
+
+## 5. How to Manage or Disable Cookies
 
 You can control or disable cookies through:
 
 * Your browser settings
-* Built-in cookie control tools (if available on our Site)
-* Opt-out tools provided by third-party platforms
+* Our built-in cookie consent banner
+* [Google's Ad Settings](https://adssettings.google.com/) to opt out of personalised ads
+* [aboutads.info](https://www.aboutads.info/choices/) for industry-wide opt-out
 
 Please note:
 *Disabling essential cookies may limit your ability to use key features of the Site.*
 
 ---
 
-## 5. Updates to This Cookies Policy
+## 6. Updates to This Cookies Policy
 
 We may update this Cookies Policy from time to time to reflect changes in:
 
@@ -97,14 +110,12 @@ We may update this Cookies Policy from time to time to reflect changes in:
 * Legal requirements
 * Our operational practices
 
-We will update the “Last updated” date at the top of this page when changes occur.
+We will update the "Last updated" date at the top of this page when changes occur.
 
 ---
 
-## 6. Contact Us
+## 7. Contact Us
 
 If you have any questions about this Cookies Policy or our data practices, you can contact us at:
 
 **Email:** support@dropiti.com
-
-

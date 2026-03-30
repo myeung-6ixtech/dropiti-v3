@@ -6,14 +6,20 @@ module.exports = {
   sitemapSize: 7000,
   outDir: './public',
   exclude: [
+    '/dashboard',
     '/dashboard/*',
+    '/auth',
     '/auth/*',
+    '/onboarding',
     '/onboarding/*',
+    '/api',
     '/api/*',
+    '/admin',
     '/admin/*',
+    '/_next',
     '/_next/*',
     '/404',
-    '/500'
+    '/500',
   ],
   additionalPaths: async (config) => {
     // Add dynamic property pages

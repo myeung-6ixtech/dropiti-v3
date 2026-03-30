@@ -33,8 +33,8 @@ const footerSections: FooterSection[] = [
   {
     title: 'Our Community',
     links: [
+      { name: 'About Us', href: '/about' },
       { name: 'Listing Guidelines', href: '/listing-guidelines' },
-      { name: 'Help Center', href: '/help' },
       { name: 'Press', href: 'https://www.instagram.com/dropiti.housing/', external: true },
     ]
   },
