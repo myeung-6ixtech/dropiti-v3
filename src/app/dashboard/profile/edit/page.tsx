@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useToast } from '@/context/ToastContext';
 import { useRouter } from 'next/navigation';
 import { usersAPI } from '@/lib/api-client';
 
@@ -19,6 +20,39 @@ import {
 import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages } from '@/types';
 import { User } from '@/types/user';
 import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
+
+// ---------------------------------------------------------------------------
+// Display name helpers
+// ---------------------------------------------------------------------------
+
+interface NameParts {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+}
+
+type DisplayNameMode = 'firstLast' | 'firstInitialLast' | 'lastInitialFirst' | 'fullName' | 'nickname';
+
+function buildVariants(parts: NameParts): Record<Exclude<DisplayNameMode, 'nickname'>, string> {
+  return {
+    firstLast:        [parts.firstName, parts.lastName].filter(Boolean).join(' '),
+    firstInitialLast: parts.firstName && parts.lastName
+                        ? `${parts.firstName} ${parts.lastName[0]}.`
+                        : '',
+    lastInitialFirst: parts.lastName && parts.firstName
+                        ? `${parts.lastName} ${parts.firstName[0]}.`
+                        : '',
+    fullName:         [parts.firstName, parts.middleName, parts.lastName].filter(Boolean).join(' '),
+  };
+}
+
+function detectMode(displayName: string, parts: NameParts): DisplayNameMode {
+  const variants = buildVariants(parts);
+  for (const [mode, value] of Object.entries(variants) as [DisplayNameMode, string][]) {
+    if (value && value === displayName) return mode;
+  }
+  return 'nickname';
+}
 
 interface UserProfile {
   displayName: string;
@@ -46,6 +80,7 @@ interface UserProfile {
 export default function EditProfilePage() {
   const { user: authUser } = useAuth();
   const { locale, setLocale, t, isLoading: isLanguageLoading } = useLanguage();
+  const { showToast } = useToast();
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
     displayName: 'dropiti User',
@@ -73,7 +108,8 @@ export default function EditProfilePage() {
   const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [nameParts, setNameParts] = useState<NameParts>({ firstName: '', middleName: '', lastName: '' });
+  const [displayNameMode, setDisplayNameMode] = useState<DisplayNameMode>('nickname');
 
   useEffect(() => {
     setTempProfile(profile);
@@ -125,15 +161,20 @@ export default function EditProfilePage() {
               }
             };
             
+            const parts: NameParts = {
+              firstName:  userData.first_name  || '',
+              middleName: userData.middle_name || '',
+              lastName:   userData.last_name   || '',
+            };
+            setNameParts(parts);
+            setDisplayNameMode(detectMode(newProfile.displayName, parts));
+
             setProfile(newProfile);
             setTempProfile(newProfile);
           }
         } catch (error) {
           console.error('Failed to load user profile:', error);
-          setSaveMessage({
-            type: 'error',
-            message: 'Failed to load profile data'
-          });
+          showToast('error', 'Failed to load profile data');
         } finally {
           setIsLoading(false);
         }
@@ -161,33 +202,23 @@ export default function EditProfilePage() {
 
   const handleSave = async () => {
     if (!authUser?.id) {
-      setSaveMessage({
-        type: 'error',
-        message: 'You must be logged in to save changes'
-      });
+      showToast('error', 'You must be logged in to save changes');
       return;
     }
 
     // Validate required fields
     if (!tempProfile.displayName.trim()) {
-      setSaveMessage({
-        type: 'error',
-        message: 'Display Name is required'
-      });
+      showToast('error', 'Display Name is required');
       return;
     }
 
     if (!tempProfile.about?.trim()) {
-      setSaveMessage({
-        type: 'error',
-        message: 'About section is required'
-      });
+      showToast('error', 'About section is required');
       return;
     }
 
     try {
       setIsLoading(true);
-      setSaveMessage(null);
 
       let finalPhotoUrl = tempProfile.avatar;
 
@@ -220,10 +251,7 @@ export default function EditProfilePage() {
           }
         } catch (uploadError) {
           console.error('Profile Edit: Image upload error:', uploadError);
-          setSaveMessage({
-            type: 'error',
-            message: `Failed to upload profile image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}. Please try again.`
-          });
+          showToast('error', `Failed to upload profile image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}. Please try again.`);
           return;
         }
       }
@@ -260,10 +288,7 @@ export default function EditProfilePage() {
         setProfile(updatedProfile);
         setSelectedImageFile(null); // Clear the selected file
         
-        setSaveMessage({
-          type: 'success',
-          message: 'Profile updated successfully!'
-        });
+        showToast('success', 'Profile updated successfully!');
         
         // Redirect back to profile page after 2 seconds
         setTimeout(() => {
@@ -274,10 +299,7 @@ export default function EditProfilePage() {
       }
     } catch (error) {
       console.error('Failed to save profile:', error);
-      setSaveMessage({
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Failed to save profile'
-      });
+      showToast('error', error instanceof Error ? error.message : 'Failed to save profile');
     } finally {
       setIsLoading(false);
     }
@@ -327,25 +349,6 @@ export default function EditProfilePage() {
         </div>
       )}
 
-      {/* Save Message */}
-      {saveMessage && (
-        <div className={`mb-6 border rounded-lg p-4 ${
-          saveMessage.type === 'success' 
-            ? 'bg-green-50 border-green-200 text-green-800' 
-            : 'bg-red-50 border-red-200 text-red-800'
-        }`}>
-          <div className="flex items-center justify-between">
-            <span>{saveMessage.message}</span>
-            <button
-              onClick={() => setSaveMessage(null)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Profile Form */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
@@ -374,10 +377,49 @@ export default function EditProfilePage() {
             <input
               type="text"
               value={tempProfile.displayName}
-              onChange={(e) => handleInputChange('displayName', e.target.value)}
+              onChange={(e) => {
+                setDisplayNameMode('nickname');
+                handleInputChange('displayName', e.target.value);
+              }}
               className="form-input"
               placeholder="Enter your display name"
             />
+            {/* Quick-select pills */}
+            {(nameParts.firstName || nameParts.lastName) && (() => {
+              const variants = buildVariants(nameParts);
+              const pills: { mode: DisplayNameMode; label: string }[] = ([
+                { mode: 'firstLast' as DisplayNameMode,        label: variants.firstLast },
+                { mode: 'firstInitialLast' as DisplayNameMode, label: variants.firstInitialLast },
+                { mode: 'lastInitialFirst' as DisplayNameMode, label: variants.lastInitialFirst },
+                ...(nameParts.middleName && variants.fullName !== variants.firstLast
+                  ? [{ mode: 'fullName' as DisplayNameMode, label: variants.fullName }]
+                  : []),
+                { mode: 'nickname' as DisplayNameMode, label: 'Nickname (custom)' },
+              ] as { mode: DisplayNameMode; label: string }[]).filter(p => p.label);
+              return (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {pills.map(({ mode, label }) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => {
+                        setDisplayNameMode(mode);
+                        if (mode !== 'nickname') {
+                          handleInputChange('displayName', variants[mode as keyof typeof variants] ?? '');
+                        }
+                      }}
+                      className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                        displayNameMode === mode
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
             <p className="text-xs text-gray-500 mt-1">This is the name that will be visible to other users</p>
           </div>
 

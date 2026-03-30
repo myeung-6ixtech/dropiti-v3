@@ -6,6 +6,7 @@ import { usersAPI } from '@/lib/api-client';
 import DropitiPassport2 from '@/components/common/DropitiPassport2';
 import { UserListings, UserReviews } from '@/components/user-profile';
 import { DEFAULT_AVATAR_URL } from '@/constants';
+import Footer from '@/components/common/Footer';
 
 interface User {
   uuid: string;
@@ -24,7 +25,7 @@ interface User {
   education?: string;
   occupation?: string;
   marital_status?: string;
-  phone_number?: string;
+  // phone_number and whatsapp_number are intentionally excluded — private contact info
   // Properties and reviews are now fetched separately by dedicated components
 }
 
@@ -64,8 +65,7 @@ export default function UserProfilePage() {
               response_rate: response.data.response_rate || 0,
               education: response.data.education,
               occupation: response.data.occupation,
-              marital_status: response.data.marital_status,
-              phone_number: response.data.phone_number
+              marital_status: response.data.marital_status
             };
             
             setUser(transformedUser);
@@ -121,15 +121,18 @@ export default function UserProfilePage() {
   }
 
   return (
-    <div className="max-w-[1180px] mx-auto px-4 py-8">
-      {/* Profile Header - Using DropitiPassport2 Component */}
-      <DropitiPassport2 user={mapToPassportFormat(user)} nhostUserId={user.nhost_user_id} />
+    <>
+      <div className="max-w-[1180px] mx-auto px-4 py-8">
+        {/* Profile Header - Using DropitiPassport2 Component */}
+        <DropitiPassport2 user={mapToPassportFormat(user)} nhostUserId={user.nhost_user_id} />
 
-      {/* User Listings Component */}
-      <UserListings userId={user.nhost_user_id} />
+        {/* User Listings Component */}
+        <UserListings userId={user.nhost_user_id} />
 
-      {/* User Reviews Component */}
-      <UserReviews userId={user.nhost_user_id} />
-    </div>
+        {/* User Reviews Component */}
+        <UserReviews userId={user.nhost_user_id} />
+      </div>
+      <Footer />
+    </>
   );
 }

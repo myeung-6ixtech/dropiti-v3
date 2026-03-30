@@ -16,6 +16,7 @@ export interface User {
   photo_url?: string;
   auth_provider: 'email' | 'google' | 'facebook' | 'apple';
   phone_number?: string;
+  whatsapp_number?: string;
   location?: string;
   about?: string;
   education?: string;
@@ -55,6 +56,7 @@ export interface NotificationSettings {
   email: boolean;
   push: boolean;
   sms: boolean;
+  whatsapp?: boolean;
   marketing_emails?: boolean;
   property_updates?: boolean;
   message_notifications?: boolean;
@@ -103,9 +105,11 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
   display_name?: string;
   first_name?: string;
+  middle_name?: string;
   last_name?: string;
   photo_url?: string;
   phone_number?: string;
+  whatsapp_number?: string | null;
   location?: string;
   about?: string;
   education?: string;

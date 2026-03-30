@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
@@ -12,6 +12,39 @@ import {
   BriefcaseIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline';
+
+// ---------------------------------------------------------------------------
+// Display name helpers (shared logic — duplicated from edit profile page)
+// ---------------------------------------------------------------------------
+
+interface NameParts {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+}
+
+type DisplayNameMode = 'firstLast' | 'firstInitialLast' | 'lastInitialFirst' | 'fullName' | 'nickname';
+
+function buildVariants(parts: NameParts): Record<Exclude<DisplayNameMode, 'nickname'>, string> {
+  return {
+    firstLast:        [parts.firstName, parts.lastName].filter(Boolean).join(' '),
+    firstInitialLast: parts.firstName && parts.lastName
+                        ? `${parts.firstName} ${parts.lastName[0]}.`
+                        : '',
+    lastInitialFirst: parts.lastName && parts.firstName
+                        ? `${parts.lastName} ${parts.firstName[0]}.`
+                        : '',
+    fullName:         [parts.firstName, parts.middleName, parts.lastName].filter(Boolean).join(' '),
+  };
+}
+
+function detectMode(displayName: string, parts: NameParts): DisplayNameMode {
+  const variants = buildVariants(parts);
+  for (const [mode, value] of Object.entries(variants) as [DisplayNameMode, string][]) {
+    if (value && value === displayName) return mode;
+  }
+  return 'nickname';
+}
 
 export default function OnboardingStepOne() {
   const { user } = useAuth();
@@ -26,6 +59,29 @@ export default function OnboardingStepOne() {
     languages: Array.isArray(user?.languages) ? user?.languages : [],
   });
   const [saving, setSaving] = useState(false);
+  const [nameParts, setNameParts] = useState<NameParts>({ firstName: '', middleName: '', lastName: '' });
+  const [displayNameMode, setDisplayNameMode] = useState<DisplayNameMode>('nickname');
+
+  useEffect(() => {
+    if (!user?.id) return;
+    usersAPI.getUserByNhostUserId(user.id).then((response) => {
+      if (response.success && response.data) {
+        const d = response.data;
+        const parts: NameParts = {
+          firstName:  d.first_name  || '',
+          middleName: d.middle_name || '',
+          lastName:   d.last_name   || '',
+        };
+        setNameParts(parts);
+        const currentName = d.display_name || form.name;
+        setDisplayNameMode(detectMode(currentName, parts));
+        if (currentName) {
+          setForm((prev) => ({ ...prev, name: currentName }));
+        }
+      }
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   const handleChange = (key: string, value: string | string[]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -69,7 +125,7 @@ export default function OnboardingStepOne() {
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
         
         <div className="space-y-6">
-          {/* Name */}
+          {/* Display Name */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -80,10 +136,49 @@ export default function OnboardingStepOne() {
             <input
               type="text"
               value={form.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => {
+                setDisplayNameMode('nickname');
+                handleChange('name', e.target.value);
+              }}
               className="form-input-sm"
               placeholder="Enter your name"
             />
+            {/* Quick-select pills */}
+            {(nameParts.firstName || nameParts.lastName) && (() => {
+              const variants = buildVariants(nameParts);
+              const pills: { mode: DisplayNameMode; label: string }[] = ([
+                { mode: 'firstLast' as DisplayNameMode,        label: variants.firstLast },
+                { mode: 'firstInitialLast' as DisplayNameMode, label: variants.firstInitialLast },
+                { mode: 'lastInitialFirst' as DisplayNameMode, label: variants.lastInitialFirst },
+                ...(nameParts.middleName && variants.fullName !== variants.firstLast
+                  ? [{ mode: 'fullName' as DisplayNameMode, label: variants.fullName }]
+                  : []),
+                { mode: 'nickname' as DisplayNameMode, label: 'Nickname' },
+              ] as { mode: DisplayNameMode; label: string }[]).filter(p => p.label);
+              return (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {pills.map(({ mode, label }) => (
+                    <button
+                      key={mode}
+                      type="button"
+                      onClick={() => {
+                        setDisplayNameMode(mode);
+                        if (mode !== 'nickname') {
+                          handleChange('name', variants[mode as keyof typeof variants] ?? '');
+                        }
+                      }}
+                      className={`px-3 py-1 text-xs rounded-full border transition-colors ${
+                        displayNameMode === mode
+                          ? 'bg-gray-900 text-white border-gray-900'
+                          : 'bg-white text-gray-600 border-gray-300 hover:border-gray-500 hover:text-gray-800'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              );
+            })()}
             <p className="text-xs text-gray-500 mt-1">This is the name that will be visible to other users</p>
           </div>
 
