@@ -11,7 +11,7 @@ export interface AuthContextType {
   isLoading: boolean;
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: () => Promise<{ error?: string }>;
+  loginWithGoogle: () => void;
   logout: () => void;
 }
 

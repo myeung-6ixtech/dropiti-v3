@@ -125,12 +125,17 @@ class NhostAuthService {
   // -------------------------------------------------------------------------
   // Google OAuth (redirect-based)
   // -------------------------------------------------------------------------
-  async signInWithGoogle(redirectTo?: string): Promise<{ error?: string }> {
-    const { error } = await nhost.auth.signIn({
-      provider: 'google',
-      options: { redirectTo },
-    });
-    return { error: error?.message };
+  signInWithGoogle(callbackUrl?: string): void {
+    if (typeof window === 'undefined') return;
+    const subdomain = process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN;
+    const region = process.env.NEXT_PUBLIC_NHOST_REGION;
+    sessionStorage.setItem('oauth_callback_url', callbackUrl || '/dashboard');
+    const redirectTo = window.location.origin;
+    const url =
+      `https://${subdomain}.auth.${region}.nhost.run/v1/signin/provider/google` +
+      `?redirectTo=${encodeURIComponent(redirectTo)}` +
+      `&options[authorizationParams][prompt]=select_account`;
+    window.location.assign(url);
   }
 
   // -------------------------------------------------------------------------

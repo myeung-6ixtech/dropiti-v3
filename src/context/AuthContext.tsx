@@ -4,6 +4,7 @@ import { useAuthenticationStatus, useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
 import { usersAPI } from "@/lib/api-client";
 import { nhost } from "@/lib/nhost";
+import { nhostAuthService } from "@/services/auth/nhostAuthService";
 import { AUTH_ERRORS } from "@/types/error-messages";
 
 interface AuthUser {
@@ -43,7 +44,7 @@ interface AuthContextType {
   isLoading: boolean;
   user: AuthUser | null;
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
-  loginWithGoogle: () => Promise<{ error?: string }>;
+  loginWithGoogle: () => void;
   logout: () => void;
   isRememberMeEnabled: boolean;
 }
@@ -214,9 +215,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithGoogle = async (): Promise<{ error?: string }> => {
-    const { error } = await nhost.auth.signIn({ provider: 'google' });
-    return { error: error?.message };
+  const loginWithGoogle = (): void => {
+    nhostAuthService.signInWithGoogle('/dashboard');
   };
 
   const logout = async () => {

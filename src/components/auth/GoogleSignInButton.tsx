@@ -1,48 +1,33 @@
 'use client';
 
-import { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { useToast } from '@/context/ToastContext';
-import { nhost } from '@/lib/nhost';
-
 interface GoogleSignInButtonProps {
   mode: 'signin' | 'signup';
   className?: string;
 }
 
 export default function GoogleSignInButton({ mode, className = '' }: GoogleSignInButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const { showToast } = useToast();
-  const searchParams = useSearchParams();
+  const handleClick = () => {
+    const subdomain = process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN;
+    const region = process.env.NEXT_PUBLIC_NHOST_REGION;
 
-  const handleGoogleSignIn = async () => {
-    setIsLoading(true);
+    const params = new URLSearchParams(window.location.search);
+    const callbackUrl = params.get('callbackUrl') || '/dashboard';
+    sessionStorage.setItem('oauth_callback_url', callbackUrl);
 
-    try {
-      const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
-      const { error } = await nhost.auth.signIn({
-        provider: 'google',
-        options: { redirectTo: `${window.location.origin}${callbackUrl}` },
-      });
+    const redirectTo = window.location.origin;
+    const url =
+      `https://${subdomain}.auth.${region}.nhost.run/v1/signin/provider/google` +
+      `?redirectTo=${encodeURIComponent(redirectTo)}` +
+      `&options[authorizationParams][prompt]=select_account`;
 
-      if (error) {
-        showToast('error', 'Failed to sign in with Google');
-        setIsLoading(false);
-      }
-      // On success the browser redirects — no need to do anything else
-    } catch (error) {
-      console.error('Google sign-in error:', error);
-      showToast('error', 'An error occurred during Google sign-in');
-      setIsLoading(false);
-    }
+    window.location.assign(url);
   };
 
   return (
     <button
-      onClick={handleGoogleSignIn}
-      disabled={isLoading}
-      className={`mb-2 google-signin-button ${className}`}
       type="button"
+      onClick={handleClick}
+      className={`mb-2 google-signin-button ${className}`}
     >
       <div className="google-signin-content">
         <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
@@ -52,11 +37,7 @@ export default function GoogleSignInButton({ mode, className = '' }: GoogleSignI
           <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
         </svg>
         <span className="google-text">
-          {isLoading
-            ? 'Redirecting...'
-            : mode === 'signin'
-            ? 'Continue with Google'
-            : 'Sign up with Google'}
+          {mode === 'signin' ? 'Continue with Google' : 'Sign up with Google'}
         </span>
       </div>
     </button>
