@@ -35,6 +35,7 @@ interface PropertyPricingCardProps {
   hasExistingOffer: boolean;
   onEditListing?: () => void;
   isAdminListing?: boolean;
+  onRequestClaimListing?: () => void;
 }
 
 export default function PropertyPricingCard({
@@ -47,6 +48,7 @@ export default function PropertyPricingCard({
   hasExistingOffer,
   onEditListing,
   isAdminListing = false,
+  onRequestClaimListing,
 }: PropertyPricingCardProps) {
 
   const router = useRouter();
@@ -111,7 +113,8 @@ export default function PropertyPricingCard({
                   Create an account or sign in so we can transfer this listing to you.
                 </p>
                 <button
-                  onClick={() => router.push(isAuthenticated ? '/dashboard' : '/auth/signin')}
+                  type="button"
+                  onClick={() => onRequestClaimListing?.()}
                   className="w-full btn-primary py-3 px-4 font-medium text-sm"
                 >
                   Request to Claim Listing

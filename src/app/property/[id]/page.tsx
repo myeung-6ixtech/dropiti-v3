@@ -8,6 +8,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
+import ClaimListingAuthModal from '@/components/property/ClaimListingAuthModal';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
 import { capitalizeWords } from '@/lib/utils';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
@@ -66,6 +67,7 @@ export default function PropertyDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
+  const [isClaimListingModalOpen, setIsClaimListingModalOpen] = useState(false);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
@@ -214,6 +216,13 @@ export default function PropertyDetailPage() {
     setIsCreateOfferModalOpen(true);
   };
 
+  const handleRequestClaimListing = useCallback(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    } else {
+      setIsClaimListingModalOpen(true);
+    }
+  }, [isAuthenticated, router]);
 
   const handleOfferSubmit = async (offerData: {
     rentalPrice: number;
@@ -398,6 +407,7 @@ export default function PropertyDetailPage() {
         isAuthenticated={isAuthenticated}
         isOwner={authUser?.id === property.owner_id}
         isAdminListing={isAdminListing}
+        onRequestClaimListing={handleRequestClaimListing}
         formatAddressDisplay={(address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => formatAddressDisplay(address, showSpecific) || ''}
       />
 
@@ -417,11 +427,17 @@ export default function PropertyDetailPage() {
         groupedAmenities={groupedAmenities}
         isOwner={authUser?.id === property.owner_id}
         isAdminListing={isAdminListing}
+        onRequestClaimListing={handleRequestClaimListing}
       />
 
 
       {/* Footer */}
       <Footer />
+
+      <ClaimListingAuthModal
+        isOpen={isClaimListingModalOpen}
+        onClose={() => setIsClaimListingModalOpen(false)}
+      />
 
       {/* Create Offer Modal */}
       <CreateOfferModal

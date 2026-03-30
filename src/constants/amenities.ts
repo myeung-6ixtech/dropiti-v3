@@ -90,8 +90,8 @@ export const getAllAmenities = () => Object.values(AMENITIES);
 
 // Helper function to get amenities by category
 export const getAmenitiesByCategory = (category: AmenityCategory) => {
-  const amenityIds = AMENITY_CATEGORIES[category];
-  return amenityIds.map(id => AMENITIES[id as keyof typeof AMENITIES]).filter(Boolean);
+  const amenityIds = AMENITY_CATEGORIES[category] as readonly string[];
+  return Object.values(AMENITIES).filter(amenity => amenityIds.includes(amenity.id));
 };
 
 // Helper function to get amenity by ID

@@ -16,6 +16,8 @@ interface BasicInfoSectionProps {
   isSaving: boolean;
 }
 
+const PHONE_REGEX = /(\+?[\d][\s\-.]?(?:[\d][\s\-.]?){6,}[\d])/;
+
 export function BasicInfoSection({
   data,
   tempData,
@@ -28,6 +30,16 @@ export function BasicInfoSection({
   isSaving
 }: BasicInfoSectionProps) {
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
+
+  const handleDescriptionChange = (value: string) => {
+    if (PHONE_REGEX.test(value)) {
+      setDescriptionError('Phone numbers are not allowed in descriptions. Please use the contact options provided.');
+    } else {
+      setDescriptionError(null);
+    }
+    onUpdateField('rentalDetails', 'listingDescription', value);
+  };
 
   // Function to check if description needs truncation (500 characters)
   const shouldTruncateDescription = (description: string) => {
@@ -56,7 +68,7 @@ export function BasicInfoSection({
             </button>
             <button
               onClick={onSaveEdit}
-              disabled={isSaving}
+              disabled={isSaving || !!descriptionError}
               className="btn-primary flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
             >
               <span>{isSaving ? 'Saving...' : 'Save Information'}</span>
@@ -140,11 +152,16 @@ export function BasicInfoSection({
             </label>
             <textarea
               value={tempData.rentalDetails?.listingDescription || ''}
-              onChange={(e) => onUpdateField('rentalDetails', 'listingDescription', e.target.value)}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
               rows={4}
-              className="form-textarea w-full"
+              className={`form-textarea w-full ${descriptionError ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : ''}`}
               placeholder="Describe your property"
             />
+            {descriptionError ? (
+              <p className="text-xs text-red-500 mt-1">{descriptionError}</p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">Do not include phone numbers in your description.</p>
+            )}
           </div>
 
           {/* Listing Status */}

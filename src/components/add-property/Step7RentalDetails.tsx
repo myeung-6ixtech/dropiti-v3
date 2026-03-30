@@ -48,6 +48,8 @@ interface Step7RentalDetailsProps {
   } }) => void;
 }
 
+const PHONE_REGEX = /(\+?[\d][\s\-.]?(?:[\d][\s\-.]?){6,}[\d])/;
+
 export default function Step7RentalDetails({ data, onUpdate }: Step7RentalDetailsProps) {
   const [rentalDetails, setRentalDetails] = useState(data?.rentalDetails || {
     listingName: '',
@@ -55,11 +57,21 @@ export default function Step7RentalDetails({ data, onUpdate }: Step7RentalDetail
     rentalPrice: undefined,
     availableDate: undefined,
   });
+  const [descriptionError, setDescriptionError] = useState<string | null>(null);
 
   const handleInputChange = (field: string, value: string | number | Date | null | undefined) => {
     const updatedRentalDetails = { ...rentalDetails, [field]: value };
     setRentalDetails(updatedRentalDetails);
     onUpdate({ rentalDetails: updatedRentalDetails });
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    if (PHONE_REGEX.test(value)) {
+      setDescriptionError('Phone numbers are not allowed in descriptions. Please use the contact options provided.');
+    } else {
+      setDescriptionError(null);
+    }
+    handleInputChange('listingDescription', value);
   };
 
   const formatCurrency = (value: number) => {
@@ -157,11 +169,16 @@ export default function Step7RentalDetails({ data, onUpdate }: Step7RentalDetail
                   </label>
                   <textarea
                     value={rentalDetails.listingDescription || ''}
-                    onChange={(e) => handleInputChange('listingDescription', e.target.value)}
+                    onChange={(e) => handleDescriptionChange(e.target.value)}
                     placeholder="Describe your property, its features, and what makes it special..."
-                    className="form-textarea"
+                    className={`form-textarea ${descriptionError ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : ''}`}
                     rows={4}
                   />
+                  {descriptionError ? (
+                    <p className="text-xs text-red-500 mt-1">{descriptionError}</p>
+                  ) : (
+                    <p className="text-xs text-gray-500 mt-1">Do not include phone numbers in your description.</p>
+                  )}
                 </div>
 
                 <div>

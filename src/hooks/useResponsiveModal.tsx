@@ -11,6 +11,8 @@ interface UseResponsiveModalOptions {
   preventBodyScroll?: boolean;
   isOpen: boolean;
   onClose: () => void;
+  modalClassName?: string;
+  showCloseButton?: boolean;
 }
 
 interface UseResponsiveModalReturn {
@@ -38,12 +40,13 @@ export const useResponsiveModal = (options: UseResponsiveModalOptions): UseRespo
       <Modal
         isOpen={options.isOpen}
         onClose={options.onClose}
-        className="max-w-4xl w-full mx-4"
+        className={options.modalClassName ?? "max-w-4xl w-full mx-4"}
+        showCloseButton={options.showCloseButton ?? true}
       >
         {children}
       </Modal>
     );
-  }, [options.isOpen, options.onClose, isMobile, options.mobileTitle, options.mobileHeight]);
+  }, [options.isOpen, options.onClose, isMobile, options.mobileTitle, options.mobileHeight, options.showCloseButton]);
   
   return { ModalComponent };
 };

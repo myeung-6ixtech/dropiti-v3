@@ -1276,6 +1276,13 @@
   resolved "https://registry.yarnpkg.com/@next/swc-win32-x64-msvc/-/swc-win32-x64-msvc-16.0.7.tgz#e9e38fcca752902542c25c527e532af71e9ca812"
   integrity sha512-gniPjy55zp5Eg0896qSrf3yB1dw4F/3s8VK1ephdsZZ129j2n6e1WqCbE2YgcKhW9hPB9TVZENugquWJD5x0ug==
 
+"@next/third-parties@^16.2.1":
+  version "16.2.1"
+  resolved "https://registry.yarnpkg.com/@next/third-parties/-/third-parties-16.2.1.tgz#2194e1c30cb5701906f4673eea947fc0308d52b5"
+  integrity sha512-XyeT9WVBUdVXMrKFz0wTSrMc+O5JN2B08yU7JpK8YJiP/qBgc3q1kIfjop/pdnhT4W4oLjwXaqrMh7uWaoYILQ==
+  dependencies:
+    third-party-capital "1.0.20"
+
 "@nhost/graphql-js@0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@nhost/graphql-js/-/graphql-js-0.3.0.tgz#0db0c81f851b6cbb09d292a89eeca02fefaa3076"
@@ -6023,6 +6030,11 @@ thenify-all@^1.0.0:
   integrity sha512-RVZSIV5IG10Hk3enotrhvz0T9em6cyHBLkH/YAZuKqd8hRkKhSfCGIcP2KUY0EPxndzANBmNllzWPwak+bheSw==
   dependencies:
     any-promise "^1.0.0"
+
+third-party-capital@1.0.20:
+  version "1.0.20"
+  resolved "https://registry.yarnpkg.com/third-party-capital/-/third-party-capital-1.0.20.tgz#e218a929a35bf4d2245da9addb8ab978d2f41685"
+  integrity sha512-oB7yIimd8SuGptespDAZnNkzIz+NWaJCu2RMsbs4Wmp9zSDUM8Nhi3s2OOcqYuv3mN4hitXc8DVx+LyUmbUDiA==
 
 tinyglobby@^0.2.13:
   version "0.2.14"

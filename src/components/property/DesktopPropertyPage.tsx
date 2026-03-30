@@ -50,6 +50,7 @@ interface DesktopPropertyPageProps {
   groupedAmenities: Record<string, Array<{ id: string; name: string }>>;
   isOwner?: boolean;
   isAdminListing?: boolean;
+  onRequestClaimListing?: () => void;
 }
 
 export default function DesktopPropertyPage({
@@ -67,6 +68,7 @@ export default function DesktopPropertyPage({
   groupedAmenities,
   isOwner = false,
   isAdminListing = false,
+  onRequestClaimListing,
 }: DesktopPropertyPageProps) {
   const router = useRouter();
 
@@ -360,6 +362,7 @@ export default function DesktopPropertyPage({
                 isOwner={isOwner}
                 hasExistingOffer={hasExistingOffer}
                 isAdminListing={isAdminListing}
+                onRequestClaimListing={onRequestClaimListing}
               />
             </div>
           </div>

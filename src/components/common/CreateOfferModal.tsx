@@ -50,7 +50,8 @@ export default function CreateOfferModal({
     mobileTitle: mode === 'counter' ? 'Counter Offer' : 'Create Offer',
     mobileHeight: 'large',
     isOpen,
-    onClose
+    onClose,
+    showCloseButton: false,
   });
 
   const [offerData, setOfferData] = useState<OfferData>({
@@ -132,7 +133,7 @@ export default function CreateOfferModal({
 
   return (
     <ModalComponent>
-      <div className="bg-white rounded-lg shadow-xl">
+      <div className="bg-white overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-0">

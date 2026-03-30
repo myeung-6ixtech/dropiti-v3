@@ -41,6 +41,7 @@ interface MobilePropertyPageProps {
   isAuthenticated: boolean;
   isOwner?: boolean;
   isAdminListing?: boolean;
+  onRequestClaimListing?: () => void;
   formatAddressDisplay: (address: Record<string, unknown> | undefined, showSpecific: boolean | undefined) => string;
 }
 
@@ -54,6 +55,7 @@ export default function MobilePropertyPage({
   isAuthenticated,
   isOwner = false,
   isAdminListing = false,
+  onRequestClaimListing,
   formatAddressDisplay
 }: MobilePropertyPageProps) {
   const router = useRouter();
@@ -231,7 +233,8 @@ export default function MobilePropertyPage({
 
           {isAdminListing ? (
             <button
-              onClick={() => router.push(isAuthenticated ? '/dashboard' : '/auth/signin')}
+              type="button"
+              onClick={() => onRequestClaimListing?.()}
               className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
             >
               Request to Claim Listing

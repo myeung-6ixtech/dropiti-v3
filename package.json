@@ -19,6 +19,7 @@
     "@fullcalendar/react": "^6.1.15",
     "@fullcalendar/timegrid": "^6.1.15",
     "@heroicons/react": "^2.0.18",
+    "@next/third-parties": "^16.2.1",
     "@nhost/nextjs": "^2.3.1",
     "@nhost/react": "^3.11.2",
     "@react-google-maps/api": "^2.20.7",

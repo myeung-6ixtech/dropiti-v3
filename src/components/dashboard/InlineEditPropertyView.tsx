@@ -250,13 +250,7 @@ export default function InlineEditPropertyView({ propertyId, onSave }: InlineEdi
       // Also include photos field for backward compatibility
       photos: propertyData.uploadedImages || [],
     };
-    
-    // Debug logging to help identify the issue
-    console.log('InlineEditPropertyView: transformPropertyDataToApi - apiData:', apiData);
-    console.log('InlineEditPropertyView: propertyData.propertyType:', propertyData.propertyType);
-    console.log('InlineEditPropertyView: propertyData.rentalSpace:', propertyData.rentalSpace);
-    console.log('InlineEditPropertyView: propertyData.status:', propertyData.status);
-    
+       
     return apiData;
   };
 

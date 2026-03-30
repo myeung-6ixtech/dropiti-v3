@@ -11,6 +11,7 @@ import ToastContainer from "@/components/ui/toast/ToastContainer";
 import MobileChatContainer from "@/components/chat/mobile/MobileChatContainer";
 import MobileNotificationsContainer from "@/components/notifications/mobile/MobileNotificationsContainer";
 import ClientOnboardingGate from "@/components/ClientOnboardingGate";
+import CookieConsentAndAnalytics from "@/components/analytics/CookieConsentAndAnalytics";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -121,6 +122,7 @@ export default function RootLayout({
             <MobileChatContainer />
             <MobileNotificationsContainer />
           </ClientOnboardingGate>
+          <CookieConsentAndAnalytics />
         </Providers>
       </body>
     </html>
