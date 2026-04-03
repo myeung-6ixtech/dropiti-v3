@@ -1,8 +1,8 @@
-import { UserIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Offer } from '@/types/offer';
 import { calculatePlatformDuration } from '@/lib/utils';
+import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface OfferUserDetailsProps {
   offer: Pick<Offer, 'createdAt' | 'initiator' | 'recipient'>;
@@ -44,18 +44,18 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
       {/* Offer Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-            {userToShow.photoUrl ? (
-              <Image 
-                src={userToShow.photoUrl} 
-                alt={userToShow.displayName}
-                width={20}
-                height={20}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <UserIcon className="h-5 w-5 text-gray-400" />
-            )}
+          <div className="w-10 h-10 rounded-full overflow-hidden">
+            <Image 
+              src={userToShow.photoUrl || DEFAULT_AVATAR_URL} 
+              alt={userToShow.displayName}
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = DEFAULT_AVATAR_URL;
+              }}
+            />
           </div>
           <div>
             <h3 className="font-medium text-sm text-gray-900 mb-0">

@@ -211,6 +211,17 @@ export function validateOfferAction(
     return { isValid: false, error: 'Offer is no longer active' };
   }
   
+  // Withdraw bypasses turn logic — initiator can always retract a pending offer
+  if (action === 'INITIATOR_CANCELLED') {
+    if (!isInitiator) {
+      return { isValid: false, error: 'Only initiator can withdraw offer' };
+    }
+    if (offer.offerStatus !== 'pending') {
+      return { isValid: false, error: 'Can only withdraw pending offers' };
+    }
+    return { isValid: true };
+  }
+
   // Check if it's the user's turn
   const nextActionBy = determineNextActionBy(offer);
   const userRole = isInitiator ? 'initiator' : 'recipient';
@@ -225,15 +236,6 @@ export function validateOfferAction(
     case 'RECIPIENT_COUNTERED':
       if (offer.negotiationRound >= MAX_NEGOTIATION_ROUNDS) {
         return { isValid: false, error: 'Maximum negotiation rounds reached' };
-      }
-      break;
-      
-    case 'INITIATOR_CANCELLED':
-      if (!isInitiator) {
-        return { isValid: false, error: 'Only initiator can withdraw offer' };
-      }
-      if (offer.offerStatus !== 'pending') {
-        return { isValid: false, error: 'Can only withdraw pending offers' };
       }
       break;
   }

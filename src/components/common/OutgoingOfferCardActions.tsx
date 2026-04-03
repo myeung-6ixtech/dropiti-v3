@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { XMarkIcon, CheckIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, CheckIcon, InformationCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { offersAPI } from '@/lib/api-client';
 import FinalCounterOfferModal2 from './FinalCounterOfferModal2';
 import { useToast } from '@/context/ToastContext';
 import FinalDealDisplay from './FinalDealDisplay';
+import { useResponsiveModal } from '@/hooks/useResponsiveModal';
 
 interface OutgoingOfferCardActionsProps {
   offer: {
@@ -54,11 +55,21 @@ export default function OutgoingOfferCardActions({
 }: OutgoingOfferCardActionsProps) {
   const { showToast } = useToast();
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [isWithdrawConfirmOpen, setIsWithdrawConfirmOpen] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [isRejecting, setIsRejecting] = useState(false);
   const [isFinalCounterModalOpen, setIsFinalCounterModalOpen] = useState(false);
   const [isSubmittingFinalCounter, setIsSubmittingFinalCounter] = useState(false);
   const [isAccepted, setIsAccepted] = useState(false);
+
+  const { ModalComponent: WithdrawConfirmModal } = useResponsiveModal({
+    isOpen: isWithdrawConfirmOpen,
+    onClose: () => setIsWithdrawConfirmOpen(false),
+    mobileTitle: 'Withdraw Offer',
+    mobileHeight: 'small',
+    modalClassName: 'max-w-sm w-full mx-4',
+    showCloseButton: false,
+  });
 
   // Show final deal display if offer has been accepted
   if (isAccepted) {
@@ -193,28 +204,75 @@ export default function OutgoingOfferCardActions({
   // Rule 1: For pending offers, initiator (tenant) can only withdraw or view property
   if (offer.offerStatus === 'pending') {
     return (
-      <div className="pt-4 border-t border-gray-200 mb-4">
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-          {onWithdrawOffer && (
-            <button
-              onClick={handleWithdrawOffer}
-              className="btn-primary w-full sm:flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
-              disabled={isWithdrawing}
-            >
-              <XMarkIcon className="h-4 w-4 mr-2" />
-              {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
-            </button>
-          )}
-          {offer.property && (
-            <Link
-              href={`/property/${offer.propertyUuid}`}
-              className="btn-secondary w-full sm:flex-1 bg-gray-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center justify-center"
-            >
-              <span>View Property</span>
-            </Link>
-          )}
+      <>
+        <div className="pt-4 border-t border-gray-200 mb-4">
+          <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+            {onWithdrawOffer && (
+              <button
+                onClick={() => setIsWithdrawConfirmOpen(true)}
+                className="btn-primary w-full sm:flex-1 bg-red-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors flex items-center justify-center"
+                disabled={isWithdrawing}
+              >
+                <XMarkIcon className="h-4 w-4 mr-2" />
+                {isWithdrawing ? 'Withdrawing...' : 'Withdraw'}
+              </button>
+            )}
+            {offer.property && (
+              <Link
+                href={`/property/${offer.propertyUuid}`}
+                className="btn-secondary w-full sm:flex-1 bg-gray-600 text-white py-2 px-4 rounded-md text-sm font-medium hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors flex items-center justify-center"
+              >
+                <span>View Property</span>
+              </Link>
+            )}
+          </div>
         </div>
-      </div>
+
+        <WithdrawConfirmModal>
+          <div className="bg-white overflow-hidden">
+            <div className="hidden md:flex items-center justify-between p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900 pr-2 mb-0">Withdraw Offer</h2>
+              <button
+                type="button"
+                onClick={() => setIsWithdrawConfirmOpen(false)}
+                className="p-2 shrink-0 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="Close"
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-500" />
+              </button>
+            </div>
+            <div className="p-5 md:p-6 space-y-4">
+              <div className="flex items-start space-x-3">
+                <ExclamationTriangleIcon className="h-6 w-6 text-red-500 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-gray-700 font-medium mb-1">Are you sure you want to withdraw this offer?</p>
+                  <p className="text-xs text-gray-500 mb-0">This action cannot be undone. You will need to create a new offer if you change your mind.</p>
+                </div>
+              </div>
+              <div className="flex flex-col gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsWithdrawConfirmOpen(false);
+                    handleWithdrawOffer();
+                  }}
+                  disabled={isWithdrawing}
+                  className="w-full bg-red-600 text-white py-3 px-4 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isWithdrawing ? 'Withdrawing...' : 'Yes, Withdraw Offer'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsWithdrawConfirmOpen(false)}
+                  className="w-full btn-secondary py-3 px-4 text-sm font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </WithdrawConfirmModal>
+      </>
     );
   }
 
