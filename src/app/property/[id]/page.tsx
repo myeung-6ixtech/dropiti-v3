@@ -9,6 +9,7 @@ import { useToast } from '@/context/ToastContext';
 import Footer from '@/components/common/Footer';
 import CreateOfferModal from '@/components/common/CreateOfferModal';
 import ClaimListingAuthModal from '@/components/property/ClaimListingAuthModal';
+import ClaimListingContactModal from '@/components/property/ClaimListingContactModal';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
 import { capitalizeWords } from '@/lib/utils';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
@@ -68,6 +69,7 @@ export default function PropertyDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCreateOfferModalOpen, setIsCreateOfferModalOpen] = useState(false);
   const [isClaimListingModalOpen, setIsClaimListingModalOpen] = useState(false);
+  const [isClaimContactModalOpen, setIsClaimContactModalOpen] = useState(false);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [hasExistingOffer, setHasExistingOffer] = useState(false);
@@ -218,11 +220,11 @@ export default function PropertyDetailPage() {
 
   const handleRequestClaimListing = useCallback(() => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      setIsClaimContactModalOpen(true);
     } else {
       setIsClaimListingModalOpen(true);
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated]);
 
   const handleOfferSubmit = async (offerData: {
     rentalPrice: number;
@@ -438,6 +440,17 @@ export default function PropertyDetailPage() {
         isOpen={isClaimListingModalOpen}
         onClose={() => setIsClaimListingModalOpen(false)}
       />
+
+      {authUser?.id && propertyData?.property ? (
+        <ClaimListingContactModal
+          isOpen={isClaimContactModalOpen}
+          onClose={() => setIsClaimContactModalOpen(false)}
+          propertyTitle={propertyData.property.title}
+          propertyUuid={propertyData.property.property_uuid}
+          userEmail={authUser.email || ''}
+          userId={authUser.id}
+        />
+      ) : null}
 
       {/* Create Offer Modal */}
       <CreateOfferModal

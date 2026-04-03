@@ -110,7 +110,9 @@ export default function PropertyPricingCard({
             {isAdminListing ? (
               <>
                 <p className="text-xs text-gray-600 mb-2">
-                  Create an account or sign in so we can transfer this listing to you.
+                  {isAuthenticated
+                    ? 'Contact our team to transfer this listing to your account.'
+                    : 'Create an account or sign in so we can transfer this listing to you.'}
                 </p>
                 <button
                   type="button"
@@ -211,12 +213,13 @@ export default function PropertyPricingCard({
             {/* Contact Actions */}
             <div className="flex flex-col space-y-2 mb-4">
               {isAdminListing ? (
-                <a
-                  href="mailto:support@dropiti.com"
+                <button
+                  type="button"
+                  onClick={() => onRequestClaimListing?.()}
                   className="w-full btn-secondary py-3 px-4 font-medium text-sm text-center"
                 >
                   Reach out to Admin
-                </a>
+                </button>
               ) : (
                 <button
                   onClick={onChatWithLandlord}

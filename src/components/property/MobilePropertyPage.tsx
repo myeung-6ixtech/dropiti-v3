@@ -221,7 +221,9 @@ export default function MobilePropertyPage({
               </h3>
               <p className="text-xs text-gray-600">
                 {isAdminListing
-                  ? 'Create an account or sign in so we can transfer this listing to you. Our team will reach out after you request.'
+                  ? isAuthenticated
+                    ? 'Contact our team to transfer this listing to your account.'
+                    : 'Create an account or sign in so we can transfer this listing to you. Our team will reach out after you request.'
                   : 'Start your rental journey'}
               </p>
             </div>
@@ -370,12 +372,13 @@ export default function MobilePropertyPage({
                   </div>
                 )}
                 {isAdminListing ? (
-                  <a
-                    href="mailto:support@dropiti.com"
-                    className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors inline-block text-center"
+                  <button
+                    type="button"
+                    onClick={() => onRequestClaimListing?.()}
+                    className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors text-center"
                   >
                     Reach out to Admin
-                  </a>
+                  </button>
                 ) : (
                   <button className="btn-primary w-full bg-black text-white py-4 rounded-xl text-xs font-semibold hover:bg-gray-800 transition-colors">
                     Chat with Landlord
