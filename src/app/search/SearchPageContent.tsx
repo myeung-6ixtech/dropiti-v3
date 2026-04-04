@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
 import ModernFilter from '@/components/search/ModernFilter';
 import FilterTags from '@/components/search/FilterTags';
+import ViewModeToggle, { ViewMode } from '@/components/search/ViewModeToggle';
+import SearchMapView from '@/components/search/SearchMapView';
 import Footer from '@/components/common/Footer';
 import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkeleton';
 import { Property } from '@/types';
@@ -19,7 +21,14 @@ export default function SearchPageContent() {
   const router = useRouter();
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFilterOpen, setIsFilterOpen] = useState(false); // Add filter panel state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  // Default to map on desktop, list on mobile
+  useEffect(() => {
+    const isDesktop = window.innerWidth >= 1024;
+    setViewMode(isDesktop ? 'map' : 'list');
+  }, []);
   const [filters, setFilters] = useState({
     location: searchParams.get('location') || '',
     bedrooms: searchParams.get('bedrooms') || '',
@@ -249,32 +258,25 @@ export default function SearchPageContent() {
     return criteria.length > 0 ? criteria.join(' • ') : 'All properties';
   };
 
+  const isMapMode = viewMode === 'map';
+
   return (
     <div className="min-h-screen bg-white">
-      <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Find Your Perfect Home
-          </h1>
-          <p className="text-gray-600">
-            Discover amazing properties in your preferred location
-          </p>
+      <div className={isMapMode ? 'w-full px-0 lg:px-4 py-0 lg:py-4' : 'max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8'}>
+        {/* Filter Tags — hidden on mobile in map mode */}
+        <div className={isMapMode ? 'hidden lg:block' : ''}>
+          <FilterTags
+            filters={filters}
+            onRemoveFilter={removeFilter}
+            onClearAll={clearFilters}
+          />
         </div>
-
-        {/* Filter Tags - Modern filter display */}
-        <FilterTags
-          filters={filters}
-          onRemoveFilter={removeFilter}
-          onClearAll={clearFilters}
-        />
 
         {/* Filters and Results */}
         <div className="w-full">
-          {/* Results - Full width since filter is now an overlay */}
           <div className="w-full">
-            {/* Results Header with Filter Button */}
-            <div className="flex items-center justify-between mb-6">
+            {/* Results Header — hidden on mobile in map mode */}
+            <div className={`flex items-center justify-between ${isMapMode ? 'hidden lg:flex mb-3' : 'mb-6'}`}>
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-0">
                   {isLoading ? (
@@ -286,14 +288,13 @@ export default function SearchPageContent() {
                 <p className="text-gray-600">
                   {getSearchSummary()}
                 </p>
-                {!isLoading && filteredProperties.length > 0 && (
+                {!isMapMode && !isLoading && filteredProperties.length > 0 && (
                   <p className="text-sm text-gray-500 mt-1">
                     Showing {startIndex + 1}-{Math.min(endIndex, filteredProperties.length)} of {filteredProperties.length} properties
                   </p>
                 )}
               </div>
               
-              {/* Filter Button moved to top right */}
               <button 
                 onClick={() => setIsFilterOpen(true)}
                 className="inline-flex items-center px-4 py-2 border border-black text-gray-900 font-semibold rounded-lg hover:bg-black hover:text-white transition-all duration-200"
@@ -305,32 +306,116 @@ export default function SearchPageContent() {
               </button>
             </div>
 
-            {/* Properties Grid */}
+            {/* Floating filter button on mobile map mode */}
+            {isMapMode && (
+              <button
+                onClick={() => setIsFilterOpen(true)}
+                className="lg:hidden fixed top-[84px] right-4 z-40 flex items-center gap-1.5 px-3 py-2 bg-white rounded-full shadow-lg border border-gray-200 text-sm font-medium text-gray-900"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z" />
+                </svg>
+                Filter
+              </button>
+            )}
+
+            {/* Properties — List or Map */}
             {isLoading ? (
               <PropertyCardSkeletonGrid count={12} />
             ) : filteredProperties.length > 0 ? (
-              <div className={propertyCardClasses.grid.search}>
-                {paginatedProperties.map((property) => {    
-                  // The API already transforms the data, so we can use it directly
-                  // Just ensure we have the property_uuid for navigation
-                  const propertyForCard = {
-                    ...property,
-                    // Ensure property_uuid is available for navigation
-                    property_uuid: property.property_uuid || property.id,
-                  };
-                  
-                  return (
-                    <PropertyCard
-                      key={property.id}
-                      property={propertyForCard}
-                      onViewDetails={(uuid) => {
-                        // Handle navigation to property detail page using property_uuid
-                        router.push(`/property/${uuid}`);
-                      }}
-                    />
-                  );
-                })}
-              </div>
+              viewMode === 'map' ? (
+                <SearchMapView properties={filteredProperties} />
+              ) : (
+                <>
+                  <div className={propertyCardClasses.grid.search}>
+                    {paginatedProperties.map((property) => {
+                      const propertyForCard = {
+                        ...property,
+                        property_uuid: property.property_uuid || property.id,
+                      };
+
+                      return (
+                        <PropertyCard
+                          key={property.id}
+                          property={propertyForCard}
+                          onViewDetails={(uuid) => {
+                            router.push(`/property/${uuid}`);
+                          }}
+                        />
+                      );
+                    })}
+                  </div>
+
+                  {/* Pagination (list mode only) */}
+                  {filteredProperties.length > itemsPerPage && (
+                    <div className="mt-12 flex items-center justify-center">
+                      <nav className="flex items-center space-x-2" aria-label="Pagination">
+                        <button
+                          onClick={goToPreviousPage}
+                          disabled={currentPage === 1}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === 1
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          }`}
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                        </button>
+
+                        <div className="flex items-center space-x-1">
+                          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                            const shouldShow =
+                              page === 1 ||
+                              page === totalPages ||
+                              (page >= currentPage - 1 && page <= currentPage + 1);
+
+                            if (!shouldShow) {
+                              if (page === currentPage - 2 || page === currentPage + 2) {
+                                return (
+                                  <span key={page} className="px-3 py-2 text-gray-400">
+                                    ...
+                                  </span>
+                                );
+                              }
+                              return null;
+                            }
+
+                            return (
+                              <button
+                                key={page}
+                                onClick={() => goToPage(page)}
+                                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                  page === currentPage
+                                    ? 'bg-blue-600 text-white'
+                                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                                }`}
+                              >
+                                {page}
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        <button
+                          onClick={goToNextPage}
+                          disabled={currentPage === totalPages}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === totalPages
+                              ? 'text-gray-400 cursor-not-allowed'
+                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                          }`}
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      </nav>
+                    </div>
+                  )}
+                </>
+              )
             ) : (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
@@ -350,83 +435,12 @@ export default function SearchPageContent() {
                 </button>
               </div>
             )}
-
-            {/* Pagination */}
-            {filteredProperties.length > itemsPerPage && (
-              <div className="mt-12 flex items-center justify-center">
-                <nav className="flex items-center space-x-2" aria-label="Pagination">
-                  {/* Previous Button */}
-                  <button
-                    onClick={goToPreviousPage}
-                    disabled={currentPage === 1}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === 1
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-
-                  {/* Page Numbers */}
-                  <div className="flex items-center space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                      // Show first page, last page, current page, and pages around current page
-                      const shouldShow = 
-                        page === 1 || 
-                        page === totalPages || 
-                        (page >= currentPage - 1 && page <= currentPage + 1);
-                      
-                      if (!shouldShow) {
-                        // Show ellipsis for gaps
-                        if (page === currentPage - 2 || page === currentPage + 2) {
-                          return (
-                            <span key={page} className="px-3 py-2 text-gray-400">
-                              ...
-                            </span>
-                          );
-                        }
-                        return null;
-                      }
-
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => goToPage(page)}
-                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            page === currentPage
-                              ? 'bg-blue-600 text-white'
-                              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Next Button */}
-                  <button
-                    onClick={goToNextPage}
-                    disabled={currentPage === totalPages}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      currentPage === totalPages
-                        ? 'text-gray-400 cursor-not-allowed'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                    }`}
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </nav>
-              </div>
-            )}
           </div>
         </div>
       </div>
+
+      {/* View Mode Toggle Pill */}
+      <ViewModeToggle viewMode={viewMode} onToggle={setViewMode} />
 
       {/* ModernFilter Overlay - Doesn't affect main layout */}
       <ModernFilter
@@ -438,8 +452,8 @@ export default function SearchPageContent() {
         onToggle={() => setIsFilterOpen(false)}
       />
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer - hidden in map mode */}
+      {!isMapMode && <Footer />}
     </div>
   );
 }
