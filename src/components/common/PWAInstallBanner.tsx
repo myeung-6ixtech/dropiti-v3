@@ -40,7 +40,7 @@ export default function PWAInstallBanner() {
 
         {/* Copy */}
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 leading-tight">
+          <p className="text-sm font-semibold text-gray-900 leading-tight mb-0">
             Get the Dropiti app
           </p>
           <p className="text-xs text-gray-500 leading-tight mt-0.5">
