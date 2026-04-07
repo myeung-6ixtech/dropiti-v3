@@ -9,13 +9,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Search Properties - dropiti',
     description: 'Search and discover amazing properties for rent on dropiti. Find your perfect home with our advanced search filters.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Search Properties - dropiti',
     description: 'Search and discover amazing properties for rent on dropiti. Find your perfect home with our advanced search filters.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
 };
 

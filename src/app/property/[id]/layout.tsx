@@ -82,7 +82,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         siteName: 'Dropiti',
         images: [
           {
-            url: property.display_image || '/images/dropiti_logo.png',
+            url: property.display_image || '/images/dropiti-homepage-001.webp',
             width: 1200,
             height: 630,
             alt: property.title,
@@ -94,7 +94,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         card: 'summary_large_image',
         title,
         description,
-        images: [property.display_image || '/images/dropiti_logo.png'],
+        images: [property.display_image || '/images/dropiti-homepage-001.webp'],
       },
       alternates: {
         canonical: `${siteUrl}/property/${id}`,

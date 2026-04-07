@@ -9,13 +9,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Tenant Marketplace - dropiti',
     description: 'Discover qualified tenants looking for rental properties. Browse tenant profiles and find the perfect match for your property.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Tenant Marketplace - dropiti',
     description: 'Discover qualified tenants looking for rental properties. Browse tenant profiles and find the perfect match for your property.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
 };
 

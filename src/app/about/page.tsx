@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'About Us - Dropiti',
     description: 'Learn about Dropiti — Hong Kong\'s property rental platform connecting landlords and tenants.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
 };
 

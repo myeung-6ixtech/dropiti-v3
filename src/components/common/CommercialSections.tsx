@@ -6,20 +6,21 @@ import { ArrowRightIcon } from '@heroicons/react/24/outline';
 export default function CommercialSections() {
   return (
     <>
-      {/* Beyond Property Section */}
-      <div className="text-center">
-        <p className="text-lg sm:text-xl text-gray-600 mb-3">
-          One platform, endless possibilities
-        </p>
-        <p className="text-xl sm:text-2xl font-bold text-gray-900">
-          Dropiti - Where Property Meets Innovation
-        </p>
-      </div>
+      <div className="bg-white">
+        {/* Beyond Property Section */}
+        <div className="text-center pt-10 sm:pt-12 px-4 sm:px-6">
+          <p className="text-lg sm:text-xl text-gray-600 mb-3">
+            One platform, endless possibilities
+          </p>
+          <p className="text-xl sm:text-2xl font-bold text-gray-900">
+            Dropiti - Where Property Meets Innovation
+          </p>
+        </div>
 
-      {/* Services Section */}
-      <div className="py-16">
-        <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 justify-center">
+        {/* Services Section */}
+        <div className="py-16">
+          <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 justify-center">
             
             {/* Map & search */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
@@ -121,6 +122,7 @@ export default function CommercialSections() {
               </div>
             </div>
 
+            </div>
           </div>
         </div>
       </div>

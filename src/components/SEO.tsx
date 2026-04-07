@@ -19,7 +19,7 @@ export default function SEO({
   title,
   description,
   canonical,
-  image = '/images/dropiti_logo.png',
+  image = '/images/dropiti-homepage-001.webp',
   type = 'website',
   structuredData,
   keywords = [],

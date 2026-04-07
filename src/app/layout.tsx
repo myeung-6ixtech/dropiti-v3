@@ -68,10 +68,10 @@ export const metadata: Metadata = {
     description: "Find your perfect home with Dropiti - the leading real estate platform for property rentals and sales.",
     images: [
       {
-        url: '/images/dropiti_logo.png',
+        url: '/images/dropiti-homepage-001.webp',
         width: 1200,
         height: 630,
-        alt: 'Dropiti Real Estate Platform',
+        alt: 'Dropiti — property search and listings',
       },
     ],
   },
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Dropiti - Real Estate Platform',
     description: "Find your perfect home with Dropiti - the leading real estate platform for property rentals and sales.",
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
     creator: '@dropiti',
   },
   robots: {

@@ -12,13 +12,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'dropiti - real estate platform',
     description: 'Find your perfect home with dropiti - the leading real estate platform for property rentals and sales.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'dropiti - real estate platform',
     description: 'Find your perfect home with dropiti - the leading real estate platform for property rentals and sales.',
-    images: ['/images/dropiti_logo.png'],
+    images: ['/images/dropiti-homepage-001.webp'],
   },
 };
 
