@@ -8,6 +8,7 @@ import { tenantsAPI } from '@/lib/api-client';
 import TenantProfileCard from '@/components/tenant-profile/TenantProfileCard';
 import TenantMarketplaceFilter from '@/components/tenant-marketplace/TenantMarketplaceFilter';
 import TenantFilterTags from '@/components/tenant-marketplace/TenantFilterTags';
+import PullToRefreshWrapper from '@/components/common/PullToRefreshWrapper';
 import Footer from '@/components/common/Footer';
 import { TenantProfileCardSkeletonGrid } from '@/components/skeleton';
 import { TenantProfileData } from '@/types/tenant';
@@ -201,6 +202,7 @@ export default function TenantMarketplaceContent() {
   };
 
   return (
+    <PullToRefreshWrapper onRefresh={fetchTenantProfiles}>
     <div className="min-h-screen bg-white">
       <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -377,5 +379,6 @@ export default function TenantMarketplaceContent() {
       {/* Footer */}
       <Footer />
     </div>
+    </PullToRefreshWrapper>
   );
 }

@@ -6,6 +6,7 @@ import { Property } from '@/types';
 import PropertyCard from '@/components/PropertyCard';
 import SearchMap from './SearchMap';
 import MapBottomSheet from './MapBottomSheet';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface SearchMapViewProps {
   properties: (Property & { property_uuid?: string })[];
@@ -13,6 +14,7 @@ interface SearchMapViewProps {
 
 export default function SearchMapView({ properties }: SearchMapViewProps) {
   const router = useRouter();
+  const { tap } = useHaptic();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -47,12 +49,13 @@ export default function SearchMapView({ properties }: SearchMapViewProps) {
   }, []);
 
   const handleMarkerClick = useCallback((id: string) => {
+    tap('light');
     setSelectedId(id);
     const el = cardRefs.current[id];
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, []);
+  }, [tap]);
 
   const handleCardClick = useCallback((id: string) => {
     setSelectedId(id);

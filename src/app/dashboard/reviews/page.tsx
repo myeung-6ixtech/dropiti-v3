@@ -8,6 +8,7 @@ import CreateReviewModal from '@/components/common/CreateReviewModal';
 import { FullScreenLoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Review, ReviewOpportunity, ReviewTabType, ReviewTab } from '@/types/review';
 import { ReviewsHeader } from './_components/reviews-header';
+import PullToRefreshWrapper from '@/components/common/PullToRefreshWrapper';
 import { ReviewsTabs } from './_components/reviews-tabs';
 import { UpcomingReviewsSection } from './_components/upcoming-reviews-section';
 import { ReviewsGivenSection } from './_components/reviews-given-section';
@@ -148,6 +149,7 @@ export default function ReviewsPage() {
   }
 
   return (
+    <PullToRefreshWrapper onRefresh={fetchReviewData}>
     <div className="min-h-screen bg-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <ReviewsHeader />
@@ -192,5 +194,6 @@ export default function ReviewsPage() {
         />
       )}
     </div>
+    </PullToRefreshWrapper>
   );
 }

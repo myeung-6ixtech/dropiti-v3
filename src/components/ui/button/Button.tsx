@@ -1,14 +1,15 @@
 import React, { ReactNode } from "react";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md" | "lg" | "xl"; // Button size
-  variant?: "primary" | "outline" | "tertiary" | "danger" | "success"; // Button variant
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Additional classes
+  children: ReactNode;
+  size?: "sm" | "md" | "lg" | "xl";
+  variant?: "primary" | "outline" | "tertiary" | "danger" | "success";
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -21,6 +22,7 @@ const Button: React.FC<ButtonProps> = ({
   className = "",
   disabled = false,
 }) => {
+  const { tap } = useHaptic();
   // Size Classes
   const sizeClasses = {
     sm: "btn-sm",
@@ -45,7 +47,10 @@ const Button: React.FC<ButtonProps> = ({
       } ${variantClasses[variant]} ${
         disabled ? "cursor-not-allowed opacity-50" : ""
       }`}
-      onClick={onClick}
+      onClick={() => {
+        tap(variant === 'danger' ? 'warning' : variant === 'success' ? 'success' : 'light');
+        onClick?.();
+      }}
       disabled={disabled}
     >
       {startIcon && <span className="flex items-center">{startIcon}</span>}

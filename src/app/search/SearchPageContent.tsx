@@ -12,6 +12,7 @@ import SearchMapView from '@/components/search/SearchMapView';
 import Footer from '@/components/common/Footer';
 import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkeleton';
 import SearchMapViewSkeleton from '@/components/search/SearchMapViewSkeleton';
+import PullToRefreshWrapper from '@/components/common/PullToRefreshWrapper';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 
@@ -331,7 +332,7 @@ export default function SearchPageContent() {
               viewMode === 'map' ? (
                 <SearchMapView properties={filteredProperties} />
               ) : (
-                <>
+                <PullToRefreshWrapper onRefresh={fetchProperties}>
                   <div className={propertyCardClasses.grid.search}>
                     {paginatedProperties.map((property) => {
                       const propertyForCard = {
@@ -419,7 +420,7 @@ export default function SearchPageContent() {
                       </nav>
                     </div>
                   )}
-                </>
+                </PullToRefreshWrapper>
               )
             ) : (
               <div className="text-center py-12">

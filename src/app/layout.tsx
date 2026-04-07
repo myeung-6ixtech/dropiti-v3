@@ -12,6 +12,7 @@ import MobileChatContainer from "@/components/chat/mobile/MobileChatContainer";
 import MobileNotificationsContainer from "@/components/notifications/mobile/MobileNotificationsContainer";
 import ClientOnboardingGate from "@/components/ClientOnboardingGate";
 import CookieConsentAndAnalytics from "@/components/analytics/CookieConsentAndAnalytics";
+import PWAInstallBanner from "@/components/common/PWAInstallBanner";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -107,10 +108,16 @@ export default function RootLayout({
     <html lang="en" className={plusJakartaSans.variable}>
       <head>
         <meta name="google-adsense-account" content="ca-pub-6301512886533217" />
+        <meta name="theme-color" content="#7c3aed" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Dropiti" />
+        <link rel="apple-touch-icon" href="/images/dropiti_logo.png" />
       </head>
       <body className={`${plusJakartaSans.className} antialiased`}>
         <Providers>
           <ClientOnboardingGate>
+            <PWAInstallBanner />
             <div className="min-h-screen flex flex-col bg-white">
               <Navigation />
               <main className="flex-1 pb-16 md:pb-0">

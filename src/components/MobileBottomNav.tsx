@@ -8,6 +8,7 @@ import { getSafeProfileImage } from '@/lib/utils';
 import { FiHome, FiSearch, FiLayers, FiUser } from 'react-icons/fi';
 import { mobileBottomNavStyles } from '@/styles/index';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
+import { useHaptic } from '@/hooks/useHaptic';
 
 interface MobileBottomNavProps {
   className?: string;
@@ -27,7 +28,8 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
   const pathname = usePathname();
   const { isAuthenticated, user } = useAuth();
   
-  // Scroll direction detection for auto-hide functionality
+  const { tap } = useHaptic();
+
   const { isVisible } = useScrollDirection({
     threshold: 20, // Higher threshold for rapid scroll detection
     debounceMs: 100, // Faster response
@@ -93,6 +95,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
             <Link
               key={item.id}
               href={item.href}
+              onClick={() => tap('selection')}
               className={`${mobileBottomNavStyles.item} ${
                 active ? mobileBottomNavStyles.itemActive : mobileBottomNavStyles.itemInactive
               }`}

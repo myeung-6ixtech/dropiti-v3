@@ -1,5 +1,6 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { triggerHaptic } from '@/hooks/useHaptic';
 
 interface Toast {
   id: string;
@@ -32,6 +33,9 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   }, []);
 
   const showToast = useCallback((type: Toast['type'], message: string, duration: number = 5000) => {
+    const hapticMap = { success: 'success', error: 'error', warning: 'warning', info: 'light' } as const;
+    triggerHaptic(hapticMap[type]);
+
     const id = Math.random().toString(36).substr(2, 9);
     const newToast: Toast = { id, type, message, duration };
     

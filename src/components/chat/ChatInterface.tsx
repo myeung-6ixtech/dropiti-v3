@@ -11,6 +11,7 @@ import { useRealTimeChat } from '@/hooks/useRealTimeChat';
 import { convertMessageToUIMessage } from '@/lib/chat-api';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
+import { useHaptic } from '@/hooks/useHaptic';
 import { MessageSkeleton } from '@/components/skeleton';
 
 interface Message {
@@ -46,6 +47,7 @@ interface ChatInterfaceProps {
 export default function ChatInterface({ contacts, userType, isLoadingContacts = false, selectedRoomId, hideSidebar = false }: ChatInterfaceProps) {
   const { user: authUser } = useAuth();
   const { showToast } = useToast();
+  const { tap } = useHaptic();
   const [selectedContact, setSelectedContact] = useState<ChatContact | null>(contacts[0] || null);
   const [newMessage, setNewMessage] = useState('');
   const [showShareActionMenu, setShowShareActionMenu] = useState(false);
@@ -146,6 +148,7 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
 
   const handleSendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedContact) return;
+    tap('light');
 
     const messageContent = newMessage.trim();
     setNewMessage('');

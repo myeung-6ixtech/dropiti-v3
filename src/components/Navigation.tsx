@@ -13,6 +13,7 @@ import { navigationStyles } from '@/styles/index';
 import NotificationCenter from '@/components/notifications/NotificationCenter';
 import { useMobileChat } from '@/context/MobileChatContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useHaptic } from '@/hooks/useHaptic';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -20,6 +21,7 @@ export default function Navigation() {
   const { t } = useLanguage();
   const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
   const { openBottomSheet } = useMobileChat();
+  const { tap } = useHaptic();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAvatarLoading, setIsAvatarLoading] = useState(false);
@@ -118,7 +120,7 @@ export default function Navigation() {
             <div className={navigationStyles.brand}>
               {/* Mobile menu button */}
               <button
-                onClick={toggleSidebar}
+                onClick={() => { tap('light'); toggleSidebar(); }}
                 className={navigationStyles.menuButton}
                 aria-label={sidebarOpen ? "Close menu" : "Open menu"}
               >
@@ -143,7 +145,7 @@ export default function Navigation() {
                 <LanguageSwitcher variant="icon" size="sm" />
                 <NotificationCenter />
                 <button
-                  onClick={openBottomSheet}
+                  onClick={() => { tap('light'); openBottomSheet(); }}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                   aria-label="Open chat"
                 >
@@ -188,6 +190,7 @@ export default function Navigation() {
           <div className={navigationStyles.menu}>
             <Link
               href="/"
+              onClick={() => tap('selection')}
               className={`${navigationStyles.link} ${
                 isActive('/') 
                   ? navigationStyles.linkActive
@@ -199,6 +202,7 @@ export default function Navigation() {
             
             <Link
               href="/search"
+              onClick={() => tap('selection')}
               className={`${navigationStyles.link} ${
                 isActive('/search') 
                   ? navigationStyles.linkActive
@@ -210,6 +214,7 @@ export default function Navigation() {
             
             <Link
               href="/tenant-marketplace"
+              onClick={() => tap('selection')}
               className={`${navigationStyles.link} ${
                 isActive('/tenant-marketplace') 
                   ? navigationStyles.linkActive
@@ -241,7 +246,7 @@ export default function Navigation() {
             
             <div className={navigationStyles.userDropdown} ref={dropdownRef}>
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => { tap('light'); setIsDropdownOpen(!isDropdownOpen); }}
                   className={navigationStyles.userButton}
                 >
                   <div className={navigationStyles.userAvatar}>

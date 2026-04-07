@@ -7,6 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from 'react';
+import { triggerHaptic } from '@/hooks/useHaptic';
 
 interface MapBottomSheetProps {
   children: ReactNode;
@@ -92,6 +93,7 @@ export default function MapBottomSheet({ children }: MapBottomSheetProps) {
 
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
+    triggerHaptic('light');
     const ds = dragState.current;
 
     if (Math.abs(ds.velocity) > VELOCITY_THRESHOLD) {

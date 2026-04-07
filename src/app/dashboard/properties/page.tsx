@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { propertiesAPI } from '@/lib/api-client';
 import PropertyCard from '@/components/PropertyCard';
@@ -12,6 +12,7 @@ import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 import { PropertiesHeader } from './_components/properties-header';
 import { PropertiesTabs } from './_components/properties-tabs';
+import PullToRefreshWrapper from '@/components/common/PullToRefreshWrapper';
 
 interface Draft {
   id: string;
@@ -55,48 +56,46 @@ export default function PropertiesPage() {
     }
   }, [searchParams]);
 
-  // Fetch user's properties and drafts
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!isAuthenticated || !authUser?.id) {
-        setIsLoading(false);
-        return;
+  const fetchData = useCallback(async () => {
+    if (!isAuthenticated || !authUser?.id) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const [propertiesResponse, draftsResponse] = await Promise.all([
+        propertiesAPI.getListings({
+          limit: 50,
+          landlord_user_id: authUser.id,
+        }),
+        propertiesAPI.getDrafts(authUser.id)
+      ]);
+
+      if (propertiesResponse.success && propertiesResponse.data) {
+        setProperties(propertiesResponse.data);
       }
 
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Fetch both properties and drafts in parallel
-        const [propertiesResponse, draftsResponse] = await Promise.all([
-          propertiesAPI.getListings({
-            limit: 50,
-            landlord_user_id: authUser.id,
-          }),
-          propertiesAPI.getDrafts(authUser.id)
-        ]);
-
-        if (propertiesResponse.success && propertiesResponse.data) {
-          setProperties(propertiesResponse.data);
-        }
-
-        if (draftsResponse.success && draftsResponse.data) {
-          setDrafts(draftsResponse.data);
-        }
-
-        if (!propertiesResponse.success && !draftsResponse.success) {
-          throw new Error('Failed to fetch data');
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
-      } finally {
-        setIsLoading(false);
+      if (draftsResponse.success && draftsResponse.data) {
+        setDrafts(draftsResponse.data);
       }
-    };
 
-    fetchData();
+      if (!propertiesResponse.success && !draftsResponse.success) {
+        throw new Error('Failed to fetch data');
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+    } finally {
+      setIsLoading(false);
+    }
   }, [isAuthenticated, authUser?.id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   // Use properties and drafts directly without filtering
   const filteredProperties = properties;
@@ -107,6 +106,7 @@ export default function PropertiesPage() {
   }
 
   return (
+    <PullToRefreshWrapper onRefresh={fetchData}>
     <div className="h-full flex flex-col">
       <PropertiesHeader 
         propertyCount={properties.length}
@@ -203,5 +203,6 @@ export default function PropertiesPage() {
         </div>
       )}
     </div>
+    </PullToRefreshWrapper>
   );
 }
