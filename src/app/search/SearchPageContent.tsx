@@ -11,6 +11,7 @@ import ViewModeToggle, { ViewMode } from '@/components/search/ViewModeToggle';
 import SearchMapView from '@/components/search/SearchMapView';
 import Footer from '@/components/common/Footer';
 import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkeleton';
+import SearchMapViewSkeleton from '@/components/search/SearchMapViewSkeleton';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 
@@ -321,7 +322,11 @@ export default function SearchPageContent() {
 
             {/* Properties — List or Map */}
             {isLoading ? (
-              <PropertyCardSkeletonGrid count={12} />
+              isMapMode ? (
+                <SearchMapViewSkeleton />
+              ) : (
+                <PropertyCardSkeletonGrid count={12} />
+              )
             ) : filteredProperties.length > 0 ? (
               viewMode === 'map' ? (
                 <SearchMapView properties={filteredProperties} />

@@ -21,105 +21,101 @@ export default function CommercialSections() {
         <div className="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16 justify-center">
             
-            {/* Real Estate Service */}
+            {/* Map & search */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
               <div className="mb-4 px-4 sm:px-0">
                 <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-homepage-001.webp"
-                    alt="Real Estate Service"
+                    alt="Map and list property search"
                     fill
                     className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
                   />
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Smart Property Search</h3>
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Map-aware property search</h3>
                 <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
-                  AI-powered matching finds properties tailored to your lifestyle. 
-                  Virtual tours, instant notifications, and verified listings make 
-                  your search effortless and efficient.
+                  Filter by area, bedrooms, and budget, then explore places on an interactive map or in a
+                  list—so you can see what&apos;s available before you commit.
                 </p>
                 <div className="flex items-center justify-center text-black font-semibold group-hover:text-purple-600 transition-colors">
-                  <span className="text-sm">Explore Properties</span>
+                  <span className="text-sm">Explore listings</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </div>
 
-            {/* My Home Service */}
+            {/* Landlord dashboard & listings */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
               <div className="mb-4 px-4 sm:px-0">
                 <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-homepage-002.webp"
-                    alt="My Home Service"
+                    alt="Landlord listings dashboard"
                     fill
                     className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
                   />
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Property Management</h3>
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Your listings, in one dashboard</h3>
                 <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
-                  Manage your entire property portfolio from your phone. 
-                  Track rent payments, schedule maintenance, communicate with tenants, 
-                  and access financial insights instantly.
+                  Publish and manage properties, keep drafts as you go, and stay on top of what you&apos;ve
+                  posted—all from the landlord side of the platform.
                 </p>
                 <div className="flex items-center justify-center text-black font-semibold group-hover:text-purple-600 transition-colors">
-                  <span className="text-sm">Manage Properties</span>
+                  <span className="text-sm">Manage listings</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </div>
 
-            {/* Smart Home */}
+            {/* Offers & listing flow */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
               <div className="mb-4 px-4 sm:px-0">
                 <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-homepage-003.webp"
-                    alt="Smart Home"
+                    alt="From browsing a listing to making an offer"
                     fill
                     className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
                   />
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Smart Home Integration</h3>
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">From browsing to making an offer</h3>
                 <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
-                  Transform any property into a connected smart home. 
-                  Control lighting, security, climate, and appliances remotely. 
-                  Energy-efficient automation saves money and enhances comfort.
+                  Open a listing, review the details, and move forward when you&apos;re ready—so interested
+                  renters and landlords can progress without leaving the platform.
                 </p>
                 <div className="flex items-center justify-center text-black font-semibold group-hover:text-purple-600 transition-colors">
-                  <span className="text-sm">Smart Solutions</span>
+                  <span className="text-sm">Browse listings</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </div>
 
-            {/* Dropiti Connect */}
+            {/* In-app chat */}
             <div className="group cursor-pointer text-center flex flex-col items-center">
               <div className="mb-4 px-4 sm:px-0">
                 <div className="relative w-80 sm:w-[25rem] h-[20rem] sm:h-[25rem] mx-auto">
                   <Image
                     src="/images/dropiti-connect.webp"
-                    alt="Dropiti Connect"
+                    alt="In-app chat with landlords and tenants"
                     fill
                     className="object-cover rounded-[2rem] transition-all duration-300 group-hover:scale-105"
                   />
                 </div>
               </div>
               <div className="space-y-3 max-w-sm">
-                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Community Network</h3>
+                <h3 className="text-lg sm:text-md font-semibold text-gray-900">Chat with landlords and tenants</h3>
                 <p className="text-base sm:text-sm text-gray-600 leading-relaxed">
-                  Connect with landlords, tenants, and property professionals. 
-                  Share experiences, get recommendations, and build relationships 
-                  that make property management easier and more rewarding.
+                  Start a conversation in-app when you need clarity on a listing or next steps—no juggling
+                  scattered apps and threads.
                 </p>
                 <div className="flex items-center justify-center text-black font-semibold group-hover:text-purple-600 transition-colors">
-                  <span className="text-sm">Join Community</span>
+                  <span className="text-sm">Open messages</span>
                   <ArrowRightIcon className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
