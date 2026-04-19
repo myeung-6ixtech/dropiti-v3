@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
 import { calculateNegotiationState } from '@/lib/offer-negotiation';
+import { toClientPaymentFrequency } from '@/lib/payment-frequency';
 
 const GET_OFFER_QUERY = `
   query GetOffer($offerId: Int!) {
@@ -112,14 +113,19 @@ export async function GET(request: NextRequest) {
       proposingRentPrice: offer.proposing_rent_price,
       proposingRentPriceCurrency: offer.proposing_rent_price_currency,
       numLeasingMonths: offer.num_leasing_months,
-      paymentFrequency: offer.payment_frequency,
+      paymentFrequency:
+        toClientPaymentFrequency(offer.payment_frequency) ?? offer.payment_frequency,
       moveInDate: offer.move_in_date,
       offerStatus: offer.offer_status as 'pending' | 'accepted' | 'rejected' | 'countered' | 'withdrawn' | 'expired' | 'completed',
       isActive: offer.is_active,
       currentRentPrice: offer.current_rent_price,
       currentRentPriceCurrency: offer.current_rent_price_currency,
       currentNumLeasingMonths: offer.current_num_leasing_months,
-      currentPaymentFrequency: offer.current_payment_frequency,
+      currentPaymentFrequency:
+        offer.current_payment_frequency != null
+          ? toClientPaymentFrequency(offer.current_payment_frequency) ??
+            offer.current_payment_frequency
+          : undefined,
       currentMoveInDate: offer.current_move_in_date,
       negotiationRound: offer.negotiation_round,
       lastActionBy: offer.last_action_by as 'initiator' | 'recipient',
@@ -128,7 +134,11 @@ export async function GET(request: NextRequest) {
       finalRentPrice: offer.final_rent_price,
       finalRentPriceCurrency: offer.final_rent_price_currency,
       finalNumLeasingMonths: offer.final_num_leasing_months,
-      finalPaymentFrequency: offer.final_payment_frequency,
+      finalPaymentFrequency:
+        offer.final_payment_frequency != null
+          ? toClientPaymentFrequency(offer.final_payment_frequency) ??
+            offer.final_payment_frequency
+          : undefined,
       finalMoveInDate: offer.final_move_in_date,
       finalAcceptedAt: offer.final_accepted_at,
       finalAcceptedBy: offer.final_accepted_by as 'initiator' | 'recipient' | undefined,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeQuery } from '@/app/api/graphql/serverClient';
+import { toClientPaymentFrequency } from '@/lib/payment-frequency';
 
 // GraphQL response types
 interface GraphQLOffer {
@@ -225,7 +226,10 @@ export async function GET(request: NextRequest) {
         proposingRentPrice: offer.proposing_rent_price || 0,
         proposingRentPriceCurrency: offer.proposing_rent_price_currency || 'HKD',
         numLeasingMonths: offer.num_leasing_months || 12,
-        paymentFrequency: offer.payment_frequency || 'monthly',
+        paymentFrequency:
+          toClientPaymentFrequency(offer.payment_frequency || undefined) ||
+          offer.payment_frequency ||
+          'monthly',
         moveInDate: offer.move_in_date || new Date().toISOString().split('T')[0],
         offerStatus: offer.offer_status,
         isActive: true,
@@ -235,7 +239,11 @@ export async function GET(request: NextRequest) {
         currentRentPrice: offer.current_rent_price,
         currentRentPriceCurrency: offer.current_rent_price_currency,
         currentNumLeasingMonths: offer.current_num_leasing_months,
-        currentPaymentFrequency: offer.current_payment_frequency,
+        currentPaymentFrequency:
+          offer.current_payment_frequency != null
+            ? toClientPaymentFrequency(offer.current_payment_frequency) ??
+              offer.current_payment_frequency
+            : undefined,
         currentMoveInDate: offer.current_move_in_date,
         // Negotiation fields
         negotiationRound: offer.negotiation_round,
@@ -246,7 +254,11 @@ export async function GET(request: NextRequest) {
         finalRentPrice: offer.final_rent_price,
         finalRentPriceCurrency: offer.final_rent_price_currency,
         finalNumLeasingMonths: offer.final_num_leasing_months,
-        finalPaymentFrequency: offer.final_payment_frequency,
+        finalPaymentFrequency:
+          offer.final_payment_frequency != null
+            ? toClientPaymentFrequency(offer.final_payment_frequency) ??
+              offer.final_payment_frequency
+            : undefined,
         finalMoveInDate: offer.final_move_in_date,
         finalAcceptedAt: offer.final_accepted_at,
         finalAcceptedBy: offer.final_accepted_by,

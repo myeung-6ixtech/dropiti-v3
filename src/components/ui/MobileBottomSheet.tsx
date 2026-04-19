@@ -134,9 +134,17 @@ export default function MobileBottomSheet({
           </div>
         )}
 
-        {/* Content */}
-        <div className="mobile-chat-list">
-          {children}
+        {/* Content — scroll edge fades hint at more content above/below */}
+        <div className="relative">
+          <div className="mobile-chat-list">{children}</div>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 top-0 z-[2] h-10 bg-gradient-to-b from-white to-transparent"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-10 bg-gradient-to-t from-white to-transparent"
+          />
         </div>
       </div>
     </>

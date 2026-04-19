@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
+import { toDatabasePaymentFrequency } from '@/lib/payment-frequency';
 
 const CHECK_EXISTING_OFFER_QUERY = `
   query CheckExistingOffer($propertyUuid: String!, $initiatorUserId: String!) {
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
       proposing_rent_price: parseFloat(offerData.proposingRentPrice),
       proposing_rent_price_currency: offerData.currency || 'HKD',
       num_leasing_months: parseInt(offerData.numLeasingMonths),
-      payment_frequency: offerData.paymentFrequency,
+      payment_frequency: toDatabasePaymentFrequency(offerData.paymentFrequency),
       move_in_date: offerData.moveInDate,
       offer_status: 'pending', // Default status
       is_active: true, // Default to active

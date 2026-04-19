@@ -64,7 +64,23 @@ const Modal: React.FC<ModalProps> = ({
         className={`${contentClasses} ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div>{children}</div>
+        {isFullscreen ? (
+          <div>{children}</div>
+        ) : (
+          <div className="relative flex max-h-[min(85dvh,900px)] flex-col">
+            <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+              <div>{children}</div>
+            </div>
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-10 bg-gradient-to-b from-white to-transparent dark:from-gray-900"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-10 bg-gradient-to-t from-white to-transparent dark:from-gray-900"
+            />
+          </div>
+        )}
         {showCloseButton && (
           <button
             onClick={onClose}

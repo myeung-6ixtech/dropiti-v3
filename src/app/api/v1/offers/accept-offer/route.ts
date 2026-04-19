@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeMutation } from '@/app/api/graphql/serverClient';
 import { validateOfferAction, createOfferAction } from '@/lib/offer-negotiation';
+import { toDatabasePaymentFrequency } from '@/lib/payment-frequency';
 import { REVIEW_CONSTANTS } from '@/constants/review';
 import { OfferActionType } from '@/types/offer';
 
@@ -319,7 +320,9 @@ export async function POST(request: NextRequest) {
       updates.final_rent_price = finalTerms.finalRentPrice;
       updates.final_rent_price_currency = finalTerms.finalRentPriceCurrency;
       updates.final_num_leasing_months = finalTerms.finalNumLeasingMonths;
-      updates.final_payment_frequency = finalTerms.finalPaymentFrequency;
+      updates.final_payment_frequency = toDatabasePaymentFrequency(
+        String(finalTerms.finalPaymentFrequency ?? '')
+      );
       updates.final_move_in_date = finalTerms.finalMoveInDate;
       updates.final_accepted_at = finalTerms.finalAcceptedAt;
       updates.final_accepted_by = finalTerms.finalAcceptedBy;
