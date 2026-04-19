@@ -287,7 +287,7 @@ export default function SearchPageContent() {
                     `${filteredProperties.length} Properties Found`
                   )}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-gray-600 mb-0">
                   {getSearchSummary()}
                 </p>
                 {!isMapMode && !isLoading && filteredProperties.length > 0 && (
