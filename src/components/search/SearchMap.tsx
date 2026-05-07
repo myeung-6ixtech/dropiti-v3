@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GoogleMap, OverlayView, useJsApiLoader } from '@react-google-maps/api';
 
 export interface MapProperty {
@@ -58,8 +58,20 @@ export default function SearchMap({
 }: SearchMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const [coords, setCoords] = useState<Record<string, LatLng>>({});
+  const coordsRef = useRef(coords);
+  coordsRef.current = coords;
+  const lastFitSignatureRef = useRef<string>('');
   const geocoderRef = useRef<google.maps.Geocoder | null>(null);
   const geocodeCacheRef = useRef<Record<string, LatLng>>({});
+
+  const propertyListFingerprint = useMemo(
+    () =>
+      properties
+        .map((p) => `${p.id}\u001f${p.location ?? ''}`)
+        .sort()
+        .join('\n'),
+    [properties],
+  );
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
@@ -104,39 +116,56 @@ export default function SearchMap({
       geocoderRef.current = new window.google.maps.Geocoder();
     }
 
+    lastFitSignatureRef.current = '';
+
     let cancelled = false;
 
     const geocodeAll = async () => {
       const newCoords: Record<string, LatLng> = {};
-      // Process sequentially with small delay to respect rate limits
+      const snapshot = coordsRef.current;
+      const allowedIds = new Set(properties.map((p) => p.id));
+
       for (const prop of properties) {
         if (cancelled) break;
-        // Skip if already geocoded in this batch
-        if (coords[prop.id]) {
-          newCoords[prop.id] = coords[prop.id];
+        if (snapshot[prop.id]) {
+          newCoords[prop.id] = snapshot[prop.id];
           continue;
         }
         const point = await geocodeProperty(prop);
         if (point) newCoords[prop.id] = point;
-        // Small delay between requests
         await new Promise((r) => setTimeout(r, 120));
       }
       if (!cancelled) {
-        setCoords((prev) => ({ ...prev, ...newCoords }));
+        setCoords((prev) => {
+          const base: Record<string, LatLng> = {};
+          for (const id of Object.keys(prev)) {
+            if (allowedIds.has(id)) base[id] = prev[id];
+          }
+          return { ...base, ...newCoords };
+        });
       }
     };
 
     geocodeAll();
     return () => { cancelled = true; };
-    // Only re-geocode when the property list itself changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoaded, properties, geocodeProperty]);
+  }, [isLoaded, propertyListFingerprint, geocodeProperty]);
 
-  // Fit bounds when coords change
+  // Fit bounds when coords change (skip if camera already fitted to this set — avoids jumps on re-render)
   useEffect(() => {
     if (!mapRef.current) return;
-    const entries = Object.values(coords);
-    if (entries.length === 0) return;
+    const ids = Object.keys(coords).sort();
+    if (ids.length === 0) return;
+
+    const signature = ids
+      .map((id) => {
+        const c = coords[id];
+        return `${id}:${c.lat.toFixed(6)},${c.lng.toFixed(6)}`;
+      })
+      .join('|');
+    if (signature === lastFitSignatureRef.current) return;
+    lastFitSignatureRef.current = signature;
+
+    const entries = ids.map((id) => coords[id]);
 
     if (entries.length === 1) {
       mapRef.current.panTo(entries[0]);

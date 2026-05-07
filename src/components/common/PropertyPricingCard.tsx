@@ -107,22 +107,7 @@ export default function PropertyPricingCard({
 
           {/* Action Buttons */}
           <div className="space-y-3 pt-4">
-            {isAdminListing ? (
-              <>
-                <p className="text-xs text-gray-600 mb-2">
-                  {isAuthenticated
-                    ? 'Contact our team to transfer this listing to your account.'
-                    : 'Create an account or sign in so we can transfer this listing to you.'}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onRequestClaimListing?.()}
-                  className="w-full btn-primary py-3 px-4 font-medium text-sm"
-                >
-                  Request to Claim Listing
-                </button>
-              </>
-            ) : isOwner ? (
+            {isOwner ? (
               <button
                 onClick={onEditListing}
                 className="w-full btn-secondary py-3 px-4 font-medium text-sm"
@@ -130,26 +115,60 @@ export default function PropertyPricingCard({
                 Edit Your Listing
               </button>
             ) : !isAuthenticated ? (
-              <button
-                onClick={() => router.push('/auth/signin')}
-                className="w-full btn-primary py-3 px-4 font-medium text-sm"
-              >
-                Sign In to Make an Offer
-              </button>
+              <>
+                {isAdminListing ? (
+                  <p className="text-xs text-gray-600 mb-2">
+                    Sign in to submit a rental offer to Dropiti or to request transferring this listing to your account.
+                  </p>
+                ) : null}
+                <button
+                  onClick={() => router.push('/auth/signin')}
+                  className="w-full btn-primary py-3 px-4 font-medium text-sm"
+                >
+                  {isAdminListing ? 'Sign In' : 'Sign In to Make an Offer'}
+                </button>
+              </>
             ) : hasExistingOffer ? (
-              <button
-                disabled
-                className="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-medium text-sm cursor-not-allowed opacity-75"
-              >
-                Offer Made
-              </button>
+              <>
+                <button
+                  disabled
+                  className="w-full bg-gray-400 text-white py-3 px-4 rounded-lg font-medium text-sm cursor-not-allowed opacity-75"
+                >
+                  Offer Made
+                </button>
+                {isAdminListing ? (
+                  <button
+                    type="button"
+                    onClick={() => onRequestClaimListing?.()}
+                    className="w-full btn-secondary py-3 px-4 font-medium text-sm"
+                  >
+                    Request to Claim Listing
+                  </button>
+                ) : null}
+              </>
             ) : (
-              <button
-                onClick={onCreateOffer}
-                className="w-full btn-primary py-3 px-4 font-medium text-sm"
-              >
-                Create Offer
-              </button>
+              <>
+                {isAdminListing ? (
+                  <p className="text-xs text-gray-600 mb-2">
+                    Your offer goes to Dropiti for this listing. You can also request to move the listing to your landlord account.
+                  </p>
+                ) : null}
+                <button
+                  onClick={onCreateOffer}
+                  className="w-full btn-primary py-3 px-4 font-medium text-sm"
+                >
+                  Create Offer
+                </button>
+                {isAdminListing ? (
+                  <button
+                    type="button"
+                    onClick={() => onRequestClaimListing?.()}
+                    className="w-full btn-secondary py-3 px-4 font-medium text-sm"
+                  >
+                    Request to Claim Listing
+                  </button>
+                ) : null}
+              </>
             )}
           </div>
 

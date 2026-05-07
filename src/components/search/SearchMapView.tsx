@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Property } from '@/types';
 import PropertyCard from '@/components/PropertyCard';
@@ -36,13 +36,17 @@ export default function SearchMapView({ properties }: SearchMapViewProps) {
     return () => { document.body.style.overflow = prev; };
   }, [isMobile]);
 
-  const mapProperties = properties.map((p) => ({
-    id: p.id,
-    property_uuid: p.property_uuid || p.id,
-    title: p.title,
-    location: p.location,
-    price: p.price,
-  }));
+  const mapProperties = useMemo(
+    () =>
+      properties.map((p) => ({
+        id: p.id,
+        property_uuid: p.property_uuid || p.id,
+        title: p.title,
+        location: p.location,
+        price: p.price,
+      })),
+    [properties],
+  );
 
   const handleMapReady = useCallback((controls: { panTo: (id: string) => void }) => {
     mapControlsRef.current = controls;

@@ -133,7 +133,7 @@ export default function CreateOfferModal({
 
   return (
     <ModalComponent>
-      <div className="bg-white overflow-hidden">
+      <div className="bg-white">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900 mb-0">

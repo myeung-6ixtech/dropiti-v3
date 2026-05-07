@@ -2608,8 +2608,8 @@
 .mobile-bottom-nav-container {
   @apply fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200;
   @apply md:hidden; /* Only show on mobile */
-  /* Safe area for devices with home indicator */
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Safe area + extra inset so the bar sits slightly above the screen edge (PWA / mobile) */
+  padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
 }
 
 .mobile-bottom-nav-content {

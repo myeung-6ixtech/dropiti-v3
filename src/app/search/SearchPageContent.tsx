@@ -265,6 +265,17 @@ export default function SearchPageContent() {
   return (
     <div className="min-h-screen bg-white">
       <div className={isMapMode ? 'w-full px-0 lg:px-4 py-0 lg:py-4' : 'max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 py-8'}>
+        {/* Map / list mode — top of page (not floating) */}
+        <div
+          className={
+            isMapMode
+              ? 'px-4 pt-3 pb-3 border-b border-gray-100 bg-white lg:border-b-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:pb-4'
+              : 'mb-5'
+          }
+        >
+          <ViewModeToggle viewMode={viewMode} onToggle={setViewMode} />
+        </div>
+
         {/* Filter Tags — hidden on mobile in map mode */}
         <div className={isMapMode ? 'hidden lg:block' : ''}>
           <FilterTags
@@ -444,9 +455,6 @@ export default function SearchPageContent() {
           </div>
         </div>
       </div>
-
-      {/* View Mode Toggle Pill */}
-      <ViewModeToggle viewMode={viewMode} onToggle={setViewMode} />
 
       {/* ModernFilter Overlay - Doesn't affect main layout */}
       <ModernFilter

@@ -47,44 +47,54 @@ const Modal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const contentClasses = isFullscreen
-    ? "w-full h-full"
-    : "relative w-full rounded-3xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden";
+  if (isFullscreen) {
+    return (
+      <div className="fixed inset-0 z-[99999] flex items-center justify-center modal">
+        <div
+          ref={modalRef}
+          tabIndex={-1}
+          className={`w-full h-full ${className ?? ""}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center overflow-y-auto modal z-99999">
-      {!isFullscreen && (
-        <div
-          className="fixed inset-0 h-full w-full bg-transparent"
-          onClick={onClose}
-        ></div>
-      )}
+    <div className="fixed inset-0 z-[99999] flex items-center justify-center overflow-y-auto overflow-x-hidden py-10 px-4 sm:px-6 modal">
+      {/* Backdrop */}
       <div
-        ref={modalRef}
-        className={`${contentClasses} ${className}`}
+        className="fixed inset-0 z-0 bg-black/30"
+        onClick={onClose}
+        aria-hidden
+      />
+
+      {/*
+        Two-layer card:
+          outer – carries the drop-shadow so it's never clipped
+          inner – carries bg + overflow-hidden + rounded corners
+        This keeps the shadow visible outside the card at all times.
+      */}
+      <div
+        className={`relative z-10 w-full rounded-3xl shadow-[0_8px_40px_-4px_rgba(0,0,0,0.18),0_2px_12px_-2px_rgba(0,0,0,0.10)] ${className ?? ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {isFullscreen ? (
-          <div>{children}</div>
-        ) : (
-          <div className="relative flex max-h-[min(85dvh,900px)] flex-col">
-            <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
-              <div>{children}</div>
-            </div>
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-10 bg-gradient-to-b from-white to-transparent dark:from-gray-900"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-10 bg-gradient-to-t from-white to-transparent dark:from-gray-900"
-            />
+        <div
+          ref={modalRef}
+          tabIndex={-1}
+          className="relative flex max-h-[min(85dvh,900px)] flex-col overflow-hidden rounded-3xl bg-white dark:bg-gray-900"
+        >
+          <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain">
+            {children}
           </div>
-        )}
+        </div>
+
         {showCloseButton && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 transition-colors"
             aria-label="Close modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

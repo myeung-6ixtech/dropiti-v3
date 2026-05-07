@@ -16,6 +16,21 @@ function getInstance(): WebHaptics | null {
   return sharedInstance;
 }
 
+function vibrateFallback(preset: HapticPreset) {
+  if (typeof navigator === 'undefined' || typeof navigator.vibrate !== 'function') return;
+  const ms =
+    preset === 'heavy' || preset === 'error'
+      ? 28
+      : preset === 'medium' || preset === 'warning'
+        ? 18
+        : 12;
+  try {
+    navigator.vibrate(ms);
+  } catch {
+    // ignore
+  }
+}
+
 export function useHaptic() {
   const lastTriggerRef = useRef(0);
 
@@ -25,10 +40,16 @@ export function useHaptic() {
     lastTriggerRef.current = now;
 
     try {
-      getInstance()?.trigger(preset);
+      const haptics = getInstance();
+      if (haptics) {
+        haptics.trigger(preset);
+        return;
+      }
     } catch {
-      // Silently fail on unsupported devices
+      // Fall through to Vibration API
     }
+
+    vibrateFallback(preset);
   }, []);
 
   return { tap };
@@ -36,8 +57,13 @@ export function useHaptic() {
 
 export function triggerHaptic(preset: HapticPreset = 'light') {
   try {
-    getInstance()?.trigger(preset);
+    const haptics = getInstance();
+    if (haptics) {
+      haptics.trigger(preset);
+      return;
+    }
   } catch {
-    // Silently fail
+    // Fall through
   }
+  vibrateFallback(preset);
 }

@@ -35,7 +35,7 @@ export default function PropertyShareCard({
   };
 
 
-  const propertyId = property.id || property.property_uuid;
+  const propertyId = (property.property_uuid as string | undefined) || (property.id as string | undefined);
   // Try multiple image sources in order of preference
   const propertyImage = property.image_url || 
                        property.imageUrl || 

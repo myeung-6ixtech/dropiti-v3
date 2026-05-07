@@ -120,7 +120,7 @@ export default function RootLayout({
             <PWAInstallBanner />
             <div className="min-h-screen flex flex-col bg-white">
               <Navigation />
-              <main className="flex-1 pb-16 md:pb-0">
+              <main className="flex-1 pb-[calc(4rem+10px+env(safe-area-inset-bottom,0px))] md:pb-0">
                 {children}
               </main>
               <MobileBottomNav />

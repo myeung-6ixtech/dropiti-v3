@@ -178,9 +178,9 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
       const messageContent = customMessage || `Check out this property: ${property.title}`;
       
       await sendRealTimeMessage(messageContent, 'property_share', {
-        property_uuid: property.id || property.property_uuid,
+        property_uuid: property.property_uuid || property.id,
         property_data: {
-          id: property.id || property.property_uuid,
+          id: property.property_uuid || property.id,
           property_uuid: property.property_uuid || property.id,
           title: property.title,
           price: property.price,

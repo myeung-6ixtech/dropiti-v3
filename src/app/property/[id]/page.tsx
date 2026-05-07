@@ -239,17 +239,22 @@ export default function PropertyDetailPage() {
         return;
       }
 
-      // Check if we have property and landlord data
-      if (!propertyData?.property?.property_uuid || !propertyData?.landlord?.nhost_user_id) {
-        alert('Unable to create offer: Missing property or landlord information');
+      if (!propertyData) {
+        alert('Unable to create offer: Property data is not loaded');
+        return;
+      }
+      const recipientUserId =
+        propertyData.landlord?.nhost_user_id || propertyData.property.owner_id;
+      if (!propertyData.property.property_uuid || !recipientUserId) {
+        alert('Unable to create offer: Missing property or recipient information');
         return;
       }
 
-      // Call the create-offer API
+      // Call the create-offer API (admin listings: recipient is the admin owner on the listing)
       const response = await offersAPI.createOffer({
         propertyId: propertyData.property.property_uuid,
         initiatorUserId: authUser.id,
-        recipientUserId: propertyData.landlord?.nhost_user_id || '',
+        recipientUserId,
         proposingRentPrice: offerData.rentalPrice,
         numLeasingMonths: offerData.leaseDuration,
         paymentFrequency: offerData.paymentFrequency,
@@ -458,7 +463,7 @@ export default function PropertyDetailPage() {
         onClose={() => setIsCreateOfferModalOpen(false)}
         propertyId={property.property_uuid}
         currentPrice={property.price}
-        recipientUserId={landlord?.nhost_user_id}
+        recipientUserId={landlord?.nhost_user_id || property.owner_id}
         onOfferSubmit={handleOfferSubmit}
       />
 

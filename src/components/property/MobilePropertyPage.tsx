@@ -217,13 +217,13 @@ export default function MobilePropertyPage({
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-base font-semibold text-gray-900">
-                {isAdminListing ? 'Request to Claim Listing' : 'Make an Offer'}
+                {isAdminListing ? 'Make an offer or claim' : 'Make an Offer'}
               </h3>
               <p className="text-xs text-gray-600">
                 {isAdminListing
                   ? isAuthenticated
-                    ? 'Contact our team to transfer this listing to your account.'
-                    : 'Create an account or sign in so we can transfer this listing to you. Our team will reach out after you request.'
+                    ? 'Submit a rental offer to Dropiti, or request to transfer this listing to your landlord account.'
+                    : 'Sign in to send an offer to Dropiti or to request claiming this listing for your account.'
                   : 'Start your rental journey'}
               </p>
             </div>
@@ -233,46 +233,56 @@ export default function MobilePropertyPage({
             </div>
           </div>
 
-          {isAdminListing ? (
+          {isOwner ? (
             <button
-              type="button"
-              onClick={() => onRequestClaimListing?.()}
+              onClick={() => router.push(`/dashboard/properties/edit/${property.property_uuid || 'unknown'}`)}
+              className="btn-secondary w-full py-4 rounded-xl font-semibold text-base hover:bg-gray-100 transition-colors"
+            >
+              Edit Your Listing
+            </button>
+          ) : !isAuthenticated ? (
+            <button
+              onClick={() => router.push('/auth/signin')}
               className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
             >
-              Request to Claim Listing
+              {isAdminListing ? 'Sign In' : 'Sign In to Make an Offer'}
             </button>
-          ) : (
-            <>
-              {isOwner ? (
+          ) : hasExistingOffer ? (
+            <div className="space-y-3">
+              <button
+                disabled
+                className="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-base cursor-not-allowed opacity-75"
+              >
+                Offer Made
+              </button>
+              {isAdminListing ? (
                 <button
-                  onClick={() => router.push(`/dashboard/properties/edit/${property.property_uuid || 'unknown'}`)}
+                  type="button"
+                  onClick={() => onRequestClaimListing?.()}
                   className="btn-secondary w-full py-4 rounded-xl font-semibold text-base hover:bg-gray-100 transition-colors"
                 >
-                  Edit Your Listing
+                  Request to Claim Listing
                 </button>
-              ) : !isAuthenticated ? (
+              ) : null}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <button
+                onClick={handleCreateOffer}
+                className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
+              >
+                Create Offer
+              </button>
+              {isAdminListing ? (
                 <button
-                  onClick={() => router.push('/auth/signin')}
-                  className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
+                  type="button"
+                  onClick={() => onRequestClaimListing?.()}
+                  className="btn-secondary w-full py-4 rounded-xl font-semibold text-base hover:bg-gray-100 transition-colors"
                 >
-                  Sign In to Make an Offer
+                  Request to Claim Listing
                 </button>
-              ) : hasExistingOffer ? (
-                <button
-                  disabled
-                  className="w-full bg-gray-400 text-white py-4 rounded-xl font-semibold text-base cursor-not-allowed opacity-75"
-                >
-                  Offer Made
-                </button>
-              ) : (
-                <button
-                  onClick={handleCreateOffer}
-                  className="btn-primary w-full bg-black text-white py-4 rounded-xl font-semibold text-base hover:bg-gray-800 transition-colors"
-                >
-                  Create Offer
-                </button>
-              )}
-            </>
+              ) : null}
+            </div>
           )}
 
           <div className="mt-4 text-center">
