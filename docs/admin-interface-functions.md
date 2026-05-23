@@ -2342,3 +2342,775 @@ CREATE TABLE admin_audit_logs (
 
 For implementation questions or API integration support, contact the Platform Team or refer to the main [API Guide](/documentation/api-guide.md).
 
+---
+
+## Admin Offer Inbox & Outreach
+
+### Overview
+
+When a user creates an offer on an admin-managed listing (a property where `landlord_role = 'admin'`), there is no real landlord account receiving the standard P2P notification. The Admin Offer Inbox bridges this gap: it surfaces every incoming offer across all admin-owned listings so the admin can review it and then manually route the enquiry to the real-world contact for that property — typically an external agent or landlord — via WhatsApp (Phase 1) or Facebook Messenger DM (Phase 2).
+
+This feature does **not** change the offer lifecycle from the tenant's perspective. The tenant still creates, counters, and tracks offers through the normal flow. The admin is purely an observer and outreach facilitator.
+
+---
+
+### Prerequisites
+
+#### 1. `external_contact` column on `property_listing`
+
+The property listing table must carry a phone number for the real-world point of contact. If the column does not exist yet, add it via a Hasura migration:
+
+```sql
+-- migration: add_external_contact_to_property_listing.sql
+ALTER TABLE real_estate.property_listing
+  ADD COLUMN IF NOT EXISTS external_contact TEXT;
+
+COMMENT ON COLUMN real_estate.property_listing.external_contact IS
+  'E.164 phone number (digits only, no + prefix) for the external agent or landlord. Used by admin for WhatsApp outreach.';
+```
+
+Expose the column in Hasura (track the column, update permissions so only `admin` role can write it, all roles can read it on their own listing).
+
+#### 2. Admin authentication guard
+
+All admin offer inbox pages and API routes must check that the requesting user has `role = 'admin'` (or `Super Admin` in the permission matrix). Reject with `403` otherwise.
+
+---
+
+### Architecture
+
+```
+[Admin Portal UI]
+  └─ /admin/offers/incoming
+       ├─ AdminIncomingOffersPage          (Next.js page, server-authenticated)
+       │    └─ AdminIncomingOffers         (client component, mirrors IncomingOffers)
+       │         └─ AdminOfferCard         (extends OfferCard + outreach action strip)
+       │              ├─ WhatsAppOutreach  (Method 1 — Phase 1)
+       │              └─ FacebookOutreach  (Method 2 — Phase 2, placeholder)
+       └─ /api/v1/admin/offers/incoming    (REST endpoint, Hasura query)
+```
+
+---
+
+### API Route
+
+#### `GET /api/v1/admin/offers/incoming`
+
+Fetches all `real_estate_offer` rows where the related `property_listing.landlord_role = 'admin'`, joining `external_contact` from the listing so the UI can construct outreach URLs without a second round-trip.
+
+**Query parameters**
+
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| `status` | `OfferStatus` | _(all)_ | Filter by offer status |
+| `propertyUuid` | `string` | _(all)_ | Filter to a single property |
+| `limit` | `number` | `50` | Page size |
+| `offset` | `number` | `0` | Pagination offset |
+
+**Hasura GraphQL query (server-side)**
+
+```graphql
+query AdminIncomingOffers(
+  $where: real_estate_offer_bool_exp
+  $limit: Int
+  $offset: Int
+) {
+  real_estate_offer(
+    where: $where
+    order_by: { created_at: desc }
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    offer_uuid
+    offer_key
+    property_uuid
+    initiator_user_id
+    recipient_user_id
+    proposing_rent_price
+    proposing_rent_price_currency
+    num_leasing_months
+    payment_frequency
+    move_in_date
+    offer_status
+    is_active
+    negotiation_round
+    last_action_by
+    last_action_at
+    last_action_type
+    created_at
+    updated_at
+    # Tenant (initiator) identity
+    initiator {
+      uuid
+      display_name
+      email
+      photo_url
+      whatsapp_number
+    }
+    # Property + external contact for outreach
+    property_listing {
+      property_uuid
+      title
+      location
+      price
+      external_contact       # E.164 digits for WhatsApp
+    }
+  }
+  real_estate_offer_aggregate(where: $where) {
+    aggregate { count }
+  }
+}
+```
+
+**`$where` variable construction (server)**
+
+```typescript
+const where: Record<string, unknown> = {
+  property_listing: { landlord_role: { _eq: 'admin' } },
+  is_active: { _eq: true },
+};
+if (status)       where.offer_status   = { _eq: status };
+if (propertyUuid) where.property_uuid  = { _eq: propertyUuid };
+```
+
+**Response shape**
+
+```typescript
+{
+  success: true,
+  data: AdminOffer[],   // see type extension below
+  total: number,
+  message: string
+}
+```
+
+**Route file:** `src/app/api/v1/admin/offers/incoming/route.ts`
+
+---
+
+### Type Extension
+
+Extend the base `Offer` type with the admin-specific fields:
+
+```typescript
+// src/types/offer.ts  (append to existing file)
+
+export interface AdminOffer extends Offer {
+  /** External real-world contact number (E.164 digits, no +) for the property. */
+  externalContact?: string;
+}
+```
+
+---
+
+### Outreach Utility
+
+Add a dedicated utility that mirrors the existing `claimListingContact.ts` pattern:
+
+**File:** `src/lib/adminOfferOutreach.ts`
+
+```typescript
+/**
+ * Builds a pre-filled WhatsApp wa.me URL addressed to the external contact
+ * for a given property, summarising the tenant's offer terms so the admin
+ * can forward the lead with a single tap.
+ *
+ * @param externalContact - E.164 phone digits (no + prefix), e.g. "60123456789"
+ * @param offer           - AdminOffer object from the admin inbox API
+ * @returns wa.me URL string, or null if externalContact is missing
+ */
+export function buildAdminOfferWhatsAppUrl(
+  externalContact: string | null | undefined,
+  offer: {
+    property: { title: string; location: string };
+    initiator?: { displayName: string; email: string };
+    proposingRentPrice: number;
+    proposingRentPriceCurrency: string;
+    numLeasingMonths: number;
+    paymentFrequency: string;
+    moveInDate: string;
+    offerKey: string;
+  }
+): string | null {
+  const digits = externalContact?.replace(/\D/g, '');
+  if (!digits) return null;
+
+  const tenantName   = offer.initiator?.displayName ?? 'A potential tenant';
+  const tenantEmail  = offer.initiator?.email        ?? 'unknown';
+  const price        = `${offer.proposingRentPriceCurrency} ${offer.proposingRentPrice.toLocaleString()}`;
+  const frequency    = offer.paymentFrequency;
+  const duration     = `${offer.numLeasingMonths} month${offer.numLeasingMonths !== 1 ? 's' : ''}`;
+  const moveIn       = new Date(offer.moveInDate).toLocaleDateString('en-MY', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  });
+
+  const body = `Hi, I'm reaching out on behalf of Dropiti regarding your listing.
+
+*Property:* ${offer.property.title} (${offer.property.location})
+*Offer ref:* ${offer.offerKey}
+
+A tenant is interested and has submitted the following offer:
+• Proposed rent: ${price} / ${frequency}
+• Lease duration: ${duration}
+• Move-in date: ${moveIn}
+• Tenant contact: ${tenantName} (${tenantEmail})
+
+Please let us know if you'd like to proceed or have any questions.
+
+— Dropiti Admin`;
+
+  return `https://wa.me/${digits}?text=${encodeURIComponent(body)}`;
+}
+
+/**
+ * Phase 2 placeholder — Facebook Messenger DM deep link.
+ * Replace `pageId` with the Facebook Page ID of the external contact
+ * once the Page-to-Page or Page-to-User messaging flow is configured.
+ */
+export function buildAdminOfferFacebookUrl(
+  pageId: string | null | undefined
+): string | null {
+  if (!pageId) return null;
+  return `https://m.me/${pageId}`;
+}
+```
+
+---
+
+### UI Components
+
+#### `AdminIncomingOffers` (client component)
+
+**File:** `src/components/admin/AdminIncomingOffers.tsx`
+
+Mirrors the existing `IncomingOffers` component but:
+- Calls `GET /api/v1/admin/offers/incoming` instead of `offersAPI.getOffersByRecipient`
+- Passes the resolved `externalContact` field down to each card
+- Does **not** show accept/reject/counter actions (admin is an observer, not a party)
+- Adds a new `OutreachActions` strip at the bottom of each card
+
+```typescript
+interface AdminIncomingOffersProps {
+  propertyUuid?: string;   // Optional: scope to one listing
+  statusFilter?: OfferStatus;
+}
+```
+
+#### `AdminOfferCard` (client component)
+
+**File:** `src/components/admin/AdminOfferCard.tsx`
+
+Wraps the existing `OfferCard` display (read-only, `isIncomingOffer={false}`, hide action buttons) and appends an `OutreachActions` strip:
+
+```typescript
+interface AdminOfferCardProps {
+  offer: AdminOffer;
+}
+```
+
+#### `OutreachActions` (sub-component, inline in AdminOfferCard)
+
+Renders two buttons:
+
+| Button | Phase | Behaviour |
+|--------|-------|-----------|
+| **WhatsApp** | 1 (now) | Opens `buildAdminOfferWhatsAppUrl(offer.externalContact, offer)` in a new tab. Disabled with tooltip "No external contact set" if `externalContact` is empty. |
+| **Facebook DM** | 2 (next) | Renders as disabled with badge "Coming soon". |
+
+```typescript
+// Simplified render sketch
+function OutreachActions({ offer }: { offer: AdminOffer }) {
+  const waUrl = buildAdminOfferWhatsAppUrl(offer.externalContact, {
+    property:    offer.property!,
+    initiator:   offer.initiator,
+    proposingRentPrice:         offer.proposingRentPrice,
+    proposingRentPriceCurrency: offer.proposingRentPriceCurrency,
+    numLeasingMonths:           offer.numLeasingMonths,
+    paymentFrequency:           offer.paymentFrequency,
+    moveInDate:                 offer.moveInDate,
+    offerKey:                   offer.offerKey,
+  });
+
+  return (
+    <div className="flex gap-3 pt-3 border-t border-gray-100 mt-3">
+      {/* Method 1 — WhatsApp */}
+      <a
+        href={waUrl ?? '#'}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-disabled={!waUrl}
+        className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+          ${waUrl
+            ? 'bg-green-500 text-white hover:bg-green-600'
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed pointer-events-none'
+          }`}
+        title={!waUrl ? 'No external contact set for this listing' : 'Send WhatsApp to external contact'}
+        onClick={e => { if (!waUrl) e.preventDefault(); }}
+      >
+        {/* WhatsApp SVG icon */}
+        <WhatsAppIcon className="w-4 h-4" />
+        Contact via WhatsApp
+      </a>
+
+      {/* Method 2 — Facebook DM (Phase 2 placeholder) */}
+      <button
+        disabled
+        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
+        title="Facebook DM outreach — coming soon"
+      >
+        {/* Facebook SVG icon */}
+        <FacebookIcon className="w-4 h-4" />
+        Facebook DM
+        <span className="ml-1 text-xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full">Soon</span>
+      </button>
+    </div>
+  );
+}
+```
+
+---
+
+### Page Route
+
+**File:** `src/app/admin/offers/incoming/page.tsx`
+
+```
+Route: /admin/offers/incoming
+Auth:  Admin role required (server-side guard)
+```
+
+The page:
+1. Verifies the session has `role = 'admin'`; redirects to `/` if not
+2. Renders `AdminIncomingOffers` with optional `propertyUuid` / `status` query-param filters
+3. Includes a filter bar (status dropdown, property UUID search) and a summary count badge
+
+---
+
+### Dashboard Navigation Hook
+
+Add a nav link in the admin dashboard sidebar (or wherever the admin navigation lives) pointing to `/admin/offers/incoming` with a live unread count badge — the count being the number of offers with `offer_status = 'pending'` across all admin listings.
+
+Fetch the badge count client-side from a lightweight endpoint:
+
+```
+GET /api/v1/admin/offers/incoming?status=pending&limit=0
+// Returns { total: N } — use `total` for the badge
+```
+
+---
+
+### `external_contact` Admin UI
+
+To let the admin set or update the `external_contact` field on any listing without leaving the portal, add an editable field to the existing property management detail page (`/admin/properties/[uuid]`):
+
+- Input type: `tel`, placeholder `+60 12-345 6789`
+- Strip non-digits before saving (`value.replace(/\D/g, '')`)
+- Save via `PATCH /api/v1/admin/properties/:uuid` (or a new dedicated route `PUT /api/v1/admin/properties/:uuid/external-contact`)
+- Show a live preview of the WhatsApp URL as a test link below the input
+
+---
+
+### Data Flow Summary
+
+```
+1. Tenant views admin listing → creates offer (standard flow, no change)
+2. Offer stored in real_estate_offer with admin user as recipient_user_id
+3. Admin navigates to /admin/offers/incoming
+4. Page calls GET /api/v1/admin/offers/incoming
+   └─ Hasura query joins property_listing.external_contact
+5. AdminOfferCard renders offer details (read-only)
+6. Admin clicks "Contact via WhatsApp"
+   └─ buildAdminOfferWhatsAppUrl() generates pre-filled wa.me link
+   └─ Opens WhatsApp Web / mobile app addressed to external_contact
+   └─ Admin reviews the pre-drafted message and hits Send
+7. (Phase 2) Admin clicks "Facebook DM" → routes to Messenger thread
+```
+
+---
+
+### Phase Roadmap
+
+| Phase | Feature | Status |
+|-------|---------|--------|
+| 1 | Database: `external_contact` column + migration | Required before UI work |
+| 1 | `GET /api/v1/admin/offers/incoming` API route | Required before UI work |
+| 1 | `AdminIncomingOffers` + `AdminOfferCard` UI | Core deliverable |
+| 1 | WhatsApp outreach (`buildAdminOfferWhatsAppUrl`) | Core deliverable |
+| 1 | `external_contact` editable field in property admin UI | QoL for admin operators |
+| 1 | Pending offers badge in admin nav | QoL for admin operators |
+| 2 | Facebook Messenger DM outreach | Next phase |
+| 2 | Outreach audit log (record which admin sent a WhatsApp, when) | Compliance |
+| 2 | Outreach deduplication (warn admin if external contact was pinged recently) | UX improvement |
+
+---
+
+### Security & Permissions
+
+- All `/api/v1/admin/offers/*` routes **must** validate `role = 'admin'` server-side via the Firebase token claim or Hasura session variable — never trust the client.
+- `external_contact` must be writable only by `admin` role in Hasura permissions.
+- WhatsApp links are generated entirely client-side (wa.me redirects); no credentials are needed and no server-side WhatsApp Business API call is made in Phase 1. This keeps the implementation dependency-free and avoids per-message API costs until volume justifies it.
+- In Phase 2, Facebook Messenger DM will require a Facebook App + Page token and must go through a server-side route to protect the access token.
+
+---
+
+## Transfer Ownership Invitation
+
+### Overview
+
+When an admin spots an incoming offer on an admin-managed listing and wants to route the lead to the real-world landlord or agent, they trigger a **Transfer Ownership Invitation**. The system:
+
+1. Creates a time-limited token in the `property_transfer_invitation` table
+2. Dispatches a WhatsApp message (server-side, via `WhatsAppService`) to the `external_contact` number on file for the listing
+3. The message contains a unique link: `/transfer-ownership/<token_uuid>`
+4. The recipient opens the link, registers/logs in on Dropiti, and clicks **Claim This Property**
+5. The system transfers the listing's ownership (updates `landlord_firebase_uid`) to the new user and marks the token as used
+
+If the token expires before it is claimed (default: 7 days), the admin can resend with a fresh token.
+
+---
+
+### Database
+
+**Migration file:** `documentation/database/add-property-transfer-invitation.sql`
+
+This migration:
+- Adds `external_contact TEXT` to `real_estate.property_listing`
+- Creates `real_estate.property_transfer_invitation`
+
+```sql
+CREATE TABLE real_estate.property_transfer_invitation (
+    id                    SERIAL PRIMARY KEY,
+    token_uuid            UUID        UNIQUE NOT NULL DEFAULT gen_random_uuid(),
+    property_uuid         UUID        NOT NULL REFERENCES real_estate.property_listing(property_uuid) ON DELETE CASCADE,
+    external_contact      TEXT        NOT NULL,
+    sent_by_admin_id      TEXT        NOT NULL,
+    offer_id              TEXT,
+    status                TEXT        NOT NULL CHECK (status IN ('pending','used','expired','cancelled')) DEFAULT 'pending',
+    expires_at            TIMESTAMPTZ NOT NULL DEFAULT (NOW() + INTERVAL '7 days'),
+    created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    used_at               TIMESTAMPTZ,
+    claimed_by_user_id    TEXT,
+    whatsapp_message_id   TEXT,
+    resend_count          INTEGER     NOT NULL DEFAULT 0
+);
+```
+
+**Token lifecycle:**
+
+```
+pending → used       (claimed by new owner)
+pending → expired    (expires_at passed, auto-resolved on validate)
+pending → cancelled  (admin sends a new invite / resend; old one cancelled first)
+expired → cancelled  (resend also cancels expired tokens)
+```
+
+**Hasura permissions:**
+- `admin` role: full CRUD on `property_transfer_invitation`; write `external_contact` on `property_listing`
+- `user` role: read own rows (`claimed_by_user_id = X-Hasura-User-Id`)
+- `public`: no direct table access (validated via Next.js API routes only)
+
+---
+
+### WhatsApp Service Layer
+
+**File:** `src/lib/whatsappService.ts`
+
+Provider-agnostic interface. The active implementation is set by `WHATSAPP_PROVIDER` env var:
+
+| `WHATSAPP_PROVIDER` | Behaviour |
+|---------------------|-----------|
+| `stub` (default)    | Logs to console, returns fake message ID — safe for development |
+| `meta`              | Uses Meta Cloud API (uncomment `WhatsAppMetaProvider` class, set `WHATSAPP_API_TOKEN` + `WHATSAPP_PHONE_NUMBER_ID`) |
+| `twilio`            | Twilio WhatsApp Business (add `WhatsAppTwilioProvider` class) |
+
+**Required env vars (add to `.env.local` / Vercel):**
+
+```
+WHATSAPP_PROVIDER=stub
+WHATSAPP_API_TOKEN=          # provider access token (when not using stub)
+WHATSAPP_PHONE_NUMBER_ID=    # Meta Cloud API phone number ID
+```
+
+**High-level helper:**
+
+```typescript
+import { sendOwnershipInvitation } from '@/lib/whatsappService';
+
+const result = await sendOwnershipInvitation(externalContact, {
+  propertyTitle: 'Seaview Apartment 3B',
+  invitationUrl: 'https://dropiti.com/transfer-ownership/<token>',
+  expiryDays: 7,
+});
+// result: { success: boolean, messageId?: string, error?: string }
+```
+
+**Template name (register in Meta Business Manager / Twilio console):**
+`property_ownership_invitation`
+
+Example body:
+> Hi, your property *{{1}}* has received a rental enquiry on Dropiti. Register or log in to claim your listing and manage this lead: {{2}}. This invitation expires in {{3}} days.
+
+---
+
+### API Routes
+
+All routes follow the existing `src/app/api/v1/` Next.js route handler pattern.
+
+#### `POST /api/v1/admin/transfer-ownership/invite`
+**File:** `src/app/api/v1/admin/transfer-ownership/invite/route.ts`
+**Auth:** Admin only
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `propertyUuid` | `string` | Yes | UUID of the property |
+| `externalContact` | `string` | No | Override phone number (falls back to `property_listing.external_contact`) |
+| `offerId` | `string` | No | Offer that triggered the invite (for audit trail) |
+
+Response:
+```json
+{
+  "success": true,
+  "data": {
+    "invitationId": 1,
+    "tokenUuid": "...",
+    "invitationUrl": "https://dropiti.com/transfer-ownership/...",
+    "expiresAt": "2026-05-14T...",
+    "whatsappSent": true,
+    "whatsappError": null
+  }
+}
+```
+
+---
+
+#### `GET /api/v1/transfer-ownership/validate`
+**File:** `src/app/api/v1/transfer-ownership/validate/route.ts`
+**Auth:** Public (no authentication required)
+
+| Param | Description |
+|-------|-------------|
+| `?token=<uuid>` | The `token_uuid` from the invitation URL |
+
+Performs a **live expiry check**: if `expires_at < NOW()` and status is still `pending`, automatically updates status to `expired` in the background before returning.
+
+Response:
+```json
+{
+  "success": true,
+  "status": "valid",
+  "property": {
+    "propertyUuid": "...",
+    "title": "...",
+    "location": "...",
+    "rentalPrice": 8000,
+    "rentalPriceCurrency": "HKD",
+    "propertyType": "apartment",
+    "bedrooms": 2,
+    "bathrooms": 1,
+    "imageUrl": "..."
+  },
+  "expiresAt": "2026-05-14T...",
+  "tokenUuid": "..."
+}
+```
+
+Possible `status` values: `valid` | `expired` | `used` | `cancelled` | `invalid`
+
+---
+
+#### `POST /api/v1/transfer-ownership/claim`
+**File:** `src/app/api/v1/transfer-ownership/claim/route.ts`
+**Auth:** Authenticated Nhost user required
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `token` | `string` | The `token_uuid` from the URL |
+| `userId` | `string` | The authenticated user's Nhost user ID |
+
+Validates the token is `pending` and not expired, then:
+1. Updates `property_listing.landlord_firebase_uid` to `userId`
+2. Sets `invitation.status = 'used'`, `used_at = now()`, `claimed_by_user_id = userId`
+
+Error codes returned in `code` field: `INVITATION_INVALID` | `INVITATION_USED` | `INVITATION_CANCELLED` | `INVITATION_EXPIRED`
+
+---
+
+#### `POST /api/v1/admin/transfer-ownership/resend`
+**File:** `src/app/api/v1/admin/transfer-ownership/resend/route.ts`
+**Auth:** Admin only
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `propertyUuid` | `string` | UUID of the property |
+| `externalContact` | `string` | Optional override phone |
+
+Cancels all existing `pending`/`expired` invitations for the property+contact pair, creates a fresh token, increments `resend_count`, and resends the WhatsApp message.
+
+---
+
+#### `GET /api/v1/admin/transfer-ownership/status`
+**File:** `src/app/api/v1/admin/transfer-ownership/status/route.ts`
+**Auth:** Admin only
+
+| Param | Description |
+|-------|-------------|
+| `?propertyUuid=<uuid>` | Returns the latest invitation for this property |
+
+Used by `AdminOfferCard` to render the correct badge/button. Response includes:
+- `status` — resolved invitation state
+- `daysRemaining` — days until expiry (when pending)
+- `hoursSinceSent` — time since created (guards against spamming resend)
+- `canResend` — `true` when status is `expired` OR (`pending` AND `hoursSinceSent >= 24`)
+
+---
+
+#### `GET /api/v1/admin/offers/incoming`
+**File:** `src/app/api/v1/admin/offers/incoming/route.ts`
+**Auth:** Admin only
+
+Fetches all active offers on admin-managed listings (where `recipient_user_id` is in `DROPITI_PLATFORM_LANDLORD_USER_IDS`), enriched with initiator user info, property details, and `external_contact`.
+
+| Param | Default | Description |
+|-------|---------|-------------|
+| `propertyUuid` | — | Scope to single listing |
+| `status` | — | Filter by `offer_status` |
+| `limit` | `50` | Page size (max 100) |
+| `offset` | `0` | Pagination |
+
+---
+
+### Client Pages & Components
+
+#### `/transfer-ownership/[token]`
+
+**Files:**
+- `src/app/transfer-ownership/[token]/layout.tsx` — minimal layout (no nav/bottom-bar; this page is entered from WhatsApp)
+- `src/app/transfer-ownership/[token]/page.tsx` — full client component
+
+The page validates the token on mount and renders one of these states:
+
+| State | What the user sees |
+|-------|--------------------|
+| `loading` | Spinner while token is validated |
+| `invalid` | "This invitation link is not valid." |
+| `expired` | Property card + "Invitation expired — contact manager" |
+| `used` / `cancelled` | "This property has already been claimed." |
+| `unauthenticated` | Invitation banner + property card + **Create Account** / **Sign In** buttons |
+| `ready_to_claim` | Property card + **Claim This Property** button |
+| `claiming` | Button shows spinner |
+| `claimed` | Success message → auto-redirects to `/dashboard/properties` in 3 s |
+
+Auth redirect loop uses the existing `callbackUrl` param supported by both `signin` and `signup` pages:
+```
+/auth/signup?callbackUrl=/transfer-ownership/<token>
+/auth/signin?callbackUrl=/transfer-ownership/<token>
+```
+
+> **Note:** `src/app/auth/signup/page.tsx` was updated to honour `callbackUrl` on successful registration (previously it always redirected to `/`).
+
+---
+
+#### `AdminIncomingOffers` (client component)
+
+**File:** `src/components/admin/AdminIncomingOffers.tsx`
+
+Drop-in replacement for `IncomingOffers` for admin pages. Calls `GET /api/v1/admin/offers/incoming` and renders a list of `AdminOfferCard` components.
+
+```tsx
+<AdminIncomingOffers
+  propertyUuid="..."    // optional
+  statusFilter="pending" // optional
+  title="Incoming Offers"
+/>
+```
+
+---
+
+#### `AdminOfferCard` (client component)
+
+**File:** `src/components/admin/AdminOfferCard.tsx`
+
+Extends the standard offer card with an **OutreachActions** strip at the bottom. The strip:
+1. Fetches the latest invitation status via `GET /api/v1/admin/transfer-ownership/status?propertyUuid=...` on mount
+2. Renders the appropriate button/badge based on status:
+
+| Invitation status | UI shown |
+|------------------|----------|
+| `none` | **Send Ownership Invitation** (green, disabled if no `external_contact`) |
+| `pending_fresh` (<24h old) | Blue badge "Invitation Sent — N days remaining" |
+| `pending_stale` (≥24h old) | Badge + **Resend** button |
+| `expired` | **Resend Invitation (Expired)** button (orange) |
+| `claimed` | Green badge "Listing Claimed" |
+
+The card also shows a Facebook DM button (disabled, "Soon" badge — Phase 2).
+
+---
+
+### Token Expiry Strategy
+
+- **Default expiry:** 7 days (`INVITATION_EXPIRY_DAYS` constant in `src/lib/whatsappService.ts`)
+- **Live check:** The `validate` route always compares `expires_at` to `NOW()` and auto-marks as `expired` — no cron needed for correctness
+- **Optional Hasura scheduled event** (for reporting accuracy):
+  ```sql
+  UPDATE real_estate.property_transfer_invitation
+  SET status = 'expired'
+  WHERE status = 'pending' AND expires_at < NOW();
+  ```
+- **Resend guard:** `canResend` is only `true` when the previous invite is either `expired` or older than 24 hours, preventing accidental spam
+
+---
+
+### Data Flow Summary
+
+```
+1. Tenant submits offer on admin listing (standard offer flow, no change)
+2. Admin opens /admin/offers/incoming → AdminIncomingOffers → AdminOfferCard
+3. AdminOfferCard fetches invitation status (none → badge is empty)
+4. Admin clicks "Send Ownership Invitation"
+   └─ POST /api/v1/admin/transfer-ownership/invite
+      ├─ Inserts property_transfer_invitation row (token_uuid, expires_at)
+      └─ WhatsAppService.sendOwnershipInvitation(external_contact, url)
+5. External contact receives WhatsApp → opens /transfer-ownership/<token>
+6. Validate route confirms token is valid, returns property details
+7a. If not authenticated → /auth/signup?callbackUrl=/transfer-ownership/<token>
+    → User registers → redirected back to /transfer-ownership/<token>
+7b. If already authenticated → skip to step 8
+8. User clicks "Claim This Property"
+   └─ POST /api/v1/transfer-ownership/claim { token, userId }
+      ├─ Validates token (pending + not expired)
+      ├─ Updates property_listing.landlord_firebase_uid = userId
+      └─ Marks invitation status = 'used'
+9. Page shows success → redirects to /dashboard/properties
+10. AdminOfferCard refreshes invitation status → shows "Listing Claimed" badge
+```
+
+---
+
+### Security Notes
+
+- `POST /api/v1/admin/transfer-ownership/*` routes must validate admin role server-side (Nhost JWT + Hasura session variable or header check). Add the `x-admin-user-id` header validation in a shared middleware once the admin auth layer is implemented.
+- The `validate` endpoint is intentionally **public** (no auth required) — it only exposes a sanitised property card, not PII.
+- The `claim` endpoint requires the authenticated user's ID in the request body. In production, extract the user ID from the verified Nhost JWT rather than trusting the client-supplied value.
+- `external_contact` is write-restricted to `admin` role in Hasura. It is returned in admin API responses only.
+- WhatsApp messages are sent server-side; no API credentials are exposed to the browser.
+
+---
+
+### Phase Roadmap (Transfer Ownership)
+
+| Phase | Item | Status |
+|-------|------|--------|
+| 1 | `add-property-transfer-invitation.sql` migration | Done |
+| 1 | `src/lib/whatsappService.ts` provider-agnostic layer (stub) | Done |
+| 1 | All 5 API routes (invite, validate, claim, resend, status) | Done |
+| 1 | `AdminOfferCard` + `AdminIncomingOffers` components | Done |
+| 1 | `/transfer-ownership/[token]` page (all 8 states) | Done |
+| 1 | `signup` page `callbackUrl` support | Done |
+| 2 | Swap `WhatsAppStub` for `WhatsAppMetaProvider` or `WhatsAppTwilioProvider` | Pending provider selection |
+| 2 | Pre-approve `property_ownership_invitation` template in Meta Business Manager | Pending |
+| 2 | Server-side Nhost JWT verification on claim route | Pending admin auth layer |
+| 2 | Facebook Messenger DM outreach | Next phase |
+| 2 | Outreach audit log | Compliance |
+| 3 | Hasura scheduled event to sweep expired tokens | Operational cleanup |
+

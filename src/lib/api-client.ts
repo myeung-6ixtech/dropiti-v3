@@ -3,37 +3,58 @@ import { PropertyDataForAPI, CreateUserInput, UpdateUserInput } from '@/types';
 import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
 import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
 import { StandardizedAddress, formatAddressForDatabase } from '@/utils/addressFormatter';
+import { useNhostFunctions } from '@/lib/nhost-functions';
 
-// Base API configuration
+const USE_NHOST_FUNCTIONS = useNhostFunctions();
+
+// Base API configuration — when NEXT_PUBLIC_FUNCTIONS_URL is set, route via BFF → Nhost Functions
 const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: USE_NHOST_FUNCTIONS ? '/api/v1/bff/functions/client' : '/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
-// Request interceptor to add auth token
 apiClient.interceptors.request.use(
   (config) => {
-    // You can add authentication headers here
-    // const token = localStorage.getItem('authToken');
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    if (USE_NHOST_FUNCTIONS && config.url?.startsWith('/')) {
+      config.url = config.url.slice(1);
+    }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
-// Response interceptor for error handling
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const body = response.data as Record<string, unknown> | undefined;
+    if (USE_NHOST_FUNCTIONS && body && typeof body === 'object' && 'ok' in body) {
+      if (body.ok === true) {
+        const data = body.data as Record<string, unknown> | unknown;
+        if (data && typeof data === 'object' && 'items' in (data as object)) {
+          const wrapped = data as { items: unknown; pagination?: unknown };
+          response.data = {
+            success: true,
+            data: wrapped.items,
+            pagination: wrapped.pagination,
+          };
+        } else {
+          response.data = { success: true, data: body.data };
+        }
+      } else if (body.ok === false) {
+        return Promise.reject(
+          Object.assign(new Error(String(body.error ?? 'Request failed')), {
+            response: { ...response, data: { success: false, error: body.error } },
+          })
+        );
+      }
+    }
+    return response;
+  },
   (error) => {
     if (error.response?.status === 401) {
       // Handle unauthorized access
-      // Redirect to login or refresh token
     }
     return Promise.reject(error);
   }

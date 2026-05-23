@@ -41,6 +41,45 @@ export const AUTH_ERRORS = {
 } as const;
 
 // ========================================
+// NHOST OAUTH ERRORS (Google sign-in callback ?error= codes)
+// ========================================
+
+export const NHOST_OAUTH_ERRORS: Record<string, string> = {
+  'unverified-user':
+    'You previously created an account with this email but have not verified it yet. Please check your inbox and verify your email, or sign in with email and password.',
+  'disabled-user':
+    'Your account has been disabled. Please contact support.',
+  'disabled-endpoint':
+    'Google sign-in is not available right now. Please sign in with email and password.',
+  'redirectTo-not-allowed':
+    'Sign-in configuration issue. Please contact support.',
+  'signup-disabled':
+    'New account registration is currently disabled.',
+  'user-already-exists':
+    'An account with this email already exists. Please sign in with email and password.',
+  'oauth-token-exchange-failed':
+    'Google sign-in timed out. Please try again.',
+  'oauth-profile-fetch-failed':
+    'Could not retrieve your Google profile. Please try again.',
+  'oauth-provider-error':
+    'Google returned an error. Please try again or use email sign-in.',
+  'provider-account-already-linked':
+    'This Google account is already linked to another Dropiti account.',
+  'internal-server-error':
+    'An unexpected error occurred. Please try again in a moment.',
+  'invalid-state':
+    'Your sign-in session expired. Please try again.',
+};
+
+export const DEFAULT_OAUTH_ERROR =
+  'Google sign-in failed. Please try again or sign in with email and password.';
+
+/** Map a Nhost hasura-auth OAuth error code to a user-facing message. */
+export function mapNhostOAuthError(code: string): string {
+  return NHOST_OAUTH_ERRORS[code] ?? `${DEFAULT_OAUTH_ERROR} (${code})`;
+}
+
+// ========================================
 // GENERAL APPLICATION ERRORS
 // ========================================
 

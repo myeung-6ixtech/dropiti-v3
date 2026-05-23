@@ -7,6 +7,7 @@ import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
+import { consumeOAuthError, getCallbackUrlFromSearch } from '@/lib/oauthCallback';
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,28 +16,39 @@ export default function SignInForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [oauthErrorCode, setOauthErrorCode] = useState<string | null>(null);
 
   const router = useRouter();
   const { login } = useAuth();
   const { showToast } = useToast();
 
-  // Check for success message from URL params and load remember me preference
+  // Check for success message from URL params, OAuth errors, and load remember me
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       const message = urlParams.get('message');
       if (message) {
         setSuccessMessage(message);
-        // Clear the message from URL
         window.history.replaceState({}, document.title, window.location.pathname);
       }
-      
-      // Load remember me preference from localStorage
+
+      const oauthErr = consumeOAuthError();
+      if (oauthErr) {
+        setErrorMessage(oauthErr.message);
+        setOauthErrorCode(oauthErr.code);
+        showToast('error', oauthErr.message);
+        if (urlParams.has('oauth_error')) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+
       const savedRememberMe = localStorage.getItem('dropiti_remember_me');
       if (savedRememberMe === 'true') {
         setRememberMe(true);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
@@ -51,7 +63,7 @@ export default function SignInForm() {
       
       if (result.success) {
         showToast('success', SUCCESS_MESSAGES.SIGNED_IN);
-        router.push("/dashboard");
+        router.push(getCallbackUrlFromSearch());
       } else {
         showToast('error', result.error || AUTH_ERRORS.INVALID_CREDENTIALS);
       }
@@ -84,6 +96,19 @@ export default function SignInForm() {
         {successMessage && (
           <div className={authClasses.success}>
             {successMessage}
+          </div>
+        )}
+
+        {errorMessage && (
+          <div className={authClasses.error} role="alert">
+            <p>{errorMessage}</p>
+            {oauthErrorCode === 'unverified-user' && (
+              <p className="mt-2 text-sm">
+                <Link href="/auth/user-verification" className={authClasses.link}>
+                  Resend or complete email verification
+                </Link>
+              </p>
+            )}
           </div>
         )}
 

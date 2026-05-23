@@ -17,7 +17,11 @@ export default function SignUpPage() {
     if (!isLoading && isAuthenticated && !redirectedRef.current) {
       redirectedRef.current = true;
       showToast('success', 'User successfully authenticated');
-      router.push('/');
+
+      // Honour callbackUrl so flows like transfer-ownership return correctly
+      const urlParams = new URLSearchParams(window.location.search);
+      const callbackUrl = urlParams.get('callbackUrl');
+      router.replace(callbackUrl || '/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, isLoading]);

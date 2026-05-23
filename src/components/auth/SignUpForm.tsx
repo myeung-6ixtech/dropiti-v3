@@ -9,6 +9,7 @@ import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import { consumeOAuthError } from "@/lib/oauthCallback";
 
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -49,9 +50,22 @@ export default function SignUpForm() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});
+  const [oauthErrorMessage, setOauthErrorMessage] = useState("");
+  const [oauthErrorCode, setOauthErrorCode] = useState<string | null>(null);
 
   const router = useRouter();
   const { showToast } = useToast();
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const oauthErr = consumeOAuthError();
+    if (oauthErr) {
+      setOauthErrorMessage(oauthErr.message);
+      setOauthErrorCode(oauthErr.code);
+      showToast('error', oauthErr.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const validateField = (fieldName: string, value: string) => {
     let validation: { isValid: boolean; message: string };
@@ -158,6 +172,26 @@ export default function SignUpForm() {
           <h1 className={authClasses.title}>Create Account</h1>
           <p className={authClasses.subtitle}>Sign up to start managing your properties.</p>
         </div>
+
+        {oauthErrorMessage && (
+          <div className={authClasses.error} role="alert">
+            <p>{oauthErrorMessage}</p>
+            {oauthErrorCode === 'unverified-user' && (
+              <p className="mt-2 text-sm">
+                <Link href="/auth/user-verification" className={authClasses.link}>
+                  Resend or complete email verification
+                </Link>
+              </p>
+            )}
+            {oauthErrorCode === 'user-already-exists' && (
+              <p className="mt-2 text-sm">
+                <Link href="/auth/signin" className={authClasses.link}>
+                  Sign in with email instead
+                </Link>
+              </p>
+            )}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className={authClasses.form}>
           <div className={authFormPatterns.field.container}>

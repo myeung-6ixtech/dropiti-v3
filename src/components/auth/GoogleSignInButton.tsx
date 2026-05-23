@@ -1,26 +1,24 @@
 'use client';
 
+import { nhostAuthService } from '@/services/auth/nhostAuthService';
+import { getCallbackUrlFromSearch } from '@/lib/oauthCallback';
+import { useToast } from '@/context/ToastContext';
+
 interface GoogleSignInButtonProps {
   mode: 'signin' | 'signup';
   className?: string;
 }
 
 export default function GoogleSignInButton({ mode, className = '' }: GoogleSignInButtonProps) {
+  const { showToast } = useToast();
+
   const handleClick = () => {
-    const subdomain = process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN;
-    const region = process.env.NEXT_PUBLIC_NHOST_REGION;
+    const callbackUrl = getCallbackUrlFromSearch();
+    const result = nhostAuthService.signInWithGoogle(callbackUrl);
 
-    const params = new URLSearchParams(window.location.search);
-    const callbackUrl = params.get('callbackUrl') || '/dashboard';
-    sessionStorage.setItem('oauth_callback_url', callbackUrl);
-
-    const redirectTo = window.location.origin;
-    const url =
-      `https://${subdomain}.auth.${region}.nhost.run/v1/signin/provider/google` +
-      `?redirectTo=${encodeURIComponent(redirectTo)}` +
-      `&options[authorizationParams][prompt]=select_account`;
-
-    window.location.assign(url);
+    if (!result.ok) {
+      showToast('error', result.error);
+    }
   };
 
   return (

@@ -6,6 +6,7 @@ import { usersAPI } from "@/lib/api-client";
 import { nhost } from "@/lib/nhost";
 import { nhostAuthService } from "@/services/auth/nhostAuthService";
 import { AUTH_ERRORS } from "@/types/error-messages";
+import { getCallbackUrlFromSearch } from "@/lib/oauthCallback";
 
 interface AuthUser {
   id: string;
@@ -216,7 +217,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = (): void => {
-    nhostAuthService.signInWithGoogle('/dashboard');
+    const callbackUrl =
+      typeof window !== 'undefined' ? getCallbackUrlFromSearch() : '/dashboard';
+    nhostAuthService.signInWithGoogle(callbackUrl);
   };
 
   const logout = async () => {

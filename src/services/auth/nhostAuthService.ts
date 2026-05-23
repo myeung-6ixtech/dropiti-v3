@@ -1,6 +1,7 @@
 import { nhost } from '@/lib/nhost';
 import { executeMutation, executeQuery } from '@/app/api/graphql/serverClient';
 import { DEFAULT_AVATAR_URL } from '@/constants/images';
+import { sanitizeCallbackPath, setOAuthCallbackUrl } from '@/lib/oauthCallback';
 
 // ---------------------------------------------------------------------------
 // GraphQL — user profile management
@@ -125,17 +126,33 @@ class NhostAuthService {
   // -------------------------------------------------------------------------
   // Google OAuth (redirect-based)
   // -------------------------------------------------------------------------
-  signInWithGoogle(callbackUrl?: string): void {
-    if (typeof window === 'undefined') return;
+  signInWithGoogle(callbackUrl?: string): { ok: true } | { ok: false; error: string } {
+    if (typeof window === 'undefined') {
+      return { ok: false, error: 'Google sign-in is only available in the browser.' };
+    }
+
     const subdomain = process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN;
     const region = process.env.NEXT_PUBLIC_NHOST_REGION;
-    sessionStorage.setItem('oauth_callback_url', callbackUrl || '/dashboard');
+
+    if (!subdomain || !region) {
+      console.error('[Auth] Missing NEXT_PUBLIC_NHOST_SUBDOMAIN or NEXT_PUBLIC_NHOST_REGION');
+      return {
+        ok: false,
+        error: 'Sign-in is not configured. Please try again later or use email sign-in.',
+      };
+    }
+
+    // Store intended destination — bare origin only for redirectTo (Rule 2)
+    setOAuthCallbackUrl(sanitizeCallbackPath(callbackUrl || '/dashboard'));
+
     const redirectTo = window.location.origin;
     const url =
       `https://${subdomain}.auth.${region}.nhost.run/v1/signin/provider/google` +
       `?redirectTo=${encodeURIComponent(redirectTo)}` +
       `&options[authorizationParams][prompt]=select_account`;
+
     window.location.assign(url);
+    return { ok: true };
   }
 
   // -------------------------------------------------------------------------

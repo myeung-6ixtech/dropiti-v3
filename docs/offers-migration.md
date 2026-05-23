@@ -1,6 +1,11 @@
-# Dashboard offers & applications — reference for admin incoming offers
+# Dashboard offers & applications — current structure (incl. admin + transfer ownership)
 
-This document describes how **`/dashboard/applications`** and **`/dashboard/offers`** work today: UX purpose, file layout, data model, and API routes. Use it as a baseline when building an **admin** view for offers where **`recipient_user_id`** is an admin user (same data model; different navigation and possibly broader filters).
+This document describes how **`/dashboard/applications`** and **`/dashboard/offers`** work today: UX purpose, file layout, data model, and API routes.
+
+It also documents the **admin-managed listing** workflow:
+
+- **Admin incoming offers inbox**: a consolidated offer view for listings “owned” by platform/admin users (based on recipient ids).
+- **Transfer ownership invitation**: when an admin reaches out to an external landlord/agent via WhatsApp, they can send a time-limited link that lets the recipient register/log in and claim the listing under `/transfer-ownership/[token]`.
 
 ---
 
@@ -82,7 +87,7 @@ For a full inventory of client calls, grep `offersAPI` under `src/components/com
 
 ---
 
-## 4. HTTP API surface (`offersAPI`)
+## 4. HTTP API surface (`offersAPI`) + admin extensions
 
 **Client:** `src/lib/api-client.ts` — `export const offersAPI`  
 **Base URL:** Axios `baseURL: '/api/v1'` → routes live under **`src/app/api/v1/offers/`**.
@@ -110,6 +115,49 @@ For a full inventory of client calls, grep `offersAPI` under `src/components/com
 - `POST /offers/counter-offer` — `{ offerId, currentUserId, counterData }` (`rentPrice`, `numLeasingMonths`, `paymentFrequency`, `moveInDate`, optional `message` / `reason`)
 - `POST /offers/withdraw-offer` — `{ offerId, currentUserId, reason? }`
 - `GET /offers/get-negotiation-state?offerId=...&currentUserId=...`
+
+### 4.1 Admin list endpoint (incoming offers across admin-managed listings)
+
+**Route:** `GET /api/v1/admin/offers/incoming`  
+**File:** `src/app/api/v1/admin/offers/incoming/route.ts`
+
+This endpoint returns offers where:
+
+- `is_active = true`
+- `recipient_user_id ∈ DROPITI_PLATFORM_LANDLORD_USER_IDS` (comma-separated env var of Nhost user ids for platform/admin “landlord” accounts)
+
+It enriches each row with:
+
+- `initiator` (tenant) profile from `real_estate_user`
+- `property` from `real_estate_property_listing`
+- `externalContact` from `property_listing.external_contact` (new column) for admin outreach workflows
+
+Query params:
+
+- `propertyUuid` (optional)
+- `status` (optional)
+- `limit` (default 50, max 100)
+- `offset` (default 0)
+
+### 4.2 Transfer ownership invitation APIs (admin + public)
+
+These endpoints support sending a time-limited invitation link and letting the external party claim the listing.
+
+| Capability | HTTP | Route |
+|-----------|------|-------|
+| Create + send invitation | `POST` | `/api/v1/admin/transfer-ownership/invite` |
+| Resend invitation (fresh token) | `POST` | `/api/v1/admin/transfer-ownership/resend` |
+| Latest invitation status (admin UI badge) | `GET` | `/api/v1/admin/transfer-ownership/status?propertyUuid=...` |
+| Public token validation (live expiry check) | `GET` | `/api/v1/transfer-ownership/validate?token=...` |
+| Claim listing (requires auth) | `POST` | `/api/v1/transfer-ownership/claim` |
+
+Implementation files:
+
+- `src/app/api/v1/admin/transfer-ownership/invite/route.ts`
+- `src/app/api/v1/admin/transfer-ownership/resend/route.ts`
+- `src/app/api/v1/admin/transfer-ownership/status/route.ts`
+- `src/app/api/v1/transfer-ownership/validate/route.ts`
+- `src/app/api/v1/transfer-ownership/claim/route.ts`
 
 **Note:** `src/app/api/v1/offers/get-offers/route.ts` targets a different GraphQL shape (`offers` table) and is **not** what these dashboard pages use.
 
@@ -140,17 +188,88 @@ Important fields for routing and admin work:
 - Routes use **`executeQuery` / `executeMutation`** → **`src/app/api/graphql/serverClient.ts`** against Hasura.
 - Primary table: **`real_estate_offer`** (snake_case in GraphQL; responses mapped to camelCase for the app).
 
+### 6.1 Latest database structure (relevant fields)
+
+The app’s “source of truth” is the Hasura schema. The docs in `documentation/database/complete-database-setup.sql` may contain legacy `firebase_uid` naming, but the runtime API layer uses Nhost user ids.
+
+**`real_estate_property_listing` (property_listings)**
+
+Key ownership + admin fields used by the offers/admin flows:
+
+- `property_uuid` (listing id)
+- `landlord_firebase_uid` (currently used in app code as the “owner” column; stores the owner’s Nhost user id in practice)
+- `external_contact` (new): external landlord/agent phone digits used for WhatsApp outreach
+
+**`real_estate_offer` (offers)**
+
+Key linkage fields:
+
+- `property_uuid`
+- `initiator_user_id` (tenant)
+- `recipient_user_id` (landlord / listing owner; for admin-managed listings this is one of the platform landlord ids)
+- negotiation fields: `current_*`, `negotiation_round`, `last_action_*`
+- final terms: `final_*`
+
+**`real_estate_property_transfer_invitation` (ownership invitations)**
+
+New table storing time-limited claim tokens:
+
+- `token_uuid` (invitation token)
+- `property_uuid`
+- `external_contact`
+- `sent_by_admin_id`
+- `status`: `pending | used | expired | cancelled`
+- `expires_at`, `claimed_by_user_id`, `resend_count`, `whatsapp_message_id`
+
 Recipient listing without property filter matches **all offers** for that user across properties (`get-offers-by-id/route.ts` — `GET_OFFERS_BY_RECIPIENT_WITHOUT_PROPERTY_FILTER_QUERY`).
 
 ---
 
-## 7. Implications for an admin “incoming offers” area
+## 7. Admin-managed listings: incoming offers + transfer ownership
 
-1. **Reuse the same read path:** `getOffersByRecipient(adminUserId)` (or direct GET to the same route) returns everything where `recipient_user_id === adminUserId`. No new table required if admin listings use the admin’s user id as recipient on create.
-2. **Reuse list UI:** `AllIncomingOffers` is already parameterized by `recipientUserId`; you can mount it on an admin route with the admin session’s id, or extract a headless hook + presentational list for admin styling.
-3. **Actions:** Accept / reject / counter all require `currentUserId` matching the **recipient** in business rules (`src/lib/offer-negotiation.ts`). Ensure the admin account is the stored recipient for those offers.
-4. **Performance:** `AllIncomingOffers` may call `getPropertyByUuid` per offer when the API omits property embeds; the admin view may want a backend join (already partially done when property is included in offer payload) or a dedicated admin list endpoint to avoid N+1.
-5. **Naming debt:** Incoming offers use **`get-offers-by-id`** — when adding admin docs or new code, refer to the implementation file, not the name alone.
+### 7.1 How admin-managed listings are identified
+
+In this repo’s current implementation, “admin-managed listings” are identified by the **recipient (owner) user id**:
+
+- Offers are considered admin offers when `recipient_user_id ∈ DROPITI_PLATFORM_LANDLORD_USER_IDS`
+- The admin inbox uses a dedicated endpoint `GET /api/v1/admin/offers/incoming` to query those rows and enrich them with `externalContact`
+
+This avoids requiring a `landlord_role` column on `property_listing`.
+
+### 7.2 Admin inbox (read-only + outreach)
+
+UI components:
+
+- `src/components/admin/AdminIncomingOffers.tsx`
+- `src/components/admin/AdminOfferCard.tsx`
+
+The admin card shows offer terms and invitation status, and can trigger:
+
+- `POST /api/v1/admin/transfer-ownership/invite` (first send)
+- `POST /api/v1/admin/transfer-ownership/resend` (fresh token) — allowed when the last invite is expired or ≥24h old
+
+### 7.3 Transfer ownership invitation: user-facing claim flow
+
+Page route:
+
+- `/transfer-ownership/[token]` → `src/app/transfer-ownership/[token]/page.tsx`
+
+Behavior:
+
+1. Page calls `GET /api/v1/transfer-ownership/validate?token=...`
+2. If unauthenticated, routes to:
+   - `/auth/signup?callbackUrl=/transfer-ownership/[token]`
+   - `/auth/signin?callbackUrl=/transfer-ownership/[token]`
+3. After successful login/signup, user returns to the claim page and clicks **Claim This Property**
+4. Page calls `POST /api/v1/transfer-ownership/claim` which:
+   - validates token is pending + not expired
+   - updates `property_listing.landlord_firebase_uid` to the authenticated user id
+   - marks invitation status `used`
+
+### 7.4 Doc debt to avoid
+
+- **Naming debt**: incoming offers list uses **`get-offers-by-id`** (but is actually “by recipient”). Use file paths when referencing the canonical behavior.
+- **Legacy naming**: `landlord_firebase_uid` stores Nhost user ids in practice. When updating schema docs, treat column meaning as “owner user id”.
 
 ---
 
