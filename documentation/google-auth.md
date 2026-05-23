@@ -602,12 +602,11 @@ Nhost processes the OAuth code:
   ▼
 OAuthCallbackHandler (mounted in every page):
   │
-  ├─ Detects ?error= → clean URL → store error in sessionStorage → router.replace('/auth/signin?oauth_error=1')
+  ├─ Detects ?error= (+ optional errorDescription) → resolveAuthError() → setOAuthErrorPresentation() → router.replace('/auth/signin?oauth_error=1')
   │
-  └─ Detects ?refreshToken= → wait for isLoading=false → isAuthenticated=true
-       → clean URL
-       → destination = sessionStorage.get('oauth_callback_url') || '/dashboard'
-       → router.push(destination)
+  └─ Detects ?refreshToken= → show "Signing you in…" overlay
+       ├─ isAuthenticated within ~15s → clean URL → router.replace(destination)
+       └─ timeout (cookies blocked / SDK stuck) → oauth-session-timeout presentation → sign-in
   │
   ▼
 AuthContext runs on every page:
@@ -623,9 +622,56 @@ ClientOnboardingGate:
   user.onboarding_complete = true  → render children
 
   ▼ (if sign-in page has oauth_error=1 in URL)
-Sign-in page:
-  reads sessionStorage.oauth_error → clears it → displays message to user ✅
+Sign-in / sign-up page:
+  consumeOAuthErrorPresentation() → AuthErrorAlert (title, message, action buttons)
+  fallback: read ?error= from URL if sessionStorage was cleared
+  │
+  ▼ (if authenticated but profile API fails)
+AuthContext:
+  authWarning banner — user is signed in but profile setup failed
 ```
+
+---
+
+## Client-friendly auth error UX (dropiti-v3)
+
+Users should never see raw Nhost codes (e.g. `internal-server-error`) or silent failures on the homepage.
+
+### Central resolver
+
+| File | Role |
+|------|------|
+| `src/types/auth-errors.ts` | `AuthErrorPresentation`, `AuthErrorAction` types |
+| `src/lib/resolveAuthError.ts` | `resolveAuthError()` — maps codes to title, message, and actions |
+| `src/lib/oauthCallback.ts` | `setOAuthErrorPresentation()` / `consumeOAuthErrorPresentation()` — structured JSON in sessionStorage |
+
+### UI components
+
+| File | Role |
+|------|------|
+| `src/components/auth/AuthErrorAlert.tsx` | Titled alert with action links (verify email, retry Google, contact support) |
+| `src/components/auth/OAuthCallbackHandler.tsx` | Parses `errorDescription` (logged in dev only); 15s timeout on stuck `?refreshToken=` |
+| `src/components/auth/SignInForm.tsx` / `SignUpForm.tsx` | `AuthErrorAlert` + URL `?error=` backup |
+
+### Email sign-in and profile warnings
+
+| File | Role |
+|------|------|
+| `src/context/AuthContext.tsx` | `login()` uses `resolveAuthError()` and returns `errorCode` + `presentation`; exposes `authWarning` when profile auto-create fails after OAuth |
+
+### Developer diagnostics
+
+- In **development**, `AuthErrorAlert` shows a small `Error code: …` line under the message.
+- In **production**, codes are logged with `console.warn('[Auth]', …)` only — not shown to users.
+
+### Manual test cases
+
+1. `/?error=unverified-user` → sign-in shows verification CTA (not generic internal error).
+2. `/?error=internal-server-error` → friendly copy + retry / email / support actions.
+3. `/?error=unknown-code-xyz` → generic friendly message; code in console only.
+4. `/?refreshToken=fake` with cookies blocked → after ~15s, redirect to sign-in with timeout message.
+5. Wrong email/password → "Incorrect sign-in details" (not unexpected error).
+6. Google success + profile API down → amber `authWarning` banner; user stays signed in.
 
 ---
 
@@ -635,13 +681,14 @@ The following files implement the rules above in **dropiti-v3**. Use this sectio
 
 | Rule | File(s) |
 |------|---------|
-| OAuth error messages | `src/types/error-messages.ts` — `NHOST_OAUTH_ERRORS`, `mapNhostOAuthError()` |
-| Callback URL helpers | `src/lib/oauthCallback.ts` — `sanitizeCallbackPath`, `hasOAuthCallbackParams`, sessionStorage keys |
+| Auth error resolver | `src/lib/resolveAuthError.ts`, `src/types/auth-errors.ts` — re-exported from `error-messages.ts` |
+| Callback URL helpers | `src/lib/oauthCallback.ts` — structured presentation storage, `getOAuthErrorFromUrl()` |
+| Auth error UI | `src/components/auth/AuthErrorAlert.tsx` |
 | Google sign-in entry | `src/services/auth/nhostAuthService.ts` — `signInWithGoogle()` |
 | Google button UI | `src/components/auth/GoogleSignInButton.tsx` — delegates to `nhostAuthService` |
 | OAuth return handler | `src/components/auth/OAuthCallbackHandler.tsx` — `?error=` first, then `?refreshToken=` |
-| Display OAuth errors | `src/components/auth/SignInForm.tsx`, `src/components/auth/SignUpForm.tsx` — `consumeOAuthError()` |
-| Profile auto-create | `src/context/AuthContext.tsx` |
+| Display OAuth errors | `SignInForm.tsx`, `SignUpForm.tsx` — `AuthErrorAlert` + `consumeOAuthErrorPresentation()` |
+| Profile auto-create + warnings | `src/context/AuthContext.tsx` — `authWarning` when profile setup fails |
 | `callbackUrl` on email login | `src/components/auth/SignInForm.tsx` — `getCallbackUrlFromSearch()` after success |
 | `loginWithGoogle` callback | `src/context/AuthContext.tsx` — reads `callbackUrl` from query |
 | Onboarding gate | `src/components/ClientOnboardingGate.tsx` |
@@ -652,8 +699,10 @@ The following files implement the rules above in **dropiti-v3**. Use this sectio
 
 - [x] `signInWithGoogle()` uses `window.location.origin` with no path
 - [x] `OAuthCallbackHandler` handles `?error=` before `?refreshToken=`
-- [x] OAuth errors stored in `sessionStorage` via `setOAuthError` / read via `consumeOAuthError`
-- [x] Sign-in and sign-up forms display OAuth errors with CTAs for `unverified-user`
+- [x] OAuth errors stored as structured `AuthErrorPresentation` in sessionStorage
+- [x] `OAuthCallbackHandler` timeout for stuck `?refreshToken=` (`oauth-session-timeout`)
+- [x] Sign-in and sign-up use `AuthErrorAlert` with per-code actions (not raw codes in production)
+- [x] Email login uses `resolveAuthError()`; `authWarning` when profile setup fails after OAuth
 - [x] Email sign-in honors `callbackUrl` query param
 - [x] `VerificationRedirect` uses `emailVerified !== false`
 - [x] `ClientOnboardingGate` skips while `refreshToken` or `error` in URL

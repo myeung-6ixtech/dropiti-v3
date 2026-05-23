@@ -2,9 +2,12 @@
  * Shared helpers for Google OAuth callback handling (client-side only).
  */
 
+import type { AuthErrorPresentation } from '@/types/auth-errors';
+
 export const OAUTH_CALLBACK_URL_KEY = 'oauth_callback_url';
 export const OAUTH_ERROR_KEY = 'oauth_error';
 export const OAUTH_ERROR_CODE_KEY = 'oauth_error_code';
+export const OAUTH_ERROR_PRESENTATION_KEY = 'oauth_error_presentation';
 
 const DEFAULT_POST_AUTH_PATH = '/dashboard';
 
@@ -53,6 +56,15 @@ export function clearOAuthCallbackUrl(): void {
   sessionStorage.removeItem(OAUTH_CALLBACK_URL_KEY);
 }
 
+/** Store structured auth error for sign-in / sign-up pages. */
+export function setOAuthErrorPresentation(presentation: AuthErrorPresentation): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(OAUTH_ERROR_KEY, presentation.message);
+  sessionStorage.setItem(OAUTH_ERROR_CODE_KEY, presentation.code);
+  sessionStorage.setItem(OAUTH_ERROR_PRESENTATION_KEY, JSON.stringify(presentation));
+}
+
+/** @deprecated Prefer setOAuthErrorPresentation */
 export function setOAuthError(message: string, code?: string): void {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(OAUTH_ERROR_KEY, message);
@@ -61,16 +73,52 @@ export function setOAuthError(message: string, code?: string): void {
   } else {
     sessionStorage.removeItem(OAUTH_ERROR_CODE_KEY);
   }
+  sessionStorage.removeItem(OAUTH_ERROR_PRESENTATION_KEY);
 }
 
-export function consumeOAuthError(): { message: string; code: string | null } | null {
+export function consumeOAuthErrorPresentation(): AuthErrorPresentation | null {
   if (typeof window === 'undefined') return null;
+
+  const raw = sessionStorage.getItem(OAUTH_ERROR_PRESENTATION_KEY);
   const message = sessionStorage.getItem(OAUTH_ERROR_KEY);
-  if (!message) return null;
   const code = sessionStorage.getItem(OAUTH_ERROR_CODE_KEY);
+
+  sessionStorage.removeItem(OAUTH_ERROR_PRESENTATION_KEY);
   sessionStorage.removeItem(OAUTH_ERROR_KEY);
   sessionStorage.removeItem(OAUTH_ERROR_CODE_KEY);
-  return { message, code };
+
+  if (raw) {
+    try {
+      return JSON.parse(raw) as AuthErrorPresentation;
+    } catch {
+      // fall through to legacy keys
+    }
+  }
+
+  if (!message) return null;
+
+  return {
+    code: code ?? 'unknown',
+    title: 'Sign-in failed',
+    message,
+    actions: [],
+  };
+}
+
+/** @deprecated Use consumeOAuthErrorPresentation */
+export function consumeOAuthError(): { message: string; code: string | null } | null {
+  const presentation = consumeOAuthErrorPresentation();
+  if (!presentation) return null;
+  return { message: presentation.message, code: presentation.code };
+}
+
+/** Parse ?error= from URL as backup when sessionStorage was cleared. */
+export function getOAuthErrorFromUrl(search?: string): { code: string; description: string | null } | null {
+  if (typeof window === 'undefined') return null;
+  const params = new URLSearchParams(search ?? window.location.search);
+  const code = params.get('error');
+  if (!code) return null;
+  return { code, description: params.get('errorDescription') };
 }
 
 /** Strip OAuth query params from the current URL without navigation. */

@@ -9,7 +9,13 @@ import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
-import { consumeOAuthError } from "@/lib/oauthCallback";
+import AuthErrorAlert from "@/components/auth/AuthErrorAlert";
+import {
+  consumeOAuthErrorPresentation,
+  getOAuthErrorFromUrl,
+} from "@/lib/oauthCallback";
+import { resolveAuthError } from "@/lib/resolveAuthError";
+import type { AuthErrorPresentation } from "@/types/auth-errors";
 
 const validateEmail = (email: string): { isValid: boolean; message: string } => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -50,19 +56,31 @@ export default function SignUpForm() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldError>({});
-  const [oauthErrorMessage, setOauthErrorMessage] = useState("");
-  const [oauthErrorCode, setOauthErrorCode] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<AuthErrorPresentation | null>(null);
 
   const router = useRouter();
   const { showToast } = useToast();
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
-    const oauthErr = consumeOAuthError();
-    if (oauthErr) {
-      setOauthErrorMessage(oauthErr.message);
-      setOauthErrorCode(oauthErr.code);
-      showToast('error', oauthErr.message);
+
+    let presentation = consumeOAuthErrorPresentation();
+    if (!presentation) {
+      const urlError = getOAuthErrorFromUrl();
+      if (urlError) {
+        presentation = resolveAuthError({
+          code: urlError.code,
+          description: urlError.description,
+        });
+      }
+    }
+
+    if (presentation) {
+      setAuthError(presentation);
+      showToast('error', presentation.message);
+      if (window.location.search.includes('error=')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -173,24 +191,11 @@ export default function SignUpForm() {
           <p className={authClasses.subtitle}>Sign up to start managing your properties.</p>
         </div>
 
-        {oauthErrorMessage && (
-          <div className={authClasses.error} role="alert">
-            <p>{oauthErrorMessage}</p>
-            {oauthErrorCode === 'unverified-user' && (
-              <p className="mt-2 text-sm">
-                <Link href="/auth/user-verification" className={authClasses.link}>
-                  Resend or complete email verification
-                </Link>
-              </p>
-            )}
-            {oauthErrorCode === 'user-already-exists' && (
-              <p className="mt-2 text-sm">
-                <Link href="/auth/signin" className={authClasses.link}>
-                  Sign in with email instead
-                </Link>
-              </p>
-            )}
-          </div>
+        {authError && (
+          <AuthErrorAlert
+            presentation={authError}
+            onDismiss={() => setAuthError(null)}
+          />
         )}
 
         <form onSubmit={handleSubmit} className={authClasses.form}>

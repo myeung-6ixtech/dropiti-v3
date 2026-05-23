@@ -1,29 +1,28 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthenticationStatus } from '@nhost/nextjs';
-import { mapNhostOAuthError } from '@/types/error-messages';
+import { resolveAuthError } from '@/lib/resolveAuthError';
 import {
   clearOAuthCallbackUrl,
   getOAuthCallbackUrl,
-  setOAuthError,
+  setOAuthErrorPresentation,
   stripOAuthParamsFromUrl,
 } from '@/lib/oauthCallback';
 
+const OAUTH_SESSION_TIMEOUT_MS = 15_000;
+
 /**
- * Headless component mounted globally. When Nhost redirects back from Google
- * OAuth it appends either `?refreshToken=...` (success) or `?error=...`
- * (failure) to the origin URL. This component:
- *  1. Handles ?error= first (Rule 5) — stores message and routes to sign-in.
- *  2. On success, waits for session hydration, strips the URL, routes to
- *     the post-auth destination stored in sessionStorage.
+ * Handles Nhost Google OAuth return: ?error= failures and ?refreshToken= success.
  */
 export default function OAuthCallbackHandler() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuthenticationStatus();
   const handledRef = useRef(false);
   const errorHandledRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,10 +33,16 @@ export default function OAuthCallbackHandler() {
     const errorCode = params.get('error');
     if (errorCode && !errorHandledRef.current) {
       errorHandledRef.current = true;
+      setIsSigningIn(false);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
       stripOAuthParamsFromUrl();
 
-      const userMessage = mapNhostOAuthError(errorCode);
-      setOAuthError(userMessage, errorCode);
+      const presentation = resolveAuthError({
+        code: errorCode,
+        description: params.get('errorDescription'),
+      });
+      setOAuthErrorPresentation(presentation);
       clearOAuthCallbackUrl();
 
       router.replace('/auth/signin?oauth_error=1');
@@ -45,18 +50,66 @@ export default function OAuthCallbackHandler() {
     }
 
     // ── Rule 5b: Handle success ─────────────────────────────────────────────
-    if (!params.has('refreshToken')) return;
+    if (!params.has('refreshToken')) {
+      setIsSigningIn(false);
+      return;
+    }
+
+    setIsSigningIn(true);
+
     if (handledRef.current) return;
+
+    // Timeout if session never hydrates (cookies blocked, SDK failure, etc.)
+    if (!timeoutRef.current && !errorHandledRef.current) {
+      timeoutRef.current = setTimeout(() => {
+        if (handledRef.current || errorHandledRef.current) return;
+        errorHandledRef.current = true;
+        setIsSigningIn(false);
+
+        stripOAuthParamsFromUrl();
+        const presentation = resolveAuthError({ code: 'oauth-session-timeout' });
+        setOAuthErrorPresentation(presentation);
+        clearOAuthCallbackUrl();
+        router.replace('/auth/signin?oauth_error=1');
+      }, OAUTH_SESSION_TIMEOUT_MS);
+    }
+
     if (isLoading) return;
 
     if (isAuthenticated) {
       handledRef.current = true;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      setIsSigningIn(false);
       stripOAuthParamsFromUrl();
       const destination = getOAuthCallbackUrl();
       clearOAuthCallbackUrl();
       router.replace(destination);
     }
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [isAuthenticated, isLoading, router]);
 
-  return null;
+  if (!isSigningIn) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-sm"
+      role="status"
+      aria-live="polite"
+      aria-label="Signing in"
+    >
+      <div className="text-center px-6">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-3" />
+        <p className="text-gray-700 text-sm font-medium">Signing you in&hellip;</p>
+      </div>
+    </div>
+  );
 }

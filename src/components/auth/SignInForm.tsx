@@ -7,7 +7,14 @@ import { useToast } from "@/context/ToastContext";
 import { authClasses, authFormPatterns } from "@/styles/auth";
 import { AUTH_ERRORS, SUCCESS_MESSAGES } from "@/types/error-messages";
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
-import { consumeOAuthError, getCallbackUrlFromSearch } from '@/lib/oauthCallback';
+import AuthErrorAlert from '@/components/auth/AuthErrorAlert';
+import {
+  consumeOAuthErrorPresentation,
+  getCallbackUrlFromSearch,
+  getOAuthErrorFromUrl,
+} from '@/lib/oauthCallback';
+import { resolveAuthError } from '@/lib/resolveAuthError';
+import type { AuthErrorPresentation } from '@/types/auth-errors';
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,59 +23,73 @@ export default function SignInForm() {
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
-  const [oauthErrorCode, setOauthErrorCode] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<AuthErrorPresentation | null>(null);
 
   const router = useRouter();
   const { login } = useAuth();
   const { showToast } = useToast();
 
-  // Check for success message from URL params, OAuth errors, and load remember me
   React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const message = urlParams.get('message');
-      if (message) {
-        setSuccessMessage(message);
+    if (typeof window === 'undefined') return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const message = urlParams.get('message');
+    if (message) {
+      setSuccessMessage(message);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    let presentation = consumeOAuthErrorPresentation();
+
+    if (!presentation) {
+      const urlError = getOAuthErrorFromUrl();
+      if (urlError) {
+        presentation = resolveAuthError({
+          code: urlError.code,
+          description: urlError.description,
+        });
+      }
+    }
+
+    if (presentation) {
+      setAuthError(presentation);
+      showToast('error', presentation.message);
+      if (urlParams.has('oauth_error') || urlParams.has('error')) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+    }
 
-      const oauthErr = consumeOAuthError();
-      if (oauthErr) {
-        setErrorMessage(oauthErr.message);
-        setOauthErrorCode(oauthErr.code);
-        showToast('error', oauthErr.message);
-        if (urlParams.has('oauth_error')) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
-
-      const savedRememberMe = localStorage.getItem('dropiti_remember_me');
-      if (savedRememberMe === 'true') {
-        setRememberMe(true);
-      }
+    const savedRememberMe = localStorage.getItem('dropiti_remember_me');
+    if (savedRememberMe === 'true') {
+      setRememberMe(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAuthError(null);
     setIsLoading(true);
 
     try {
-      // Save remember me preference to localStorage
       localStorage.setItem('dropiti_remember_me', rememberMe.toString());
-      
+
       const result = await login(email, password, rememberMe);
-      
+
       if (result.success) {
         showToast('success', SUCCESS_MESSAGES.SIGNED_IN);
         router.push(getCallbackUrlFromSearch());
       } else {
-        showToast('error', result.error || AUTH_ERRORS.INVALID_CREDENTIALS);
+        const presentation =
+          result.presentation ??
+          resolveAuthError({ code: result.errorCode, message: result.error });
+        setAuthError(presentation);
+        showToast('error', presentation.message);
       }
     } catch (error) {
       console.error('Sign in error:', error);
+      const presentation = resolveAuthError({ code: 'unknown' });
+      setAuthError(presentation);
       showToast('error', AUTH_ERRORS.UNEXPECTED_ERROR);
     } finally {
       setIsLoading(false);
@@ -82,7 +103,7 @@ export default function SignInForm() {
           ← Back to homepage
         </Link>
       </div>
-      
+
       <div>
         <div className={authClasses.sectionSpacing}>
           <h1 className={authClasses.title}>
@@ -92,24 +113,18 @@ export default function SignInForm() {
             Enter your email and password to sign in to your account.
           </p>
         </div>
-        
+
         {successMessage && (
           <div className={authClasses.success}>
             {successMessage}
           </div>
         )}
 
-        {errorMessage && (
-          <div className={authClasses.error} role="alert">
-            <p>{errorMessage}</p>
-            {oauthErrorCode === 'unverified-user' && (
-              <p className="mt-2 text-sm">
-                <Link href="/auth/user-verification" className={authClasses.link}>
-                  Resend or complete email verification
-                </Link>
-              </p>
-            )}
-          </div>
+        {authError && (
+          <AuthErrorAlert
+            presentation={authError}
+            onDismiss={() => setAuthError(null)}
+          />
         )}
 
         <form onSubmit={handleEmailSubmit} className={authClasses.form}>
@@ -117,16 +132,16 @@ export default function SignInForm() {
             <label className={authFormPatterns.field.label}>
               Email address <span className={authFormPatterns.field.required}>*</span>
             </label>
-            <input 
+            <input
               type="email"
-              placeholder="Enter your email" 
+              placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className={authFormPatterns.field.input}
               required
             />
           </div>
-          
+
           <div className={authFormPatterns.fieldWithIcon.container}>
             <label className={authFormPatterns.fieldWithIcon.label}>
               Password <span className={authFormPatterns.fieldWithIcon.required}>*</span>
@@ -149,7 +164,7 @@ export default function SignInForm() {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className={authFormPatterns.checkbox.container}>
               <input
@@ -168,7 +183,7 @@ export default function SignInForm() {
               Forgot password?
             </Link>
           </div>
-          
+
           <div>
             <button
               type="submit"
@@ -180,7 +195,6 @@ export default function SignInForm() {
           </div>
         </form>
 
-        {/* Social sign-in */}
         <div className="auth-divider">
           <span className="auth-divider-text">or</span>
         </div>
@@ -197,7 +211,6 @@ export default function SignInForm() {
         </div>
       </div>
 
-      {/* reCAPTCHA container (invisible) */}
       <div id="recaptcha-container"></div>
     </div>
   );

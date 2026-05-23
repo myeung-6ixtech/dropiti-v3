@@ -7,6 +7,8 @@ import { nhost } from "@/lib/nhost";
 import { nhostAuthService } from "@/services/auth/nhostAuthService";
 import { AUTH_ERRORS } from "@/types/error-messages";
 import { getCallbackUrlFromSearch } from "@/lib/oauthCallback";
+import { resolveAuthError } from "@/lib/resolveAuthError";
+import type { AuthErrorPresentation } from "@/types/auth-errors";
 
 interface AuthUser {
   id: string;
@@ -44,10 +46,21 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   user: AuthUser | null;
-  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string,
+    rememberMe?: boolean,
+  ) => Promise<{
+    success: boolean;
+    error?: string;
+    errorCode?: string;
+    presentation?: AuthErrorPresentation;
+  }>;
   loginWithGoogle: () => void;
   logout: () => void;
   isRememberMeEnabled: boolean;
+  authWarning: string | null;
+  clearAuthWarning: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -60,18 +73,8 @@ export const useAuth = () => {
   return context;
 };
 
-const mapAuthError = (error: string): string => {
-  const errorMap: Record<string, string> = {
-    'invalid-email-password': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'unverified-user': 'Please verify your email before signing in.',
-    'user-not-found': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'invalid-email': AUTH_ERRORS.INVALID_CREDENTIALS,
-    'disabled-user': AUTH_ERRORS.ACCOUNT_DISABLED,
-    'too-many-requests': 'Too many login attempts. Please try again later.',
-    'network-error': AUTH_ERRORS.UNEXPECTED_ERROR,
-  };
-  return errorMap[error] || AUTH_ERRORS.UNEXPECTED_ERROR;
-};
+const PROFILE_SETUP_WARNING =
+  "Your account is signed in but we couldn't finish setting up your profile. Refresh the page or contact support if this continues.";
 
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
 const parseJSON = <T,>(value: unknown, fallback: T): T => {
@@ -93,7 +96,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isRememberMeEnabled, setIsRememberMeEnabled] = useState(false);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const [authWarning, setAuthWarning] = useState<string | null>(null);
   const router = useRouter();
+
+  const clearAuthWarning = useCallback(() => setAuthWarning(null), []);
 
   const checkRememberMe = useCallback((): boolean => {
     if (typeof window === 'undefined') return false;
@@ -106,6 +112,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isAuthenticated || !nhostUser?.id) {
         setUser(null);
         setIsRememberMeEnabled(false);
+        setAuthWarning(null);
         return;
       }
 
@@ -151,16 +158,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const detectedProvider = nhostUser.avatarUrl?.includes('googleusercontent')
             ? 'google' as const
             : 'email' as const;
+          let profileCreated = false;
           try {
-            await usersAPI.createUser({
+            const createResponse = await usersAPI.createUser({
               nhost_user_id: nhostUser.id,
               display_name: nhostUser.displayName || nhostUser.email?.split('@')[0] || 'User',
               email: nhostUser.email || '',
               photo_url: nhostUser.avatarUrl || undefined,
               auth_provider: detectedProvider,
             });
+            profileCreated = createResponse.success;
           } catch (createErr) {
             console.warn('AuthContext: could not auto-create profile row', createErr);
+          }
+          if (!profileCreated) {
+            setAuthWarning(PROFILE_SETUP_WARNING);
           }
           setUser({
             id: nhostUser.id,
@@ -178,6 +190,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (err) {
         console.error('AuthContext: profile load error', err);
+        setAuthWarning(PROFILE_SETUP_WARNING);
         setUser({
           id: nhostUser.id,
           email: nhostUser.email || '',
@@ -196,13 +209,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email: string,
     password: string,
     rememberMe: boolean = false,
-  ): Promise<{ success: boolean; error?: string }> => {
+  ) => {
     try {
       const { session, error } = await nhost.auth.signIn({ email, password });
 
       if (error || !session) {
-        const code = (error as { error?: string })?.error || '';
-        return { success: false, error: mapAuthError(code) };
+        const presentation = resolveAuthError({
+          code: (error as { error?: string })?.error,
+          message: (error as { message?: string })?.message,
+        });
+        return {
+          success: false,
+          error: presentation.message,
+          errorCode: presentation.code,
+          presentation,
+        };
       }
 
       if (rememberMe) {
@@ -246,8 +267,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loginWithGoogle,
         logout,
         isRememberMeEnabled,
+        authWarning,
+        clearAuthWarning,
       }}
     >
+      {authWarning && (
+        <div
+          className="fixed top-0 left-0 right-0 z-[9998] bg-amber-50 border-b border-amber-200 px-4 py-3 text-sm text-amber-900"
+          role="status"
+        >
+          <div className="max-w-4xl mx-auto flex items-start justify-between gap-4">
+            <p>{authWarning}</p>
+            <button
+              type="button"
+              onClick={clearAuthWarning}
+              className="shrink-0 text-amber-700 hover:text-amber-900 font-medium"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
       {children}
     </AuthContext.Provider>
   );
