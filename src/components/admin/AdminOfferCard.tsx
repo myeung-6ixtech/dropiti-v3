@@ -210,7 +210,7 @@ export function AdminOfferCard({ offer }: AdminOfferCardProps) {
             };
           });
 
-      if (!data.success || !data.hasInvitation) {
+      if (!data.success || !data.hasInvitation || !data.data) {
         setInvitation({ status: 'none', daysRemaining: 0, resendCount: 0, canResend: false });
         return;
       }
@@ -223,7 +223,7 @@ export function AdminOfferCard({ offer }: AdminOfferCardProps) {
       } else if (d.status === 'expired') {
         uiStatus = 'expired';
       } else if (d.status === 'pending') {
-        uiStatus = d.hoursSinceSent < 24 ? 'pending_fresh' : 'pending_stale';
+        uiStatus = (d.hoursSinceSent ?? 0) < 24 ? 'pending_fresh' : 'pending_stale';
       }
 
       setInvitation({
@@ -268,23 +268,20 @@ export function AdminOfferCard({ offer }: AdminOfferCardProps) {
       });
 
       const raw = await res.json();
-      const parsed = parseFunctionsEnvelope(raw);
-      const data = parsed.success
-        ? {
-            success: true,
-            message: 'Invitation sent',
-            data: parsed.data,
-          }
-        : (raw as { success: boolean; message?: string; error?: string });
+      const parsed = parseFunctionsEnvelope<{ message?: string }>(raw);
 
-      if (data.success) {
+      if (parsed.success) {
         setActionMessage({
           type: 'success',
-          text: data.message ?? 'Invitation sent successfully',
+          text: parsed.data?.message ?? 'Invitation sent successfully',
         });
         await fetchStatus();
       } else {
-        setActionMessage({ type: 'error', text: data.error ?? 'Action failed' });
+        const legacy = raw as { error?: string; message?: string };
+        setActionMessage({
+          type: 'error',
+          text: parsed.error ?? legacy.error ?? legacy.message ?? 'Action failed',
+        });
       }
     } catch {
       setActionMessage({ type: 'error', text: 'Network error. Please try again.' });
