@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/context/ToastContext';
 import { usersAPI } from '@/lib/api-client';
+import {
+  buildProfileInputFromNhostUser,
+  ensureUserProfile,
+} from '@/lib/ensureUserProfile';
 import { availableLanguages, educationOptions, occupationOptions } from '@/types/user';
 import {
   UserIcon,
@@ -12,10 +17,6 @@ import {
   BriefcaseIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline';
-
-// ---------------------------------------------------------------------------
-// Display name helpers (shared logic — duplicated from edit profile page)
-// ---------------------------------------------------------------------------
 
 interface NameParts {
   firstName: string;
@@ -47,8 +48,9 @@ function detectMode(displayName: string, parts: NameParts): DisplayNameMode {
 }
 
 export default function OnboardingStepOne() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState({
     name: user?.displayName || user?.name || '',
@@ -56,43 +58,94 @@ export default function OnboardingStepOne() {
     about: user?.about || '',
     education: user?.education || '',
     occupation: user?.occupation || '',
-    languages: Array.isArray(user?.languages) ? user?.languages : [],
+    languages: Array.isArray(user?.languages) ? user.languages : [],
   });
   const [saving, setSaving] = useState(false);
+  const [profileEnsuring, setProfileEnsuring] = useState(false);
+  const [profileNhostId, setProfileNhostId] = useState<string | null>(user?.id ?? null);
   const [nameParts, setNameParts] = useState<NameParts>({ firstName: '', middleName: '', lastName: '' });
   const [displayNameMode, setDisplayNameMode] = useState<DisplayNameMode>('nickname');
 
   useEffect(() => {
-    if (!user?.id) return;
-    usersAPI.getUserByNhostUserId(user.id).then((response) => {
-      if (response.success && response.data) {
-        const d = response.data;
-        const parts: NameParts = {
-          firstName:  d.first_name  || '',
-          middleName: d.middle_name || '',
-          lastName:   d.last_name   || '',
-        };
-        setNameParts(parts);
-        const currentName = d.display_name || form.name;
-        setDisplayNameMode(detectMode(currentName, parts));
-        if (currentName) {
-          setForm((prev) => ({ ...prev, name: currentName }));
+    if (!user?.id || authLoading) return;
+
+    let cancelled = false;
+    setProfileEnsuring(true);
+
+    ensureUserProfile(
+      buildProfileInputFromNhostUser({
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName || user.name,
+        avatarUrl: user.photoUrl || user.avatar,
+      }),
+    )
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok) {
+          setProfileNhostId(result.effectiveNhostUserId);
+          const d = result.data;
+          const parts: NameParts = {
+            firstName:  d.first_name  || '',
+            middleName: d.middle_name || '',
+            lastName:   d.last_name   || '',
+          };
+          setNameParts(parts);
+          const currentName = d.display_name || user.displayName || user.name || '';
+          setDisplayNameMode(detectMode(currentName, parts));
+          if (currentName) {
+            setForm((prev) => ({ ...prev, name: currentName }));
+          }
+        } else {
+          showToast('error', result.error);
         }
-      }
-    }).catch(() => {});
+      })
+      .catch(() => {
+        if (!cancelled) {
+          showToast('error', 'Could not set up your profile. Please refresh and try again.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setProfileEnsuring(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, authLoading]);
 
   const handleChange = (key: string, value: string | string[]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   async function onNext() {
+    if (!user?.id) {
+      showToast('error', 'You must be signed in to continue.');
+      return;
+    }
+
     try {
       setSaving(true);
-      
-      // Update user profile with form data
-      await usersAPI.updateUser(user?.id || '', {
+
+      const ensureResult = await ensureUserProfile(
+        buildProfileInputFromNhostUser({
+          id: user.id,
+          email: user.email,
+          displayName: form.name || user.displayName || user.name,
+          avatarUrl: user.photoUrl || user.avatar,
+        }),
+      );
+
+      if (!ensureResult.ok) {
+        showToast('error', ensureResult.error);
+        return;
+      }
+
+      const nhostUserId = ensureResult.effectiveNhostUserId;
+      setProfileNhostId(nhostUserId);
+
+      const updateResponse = await usersAPI.updateUser(nhostUserId, {
         display_name: form.name,
         location: form.location,
         about: form.about,
@@ -100,32 +153,38 @@ export default function OnboardingStepOne() {
         occupation: form.occupation,
         languages: form.languages,
       });
-      
-      // Navigate to photo step
+
+      if (!updateResponse?.success) {
+        showToast(
+          'error',
+          (updateResponse as { error?: string })?.error || 'Failed to save your profile. Please try again.',
+        );
+        return;
+      }
+
       router.push('/onboarding/photo');
     } catch (error) {
       console.error('Error updating profile:', error);
-      // You might want to show a toast error here
+      showToast('error', 'Failed to save your profile. Please try again.');
     } finally {
       setSaving(false);
     }
   }
 
+  const isBusy = saving || profileEnsuring || authLoading;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header */}
       <div className="mb-8">
         <p className="text-xs text-gray-500 mb-1">Step 1 of 2</p>
         <h1 className="text-3xl font-bold text-gray-900 mb-0">Set up your profile</h1>
         <p className="text-gray-600">Tell us a bit about yourself to get started.</p>
       </div>
 
-      {/* Profile Form */}
       <div className="bg-white rounded-2xl p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
-        
+
         <div className="space-y-6">
-          {/* Display Name */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -143,7 +202,6 @@ export default function OnboardingStepOne() {
               className="form-input-sm"
               placeholder="Enter your name"
             />
-            {/* Quick-select pills */}
             {(nameParts.firstName || nameParts.lastName) && (() => {
               const variants = buildVariants(nameParts);
               const pills: { mode: DisplayNameMode; label: string }[] = ([
@@ -182,7 +240,6 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">This is the name that will be visible to other users</p>
           </div>
 
-          {/* Location */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -200,7 +257,6 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">Help others understand your location</p>
           </div>
 
-          {/* About */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -218,7 +274,6 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">Share your story and what makes you unique</p>
           </div>
 
-          {/* Education */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -241,7 +296,6 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">Optional: Share your educational background</p>
           </div>
 
-          {/* Occupation */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -264,7 +318,6 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">Optional: Tell us about your profession</p>
           </div>
 
-          {/* Languages */}
           <div>
             <label className="form-label text-xs">
               <span className="flex items-center">
@@ -295,14 +348,13 @@ export default function OnboardingStepOne() {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col space-y-3 pt-6 border-t border-gray-200">
           <button
             onClick={onNext}
-            disabled={saving || !form.name.trim()}
+            disabled={isBusy || !form.name.trim() || !profileNhostId}
             className="btn-primary disabled:opacity-50 w-full py-4 rounded-xl font-semibold text-base"
           >
-            {saving ? 'Saving...' : 'Continue'}
+            {saving ? 'Saving...' : profileEnsuring ? 'Preparing...' : 'Continue'}
           </button>
         </div>
       </div>

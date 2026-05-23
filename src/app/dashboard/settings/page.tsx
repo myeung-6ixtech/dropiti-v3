@@ -162,8 +162,12 @@ export default function SettingsPage() {
             setSettings(newSettings);
             setTempSettings(newSettings);
           } else {
-            console.error('Failed to load user settings:', response.error);
-            showToast('error', response.error || t('errors.settings.failedToLoad'));
+            const errMsg =
+              !response.success && 'error' in response
+                ? response.error
+                : t('errors.settings.failedToLoad');
+            console.error('Failed to load user settings:', errMsg);
+            showToast('error', errMsg);
             // Keep default settings if API fails
             console.log('Keeping default settings due to API failure');
           }

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { PropertyDataForAPI, CreateUserInput, UpdateUserInput } from '@/types';
+import type { RealEstateUserRow } from '@/lib/ensureUserProfile';
 import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
 import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
 import { StandardizedAddress, formatAddressForDatabase } from '@/utils/addressFormatter';
@@ -295,25 +296,34 @@ export const usersAPI = {
     }
   },
 
-  // Get user by Nhost User ID
-  getUserByNhostUserId: async (nhostUserId: string) => {
+  // Get user by Nhost User ID (404 returns notFound — does not throw)
+  getUserByNhostUserId: async (
+    nhostUserId: string,
+  ): Promise<
+    | { success: true; data: RealEstateUserRow }
+    | { success: false; notFound: true }
+    | { success: false; error: string }
+  > => {
     try {
-      console.log('API Client: Fetching user by Nhost User ID:', nhostUserId);
-      const response = await apiClient.get('/users/get-user-by-id', { 
-        params: { nhost_user_id: nhostUserId } 
+      const response = await apiClient.get('/users/get-user-by-id', {
+        params: { nhost_user_id: nhostUserId },
       });
-      console.log('API Client: Response received:', response.data);
-      return response.data;
+      return response.data as { success: true; data: RealEstateUserRow };
     } catch (error) {
-      console.error('Get user by Nhost User ID error:', error);
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      } else if (error instanceof Error) {
-        console.error('Error message:', error.message);
+        const axiosError = error as { response: { data?: { error?: string }; status: number } };
+        if (axiosError.response.status === 404) {
+          return { success: false, notFound: true };
+        }
+        return {
+          success: false,
+          error: axiosError.response.data?.error || 'Failed to retrieve user',
+        };
       }
-      throw error;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to retrieve user',
+      };
     }
   },
 

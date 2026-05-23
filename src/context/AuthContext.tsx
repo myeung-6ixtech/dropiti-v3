@@ -2,13 +2,17 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useAuthenticationStatus, useUserData } from "@nhost/nextjs";
 import { useRouter } from "next/navigation";
-import { usersAPI } from "@/lib/api-client";
 import { nhost } from "@/lib/nhost";
 import { nhostAuthService } from "@/services/auth/nhostAuthService";
 import { AUTH_ERRORS } from "@/types/error-messages";
 import { getCallbackUrlFromSearch } from "@/lib/oauthCallback";
 import { resolveAuthError } from "@/lib/resolveAuthError";
 import type { AuthErrorPresentation } from "@/types/auth-errors";
+import {
+  buildProfileInputFromNhostUser,
+  ensureUserProfile,
+  mapDbUserToAuthUser,
+} from "@/lib/ensureUserProfile";
 
 interface AuthUser {
   id: string;
@@ -76,20 +80,6 @@ export const useAuth = () => {
 const PROFILE_SETUP_WARNING =
   "Your account is signed in but we couldn't finish setting up your profile. Refresh the page or contact support if this continues.";
 
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-constraint
-const parseJSON = <T,>(value: unknown, fallback: T): T => {
-  if (value && typeof value === 'object') return value as T;
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      return typeof parsed === 'object' ? (parsed as T) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-  return fallback;
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading: authLoading } = useAuthenticationStatus();
   const nhostUser = useUserData();
@@ -118,67 +108,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setProfileLoading(true);
       try {
-        const response = await usersAPI.getUserByNhostUserId(nhostUser.id);
+        const ensureResult = await ensureUserProfile(buildProfileInputFromNhostUser(nhostUser));
 
-        if (response.success && response.data) {
-          const d = response.data;
-          setUser({
-            id: d.nhost_user_id || nhostUser.id,
-            email: d.email || nhostUser.email || '',
-            name: d.display_name || nhostUser.displayName || 'User',
-            avatar: d.photo_url || nhostUser.avatarUrl || undefined,
-            uuid: d.uuid,
-            displayName: d.display_name,
-            photoUrl: d.photo_url,
-            location: d.location,
-            about: d.about,
-            education: d.education,
-            occupation: d.occupation,
-            maritalStatus: d.marital_status,
-            languages: Array.isArray(d.languages) ? d.languages : [],
-            responseTime: d.response_time,
-            verified: d.verified || false,
-            rating: d.rating || 0,
-            reviewCount: d.review_count || 0,
-            responseRate: d.response_rate || 0,
-            avgResponseTime: d.avg_response_time || 'Not specified',
-            totalProperties: d.total_properties || 0,
-            totalGuests: d.total_guests || 0,
-            userSince: d.created_at,
-            phoneNumber: d.phone_number,
-            onboarding_complete: d.onboarding_complete || false,
-            preferences: parseJSON(d.preferences, {}),
-            notificationSettings: parseJSON(d.notification_settings, {}),
-            privacySettings: parseJSON(d.privacy_settings, {}),
-            createdAt: d.created_at,
-            updatedAt: d.updated_at,
-          });
+        if (ensureResult.ok) {
+          setUser(mapDbUserToAuthUser(ensureResult.data, nhostUser));
+          setAuthWarning(null);
         } else {
-          // No DB profile row found — auto-create one (covers Google OAuth sign-ups)
-          const detectedProvider = nhostUser.avatarUrl?.includes('googleusercontent')
-            ? 'google' as const
-            : 'email' as const;
-          let profileCreated = false;
-          try {
-            const createResponse = await usersAPI.createUser({
-              nhost_user_id: nhostUser.id,
-              display_name: nhostUser.displayName || nhostUser.email?.split('@')[0] || 'User',
-              email: nhostUser.email || '',
-              photo_url: nhostUser.avatarUrl || undefined,
-              auth_provider: detectedProvider,
-            });
-            profileCreated = createResponse.success;
-          } catch (createErr) {
-            console.warn('AuthContext: could not auto-create profile row', createErr);
-          }
-          if (!profileCreated) {
-            setAuthWarning(PROFILE_SETUP_WARNING);
-          }
+          console.warn('AuthContext: ensureUserProfile failed', ensureResult.error);
+          setAuthWarning(PROFILE_SETUP_WARNING);
           setUser({
             id: nhostUser.id,
             email: nhostUser.email || '',
             name: nhostUser.displayName || 'User',
             avatar: nhostUser.avatarUrl || undefined,
+            onboarding_complete: false,
           });
         }
 
@@ -196,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: nhostUser.email || '',
           name: nhostUser.displayName || 'User',
           avatar: nhostUser.avatarUrl || undefined,
+          onboarding_complete: false,
         });
       } finally {
         setProfileLoading(false);
