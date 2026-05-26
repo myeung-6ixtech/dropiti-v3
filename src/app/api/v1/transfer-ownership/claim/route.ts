@@ -19,16 +19,16 @@ const GET_INVITATION_FOR_CLAIM_QUERY = `
 `;
 
 const TRANSFER_OWNERSHIP_MUTATION = `
-  mutation TransferPropertyOwnership($propertyUuid: uuid!, $newOwnerId: String!) {
+  mutation TransferPropertyOwnership($propertyUuid: uuid!, $newOwnerId: uuid!) {
     update_real_estate_property_listing(
       where: { property_uuid: { _eq: $propertyUuid } }
-      _set: { landlord_firebase_uid: $newOwnerId }
+      _set: { landlord_user_id: $newOwnerId }
     ) {
       affected_rows
       returning {
         property_uuid
         title
-        landlord_firebase_uid
+        landlord_user_id
       }
     }
   }

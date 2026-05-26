@@ -18,17 +18,25 @@ const GET_INVITATION_QUERY = `
       created_at
       used_at
       claimed_by_user_id
-      property_listing {
-        property_uuid
-        title
-        address
-        rental_price
-        rental_price_currency
-        property_type
-        num_bedroom
-        num_bathroom
-        display_image
-      }
+    }
+  }
+`;
+
+const GET_PROPERTY_QUERY = `
+  query GetPropertyForTransfer($propertyUuid: uuid!) {
+    real_estate_property_listing(
+      where: { property_uuid: { _eq: $propertyUuid } }
+      limit: 1
+    ) {
+      property_uuid
+      title
+      address
+      rental_price
+      rental_price_currency
+      property_type
+      num_bedroom
+      num_bathroom
+      display_image
     }
   }
 `;
@@ -71,7 +79,6 @@ interface InvitationRow {
   created_at: string;
   used_at: string | null;
   claimed_by_user_id: string | null;
-  property_listing: PropertyListing | null;
 }
 
 function extractLocation(address: unknown): string {
@@ -123,24 +130,32 @@ export async function GET(request: NextRequest) {
     }
 
     // ── 2. Resolve status ──────────────────────────────────────────────────
-    let resolvedStatus = invitation.status as InvitationStatus;
+    const isPastExpiry = new Date(invitation.expires_at) < new Date();
 
-    // Live expiry check: if DB says pending but expires_at has passed, expire it
-    if (
-      invitation.status === 'pending' &&
-      new Date(invitation.expires_at) < new Date()
-    ) {
-      resolvedStatus = 'expired';
-      // Persist the state change asynchronously — don't block the response
-      executeMutation(EXPIRE_INVITATION_MUTATION, { id: invitation.id }).catch(
-        (err) => console.error('Failed to persist expired status:', err)
-      );
+    let resolvedStatus: InvitationStatus;
+    if (invitation.status === 'pending') {
+      if (isPastExpiry) {
+        resolvedStatus = 'expired';
+        executeMutation(EXPIRE_INVITATION_MUTATION, { id: invitation.id }).catch(
+          (err) => console.error('Failed to persist expired status:', err)
+        );
+      } else {
+        resolvedStatus = 'valid';
+      }
+    } else {
+      resolvedStatus = invitation.status as InvitationStatus;
     }
 
-    // ── 3. Build property shape for client ─────────────────────────────────
-    const prop = invitation.property_listing;
-    const property = prop
-      ? {
+    // ── 3. Fetch property by property_uuid ─────────────────────────────────
+    let property = null;
+    if (invitation.property_uuid) {
+      const propData = await executeQuery<{
+        real_estate_property_listing: PropertyListing[];
+      }>(GET_PROPERTY_QUERY, { propertyUuid: invitation.property_uuid });
+
+      const prop = propData?.real_estate_property_listing?.[0];
+      if (prop) {
+        property = {
           propertyUuid: prop.property_uuid,
           title: prop.title,
           location: extractLocation(prop.address),
@@ -150,8 +165,9 @@ export async function GET(request: NextRequest) {
           bedrooms: prop.num_bedroom,
           bathrooms: prop.num_bathroom,
           imageUrl: prop.display_image ?? null,
-        }
-      : null;
+        };
+      }
+    }
 
     return NextResponse.json({
       success: true,

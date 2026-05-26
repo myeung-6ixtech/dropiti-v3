@@ -69,7 +69,7 @@ const GET_PROPERTY_QUERY = `
       num_bathroom
       display_image
       external_contact
-      landlord_firebase_uid
+      landlord_user_id
     }
   }
 `;
@@ -125,7 +125,7 @@ interface GraphQLProperty {
   num_bathroom: number;
   display_image: string | null;
   external_contact: string | null;
-  landlord_firebase_uid: string;
+  landlord_user_id: string;
 }
 
 function extractLocation(address: unknown): string {

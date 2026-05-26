@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { authClasses } from '@/styles/auth';
 import { parseFunctionsEnvelope, resolveApiPath } from '@/lib/nhost-functions';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -59,19 +60,37 @@ function daysUntil(isoDate: string): number {
   );
 }
 
+function formatExpiry(isoDate: string): string {
+  const days = daysUntil(isoDate);
+  const dateStr = new Date(isoDate).toLocaleDateString('en', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  if (days === 0) return `Expires today (${dateStr})`;
+  if (days === 1) return `Expires tomorrow (${dateStr})`;
+  return `Expires in ${days} days — ${dateStr}`;
+}
+
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function Header() {
+function PageFooter() {
   return (
-    <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-center">
-      <span className="text-xl font-bold text-blue-600 tracking-tight">Dropiti</span>
-    </header>
+    <footer className="text-center text-xs text-gray-400 py-6 mt-4">
+      <Link href="/privacy-policy" className="hover:text-gray-600 transition-colors">
+        Privacy Policy
+      </Link>
+      {' · '}
+      <Link href="/terms-of-service" className="hover:text-gray-600 transition-colors">
+        Terms of Service
+      </Link>
+    </footer>
   );
 }
 
 function PropertyCard({ property }: { property: PropertyInfo }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="dashboard-card overflow-hidden p-0 mb-0">
       {property.imageUrl && (
         <div className="relative h-48 w-full bg-gray-100">
           <Image
@@ -132,6 +151,26 @@ function StatusCard({
   );
 }
 
+function InviteBanner({
+  title,
+  body,
+  expiresAt,
+}: {
+  title: string;
+  body: React.ReactNode;
+  expiresAt?: string | null;
+}) {
+  return (
+    <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5">
+      <p className="text-purple-800 text-sm font-medium mb-1">{title}</p>
+      <p className="text-purple-700 text-sm leading-relaxed">{body}</p>
+      {expiresAt && (
+        <p className="mt-2 text-purple-600 text-xs">{formatExpiry(expiresAt)}</p>
+      )}
+    </div>
+  );
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TransferOwnershipPage() {
@@ -145,6 +184,10 @@ export default function TransferOwnershipPage() {
   const [property, setProperty] = useState<PropertyInfo | null>(null);
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
   const [claimError, setClaimError] = useState<string | null>(null);
+
+  const callbackUrl = `/transfer-ownership/${token}`;
+  const signUpUrl = `/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+  const signInUrl = `/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 
   // ── Validate token ──────────────────────────────────────────────────────
   const validate = useCallback(async () => {
@@ -190,28 +233,18 @@ export default function TransferOwnershipPage() {
         return;
       }
 
-      // Token is valid — check auth state
-      if (!authLoading) {
-        setStatus(isAuthenticated ? 'ready_to_claim' : 'unauthenticated');
-      }
+      // authLoading is guaranteed false here — effect waits for auth to settle
+      setStatus(isAuthenticated ? 'ready_to_claim' : 'unauthenticated');
     } catch {
       setStatus('error');
     }
-  }, [token, authLoading, isAuthenticated]);
+  }, [token, isAuthenticated]);
 
   useEffect(() => {
-    if (token) {
+    if (token && !authLoading) {
       validate();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  // When auth state resolves after redirect back from login/signup, update
-  useEffect(() => {
-    if (status === 'unauthenticated' && isAuthenticated && !authLoading) {
-      setStatus('ready_to_claim');
-    }
-  }, [isAuthenticated, authLoading, status]);
+  }, [token, authLoading, validate]);
 
   // ── Claim handler ───────────────────────────────────────────────────────
   const handleClaim = async () => {
@@ -228,7 +261,7 @@ export default function TransferOwnershipPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token, userId: user.id }),
       });
       const raw = await res.json();
       const parsed = parseFunctionsEnvelope(raw);
@@ -249,23 +282,20 @@ export default function TransferOwnershipPage() {
     }
   };
 
-  // ── Auth links ──────────────────────────────────────────────────────────
-  const callbackUrl = `/transfer-ownership/${token}`;
-  const signUpUrl = `/auth/signup?callbackUrl=${encodeURIComponent(callbackUrl)}`;
-  const signInUrl = `/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+  const mainClass = 'max-w-lg mx-auto px-4 pt-4 pb-16';
 
   // ── Render states ───────────────────────────────────────────────────────
 
   if (status === 'loading' || (status === 'unauthenticated' && authLoading)) {
     return (
       <>
-        <Header />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4" />
             <p className="text-gray-500 text-sm">Verifying invitation&hellip;</p>
           </div>
         </div>
+        <PageFooter />
       </>
     );
   }
@@ -273,8 +303,7 @@ export default function TransferOwnershipPage() {
   if (status === 'invalid' || status === 'error') {
     return (
       <>
-        <Header />
-        <main className="max-w-lg mx-auto px-4 pt-8">
+        <main className={mainClass}>
           <StatusCard
             icon={
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
@@ -287,6 +316,7 @@ export default function TransferOwnershipPage() {
             description="The invitation link you followed is not recognised. It may have been copied incorrectly. Please check the original WhatsApp message."
           />
         </main>
+        <PageFooter />
       </>
     );
   }
@@ -294,8 +324,7 @@ export default function TransferOwnershipPage() {
   if (status === 'expired') {
     return (
       <>
-        <Header />
-        <main className="max-w-lg mx-auto px-4 pt-8">
+        <main className={mainClass}>
           {property && <PropertyCard property={property} />}
           <StatusCard
             icon={
@@ -318,6 +347,7 @@ export default function TransferOwnershipPage() {
             </a>
           </StatusCard>
         </main>
+        <PageFooter />
       </>
     );
   }
@@ -325,8 +355,7 @@ export default function TransferOwnershipPage() {
   if (status === 'used' || status === 'cancelled') {
     return (
       <>
-        <Header />
-        <main className="max-w-lg mx-auto px-4 pt-8">
+        <main className={mainClass}>
           {property && <PropertyCard property={property} />}
           <StatusCard
             icon={
@@ -339,14 +368,12 @@ export default function TransferOwnershipPage() {
             title="Already claimed"
             description="This property has already been claimed by its owner. If you believe this is an error, please contact Dropiti support."
           >
-            <Link
-              href="/auth/signin"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
+            <Link href={signInUrl} className={`${authClasses.button} inline-flex items-center justify-center !w-auto px-5`}>
               Sign in to Dropiti
             </Link>
           </StatusCard>
         </main>
+        <PageFooter />
       </>
     );
   }
@@ -354,37 +381,25 @@ export default function TransferOwnershipPage() {
   if (status === 'unauthenticated') {
     return (
       <>
-        <Header />
-        <main className="max-w-lg mx-auto px-4 pt-6 pb-12 space-y-5">
-          {/* Invitation context banner */}
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
-            <p className="text-blue-800 text-sm font-medium mb-1">You have been invited</p>
-            <p className="text-blue-700 text-sm leading-relaxed">
-              Dropiti has received a rental enquiry for your property. Register or log in to
-              claim ownership and manage this lead.
-            </p>
-            {expiresAt && (
-              <p className="mt-2 text-blue-600 text-xs">
-                This invitation expires in {daysUntil(expiresAt)} day{daysUntil(expiresAt) !== 1 ? 's' : ''}.
-              </p>
-            )}
-          </div>
+        <main className={`${mainClass} space-y-5`}>
+          <InviteBanner
+            title="You have been invited"
+            expiresAt={expiresAt}
+            body={
+              <>
+                Dropiti has received a rental enquiry for your property. Register or log in to
+                claim ownership and manage this lead.
+              </>
+            }
+          />
 
-          {/* Property preview */}
           {property && <PropertyCard property={property} />}
 
-          {/* Auth CTAs */}
           <div className="space-y-3">
-            <Link
-              href={signUpUrl}
-              className="flex items-center justify-center w-full px-5 py-3.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm"
-            >
+            <Link href={signUpUrl} className={`${authClasses.button} flex items-center justify-center !mb-0`}>
               Create a Free Account
             </Link>
-            <Link
-              href={signInUrl}
-              className="flex items-center justify-center w-full px-5 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium text-sm hover:bg-gray-50 transition-colors"
-            >
+            <Link href={signInUrl} className={`${authClasses.buttonSecondary} flex items-center justify-center`}>
               I already have an account — Sign in
             </Link>
           </div>
@@ -393,6 +408,7 @@ export default function TransferOwnershipPage() {
             By continuing you agree to Dropiti&apos;s Terms of Service and Privacy Policy.
           </p>
         </main>
+        <PageFooter />
       </>
     );
   }
@@ -400,8 +416,7 @@ export default function TransferOwnershipPage() {
   if (status === 'claimed') {
     return (
       <>
-        <Header />
-        <main className="max-w-lg mx-auto px-4 pt-8">
+        <main className={mainClass}>
           <StatusCard
             icon={
               <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
@@ -411,11 +426,12 @@ export default function TransferOwnershipPage() {
               </div>
             }
             title="Property claimed!"
-            description="You are now the owner of this listing on Dropiti. Redirecting you to your dashboard..."
+            description="You are now the owner of this listing on Dropiti. Redirecting you to your properties..."
           >
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto" />
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto" />
           </StatusCard>
         </main>
+        <PageFooter />
       </>
     );
   }
@@ -423,38 +439,32 @@ export default function TransferOwnershipPage() {
   // ── ready_to_claim / claiming ────────────────────────────────────────────
   return (
     <>
-      <Header />
-      <main className="max-w-lg mx-auto px-4 pt-6 pb-12 space-y-5">
-        {/* Invitation context banner */}
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
-          <p className="text-blue-800 text-sm font-medium mb-1">Ready to claim your listing</p>
-          <p className="text-blue-700 text-sm leading-relaxed">
-            You are signed in as{' '}
-            <span className="font-semibold">{user?.email}</span>. Click below to
-            transfer this listing into your Dropiti account.
-          </p>
-          {expiresAt && (
-            <p className="mt-2 text-blue-600 text-xs">
-              Invitation expires in {daysUntil(expiresAt)} day{daysUntil(expiresAt) !== 1 ? 's' : ''}.
-            </p>
-          )}
-        </div>
+      <main className={`${mainClass} space-y-5`}>
+        <InviteBanner
+          title="Ready to claim your listing"
+          expiresAt={expiresAt}
+          body={
+            <>
+              You are signed in as{' '}
+              <span className="font-semibold">{user?.email}</span>. Click below to
+              transfer this listing into your Dropiti account.
+            </>
+          }
+        />
 
-        {/* Property preview */}
         {property && <PropertyCard property={property} />}
 
-        {/* Error message */}
         {claimError && (
-          <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-sm text-red-700">
+          <div className={authClasses.error} role="alert">
             {claimError}
           </div>
         )}
 
-        {/* Claim CTA */}
         <button
+          type="button"
           onClick={handleClaim}
           disabled={status === 'claiming'}
-          className="flex items-center justify-center w-full px-5 py-3.5 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+          className={`${authClasses.button} flex items-center justify-center !mb-0 disabled:opacity-60 disabled:cursor-not-allowed`}
         >
           {status === 'claiming' ? (
             <>
@@ -466,13 +476,14 @@ export default function TransferOwnershipPage() {
           )}
         </button>
 
-        <button
-          onClick={() => router.push('/auth/signin')}
+        <Link
+          href={signInUrl}
           className="flex items-center justify-center w-full px-5 py-2 text-gray-500 text-sm hover:text-gray-700 transition-colors"
         >
           Sign in with a different account
-        </button>
+        </Link>
       </main>
+      <PageFooter />
     </>
   );
 }

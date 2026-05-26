@@ -10,7 +10,7 @@ const GET_PROPERTY_QUERY = `
       property_uuid
       title
       address
-      landlord_firebase_uid
+      landlord_user_id
       external_contact
     }
   }
@@ -59,7 +59,7 @@ interface PropertyRow {
   property_uuid: string;
   title: string;
   address: unknown;
-  landlord_firebase_uid: string;
+  landlord_user_id: string;
   external_contact: string | null;
 }
 
