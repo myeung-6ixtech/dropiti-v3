@@ -33,7 +33,7 @@ export default function ReviewsPage() {
       // Fetch review opportunities
       const opportunitiesResponse = await offersAPI.getReviewOpportunities(authUser.id);
       if (opportunitiesResponse.success) {
-        setReviewOpportunities(opportunitiesResponse.data.opportunities || []);
+        setReviewOpportunities(opportunitiesResponse.data?.opportunities ?? []);
       } else {
         console.warn('Failed to fetch review opportunities:', opportunitiesResponse.error);
       }

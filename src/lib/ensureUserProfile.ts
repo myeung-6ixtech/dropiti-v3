@@ -1,4 +1,5 @@
 import { usersAPI } from '@/lib/api-client';
+import { syncSessionCookie } from '@/lib/sync-session-cookie';
 import type { CreateUserInput } from '@/types';
 
 /** DB row shape returned by get-user-by-id / create-user */
@@ -47,7 +48,17 @@ export type EnsureUserProfileResult =
 export async function ensureUserProfile(
   input: CreateUserInput,
 ): Promise<EnsureUserProfileResult> {
-  const getResult = await usersAPI.getUserByNhostUserId(input.nhost_user_id);
+  let getResult = await usersAPI.getUserByNhostUserId(input.nhost_user_id);
+
+  // Cookie may lag behind Nhost SDK session on first paint after login
+  if (
+    !getResult.success &&
+    'unauthorized' in getResult &&
+    getResult.unauthorized
+  ) {
+    await syncSessionCookie();
+    getResult = await usersAPI.getUserByNhostUserId(input.nhost_user_id);
+  }
 
   if (getResult.success && getResult.data) {
     const row = getResult.data as RealEstateUserRow;
@@ -61,6 +72,22 @@ export async function ensureUserProfile(
   if (!getResult.success && 'notFound' in getResult && getResult.notFound) {
     try {
       const createResult = await usersAPI.createUser(input);
+
+      // Row was created concurrently (409) — refetch by nhost_user_id
+      if (
+        !createResult.success &&
+        'conflict' in createResult &&
+        createResult.conflict
+      ) {
+        const refetch = await usersAPI.getUserByNhostUserId(input.nhost_user_id);
+        if (refetch.success && refetch.data) {
+          return {
+            ok: true,
+            data: refetch.data as RealEstateUserRow,
+            effectiveNhostUserId: refetch.data.nhost_user_id || input.nhost_user_id,
+          };
+        }
+      }
 
       if (!createResult.success || !createResult.data) {
         const message =

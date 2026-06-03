@@ -95,12 +95,17 @@ The single source of truth for auth state in the app. Wraps Nhost's `useAuthenti
 
 ```
 isAuthenticated + nhostUser.id available
-  └─► GET /api/v1/users/get-user-by-uuid?id=<nhostUserId>
+  └─► syncSessionCookie()   ← writes httpOnly nhost_access_token cookie
+  └─► GET /api/v1/users/get-user-by-id?nhost_user_id=<nhostUserId>
         ├─► Profile found → setUser() with full DB data
         └─► Profile not found (e.g. new Google OAuth user)
               └─► POST /api/v1/users/create-user
                     (auto-detects auth_provider from avatarUrl)
-                  └─► setUser() with minimal Nhost data
+                  └─► setUser() with full DB data (re-fetched after create)
+
+When NEXT_PUBLIC_FUNCTIONS_URL is set, requests route via:
+  GET /api/v1/bff/functions/client/users/get-user-by-id?nhost_user_id=<nhostUserId>
+  → proxied to Nhost Functions with Bearer token from httpOnly cookie
 ```
 
 ### Provided Context Values
@@ -154,7 +159,7 @@ SignInForm / AuthContext.login()
   └─► nhost.auth.signIn({ email, password })
         └─► Nhost validates credentials, returns session
               └─► AuthContext loadProfile()
-                    ├─► GET /api/v1/users/get-user-by-uuid (profile found → done)
+                    ├─► GET /api/v1/users/get-user-by-id?nhost_user_id=<id> (profile found → done)
                     └─► Not found → POST /api/v1/users/create-user (safety net)
 ```
 
@@ -197,21 +202,23 @@ Both functions POST to `HASURA_ENDPOINT` with the `x-hasura-admin-secret` header
 
 ## API Routes for User Profiles
 
-### `GET /api/v1/users/get-user-by-uuid?id=<nhostUserId>`
+### `GET /api/v1/users/get-user-by-id?nhost_user_id=<nhostUserId>`
 
-Fetches a `real_estate.user` row by `nhost_user_id`. Used by `AuthContext` on every session load.
+Canonical lookup by Nhost auth id (`real_estate_user.nhost_user_id`). Used by `AuthContext`, dashboard profile, and `/user/[id]` (route param is always `nhost_user_id`).
+
+Optional: `?id=<numeric>` for Hasura PK lookups (requires auth when using Nhost Functions).
+
+### `GET /api/v1/users/get-user-by-uuid` (deprecated)
+
+Returns **410**. Use `get-user-by-id?nhost_user_id=` instead.
 
 ### `POST /api/v1/users/create-user`
 
 Creates a new `real_estate.user` row. Accepts `{ nhost_user_id, display_name, email, photo_url?, auth_provider? }`. Checks for existing row by both `nhost_user_id` and `email` before inserting to prevent duplicates.
 
-### `PUT /api/v1/users/update-user`
+### `PUT` / `PATCH /api/v1/users/update-user`
 
-Updates profile fields for a user identified by `nhost_user_id`.
-
-### `GET /api/v1/users/get-user-by-id?id=<nhostUserId>`
-
-Public-facing profile lookup used by the `/user/[id]` page.
+Updates profile fields for the authenticated user.
 
 ---
 

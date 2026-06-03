@@ -14,7 +14,10 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
   // For incoming offers (landlord perspective), show initiator (tenant) details
   // For outgoing offers (tenant perspective), show recipient (landlord) details
   const userToShow = isIncomingOffer ? offer.initiator : offer.recipient;
-  
+  const profileUserId = isIncomingOffer
+    ? offer.initiatorUserId
+    : offer.recipientUserId;
+
   if (!userToShow) {
     return null;
   }
@@ -59,9 +62,9 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
           </div>
           <div>
             <h3 className="font-medium text-sm text-gray-900 mb-0">
-              {userToShow.uuid ? (
+              {profileUserId ? (
                 <Link 
-                  href={`/user/${userToShow.uuid}`}
+                  href={`/user/${profileUserId}`}
                   className="hover:text-blue-600 hover:underline transition-colors"
                 >
                   {userToShow.displayName || `Unknown ${userLabel}`}

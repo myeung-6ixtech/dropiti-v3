@@ -211,6 +211,8 @@ export default function SearchMap({
     );
   }
 
+  const markersWithCoords = properties.filter((prop) => coords[prop.id]);
+
   return (
     <GoogleMap
       mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -219,10 +221,8 @@ export default function SearchMap({
       onLoad={onMapLoad}
       options={MAP_OPTIONS}
     >
-      {properties.map((prop) => {
+      {markersWithCoords.map((prop) => {
         const c = coords[prop.id];
-        if (!c) return null;
-
         const isSelected = selectedId === prop.id;
         const isHovered = hoveredId === prop.id;
 

@@ -34,6 +34,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      // Wait until AuthContext has finished loading the profile before fetching
+      if (isLoading) return;
+
       const nhostUserId = authUser?.id;
 
       if (!nhostUserId) {
@@ -59,8 +62,9 @@ export default function DashboardPage() {
         ]);
         
         // Handle reviews response
-        if (reviewsResponse.status === 'fulfilled' && reviewsResponse.value.success && reviewsResponse.value.data) {
-          setReviews(Array.isArray(reviewsResponse.value.data) ? reviewsResponse.value.data : [reviewsResponse.value.data]);
+        if (reviewsResponse.status === 'fulfilled' && reviewsResponse.value.success) {
+          const reviewList = reviewsResponse.value.data;
+          setReviews(Array.isArray(reviewList) ? reviewList : []);
         } else {
           console.warn('Dashboard: Failed to fetch reviews, setting empty array');
           setReviews([]);
@@ -111,7 +115,7 @@ export default function DashboardPage() {
     };
 
     fetchData();
-  }, [authUser?.id]);
+  }, [authUser?.id, isLoading]);
 
   if (isLoading) {
     return (

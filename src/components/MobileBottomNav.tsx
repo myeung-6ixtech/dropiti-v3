@@ -9,6 +9,7 @@ import { FiHome, FiSearch, FiLayers, FiUser } from 'react-icons/fi';
 import { mobileBottomNavStyles } from '@/styles/index';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useClientMounted } from '@/hooks/useClientMounted';
 
 interface MobileBottomNavProps {
   className?: string;
@@ -26,7 +27,9 @@ interface NavItem {
 
 export default function MobileBottomNav({ className = '' }: MobileBottomNavProps) {
   const pathname = usePathname();
+  const mounted = useClientMounted();
   const { isAuthenticated, user } = useAuth();
+  const showAuthenticated = mounted && isAuthenticated;
   
   const { tap } = useHaptic();
 
@@ -65,7 +68,7 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
       isActive: () => isActive('/search')
     },
     // Only show Dashboard for authenticated users
-    ...(isAuthenticated ? [{
+    ...(showAuthenticated ? [{
       id: 'dashboard',
       label: 'Manage',
       href: '/dashboard',
@@ -74,11 +77,11 @@ export default function MobileBottomNav({ className = '' }: MobileBottomNavProps
     }] : []),
     {
       id: 'profile',
-      label: isAuthenticated ? 'Profile' : 'Sign In',
-      href: isAuthenticated && user?.id ? `/user/${user.id}` : '/auth/signin',
+      label: showAuthenticated ? 'Profile' : 'Sign In',
+      href: showAuthenticated && user?.id ? `/user/${user.id}` : '/auth/signin',
       icon: FiUser,
       isActive: () => isActive('/profile'),
-      showAvatar: !!(isAuthenticated && user?.avatar)
+      showAvatar: !!(showAuthenticated && user?.avatar)
     }
   ];
 

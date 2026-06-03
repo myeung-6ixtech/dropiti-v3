@@ -14,10 +14,13 @@ import NotificationCenter from '@/components/notifications/NotificationCenter';
 import { useMobileChat } from '@/context/MobileChatContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useHaptic } from '@/hooks/useHaptic';
+import { useClientMounted } from '@/hooks/useClientMounted';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const mounted = useClientMounted();
   const { isAuthenticated, logout, user } = useAuth();
+  const showAuthenticated = mounted && isAuthenticated;
   const { t } = useLanguage();
   const { sidebarOpen, toggleSidebar, isMobile } = useSidebar();
   const { openBottomSheet } = useMobileChat();
@@ -42,7 +45,7 @@ export default function Navigation() {
 
   // Handle avatar loading state
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (showAuthenticated && user) {
       // If user is authenticated but doesn't have avatar yet, show loading
       if (!user.avatar) {
         setIsAvatarLoading(true);
@@ -64,7 +67,7 @@ export default function Navigation() {
     } else {
       setIsAvatarLoading(false);
     }
-  }, [isAuthenticated, user]);
+  }, [showAuthenticated, user]);
 
   const isActive = (path: string) => {
     return pathname === path;
@@ -98,8 +101,10 @@ export default function Navigation() {
   // Don't show loading skeleton - assume user is not authenticated initially
   // This provides better UX by showing the login button immediately
 
+  const layoutIsMobile = mounted && isMobile;
+
   // Hide navigation completely on mobile for homepage, search, property pages, user profile pages, and auth pages
-  if (isMobile && (
+  if (layoutIsMobile && (
     pathname === '/' || 
     pathname.startsWith('/search') || 
     pathname.startsWith('/property/') || 
@@ -112,7 +117,7 @@ export default function Navigation() {
   }
 
   // For mobile dashboard pages, show simplified header
-  if (isMobile && pathname.startsWith('/dashboard')) {
+  if (layoutIsMobile && pathname.startsWith('/dashboard')) {
     return (
       <nav className={navigationStyles.container}>
         <div className={navigationStyles.content}>
@@ -140,7 +145,7 @@ export default function Navigation() {
             </div>
             
             {/* Mobile Icons */}
-            {isAuthenticated && (
+            {showAuthenticated && (
               <div className="flex items-center space-x-2">
                 <LanguageSwitcher variant="icon" size="sm" />
                 <NotificationCenter />
@@ -165,7 +170,7 @@ export default function Navigation() {
         <div className={navigationStyles.header}>
           <div className={navigationStyles.brand}>
             {/* Mobile menu button - only show on mobile and dashboard pages */}
-            {isMobile && pathname.startsWith('/dashboard') && (
+            {layoutIsMobile && pathname.startsWith('/dashboard') && (
               <button
                 onClick={toggleSidebar}
                 className={navigationStyles.menuButton}
@@ -225,7 +230,7 @@ export default function Navigation() {
             </Link>
             
             
-            {isAuthenticated ? (
+            {showAuthenticated ? (
               <>
                <Link
                 href={user?.id ? `/user/${user.id}` : '/dashboard'}

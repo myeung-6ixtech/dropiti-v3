@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { usersAPI } from '@/lib/api-client';
 import { useToast } from './ToastContext';
 import { User } from '@/types/user';
+import enMessages from '@/messages/en.json';
 
 interface LanguageContextType {
   locale: string;
@@ -32,7 +33,9 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const { showToast } = useToast();
   const [locale, setLocaleState] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
-  const [translations, setTranslations] = useState<Record<string, unknown>>({});
+  const [translations, setTranslations] = useState<Record<string, unknown>>(
+    () => enMessages as Record<string, unknown>,
+  );
 
   // Load translations for the current locale
   const loadTranslations = useCallback(async (newLocale: string) => {

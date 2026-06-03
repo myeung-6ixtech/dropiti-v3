@@ -1,12 +1,125 @@
 import axios from 'axios';
 import { PropertyDataForAPI, CreateUserInput, UpdateUserInput } from '@/types';
 import type { RealEstateUserRow } from '@/lib/ensureUserProfile';
-import { CreateReviewInput, UpdateReviewInput } from '@/types/review';
+import {
+  CreateReviewInput,
+  UpdateReviewInput,
+  type Review,
+  type ReviewOpportunity,
+  type ReviewType,
+} from '@/types/review';
 import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
 import { StandardizedAddress, formatAddressForDatabase } from '@/utils/addressFormatter';
 import { useNhostFunctions } from '@/lib/nhost-functions';
+import { nhost } from '@/lib/nhost';
+import {
+  isRawListingRow,
+  normalizeListing,
+  normalizeListings,
+} from '@/lib/normalize-listing';
 
 const USE_NHOST_FUNCTIONS = useNhostFunctions();
+
+function isListingItemsPayload(items: unknown[]): boolean {
+  return items.length > 0 && items.some(isRawListingRow);
+}
+
+function mapRawOfferToReviewOpportunity(
+  offer: Record<string, unknown>,
+  userId: string,
+): ReviewOpportunity {
+  const isInitiator = offer.initiator_user_id === userId;
+  return {
+    id: String(offer.id ?? ''),
+    offerId: String(offer.offerId ?? offer.id ?? ''),
+    offerUuid: String(offer.offerUuid ?? offer.offer_uuid ?? offer.offer_key ?? offer.id ?? ''),
+    propertyUuid: String(offer.propertyUuid ?? offer.property_uuid ?? ''),
+    propertyTitle: String(offer.propertyTitle ?? 'Property'),
+    otherPartyName: String(offer.otherPartyName ?? 'Unknown User'),
+    otherPartyPhotoUrl: offer.otherPartyPhotoUrl as string | undefined,
+    otherPartyId: String(
+      offer.otherPartyId ??
+        (isInitiator ? offer.recipient_user_id : offer.initiator_user_id) ??
+        '',
+    ),
+    reviewType:
+      (offer.reviewType as ReviewOpportunity['reviewType']) ??
+      (isInitiator ? 'tenant_to_landlord' : 'landlord_to_tenant'),
+    reviewWindowEnd: String(
+      offer.reviewWindowEnd ?? offer.review_window_end ?? offer.updated_at ?? new Date().toISOString(),
+    ),
+    status: String(offer.status ?? 'pending'),
+  };
+}
+
+function parseReviewOpportunitiesData(data: unknown, userId: string): ReviewOpportunity[] {
+  if (!data) return [];
+  if (Array.isArray(data)) {
+    return data.map((row) => {
+      if (typeof row !== 'object' || row === null) return mapRawOfferToReviewOpportunity({}, userId);
+      const record = row as Record<string, unknown>;
+      if ('propertyTitle' in record && 'reviewWindowEnd' in record) {
+        return record as unknown as ReviewOpportunity;
+      }
+      return mapRawOfferToReviewOpportunity(record, userId);
+    });
+  }
+  if (typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.opportunities)) {
+      return parseReviewOpportunitiesData(obj.opportunities, userId);
+    }
+    if (Array.isArray(obj.items)) {
+      return parseReviewOpportunitiesData(obj.items, userId);
+    }
+  }
+  return [];
+}
+
+function mapRawReviewRow(row: Record<string, unknown>): Review {
+  const createdAt = String(row.createdAt ?? row.created_at ?? new Date().toISOString());
+  return {
+    id: String(row.id ?? row.review_uuid ?? ''),
+    reviewUuid: String(row.reviewUuid ?? row.review_uuid ?? row.id ?? ''),
+    reviewerUserId: String(row.reviewerUserId ?? row.reviewer_user_id ?? ''),
+    revieweeUserId: String(row.revieweeUserId ?? row.reviewee_user_id ?? ''),
+    reviewType: (row.reviewType ?? row.review_type ?? 'offer_review') as ReviewType,
+    rating: Number(row.rating ?? 0),
+    title: (row.title as string | undefined) ?? undefined,
+    comment: (row.comment as string | undefined) ?? undefined,
+    offerUuid: (row.offerUuid ?? row.offer_uuid) as string | undefined,
+    propertyUuid: (row.propertyUuid ?? row.property_uuid) as string | undefined,
+    isPublic: Boolean(row.isPublic ?? row.is_public ?? true),
+    isVerified: Boolean(row.isVerified ?? row.is_verified ?? false),
+    helpfulCount: Number(row.helpfulCount ?? row.helpful_count ?? 0),
+    createdAt,
+    updatedAt: String(row.updatedAt ?? row.updated_at ?? createdAt),
+    reviewer: (row.reviewer as Review['reviewer']) ?? undefined,
+    reviewee: (row.reviewee as Review['reviewee']) ?? undefined,
+    property: (row.property as Review['property']) ?? undefined,
+  };
+}
+
+function parseReviewsByUserData(data: unknown): Review[] {
+  if (!data) return [];
+  if (Array.isArray(data)) {
+    return data.map((row) => {
+      if (typeof row !== 'object' || row === null) return mapRawReviewRow({});
+      const record = row as Record<string, unknown>;
+      if ('reviewUuid' in record && 'createdAt' in record) {
+        return record as unknown as Review;
+      }
+      return mapRawReviewRow(record);
+    });
+  }
+  if (typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.items)) {
+      return parseReviewsByUserData(obj.items);
+    }
+  }
+  return [];
+}
 
 // Base API configuration — when NEXT_PUBLIC_FUNCTIONS_URL is set, route via BFF → Nhost Functions
 const apiClient = axios.create({
@@ -22,6 +135,12 @@ apiClient.interceptors.request.use(
     if (USE_NHOST_FUNCTIONS && config.url?.startsWith('/')) {
       config.url = config.url.slice(1);
     }
+    if (USE_NHOST_FUNCTIONS && typeof window !== 'undefined') {
+      const token = nhost.auth.getAccessToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => Promise.reject(error)
@@ -34,12 +153,23 @@ apiClient.interceptors.response.use(
       if (body.ok === true) {
         const data = body.data as Record<string, unknown> | unknown;
         if (data && typeof data === 'object' && 'items' in (data as object)) {
-          const wrapped = data as { items: unknown; pagination?: unknown };
-          response.data = {
-            success: true,
-            data: wrapped.items,
-            pagination: wrapped.pagination,
-          };
+          const wrapped = data as { items: unknown[]; pagination?: unknown };
+          const items = Array.isArray(wrapped.items) ? wrapped.items : [];
+          if (isListingItemsPayload(items)) {
+            response.data = {
+              success: true,
+              data: normalizeListings(items),
+              pagination: wrapped.pagination,
+            };
+          } else {
+            response.data = {
+              success: true,
+              data: items,
+              pagination: wrapped.pagination,
+            };
+          }
+        } else if (isRawListingRow(data)) {
+          response.data = { success: true, data: normalizeListing(data) };
         } else {
           response.data = { success: true, data: body.data };
         }
@@ -283,37 +413,89 @@ export const propertiesAPI = {
   },
 };
 
+/**
+ * Normalise a raw user row coming from either:
+ *   - Legacy v3 Next route:  { success: true, data: RealEstateUserRow }
+ *   - Nhost Functions (after interceptor unwrap): { success: true, data: <row> }
+ */
+function parseUserProfileResponse(body: unknown):
+  | { success: true; data: RealEstateUserRow }
+  | { success: false; notFound: true }
+  | { success: false; error: string } {
+  if (!body || typeof body !== 'object') {
+    return { success: false, error: 'Empty response' };
+  }
+  const b = body as Record<string, unknown>;
+  if (b.success === true && b.data && typeof b.data === 'object') {
+    return { success: true, data: b.data as RealEstateUserRow };
+  }
+  if (b.success === false) {
+    const msg = (b.error as string | undefined) ?? 'Failed to retrieve user';
+    return { success: false, error: msg };
+  }
+  // Direct row object (no success wrapper — older interceptor path)
+  if ('nhost_user_id' in b || 'uuid' in b) {
+    return { success: true, data: b as unknown as RealEstateUserRow };
+  }
+  return { success: false, error: 'Unexpected response shape' };
+}
+
+function normalizeUserApiResult(
+  parsed:
+    | { success: true; data: RealEstateUserRow }
+    | { success: false; notFound: true }
+    | { success: false; error: string },
+): { success: boolean; data?: RealEstateUserRow; error?: string; notFound?: boolean } {
+  if (parsed.success) {
+    return { success: true, data: parsed.data };
+  }
+  if ('notFound' in parsed && parsed.notFound) {
+    return { success: false, notFound: true };
+  }
+  return { success: false, error: parsed.error };
+}
+
 // Users API
 export const usersAPI = {
   // Create a new user
   createUser: async (userData: CreateUserInput) => {
     try {
       const response = await apiClient.post('/users/create-user', userData);
-      return response.data;
+      return normalizeUserApiResult(parseUserProfileResponse(response.data));
     } catch (error) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response: { data?: { error?: string }; status: number } };
+        // User already exists — treat as recoverable
+        if (axiosError.response.status === 409) {
+          return { success: false, error: axiosError.response.data?.error, conflict: true as const };
+        }
+      }
       console.error('Create user error:', error);
       throw error;
     }
   },
 
-  // Get user by Nhost User ID (404 returns notFound — does not throw)
+  /** Lookup by Nhost auth id (`real_estate_user.nhost_user_id`). Used for session + `/user/[id]`. */
   getUserByNhostUserId: async (
     nhostUserId: string,
   ): Promise<
     | { success: true; data: RealEstateUserRow }
     | { success: false; notFound: true }
-    | { success: false; error: string }
+    | { success: false; error: string; unauthorized?: boolean }
   > => {
     try {
       const response = await apiClient.get('/users/get-user-by-id', {
         params: { nhost_user_id: nhostUserId },
       });
-      return response.data as { success: true; data: RealEstateUserRow };
+      return parseUserProfileResponse(response.data);
     } catch (error) {
       if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data?: { error?: string }; status: number } };
+        const axiosError = error as { response: { data?: { error?: string; ok?: boolean }; status: number } };
         if (axiosError.response.status === 404) {
           return { success: false, notFound: true };
+        }
+        if (axiosError.response.status === 401) {
+          return { success: false, error: 'Unauthorized', unauthorized: true };
         }
         return {
           success: false,
@@ -327,37 +509,15 @@ export const usersAPI = {
     }
   },
 
-  // Get user by ID
+  // Get user by numeric Hasura PK (legacy / admin use)
   getUserById: async (userId: string) => {
     try {
-      const response = await apiClient.get('/users/get-user-by-id', { 
-        params: { id: userId } 
+      const response = await apiClient.get('/users/get-user-by-id', {
+        params: { id: userId },
       });
-      return response.data;
+      return parseUserProfileResponse(response.data);
     } catch (error) {
       console.error('Get user by ID error:', error);
-      throw error;
-    }
-  },
-
-  // Get user by UUID
-  getUserByUuid: async (userUuid: string) => {
-    try {
-      console.log('API Client: Fetching user by UUID:', userUuid);
-      const response = await apiClient.get('/users/get-user-by-uuid', { 
-        params: { uuid: userUuid } 
-      });
-      console.log('API Client: Response received:', response.data);
-      return response.data;
-    } catch (error) {
-      console.error('Get user by UUID error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      } else if (error instanceof Error) {
-        console.error('Error message:', error.message);
-      }
       throw error;
     }
   },
@@ -365,17 +525,32 @@ export const usersAPI = {
   // Update user profile
   updateUser: async (userId: string, updates: UpdateUserInput) => {
     try {
-      console.log('API Client: Updating user:', userId, 'with updates:', updates);
-      const response = await apiClient.put('/users/update-user', { id: userId, updates });
-      console.log('API Client: Update response:', response.data);
-      return response.data;
+      let response;
+      if (USE_NHOST_FUNCTIONS) {
+        // Nhost update-user: flat PATCH body, user scoped to JWT
+        const body: Record<string, unknown> = { ...updates };
+        if (Array.isArray(body.languages)) {
+          body.languages = JSON.stringify(body.languages);
+        }
+        for (const key of ['preferences', 'notification_settings', 'privacy_settings'] as const) {
+          if (body[key] && typeof body[key] === 'object') {
+            body[key] = JSON.stringify(body[key]);
+          }
+        }
+        response = await apiClient.patch('/users/update-user', body);
+      } else {
+        response = await apiClient.put('/users/update-user', { id: userId, updates });
+      }
+      const parsed = parseUserProfileResponse(response.data);
+      if (parsed.success) {
+        return { success: true as const, data: parsed.data };
+      }
+      return {
+        success: false as const,
+        error: 'error' in parsed ? parsed.error : 'Failed to update user',
+      };
     } catch (error) {
       console.error('Update user error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
       throw error;
     }
   },
@@ -383,8 +558,8 @@ export const usersAPI = {
   // Delete user (soft delete)
   deleteUser: async (userId: string) => {
     try {
-      const response = await apiClient.delete('/users/delete-user', { 
-        params: { id: userId } 
+      const response = await apiClient.delete('/users/delete-user', {
+        params: { id: userId },
       });
       return response.data;
     } catch (error) {
@@ -394,29 +569,57 @@ export const usersAPI = {
   },
 };
 
-// Tenants API (Tenant Profile)
+// Tenants API — BFF → Nhost `client/tenants` + `client/tenants/profile` when FUNCTIONS_URL is set
 export const tenantsAPI = {
   getTenantProfile: async (nhostUserId: string) => {
-    const response = await apiClient.get('/tenants/profile', { params: { nhost_user_id: nhostUserId } });
+    const response = await apiClient.get('/tenants/profile', {
+      params: { nhost_user_id: nhostUserId },
+    });
     return response.data;
   },
-  upsertTenantProfile: async (payload: Record<string, unknown> & { user_nhost_user_id: string }) => {
-    const response = await apiClient.post('/tenants/profile', payload);
+  upsertTenantProfile: async (
+    payload: Record<string, unknown> & { user_nhost_user_id: string },
+  ) => {
+    const { user_nhost_user_id, tenant_privacy_settings, privacy_settings, ...rest } =
+      payload;
+    const body: Record<string, unknown> = {
+      ...rest,
+      user_nhost_user_id,
+      privacy_settings: privacy_settings ?? tenant_privacy_settings ?? {},
+    };
+    const response = await apiClient.post('/tenants/profile', body);
     return response.data;
   },
   updateTenantProfile: async (nhostUserId: string, updates: Record<string, unknown>) => {
-    const response = await apiClient.put('/tenants/profile', { user_nhost_user_id: nhostUserId, updates });
+    if (USE_NHOST_FUNCTIONS) {
+      const { tenant_privacy_settings, privacy_settings, ...rest } = updates;
+      const body: Record<string, unknown> = {
+        ...rest,
+        ...(privacy_settings !== undefined || tenant_privacy_settings !== undefined
+          ? { privacy_settings: privacy_settings ?? tenant_privacy_settings }
+          : {}),
+      };
+      const response = await apiClient.patch('/tenants/profile', body);
+      return response.data;
+    }
+    const response = await apiClient.put('/tenants/profile', {
+      user_nhost_user_id: nhostUserId,
+      updates,
+    });
     return response.data;
   },
-  getTenantProfiles: async (params: {
-    limit?: number;
-    offset?: number;
-    budget_min?: string;
-    budget_max?: string;
-    location?: string;
-    move_in_date?: string;
-    property_type?: string;
-  } = {}) => {
+  getTenantProfiles: async (
+    params: {
+      limit?: number;
+      offset?: number;
+      budget_min?: string;
+      budget_max?: string;
+      location?: string;
+      move_in_date?: string;
+      property_type?: string;
+      status?: string;
+    } = {},
+  ) => {
     const response = await apiClient.get('/tenants', { params });
     return response.data;
   },
@@ -534,10 +737,16 @@ export const offersAPI = {
   // Get review opportunities for a user
   getReviewOpportunities: async (userId: string) => {
     try {
-      const response = await apiClient.get('/offers/get-review-opportunities', { 
-        params: { user_id: userId } 
+      const response = await apiClient.get('/offers/get-review-opportunities', {
+        params: { user_id: userId },
       });
-      return response.data;
+      const body = response.data as { success?: boolean; data?: unknown; error?: string };
+      const opportunities = parseReviewOpportunitiesData(body?.data, userId);
+      return {
+        success: body?.success !== false,
+        data: { opportunities },
+        error: body?.error,
+      };
     } catch (error) {
       console.error('Error fetching review opportunities:', error);
       throw error;
@@ -692,8 +901,22 @@ export const reviewsAPI = {
     try {
       console.log('API Client: Fetching reviews for user:', params);
       const response = await apiClient.get('/reviews/get-reviews-by-user', { params });
-      console.log('API Client: Reviews response:', response.data);
-      return response.data;
+      const body = response.data as {
+        success?: boolean;
+        data?: unknown;
+        total?: number;
+        message?: string;
+        error?: string;
+      };
+      const reviews = parseReviewsByUserData(body?.data);
+      console.log('API Client: Reviews response:', { count: reviews.length });
+      return {
+        success: body?.success !== false,
+        data: reviews,
+        total: body?.total ?? reviews.length,
+        message: body?.message,
+        error: body?.error,
+      };
     } catch (error) {
       console.error('API Client: Get reviews by user error:', error);
       if (error && typeof error === 'object' && 'response' in error) {

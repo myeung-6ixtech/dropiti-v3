@@ -4,7 +4,7 @@ import { notificationsAPI } from '@/lib/api-client';
 import { Notification } from '@/types/notification';
 
 export const useNotifications = () => {
-  const { user: authUser } = useAuth();
+  const { user: authUser, isAuthenticated, isLoading: authLoading } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -89,20 +89,23 @@ export const useNotifications = () => {
     }
   }, []);
 
-  // Initial load
+  // Initial load — only when session is ready (avoids BFF 401 before token sync)
   useEffect(() => {
+    if (authLoading || !isAuthenticated || !authUser?.id) return;
     fetchNotifications();
     fetchUnreadCount();
-  }, [fetchNotifications, fetchUnreadCount]);
+  }, [authLoading, isAuthenticated, authUser?.id, fetchNotifications, fetchUnreadCount]);
 
   // Poll for new notifications (similar to chat)
   useEffect(() => {
+    if (authLoading || !isAuthenticated || !authUser?.id) return;
+
     const interval = setInterval(() => {
       fetchUnreadCount();
     }, 30000); // Check every 30 seconds
 
     return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+  }, [authLoading, isAuthenticated, authUser?.id, fetchUnreadCount]);
 
   return {
     notifications,

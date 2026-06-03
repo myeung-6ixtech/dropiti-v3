@@ -10,6 +10,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { propertyCardClasses } from '@/styles/property-card';
 import { capitalizeWords } from '@/lib/utils';
+import { resolvePropertyLocation } from '@/lib/normalize-listing';
 
 interface PropertyCardProps {
   property: Property & { 
@@ -30,13 +31,10 @@ interface PropertyCardProps {
 export default function PropertyCard({ property, onViewDetails, isDashboard = false }: PropertyCardProps) {
   const router = useRouter();
 
-  // Debug: Log the property data to see what's being received
-  console.log('PropertyCard received property:', property);
-
   // Handle both Property interface and API response data
   const propertyUuid = property?.property_uuid || '';
   const title = property?.title || 'No Title';
-  const location = property?.location || property?.address || 'No Location';
+  const location = resolvePropertyLocation(property);
   const price = property?.price || property?.rental_price || 0;
   const imageUrl = property?.imageUrl || property?.display_image || '';
   const propertyType = property?.property_type || '';
@@ -54,7 +52,9 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
 
   // Extract District and Country for simplified display
   const getSimplifiedLocation = () => {
-    if (!location || location === 'No Location') return '';
+    if (!location || location === 'No Location' || location === 'Location not specified') {
+      return '';
+    }
     
     // Try to parse the location to extract District and Country
     // Location format is: "building, addressLine1, addressLine2, district, state, country"

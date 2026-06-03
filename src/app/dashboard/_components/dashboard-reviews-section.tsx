@@ -36,8 +36,12 @@ export function DashboardReviewsSection({
       
       <div className="dashboard-card-content">
         {reviews.length > 0 ? (
-          reviews.map((review) => (
-            <ReviewItem key={review.id} review={review} renderStars={renderStars} />
+          reviews.map((review, index) => (
+            <ReviewItem
+              key={review.reviewUuid || review.id || `review-${index}`}
+              review={review}
+              renderStars={renderStars}
+            />
           ))
         ) : (
           <div className="dashboard-review-empty">

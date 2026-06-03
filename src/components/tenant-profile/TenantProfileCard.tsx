@@ -8,6 +8,7 @@ import { TenantProfileData } from '@/types/tenant';
 import { getSafeProfileImage } from '@/lib/utils';
 import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
+import { usersAPI } from '@/lib/api-client';
 
 interface TenantProfileCardProps {
   data: TenantProfileData;
@@ -60,19 +61,17 @@ export default function TenantProfileCard({
             return;
           }
           
-          // Request user by nhost_user_id to get profile details
-          const res = await fetch(`/api/v1/users/get-user-by-id?nhost_user_id=${encodeURIComponent(nhostUserId)}`);
-          const json = await res.json();
-          if (!cancelled && json?.success && json?.data) {
+          const userRes = await usersAPI.getUserByNhostUserId(nhostUserId);
+          if (!cancelled && userRes.success && userRes.data) {
+            const row = userRes.data;
             setResolvedUser({
-              nhost_user_id: json.data.nhost_user_id,
-              uuid: json.data.uuid,
-              display_name: json.data.display_name,
-              photo_url: json.data.photo_url,
+              nhost_user_id: row.nhost_user_id,
+              uuid: row.uuid,
+              display_name: row.display_name,
+              photo_url: row.photo_url,
             });
-            // Use nhost_user_id for the /user/[id] profile link
-            if (json.data.nhost_user_id) {
-              setUserUuid(json.data.nhost_user_id);
+            if (row.nhost_user_id) {
+              setUserUuid(row.nhost_user_id);
             }
           }
         }

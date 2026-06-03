@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
+import { fetchTenantProfileByNhostUserId } from '@/lib/tenant-profiles';
 import TenantProfilePreview from '@/components/tenant-profile/TenantProfilePreview';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
 import { TenantProfileHeader } from './_components/tenant-profile-header';
@@ -31,40 +32,9 @@ export default function TenantProfilePage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await tenantsAPI.getTenantProfile(nhostUserId);
-        const profile = res?.data || null;
-        if (profile) {
-          // Map API payload directly to state
-          const mapped: TenantProfileData = {
-            tenant_listing_title: profile.tenant_listing_title,
-            tenant_listing_description: profile.tenant_listing_description,
-            budget_min: profile.budget_min,
-            budget_max: profile.budget_max,
-            budget_currency: profile.budget_currency,
-            payment_preferences: profile.payment_preferences || [],
-            deposit_capability: profile.deposit_capability,
-            preferred_property_types: profile.preferred_property_types || [],
-            rental_space_preference: profile.rental_space_preference,
-            furnishing_preference: profile.furnishing_preference,
-            pets_allowed: profile.pets_allowed,
-            preferred_locations: profile.preferred_locations || [],
-            transportation_proximity: profile.transportation_proximity || [],
-            neighborhood_preferences: profile.neighborhood_preferences || [],
-            location_flexibility: profile.location_flexibility,
-            preferred_move_in_date: profile.preferred_move_in_date,
-            preferred_lease_duration: profile.preferred_lease_duration,
-            notice_period: profile.notice_period,
-            urgency_level: profile.urgency_level,
-            work_location: profile.work_location,
-            lifestyle_preferences: profile.lifestyle_preferences || [],
-            special_requirements: profile.special_requirements || [],
-            contact_preferences: profile.contact_preferences || [],
-            best_contact_times: profile.best_contact_times || [],
-            response_time_expectation: profile.response_time_expectation,
-            tenant_privacy_settings: profile.privacy_settings || {},
-            tenant_listing_status: profile.tenant_listing_status,
-          };
-          setProfileData(mapped);
+        const res = await fetchTenantProfileByNhostUserId(nhostUserId);
+        if (res.success && res.data) {
+          setProfileData(res.data);
         }
       } catch (error) {
         console.error(error);

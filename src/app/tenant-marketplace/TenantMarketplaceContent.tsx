@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { tenantsAPI } from '@/lib/api-client';
+import { fetchTenantMarketplace } from '@/lib/tenant-profiles';
 
 import TenantProfileCard from '@/components/tenant-profile/TenantProfileCard';
 import TenantMarketplaceFilter from '@/components/tenant-marketplace/TenantMarketplaceFilter';
@@ -12,8 +12,10 @@ import PullToRefreshWrapper from '@/components/common/PullToRefreshWrapper';
 import Footer from '@/components/common/Footer';
 import { TenantProfileCardSkeletonGrid } from '@/components/skeleton';
 import { TenantProfileData } from '@/types/tenant';
+import { getTenantProfileKey } from '@/lib/tenant-profiles';
 
 interface TenantProfileWithUser extends TenantProfileData {
+  id?: string | number;
   user?: {
     uuid?: string;
     nhost_user_id: string;
@@ -52,6 +54,23 @@ export default function TenantMarketplaceContent() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const paginatedProfiles = tenantProfiles.slice(startIndex, endIndex);
+
+  const visiblePaginationItems = (() => {
+    const items: Array<{ type: 'page'; page: number } | { type: 'ellipsis'; key: string }> =
+      [];
+    for (let page = 1; page <= totalPages; page++) {
+      const shouldShow =
+        page === 1 ||
+        page === totalPages ||
+        (page >= currentPage - 1 && page <= currentPage + 1);
+      if (shouldShow) {
+        items.push({ type: 'page', page });
+      } else if (page === currentPage - 2 || page === currentPage + 2) {
+        items.push({ type: 'ellipsis', key: `ellipsis-${page}` });
+      }
+    }
+    return items;
+  })();
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -102,10 +121,10 @@ export default function TenantMarketplaceContent() {
         ...(filters.move_in_date && { move_in_date: filters.move_in_date }),
         ...(filters.property_type && { property_type: filters.property_type }),
       };
-      const result = await tenantsAPI.getTenantProfiles(params);
+      const result = await fetchTenantMarketplace(params);
 
-      if (result.success && result.data) {
-        setTenantProfiles(result.data);
+      if (result.success) {
+        setTenantProfiles(result.profiles);
       } else {
         console.error('Failed to fetch tenant profiles:', result.error);
         setTenantProfiles([]);
@@ -262,9 +281,9 @@ export default function TenantMarketplaceContent() {
               <TenantProfileCardSkeletonGrid count={12} />
             ) : tenantProfiles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {paginatedProfiles.map((profile) => (
+                {paginatedProfiles.map((profile, index) => (
                   <TenantProfileCard
-                    key={profile.tenant_uuid}
+                    key={getTenantProfileKey(profile, startIndex + index)}
                     data={profile}
                     user={profile.user}
                     currentUserId={currentUser?.id}
@@ -312,37 +331,25 @@ export default function TenantMarketplaceContent() {
 
                   {/* Page Numbers */}
                   <div className="flex items-center space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                      const shouldShow = 
-                        page === 1 || 
-                        page === totalPages || 
-                        (page >= currentPage - 1 && page <= currentPage + 1);
-                      
-                      if (!shouldShow) {
-                        if (page === currentPage - 2 || page === currentPage + 2) {
-                          return (
-                            <span key={page} className="px-3 py-2 text-gray-400">
-                              ...
-                            </span>
-                          );
-                        }
-                        return null;
-                      }
-
-                      return (
+                    {visiblePaginationItems.map((item) =>
+                      item.type === 'ellipsis' ? (
+                        <span key={item.key} className="px-3 py-2 text-gray-400">
+                          ...
+                        </span>
+                      ) : (
                         <button
-                          key={page}
-                          onClick={() => goToPage(page)}
+                          key={item.page}
+                          onClick={() => goToPage(item.page)}
                           className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                            page === currentPage
+                            item.page === currentPage
                               ? 'bg-blue-600 text-white'
                               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                           }`}
                         >
-                          {page}
+                          {item.page}
                         </button>
-                      );
-                    })}
+                      ),
+                    )}
                   </div>
 
                   {/* Next Button */}

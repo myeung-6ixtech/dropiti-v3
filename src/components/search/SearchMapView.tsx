@@ -7,6 +7,7 @@ import PropertyCard from '@/components/PropertyCard';
 import SearchMap from './SearchMap';
 import MapBottomSheet from './MapBottomSheet';
 import { useHaptic } from '@/hooks/useHaptic';
+import { getListingKey } from '@/lib/normalize-listing';
 
 interface SearchMapViewProps {
   properties: (Property & { property_uuid?: string })[];
@@ -28,23 +29,27 @@ export default function SearchMapView({ properties }: SearchMapViewProps) {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  // Lock body scroll on mobile so only the bottom sheet scrolls
   useEffect(() => {
     if (!isMobile) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
+    return () => {
+      document.body.style.overflow = prev;
+    };
   }, [isMobile]);
 
   const mapProperties = useMemo(
     () =>
-      properties.map((p) => ({
-        id: p.id,
-        property_uuid: p.property_uuid || p.id,
-        title: p.title,
-        location: p.location,
-        price: p.price,
-      })),
+      properties.map((p, index) => {
+        const listingKey = getListingKey(p, index);
+        return {
+          id: listingKey,
+          property_uuid: p.property_uuid || String(p.id ?? listingKey),
+          title: p.title,
+          location: p.location,
+          price: p.price,
+        };
+      }),
     [properties],
   );
 
@@ -82,27 +87,30 @@ export default function SearchMapView({ properties }: SearchMapViewProps) {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const cardList = properties.map((property) => {
-    const isSelected = selectedId === property.id;
-    const isHovered = hoveredId === property.id;
+  const cardList = properties.map((property, index) => {
+    const listingKey = getListingKey(property, index);
+    const propertyUuid = property.property_uuid || String(property.id ?? listingKey);
+    const isSelected = selectedId === listingKey;
+    const isHovered = hoveredId === listingKey;
+
     return (
       <div
-        key={property.id}
-        ref={(el) => { cardRefs.current[property.id] = el; }}
-        onMouseEnter={() => handleCardHover(property.id)}
+        key={listingKey}
+        ref={(el) => {
+          cardRefs.current[listingKey] = el;
+        }}
+        onMouseEnter={() => handleCardHover(listingKey)}
         onMouseLeave={() => handleCardHover(null)}
-        onClick={() => handleCardClick(property.id)}
+        onClick={() => handleCardClick(listingKey)}
         className={`
           rounded-xl transition-all duration-200 cursor-pointer
-          ${isHovered
-            ? 'ring-2 ring-gray-400 ring-offset-1'
-            : ''}
+          ${isHovered ? 'ring-2 ring-gray-400 ring-offset-1' : ''}
         `}
       >
         <PropertyCard
           property={{
             ...property,
-            property_uuid: property.property_uuid || property.id,
+            property_uuid: propertyUuid,
           }}
           onViewDetails={(uuid) => router.push(`/property/${uuid}`)}
         />
@@ -121,7 +129,6 @@ export default function SearchMapView({ properties }: SearchMapViewProps) {
     />
   );
 
-  /* ── Mobile: full-screen map + bottom sheet ── */
   if (isMobile) {
     return (
       <div className="fixed inset-0 top-16 z-10">
@@ -136,17 +143,12 @@ export default function SearchMapView({ properties }: SearchMapViewProps) {
     );
   }
 
-  /* ── Desktop: cards left (40%) | map right (60%) ── */
   return (
     <div className="flex flex-row h-[calc(100vh-180px)] min-h-[500px] w-full gap-0">
-      {/* Left: scrollable 2-col card grid */}
       <div className="w-[40%] h-full overflow-y-auto pr-4 pb-20">
-        <div className="grid grid-cols-2 gap-4">
-          {cardList}
-        </div>
+        <div className="grid grid-cols-2 gap-4">{cardList}</div>
       </div>
 
-      {/* Right: sticky map */}
       <div className="w-[60%] h-full sticky top-0 rounded-xl overflow-hidden border border-gray-200">
         {mapElement}
       </div>

@@ -13,7 +13,7 @@ import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface Landlord {
   id: string;
-  uuid: string; // Add uuid for navigation to user profile
+  nhost_user_id: string;
   name: string;
   avatar: string;
   rating: number;
@@ -209,7 +209,7 @@ export default function PropertyPricingCard({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2 mb-1">
                   <Link 
-                    href={`/user/${landlord.uuid}`}
+                    href={`/user/${landlord.nhost_user_id}`}
                     className="font-medium text-gray-900 text-base hover:text-black transition-colors cursor-pointer"
                   >
                     {landlord.name}

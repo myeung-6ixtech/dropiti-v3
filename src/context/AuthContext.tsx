@@ -13,6 +13,8 @@ import {
   ensureUserProfile,
   mapDbUserToAuthUser,
 } from "@/lib/ensureUserProfile";
+import { clearSessionCookie, syncSessionCookie } from "@/lib/sync-session-cookie";
+import { useClientMounted } from "@/hooks/useClientMounted";
 
 interface AuthUser {
   id: string;
@@ -81,6 +83,7 @@ const PROFILE_SETUP_WARNING =
   "Your account is signed in but we couldn't finish setting up your profile. Refresh the page or contact support if this continues.";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const mounted = useClientMounted();
   const { isAuthenticated, isLoading: authLoading } = useAuthenticationStatus();
   const nhostUser = useUserData();
   const [isRememberMeEnabled, setIsRememberMeEnabled] = useState(false);
@@ -103,11 +106,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null);
         setIsRememberMeEnabled(false);
         setAuthWarning(null);
+        setProfileLoading(false);
         return;
       }
 
       setProfileLoading(true);
       try {
+        await syncSessionCookie();
+
         const ensureResult = await ensureUserProfile(buildProfileInputFromNhostUser(nhostUser));
 
         if (ensureResult.ok) {
@@ -174,6 +180,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('dropiti_remember_me', 'true');
       }
 
+      await syncSessionCookie();
+
       return { success: true };
     } catch (err) {
       console.error('Login error:', err);
@@ -192,6 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem('dropiti_remember_me');
       localStorage.removeItem('dropiti_session_expiry');
       setIsRememberMeEnabled(false);
+      await clearSessionCookie();
       await nhost.auth.signOut();
       router.push("/");
     } catch (err) {
@@ -215,7 +224,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearAuthWarning,
       }}
     >
-      {authWarning && (
+      {mounted && authWarning && (
         <div
           className="fixed top-0 left-0 right-0 z-[9998] bg-amber-50 border-b border-amber-200 px-4 py-3 text-sm text-amber-900"
           role="status"

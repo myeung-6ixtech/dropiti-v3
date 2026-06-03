@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { isPublicClientBffRoute } from "@/lib/nhost-functions";
 
 const ACCESS_TOKEN_COOKIE = "nhost_access_token";
 
@@ -21,13 +22,20 @@ async function proxyToFunctions(
   }
 
   const subPath = pathSegments.join("/");
-  const isPublicValidate =
-    request.method === "GET" &&
-    subPath === "client/transfer-ownership/validate";
+  const isPublicRoute = isPublicClientBffRoute(request.method, subPath);
 
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
-  if (!accessToken && !isPublicValidate) {
+  let accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE)?.value;
+
+  // Browser may send Bearer from Nhost client before httpOnly cookie is synced
+  if (!accessToken) {
+    const authHeader = request.headers.get("authorization");
+    if (authHeader?.startsWith("Bearer ")) {
+      accessToken = authHeader.slice(7).trim();
+    }
+  }
+
+  if (!accessToken && !isPublicRoute) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import PropertyCard from '@/components/PropertyCard';
 import { Property } from '@/types';
+import { getListingKey } from '@/lib/normalize-listing';
 
 interface PropertyCarouselProps {
   properties: (Property & {
@@ -50,9 +51,9 @@ export default function PropertyCarousel({ properties }: PropertyCarouselProps) 
         ref={trackRef}
         className="flex gap-4 overflow-x-auto scroll-smooth snap-x snap-mandatory no-scrollbar"
       >
-        {properties.map((property) => (
+        {properties.map((property, index) => (
           <div
-            key={property.property_uuid || property.id}
+            key={getListingKey(property, index)}
             data-carousel-item
             className="snap-start flex-none w-[82vw] sm:w-[320px] lg:w-[calc(25%-12px)]"
           >

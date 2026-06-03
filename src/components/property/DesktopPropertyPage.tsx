@@ -31,7 +31,7 @@ interface DesktopPropertyPageProps {
   };
   landlord: {
     id: string;
-    uuid: string;
+    nhost_user_id: string;
     name: string;
     avatar?: string;
     avg_response_time?: string;
@@ -336,7 +336,7 @@ export default function DesktopPropertyPage({
                 availableDate={property.available_date || null}
                 landlord={landlord ? {
                   id: landlord.id,
-                  uuid: landlord.uuid,
+                  nhost_user_id: landlord.nhost_user_id,
                   name: landlord.name || 'Landlord',
                   avatar: landlord.avatar || '',
                   rating: landlord.rating,
@@ -347,7 +347,7 @@ export default function DesktopPropertyPage({
                   totalProperties: 1,
                 } : {
                   id: '',
-                  uuid: '',
+                  nhost_user_id: '',
                   name: 'Unknown Landlord',
                   avatar: '',
                   rating: 0,

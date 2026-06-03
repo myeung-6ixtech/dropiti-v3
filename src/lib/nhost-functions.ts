@@ -22,6 +22,23 @@ export function useNhostFunctions(): boolean {
 
 export const FUNCTIONS_BFF_PREFIX = "/api/v1/bff/functions";
 
+/** GET routes that allow anonymous access (Nhost `optionalAuth`). */
+export const PUBLIC_CLIENT_BFF_GET_PATHS = new Set([
+  "client/transfer-ownership/validate",
+  "client/properties/get-listings",
+  "client/properties/get-property",
+  "client/properties/get-property-by-uuid",
+  "client/reviews/get-reviews-by-property",
+  "client/reviews/get-reviews-by-user",
+  "client/users/get-user-by-id",
+  "client/tenants",
+  "client/tenants/profile",
+]);
+
+export function isPublicClientBffRoute(method: string, subPath: string): boolean {
+  return method === "GET" && PUBLIC_CLIENT_BFF_GET_PATHS.has(subPath);
+}
+
 export function functionsBffUrl(clientPath: string, search?: URLSearchParams): string {
   const path = clientPath.replace(/^\//, "");
   const qs = search?.toString();

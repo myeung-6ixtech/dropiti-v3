@@ -25,7 +25,9 @@ export default function ReviewOpportunities() {
     try {
       const response = await offersAPI.getReviewOpportunities(authUser.id);
       if (response.success) {
-        setOpportunities(response.data.opportunities);
+        setOpportunities(response.data?.opportunities ?? []);
+      } else {
+        setOpportunities([]);
       }
     } catch (error) {
       console.error('Error loading review opportunities:', error);
@@ -35,9 +37,12 @@ export default function ReviewOpportunities() {
   }, [authUser?.id]);
 
   useEffect(() => {
-    if (authUser?.id) {
-      loadReviewOpportunities();
+    if (!authUser?.id) {
+      setIsLoading(false);
+      setOpportunities([]);
+      return;
     }
+    loadReviewOpportunities();
   }, [authUser?.id, loadReviewOpportunities]);
 
   const calculateDaysRemaining = (endDate: string) => {
