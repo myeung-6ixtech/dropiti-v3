@@ -139,56 +139,73 @@ export default function DesktopPropertyPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Property Details */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Image Gallery */}
-            <div className="space-y-4">
-              <div 
-                className="relative h-96 w-full rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity group"
-                onClick={() => openGallery(0)}
-              >
-                <Image
-                  src={allImages[0]}
-                  alt={property.title}
-                  fill
-                  className="object-cover"
-                />
-                {/* Hover overlay to indicate clickability */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-80 rounded-full p-2">
-                    <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                    </svg>
+            {/* Image gallery — `uploaded_images` from listing */}
+            {allImages.length > 0 && (
+              <div className="space-y-4">
+                <div
+                  className="relative h-96 w-full rounded-xl overflow-hidden cursor-pointer hover:opacity-95 transition-opacity group"
+                  onClick={() => openGallery(0)}
+                >
+                  <Image
+                    src={allImages[0]}
+                    alt={property.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-200 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white bg-opacity-80 rounded-full p-2">
+                      <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
-              </div>
-              
-              {/* Image Thumbnails Gallery */}
-              <div className="grid grid-cols-4 gap-2">
-                {allImages.slice(0, 4).map((image, index) => (
-                  <div
-                    key={index}
-                    className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                    onClick={() => openGallery(index)}
-                  >
-                    <Image
-                      src={image}
-                      alt={`${property.title} - Image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                ))}
-                {allImages.length > 4 && (
-                  <div 
-                    className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity bg-gray-800"
-                    onClick={() => openGallery(4)}
-                  >
-                    <div className="absolute inset-0 flex items-center justify-center text-white">
-                      <span className="text-sm font-medium">+{allImages.length - 4}</span>
-                    </div>
+
+                {allImages.length > 1 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {allImages.slice(0, 4).map((image, index) => (
+                      <div
+                        key={`${image}-${index}`}
+                        className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => openGallery(index)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') openGallery(index);
+                        }}
+                        aria-label={`View image ${index + 1} of ${allImages.length}`}
+                      >
+                        <Image
+                          src={image}
+                          alt={`${property.title} - Image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          sizes="25vw"
+                        />
+                      </div>
+                    ))}
+                    {allImages.length > 4 && (
+                      <div
+                        className="relative h-20 w-full rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity bg-gray-800"
+                        onClick={() => openGallery(4)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') openGallery(4);
+                        }}
+                        aria-label={`View ${allImages.length - 4} more images`}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center text-white">
+                          <span className="text-sm font-medium">+{allImages.length - 4}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
-            </div>
+            )}
 
             {/* Property Title and Basic Info */}
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">

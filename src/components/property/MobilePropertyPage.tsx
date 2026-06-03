@@ -34,8 +34,8 @@ interface MobilePropertyPageProps {
     rating: number;
     review_count: number;
   } | null;
-  mainImage: string;
   allImages: string[];
+  openGallery: (index: number) => void;
   handleCreateOffer: () => void;
   hasExistingOffer: boolean;
   isAuthenticated: boolean;
@@ -48,8 +48,8 @@ interface MobilePropertyPageProps {
 export default function MobilePropertyPage({
   property,
   landlord,
-  mainImage,
   allImages,
+  openGallery,
   handleCreateOffer,
   hasExistingOffer,
   isAuthenticated,
@@ -59,6 +59,8 @@ export default function MobilePropertyPage({
   formatAddressDisplay
 }: MobilePropertyPageProps) {
   const router = useRouter();
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const heroImage = allImages[activeImageIndex] ?? allImages[0];
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
 
   // Description modal
@@ -120,14 +122,18 @@ export default function MobilePropertyPage({
     <div className="block md:hidden">
       {/* Mobile Hero Section - Full Width */}
       <div className="relative w-full h-[50vh]">
-        {/* Main Hero Image */}
-        <div className="relative w-full h-full">
+        {/* Hero + swipeable gallery from uploaded_images */}
+        <div
+          className="relative w-full h-full cursor-pointer"
+          onClick={() => openGallery(activeImageIndex)}
+        >
           <Image
-            src={mainImage}
+            src={heroImage}
             alt={property.title}
             fill
             className="object-cover"
             priority
+            sizes="100vw"
           />
           
           {/* Gradient Overlay for Better Text Readability */}
@@ -158,23 +164,80 @@ export default function MobilePropertyPage({
             </div>
           </div>
           
-          {/* Image Gallery Indicator */}
           {allImages.length > 1 && (
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-              <div className="flex space-x-2">
+            <>
+              <button
+                type="button"
+                className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg"
+                aria-label="Previous image"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImageIndex((i) => (i === 0 ? allImages.length - 1 : i - 1));
+                }}
+              >
+                <svg className="h-5 w-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow-lg"
+                aria-label="Next image"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImageIndex((i) => (i === allImages.length - 1 ? 0 : i + 1));
+                }}
+              >
+                <svg className="h-5 w-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs font-medium text-white">
+                {activeImageIndex + 1} / {allImages.length}
+              </div>
+              <div className="absolute bottom-12 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
                 {allImages.map((_, index) => (
-                  <div
+                  <button
                     key={index}
-                    className={`w-2 h-2 rounded-full ${
-                      index === 0 ? 'bg-white' : 'bg-white/50'
+                    type="button"
+                    aria-label={`Show image ${index + 1}`}
+                    className={`h-2 w-2 rounded-full ${
+                      index === activeImageIndex ? 'bg-white' : 'bg-white/50'
                     }`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveImageIndex(index);
+                    }}
                   />
                 ))}
               </div>
-            </div>
+            </>
           )}
         </div>
       </div>
+
+      {allImages.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto px-4 py-3 bg-white border-b border-gray-100">
+          {allImages.map((image, index) => (
+            <button
+              key={`${image}-${index}`}
+              type="button"
+              className={`relative h-16 w-24 flex-shrink-0 rounded-lg overflow-hidden border-2 ${
+                index === activeImageIndex ? 'border-gray-900' : 'border-transparent'
+              }`}
+              onClick={() => setActiveImageIndex(index)}
+            >
+              <Image
+                src={image}
+                alt={`${property.title} thumbnail ${index + 1}`}
+                fill
+                className="object-cover"
+                sizes="96px"
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Mobile Content Container */}
       <div className="px-4 mb-5">

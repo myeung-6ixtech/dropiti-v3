@@ -11,7 +11,12 @@ import CreateOfferModal from '@/components/common/CreateOfferModal';
 import ClaimListingAuthModal from '@/components/property/ClaimListingAuthModal';
 import ClaimListingContactModal from '@/components/property/ClaimListingContactModal';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
-import { capitalizeWords, formatAddress, resolveGeocodingAddress } from '@/lib/utils';
+import {
+  capitalizeWords,
+  formatAddress,
+  resolveGeocodingAddress,
+  resolvePropertyGalleryImages,
+} from '@/lib/utils';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
 import DesktopPropertyPage from '@/components/property/DesktopPropertyPage';
 import SEO, { createPropertySchema } from '@/components/SEO';
@@ -128,26 +133,20 @@ export default function PropertyDetailPage() {
 
   // Image navigation functions - defined at top level to avoid conditional hook calls
   const nextImage = useCallback(() => {
-    if (propertyData?.property?.uploaded_images) {
-      const images = propertyData.property.uploaded_images;
-      if (Array.isArray(images)) {
-        setSelectedImageIndex((prev) => 
-          prev === images.length - 1 ? 0 : prev + 1
-        );
-      }
+    if (!propertyData?.property) return;
+    const images = resolvePropertyGalleryImages(propertyData.property);
+    if (images.length > 1) {
+      setSelectedImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
     }
-  }, [propertyData?.property?.uploaded_images]);
+  }, [propertyData?.property]);
 
   const previousImage = useCallback(() => {
-    if (propertyData?.property?.uploaded_images) {
-      const images = propertyData.property.uploaded_images;
-      if (Array.isArray(images)) {
-        setSelectedImageIndex((prev) => 
-          prev === 0 ? images.length - 1 : prev - 1
-        );
-      }
+    if (!propertyData?.property) return;
+    const images = resolvePropertyGalleryImages(propertyData.property);
+    if (images.length > 1) {
+      setSelectedImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
     }
-  }, [propertyData?.property?.uploaded_images]);
+  }, [propertyData?.property]);
 
   // Gallery functions - defined at top level to avoid conditional hook calls
   const openGallery = useCallback((index: number) => {
@@ -345,17 +344,8 @@ export default function PropertyDetailPage() {
   // landlord.role from API (auth.users.defaultRole via get-property-by-uuid); 'admin' => show Request to Claim Listing
   const isAdminListing = landlord?.role === 'admin';
 
-  // Get the main display image or fallback
-  const mainImage = property.image_url || property.display_image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80";
-  
-  // Get all images for the gallery - prioritize uploaded_images, fallback to main image
-  const allImages = (() => {
-    if (property.uploaded_images && Array.isArray(property.uploaded_images) && property.uploaded_images.length > 0) {
-      return property.uploaded_images;
-    }
-    // If no uploaded images, use the main image as the only image
-    return [mainImage];
-  })();
+  const allImages = resolvePropertyGalleryImages(property);
+  const mainImage = allImages[0];
 
   // Get amenities list
   const amenitiesList = property.amenities && Array.isArray(property.amenities) 
@@ -414,8 +404,8 @@ export default function PropertyDetailPage() {
       <MobilePropertyPage
         property={property}
         landlord={landlord}
-        mainImage={mainImage}
         allImages={allImages}
+        openGallery={openGallery}
         handleCreateOffer={handleCreateOffer}
         hasExistingOffer={hasExistingOffer}
         isAuthenticated={isAuthenticated}

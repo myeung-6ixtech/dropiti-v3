@@ -1,4 +1,4 @@
-import { formatPropertyLocation } from '@/lib/utils';
+import { formatPropertyLocation, parseUploadedImages } from '@/lib/utils';
 import type { Property } from '@/types';
 
 /** Raw Hasura row shape from Nhost Functions `get-listings` / `get-property`. */
@@ -131,7 +131,7 @@ function rawListingToDetailProperty(row: RawListingRow): Record<string, unknown>
   const ids = resolveListingIds(row);
   const location = resolvePropertyLocation(row);
   const displayImage = row.display_image || '';
-  const uploaded = row.uploaded_images || [];
+  const uploaded = parseUploadedImages(row.uploaded_images);
   const status = (row as Record<string, unknown>).status as string | undefined;
   return {
     id: ids.id,
@@ -181,7 +181,10 @@ function normalizedListingToDetailProperty(row: Record<string, unknown>): Record
     bathrooms: row.bathrooms,
     image_url: imageUrl,
     display_image: row.display_image ?? imageUrl,
-    uploaded_images: row.uploaded_images ?? (imageUrl ? [imageUrl] : []),
+    uploaded_images: (() => {
+      const parsed = parseUploadedImages(row.uploaded_images);
+      return parsed.length > 0 ? parsed : imageUrl ? [imageUrl] : [];
+    })(),
     available: row.available,
     status: row.status,
     created_at: row.createdAt ?? row.created_at,
@@ -191,6 +194,27 @@ function normalizedListingToDetailProperty(row: Record<string, unknown>): Record
     minimum_lease: row.minimumLease ?? row.minimum_lease ?? 12,
     available_date: row.availableDate ?? row.available_date,
     owner_id: row.ownerId ?? row.owner_id,
+  };
+}
+
+/** Ensure `uploaded_images` is a string[] and sync primary image fields. */
+function enrichDetailProperty(property: Record<string, unknown>): Record<string, unknown> {
+  const uploaded = parseUploadedImages(property.uploaded_images);
+  const displayImage =
+    (typeof property.display_image === 'string' && property.display_image.trim()) ||
+    uploaded[0] ||
+    '';
+  const imageUrl =
+    (typeof property.image_url === 'string' && property.image_url.trim()) ||
+    displayImage ||
+    uploaded[0] ||
+    '';
+
+  return {
+    ...property,
+    uploaded_images: uploaded,
+    display_image: displayImage,
+    image_url: imageUrl,
   };
 }
 
@@ -204,21 +228,21 @@ export function mapPropertyDetailResponse(data: unknown): PropertyDetailPayload 
 
   if (row.property && typeof row.property === 'object') {
     return {
-      property: row.property as Record<string, unknown>,
+      property: enrichDetailProperty(row.property as Record<string, unknown>),
       landlord: (row.landlord as Record<string, unknown> | null) ?? null,
     };
   }
 
   if (isRawListingRow(data)) {
     return {
-      property: rawListingToDetailProperty(data),
+      property: enrichDetailProperty(rawListingToDetailProperty(data)),
       landlord: null,
     };
   }
 
   if (typeof row.title === 'string' && ('imageUrl' in row || 'image_url' in row)) {
     return {
-      property: normalizedListingToDetailProperty(row),
+      property: enrichDetailProperty(normalizedListingToDetailProperty(row)),
       landlord: null,
     };
   }

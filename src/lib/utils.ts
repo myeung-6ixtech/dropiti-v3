@@ -175,6 +175,69 @@ function isAllowedRemoteImageHostname(hostname: string): boolean {
 /**
  * Resolve a remote image URL safe for `next/image` (allowed host + valid URL).
  */
+const PROPERTY_IMAGE_PLACEHOLDER = '/images/placeholder.png';
+
+/** Extract a single image URL from a string or storage object. */
+function extractImageUrl(item: unknown): string | null {
+  if (typeof item === 'string') {
+    const trimmed = item.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+  if (item && typeof item === 'object') {
+    const record = item as Record<string, unknown>;
+    for (const key of ['url', 'fileUrl', 'src', 'imageUrl', 'photo_url', 'publicUrl']) {
+      const candidate = record[key];
+      if (typeof candidate === 'string' && candidate.trim()) {
+        return candidate.trim();
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Parse Hasura `uploaded_images` (jsonb array, JSON string, or object map).
+ * Returns deduplicated Nhost/storage URL strings.
+ */
+export function parseUploadedImages(value: unknown): string[] {
+  const urls: string[] = [];
+  const add = (item: unknown) => {
+    const url = extractImageUrl(item);
+    if (url && !urls.includes(url)) {
+      urls.push(url);
+    }
+  };
+
+  if (value === null || value === undefined) return [];
+
+  if (Array.isArray(value)) {
+    value.forEach(add);
+    return urls;
+  }
+
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+    if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+      try {
+        return parseUploadedImages(JSON.parse(trimmed) as unknown);
+      } catch {
+        add(trimmed);
+        return urls;
+      }
+    }
+    add(trimmed);
+    return urls;
+  }
+
+  if (typeof value === 'object') {
+    Object.values(value as Record<string, unknown>).forEach(add);
+    return urls;
+  }
+
+  return [];
+}
+
 export function getSafeRemoteImage(
   imageUrl?: string | null,
   fallbackUrl: string = DEFAULT_AVATAR_URL,
@@ -215,6 +278,34 @@ export function getSafeRemoteImage(
 export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: string): string => {
   return getSafeRemoteImage(imageUrl, fallbackUrl || DEFAULT_AVATAR_URL);
 };
+
+/** Safe URL for property gallery `next/image` (Nhost storage, etc.). */
+export function getSafePropertyGalleryImage(
+  imageUrl?: string | null,
+  fallbackUrl: string = PROPERTY_IMAGE_PLACEHOLDER,
+): string {
+  return getSafeRemoteImage(imageUrl, fallbackUrl);
+}
+
+/** Gallery URLs for property detail — prefers `uploaded_images`, then display/image fallbacks. */
+export function resolvePropertyGalleryImages(property: {
+  uploaded_images?: unknown;
+  display_image?: unknown;
+  image_url?: unknown;
+}): string[] {
+  const uploaded = parseUploadedImages(property.uploaded_images);
+
+  if (uploaded.length > 0) {
+    return uploaded.map((url) => getSafePropertyGalleryImage(url));
+  }
+
+  const fallbacks = [property.display_image, property.image_url]
+    .map((u) => (typeof u === 'string' ? u.trim() : ''))
+    .filter(Boolean)
+    .map((url) => getSafePropertyGalleryImage(url));
+
+  return fallbacks.length > 0 ? fallbacks : [PROPERTY_IMAGE_PLACEHOLDER];
+}
 
 /**
  * Check if an image URL is safe to use with Next.js Image component
