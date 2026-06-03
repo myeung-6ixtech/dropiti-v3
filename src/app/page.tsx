@@ -4,6 +4,7 @@ import HeroSection from '@/components/common/HeroSection';
 import ModernHeroSection from '@/components/common/ModernHeroSection';
 import CommercialSections from '@/components/common/CommercialSections';
 import TrustSection from '@/components/common/TrustSection';
+import LatestPropertiesSection from '@/components/common/LatestPropertiesSection';
 
 export const metadata: Metadata = {
   title: 'dropiti - real estate platform',
@@ -31,10 +32,11 @@ export default function HomePage() {
       {/* New Modern Hero Section */}
       <ModernHeroSection />
 
+      {/* Latest properties carousel — 4 most recent published listings */}
+      <LatestPropertiesSection />
+
       {/* Commercial Sections - Product features */}
       <CommercialSections />
-
-      {/* Latest News Section */}
 
       {/* Trust Section - Cyberport Partnership */}
       <TrustSection />

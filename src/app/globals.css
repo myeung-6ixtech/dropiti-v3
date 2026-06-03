@@ -180,3 +180,15 @@
    ======================================== */
 
 /* Note: CSS files are imported via design-system.css to avoid build issues */
+
+/* ========================================
+   UTILITY — hide scrollbar (keep scroll)
+   Used by PropertyCarousel
+   ======================================== */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

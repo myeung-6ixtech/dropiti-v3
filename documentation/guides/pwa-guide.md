@@ -1,6 +1,6 @@
 You've done great research—those packages absolutely belong on the list. Let me integrate them into the existing framework so you have a single, unified checklist that covers both the foundational and the "polish" layers you found.
 
-Here’s the **updated, top-tier PWA package checklist** for TastyPlates, now including your discoveries.
+Here’s the **updated, top-tier PWA package checklist** for Dropiti, now including your discoveries.
 
 ---
 
@@ -61,7 +61,7 @@ Your existing list already includes `react-swipeable` and `@use-gesture/react`. 
 
 ---
 
-## ✅ Your Action Plan for TastyPlates
+## ✅ Your Action Plan for Dropiti
 
 1. **Start with the core** – `@ducanh2912/next-pwa` + proper manifest.
 2. **Add navigation smoothness** – `ssgoi` for page transitions.
