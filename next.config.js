@@ -1,4 +1,28 @@
 /** @type {import('next').NextConfig} */
+
+const nhostSubdomain = process.env.NEXT_PUBLIC_NHOST_SUBDOMAIN?.trim();
+const nhostRegion = process.env.NEXT_PUBLIC_NHOST_REGION?.trim();
+
+/** @type {import('next').NextConfig['images']['remotePatterns']} */
+const nhostStoragePatterns = [];
+
+if (nhostSubdomain && nhostRegion) {
+  nhostStoragePatterns.push({
+    protocol: 'https',
+    hostname: `${nhostSubdomain}.storage.${nhostRegion}.nhost.run`,
+    port: '',
+    pathname: '/v1/files/**',
+  });
+}
+
+// Any Nhost project subdomain (storage, auth avatars, etc.)
+nhostStoragePatterns.push({
+  protocol: 'https',
+  hostname: '**.nhost.run',
+  port: '',
+  pathname: '/**',
+});
+
 const nextConfig = {
   // SEO optimizations
   trailingSlash: true, // Better for SEO consistency
@@ -235,6 +259,8 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      // Nhost Storage (property photos, uploaded avatars)
+      ...nhostStoragePatterns,
     ],
   },
 };

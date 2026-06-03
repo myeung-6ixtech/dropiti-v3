@@ -1,15 +1,12 @@
 'use client';
 
 import { TenantProfileData } from '@/types/tenant';
+import type { TenantProfileDisplayUser } from '@/lib/tenant-profiles';
 import TenantProfilePreview from './TenantProfilePreview';
 
 interface Step3ReviewProps {
   data: TenantProfileData;
-  user?: {
-    name?: string;
-    avatar?: string;
-    displayName?: string;
-  };
+  user?: TenantProfileDisplayUser;
   onSubmit: () => void;
   isSubmitting: boolean;
 }

@@ -1,4 +1,5 @@
 import { tenantsAPI } from '@/lib/api-client';
+import { useNhostFunctions } from '@/lib/nhost-functions';
 import type { TenantProfileData } from '@/types/tenant';
 
 /** Stable React key for tenant marketplace cards (prefer `tenant_uuid`). */
@@ -20,23 +21,107 @@ export function getTenantProfileKey(
   return `tenant-profile-${index ?? 0}`;
 }
 
+/** Embedded user from Hasura `user` (auth.users) or legacy `real_estate_user` enrichment. */
+export type TenantProfileEmbeddedUser = {
+  id?: string;
+  email?: string;
+  avatarUrl?: string | null;
+  uuid?: string;
+  nhost_user_id?: string;
+  display_name?: string;
+  name?: string;
+  photo_url?: string;
+  avatar?: string;
+  rating?: number;
+  review_count?: number;
+};
+
+/** Normalized display fields for preview / marketplace cards. */
+export type TenantProfileDisplayUser = {
+  displayName?: string;
+  name?: string;
+  avatar?: string;
+  email?: string;
+  nhost_user_id?: string;
+};
+
 export type TenantProfileRow = TenantProfileData & {
   id?: string | number;
   tenant_uuid?: string;
   user_id?: string;
   privacy_settings?: Record<string, boolean>;
-  user?: {
-    uuid?: string;
-    nhost_user_id?: string;
-    display_name?: string;
-    name?: string;
-    photo_url?: string;
-    avatar?: string;
-    email?: string;
-    rating?: number;
-    review_count?: number;
-  } | null;
+  user?: TenantProfileEmbeddedUser | null;
 };
+
+/** Map API `user` (auth.users or real_estate_user) to a single embedded shape. */
+export function normalizeTenantProfileUser(
+  raw: unknown,
+  userId?: string,
+): TenantProfileEmbeddedUser | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const u = raw as Record<string, unknown>;
+  const nhostId =
+    String(u.nhost_user_id ?? u.id ?? userId ?? '').trim() || undefined;
+
+  if ('avatarUrl' in u || (u.id && !u.display_name && !u.photo_url)) {
+    const avatarUrl = (u.avatarUrl as string | null) ?? undefined;
+    const email = u.email as string | undefined;
+    return {
+      id: String(u.id ?? userId ?? ''),
+      email,
+      avatarUrl,
+      nhost_user_id: nhostId,
+      display_name: email?.split('@')[0],
+      photo_url: avatarUrl,
+      avatar: avatarUrl,
+    };
+  }
+
+  return {
+    uuid: u.uuid as string | undefined,
+    nhost_user_id: nhostId,
+    display_name: (u.display_name as string) || (u.name as string),
+    name: u.name as string | undefined,
+    photo_url: (u.photo_url as string) || (u.avatar as string),
+    avatar: (u.avatar as string) || (u.photo_url as string),
+    email: u.email as string | undefined,
+    rating: u.rating as number | undefined,
+    review_count: u.review_count as number | undefined,
+    id: nhostId,
+  };
+}
+
+/** Resolve avatar + display name for UI; optional auth session fallback on dashboard. */
+export function resolveTenantProfileDisplayUser(
+  embedded: TenantProfileEmbeddedUser | null | undefined,
+  fallback?: {
+    displayName?: string;
+    name?: string;
+    avatar?: string;
+    photoUrl?: string;
+    email?: string;
+    id?: string;
+  },
+): TenantProfileDisplayUser {
+  const displayName =
+    embedded?.display_name?.trim() ||
+    embedded?.email?.split('@')[0] ||
+    fallback?.displayName ||
+    fallback?.name;
+  const avatar =
+    embedded?.photo_url ||
+    embedded?.avatar ||
+    embedded?.avatarUrl ||
+    fallback?.avatar ||
+    fallback?.photoUrl;
+  return {
+    displayName,
+    name: displayName,
+    avatar: avatar ?? undefined,
+    email: embedded?.email || fallback?.email,
+    nhost_user_id: embedded?.nhost_user_id || embedded?.id || fallback?.id,
+  };
+}
 
 /** Map API row → wizard / preview state. */
 export function mapTenantProfileRow(row: TenantProfileRow): TenantProfileData {
@@ -95,23 +180,29 @@ export function parseTenantProfileResponse(body: unknown): {
   return { success: false, error: 'Invalid response' };
 }
 
-/** Fetch tenant profile by Nhost user id (BFF → `client/tenants/profile`). */
-export async function fetchTenantProfileByNhostUserId(nhostUserId: string): Promise<{
+async function loadTenantProfileResponse(
+  loader: () => Promise<unknown>,
+): Promise<{
   success: boolean;
   data?: TenantProfileData | null;
+  user?: TenantProfileEmbeddedUser | null;
   error?: string;
   notFound?: boolean;
 }> {
   try {
-    const raw = await tenantsAPI.getTenantProfile(nhostUserId);
+    const raw = await loader();
     const parsed = parseTenantProfileResponse(raw);
     if (!parsed.success) {
       return parsed;
     }
     if (!parsed.data) {
-      return { success: true, data: null, notFound: true };
+      return { success: true, data: null, user: null, notFound: true };
     }
-    return { success: true, data: mapTenantProfileRow(parsed.data) };
+    return {
+      success: true,
+      data: mapTenantProfileRow(parsed.data),
+      user: normalizeTenantProfileUser(parsed.data.user, parsed.data.user_id),
+    };
   } catch (error) {
     if (error && typeof error === 'object' && 'response' in error) {
       const axiosError = error as { response?: { status?: number; data?: { error?: string } } };
@@ -128,6 +219,35 @@ export async function fetchTenantProfileByNhostUserId(nhostUserId: string): Prom
       error: error instanceof Error ? error.message : 'Failed to load tenant profile',
     };
   }
+}
+
+/**
+ * Logged-in user's tenant profile — BFF → Nhost `GET /v1/client/tenants/profile` (Bearer, no query).
+ * Matches api-doc-v2 dashboard flow.
+ */
+export function fetchMyTenantProfile(nhostUserId: string): Promise<{
+  success: boolean;
+  data?: TenantProfileData | null;
+  user?: TenantProfileEmbeddedUser | null;
+  error?: string;
+  notFound?: boolean;
+}> {
+  return loadTenantProfileResponse(() =>
+    useNhostFunctions()
+      ? tenantsAPI.getMyTenantProfile()
+      : tenantsAPI.getTenantProfile(nhostUserId),
+  );
+}
+
+/** Fetch tenant profile by `nhost_user_id` — public active or owner with JWT. */
+export function fetchTenantProfileByNhostUserId(nhostUserId: string): Promise<{
+  success: boolean;
+  data?: TenantProfileData | null;
+  user?: TenantProfileEmbeddedUser | null;
+  error?: string;
+  notFound?: boolean;
+}> {
+  return loadTenantProfileResponse(() => tenantsAPI.getTenantProfile(nhostUserId));
 }
 
 export type TenantMarketplaceParams = {
@@ -157,7 +277,7 @@ export async function fetchTenantMarketplace(params: TenantMarketplaceParams = {
     const raw = await tenantsAPI.getTenantProfiles(params);
     if (raw && typeof raw === 'object' && raw.success === true) {
       const data = raw.data;
-      const profiles = Array.isArray(data)
+      const rawProfiles = Array.isArray(data)
         ? (data as TenantProfileRow[])
         : data &&
             typeof data === 'object' &&
@@ -165,6 +285,10 @@ export async function fetchTenantMarketplace(params: TenantMarketplaceParams = {
             Array.isArray((data as { items: unknown }).items)
           ? ((data as { items: TenantProfileRow[] }).items)
           : [];
+      const profiles = rawProfiles.map((row) => ({
+        ...row,
+        user: normalizeTenantProfileUser(row.user, row.user_id) ?? row.user ?? null,
+      }));
       return {
         success: true,
         profiles,

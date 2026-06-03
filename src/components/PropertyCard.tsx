@@ -9,7 +9,7 @@ import { Bed, Bathtub } from '@/assets/icons';
 import Image from 'next/image';
 import Link from 'next/link';
 import { propertyCardClasses } from '@/styles/property-card';
-import { capitalizeWords } from '@/lib/utils';
+import { capitalizeWords, getSafeRemoteImage } from '@/lib/utils';
 import { resolvePropertyLocation } from '@/lib/normalize-listing';
 
 interface PropertyCardProps {
@@ -36,7 +36,8 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
   const title = property?.title || 'No Title';
   const location = resolvePropertyLocation(property);
   const price = property?.price || property?.rental_price || 0;
-  const imageUrl = property?.imageUrl || property?.display_image || '';
+  const rawImageUrl = property?.imageUrl || property?.display_image || '';
+  const imageUrl = getSafeRemoteImage(rawImageUrl, '/images/placeholder.png');
   const propertyType = property?.property_type || '';
 
   // Get the correct bathroom and bedroom values
@@ -131,7 +132,7 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
 
       {/* Property Image */}
       <div className={propertyCardClasses.image.container}>
-        {imageUrl && imageUrl.trim() !== '' ? (
+        {rawImageUrl && rawImageUrl.trim() !== '' ? (
           <Image
             src={imageUrl}
             alt={title}

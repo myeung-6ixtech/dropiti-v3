@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Offer } from '@/types/offer';
-import { calculatePlatformDuration } from '@/lib/utils';
+import { calculatePlatformDuration, getSafeProfileImage } from '@/lib/utils';
 import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface OfferUserDetailsProps {
@@ -49,7 +49,7 @@ export default function OfferUserDetails({ offer, isIncomingOffer, offerStatus }
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <Image 
-              src={userToShow.photoUrl || DEFAULT_AVATAR_URL} 
+              src={getSafeProfileImage(userToShow.photoUrl, DEFAULT_AVATAR_URL)}
               alt={userToShow.displayName}
               width={40}
               height={40}

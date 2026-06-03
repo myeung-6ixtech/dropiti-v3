@@ -1,11 +1,13 @@
 'use client';
 
 import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
+import { parsePropertyAddress, resolveGeocodingAddress } from '@/lib/utils';
 
 interface PropertyMapProps {
-  address: string;
+  address?: unknown;
   location?: string;
+  showSpecificLocation?: boolean;
   className?: string;
   disableGeocoding?: boolean;
 }
@@ -16,96 +18,89 @@ const mapContainerStyle = {
 };
 
 const defaultCenter = {
-  lat: 22.3193, // Hong Kong coordinates as default
+  lat: 22.3193,
   lng: 114.1694,
 };
 
-const PropertyMap: React.FC<PropertyMapProps> = ({ address, location, className = '', disableGeocoding = false }) => {
+const PropertyMap: React.FC<PropertyMapProps> = ({
+  address,
+  location,
+  showSpecificLocation,
+  className = '',
+  disableGeocoding = false,
+}) => {
   const [mapCenter, setMapCenter] = useState(defaultCenter);
   const [geocodingError, setGeocodingError] = useState<string | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
 
-  // Check if API key is available
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  
-  // Use the useJsApiLoader hook to manage API loading
+
+  const geocodingQueries = useMemo(() => {
+    const primary = resolveGeocodingAddress({
+      address,
+      location,
+      showSpecificLocation,
+    });
+    const queries = [primary];
+    const parsed = parsePropertyAddress(address);
+    const district = parsed?.district?.trim() || '';
+    if (district) {
+      queries.push(`${district}, Hong Kong`);
+    }
+    if (!queries.includes('Hong Kong')) {
+      queries.push('Hong Kong');
+    }
+    return [...new Set(queries.filter(Boolean))];
+  }, [address, location, showSpecificLocation]);
+
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey || '',
     libraries: ['places'],
   });
 
-  // Geocode address to get coordinates
-  const geocodeAddress = useCallback(async (addressString: string) => {
+  const geocodeAddress = useCallback(async (queries: string[]) => {
     if (!window.google?.maps?.Geocoder) {
       setGeocodingError('Google Maps not loaded');
       return;
     }
 
     const geocoder = new window.google.maps.Geocoder();
-    
-    try {
-      const results = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-        geocoder.geocode({ address: addressString }, (results, status) => {
-          if (status === 'OK' && results) {
-            resolve(results);
-          } else {
-            reject(new Error(`Geocoding failed: ${status}`));
-          }
-        });
-      });
 
-      if (results.length > 0) {
-        const location = results[0].geometry.location;
-        setMapCenter({
-          lat: location.lat(),
-          lng: location.lng(),
+    for (const addressString of queries) {
+      try {
+        const results = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
+          geocoder.geocode({ address: addressString }, (results, status) => {
+            if (status === 'OK' && results?.length) {
+              resolve(results);
+            } else {
+              reject(new Error(`Geocoding failed: ${status}`));
+            }
+          });
         });
+
+        const point = results[0].geometry.location;
+        setMapCenter({ lat: point.lat(), lng: point.lng() });
         setGeocodingError(null);
-      } else {
-        setGeocodingError('Address not found');
+        return;
+      } catch {
+        continue;
       }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      
-      // Handle specific geocoding errors
-      if (error instanceof Error) {
-        if (error.message.includes('REQUEST_DENIED')) {
-          setGeocodingError('Geocoding API access denied. Please check API key permissions.');
-        } else if (error.message.includes('OVER_QUERY_LIMIT')) {
-          setGeocodingError('Geocoding quota exceeded. Please try again later.');
-        } else if (error.message.includes('ZERO_RESULTS')) {
-          setGeocodingError('Address not found. Showing default location.');
-        } else {
-          setGeocodingError('Failed to geocode address. Showing default location.');
-        }
-      } else {
-        setGeocodingError('Failed to geocode address. Showing default location.');
-      }
-      
-      // Keep the default center (Hong Kong) when geocoding fails
-      console.log('Using default location due to geocoding failure');
     }
+
+    setMapCenter(defaultCenter);
+    setGeocodingError(null);
   }, []);
 
-  // Handle map load
   const onMapLoad = useCallback(() => {
     setIsMapLoaded(true);
-    
-    // Only geocode if not disabled and API is loaded
-    if (!disableGeocoding && isLoaded) {
-      const addressToGeocode = address || location || '';
-      if (addressToGeocode) {
-        geocodeAddress(addressToGeocode);
-      }
-    } else {
-      console.log('Geocoding disabled or API not loaded, using default location');
-    }
-  }, [address, location, geocodeAddress, disableGeocoding, isLoaded]);
 
-  // Handle API loading errors
+    if (!disableGeocoding && isLoaded && geocodingQueries.length > 0) {
+      geocodeAddress(geocodingQueries);
+    }
+  }, [disableGeocoding, isLoaded, geocodingQueries, geocodeAddress]);
+
   if (loadError) {
-    console.error('Google Maps load error:', loadError);
     return (
       <div className={`relative ${className}`}>
         <div className="w-full h-96 bg-gray-100 flex items-center justify-center rounded-lg">
@@ -144,6 +139,11 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, location, className 
     );
   }
 
+  const markerTitle =
+    resolveGeocodingAddress({ address, location, showSpecificLocation }) ||
+    location ||
+    'Property Location';
+
   return (
     <div className={`relative ${className}`}>
       <GoogleMap
@@ -167,19 +167,13 @@ const PropertyMap: React.FC<PropertyMapProps> = ({ address, location, className 
         }}
       >
         {isMapLoaded && (
-          <Marker
-            position={mapCenter}
-            title={address || location || 'Property Location'}
-          />
+          <Marker position={mapCenter} title={markerTitle} />
         )}
       </GoogleMap>
-      
+
       {geocodingError && (
-        <div className="absolute inset-0 bg-gray-100 bg-opacity-90 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-gray-600 mb-2">Map loaded with default location</p>
-            <p className="text-sm text-gray-500">{geocodingError}</p>
-          </div>
+        <div className="absolute bottom-2 left-2 right-2 rounded-md bg-white/90 px-3 py-2 shadow-sm">
+          <p className="text-xs text-gray-500">{geocodingError}</p>
         </div>
       )}
     </div>

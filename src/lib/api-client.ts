@@ -16,6 +16,7 @@ import {
   isRawListingRow,
   normalizeListing,
   normalizeListings,
+  mapPropertyDetailResponse,
 } from '@/lib/normalize-listing';
 
 const USE_NHOST_FUNCTIONS = useNhostFunctions();
@@ -168,6 +169,13 @@ apiClient.interceptors.response.use(
               pagination: wrapped.pagination,
             };
           }
+        } else if (
+          data &&
+          typeof data === 'object' &&
+          'property' in (data as object) &&
+          typeof (data as { property?: unknown }).property === 'object'
+        ) {
+          response.data = { success: true, data: body.data };
         } else if (isRawListingRow(data)) {
           response.data = { success: true, data: normalizeListing(data) };
         } else {
@@ -289,17 +297,30 @@ export const propertiesAPI = {
       throw new Error('Property UUID must be a string');
     }
     
-    console.log('Fetching property by UUID:', propertyUuid);
-    
     try {
-      const url = '/properties/get-property-by-uuid';
-      const params = { property_uuid: propertyUuid };
-      
-      console.log('Making API request to:', url);
-      console.log('With params:', params);
+      const url = 'properties/get-property-by-uuid';
+      const params = USE_NHOST_FUNCTIONS
+        ? { uuid: propertyUuid }
+        : { property_uuid: propertyUuid };
       
       const response = await apiClient.get(url, { params });
-      return response.data;
+      const body = response.data as Record<string, unknown>;
+      const payload =
+        body?.success === true ? body.data : body?.data ?? body;
+      const detail = mapPropertyDetailResponse(payload);
+      if (detail) {
+        return { success: true, data: detail };
+      }
+      if (body?.success === false) {
+        return {
+          success: false,
+          error: String(body.error ?? 'Failed to load property'),
+        };
+      }
+      return {
+        success: false,
+        error: 'Invalid property response',
+      };
     } catch (error) {
       console.error('Error fetching property by UUID:', error);
       console.error('Error details:', {
@@ -571,6 +592,12 @@ export const usersAPI = {
 
 // Tenants API — BFF → Nhost `client/tenants` + `client/tenants/profile` when FUNCTIONS_URL is set
 export const tenantsAPI = {
+  /** JWT user's own profile (api-doc-v2: GET without `nhost_user_id`). */
+  getMyTenantProfile: async () => {
+    const response = await apiClient.get('/tenants/profile');
+    return response.data;
+  },
+  /** Profile by Nhost auth id (`real_estate_tenant_profile.user_id`). */
   getTenantProfile: async (nhostUserId: string) => {
     const response = await apiClient.get('/tenants/profile', {
       params: { nhost_user_id: nhostUserId },

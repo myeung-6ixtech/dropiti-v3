@@ -3,14 +3,11 @@
 import Image from 'next/image';
 import { TenantProfileData } from '@/types/tenant';
 import { getSafeProfileImage } from '@/lib/utils';
+import type { TenantProfileDisplayUser } from '@/lib/tenant-profiles';
 
 interface TenantProfilePreviewProps {
   data: TenantProfileData;
-  user?: {
-    name?: string;
-    avatar?: string;
-    displayName?: string;
-  };
+  user?: TenantProfileDisplayUser;
   showActions?: boolean;
   onEdit?: () => void;
   onPublish?: () => void;
@@ -47,7 +44,7 @@ export default function TenantProfilePreview({
     });
   };
 
-  const userName = user?.displayName || user?.name || 'User';
+  const userName = user?.displayName || user?.name || user?.email?.split('@')[0] || 'User';
   const userAvatar = user?.avatar;
 
   return (

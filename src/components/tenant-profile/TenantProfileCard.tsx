@@ -9,21 +9,18 @@ import { getSafeProfileImage } from '@/lib/utils';
 import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
 import { usersAPI } from '@/lib/api-client';
+import {
+  normalizeTenantProfileUser,
+  resolveTenantProfileDisplayUser,
+  type TenantProfileDisplayUser,
+  type TenantProfileEmbeddedUser,
+  type TenantProfileRow,
+} from '@/lib/tenant-profiles';
 
 interface TenantProfileCardProps {
   data: TenantProfileData;
-  user?: {
-    nhost_user_id?: string;
-    uuid?: string;
-    display_name?: string;
-    name?: string;
-    photo_url?: string;
-    avatar?: string;
-    email?: string;
-    rating?: number;
-    review_count?: number;
-  } | null;
-  currentUserId?: string; // Add current user ID to distinguish
+  user?: TenantProfileEmbeddedUser | null;
+  currentUserId?: string;
   className?: string;
 }
 
@@ -36,52 +33,43 @@ export default function TenantProfileCard({
   const router = useRouter();
   const { isAuthenticated } = useAuth();
   
-  // Local state for resolved user (fallback when API doesn't provide user data)
-  const [resolvedUser, setResolvedUser] = useState<{
-    nhost_user_id?: string;
-    uuid?: string;
-    display_name?: string;
-    photo_url?: string;
-  } | null>(user ?? null);
-  
-  // State for user nhost_user_id (used for /user/[id] profile links)
-  const [userUuid, setUserUuid] = useState<string | null>(user?.nhost_user_id || data?.user_id || null);
+  const rowUser =
+    user ?? normalizeTenantProfileUser((data as TenantProfileRow).user, data?.user_id);
+  const [fallbackUser, setFallbackUser] = useState<TenantProfileEmbeddedUser | null>(null);
+  const embeddedUser = rowUser ?? fallbackUser;
 
-  // Fetch fallback user if not provided by API, and get UUID
+  const [userUuid, setUserUuid] = useState<string | null>(
+    embeddedUser?.nhost_user_id || embeddedUser?.id || data?.user_id || null,
+  );
+
   useEffect(() => {
+    const nhostUserId =
+      embeddedUser?.nhost_user_id || embeddedUser?.id || data?.user_id;
+    if (nhostUserId) {
+      setUserUuid(nhostUserId);
+    }
+  }, [embeddedUser?.nhost_user_id, embeddedUser?.id, data?.user_id]);
+
+  useEffect(() => {
+    if (rowUser) return;
+    const nhostUserId = data?.user_id;
+    if (!nhostUserId) return;
+
     let cancelled = false;
-    async function loadUser() {
+    (async () => {
       try {
-        const nhostUserId = data?.user_id || user?.nhost_user_id;
-        
-          if (nhostUserId) {
-          // If we already have nhost_user_id from user prop, use it for the profile link
-          if (user?.nhost_user_id) {
-            setUserUuid(user.nhost_user_id);
-            return;
-          }
-          
-          const userRes = await usersAPI.getUserByNhostUserId(nhostUserId);
-          if (!cancelled && userRes.success && userRes.data) {
-            const row = userRes.data;
-            setResolvedUser({
-              nhost_user_id: row.nhost_user_id,
-              uuid: row.uuid,
-              display_name: row.display_name,
-              photo_url: row.photo_url,
-            });
-            if (row.nhost_user_id) {
-              setUserUuid(row.nhost_user_id);
-            }
-          }
+        const userRes = await usersAPI.getUserByNhostUserId(nhostUserId);
+        if (!cancelled && userRes.success && userRes.data) {
+          setFallbackUser(normalizeTenantProfileUser(userRes.data, nhostUserId));
         }
       } catch (e) {
         console.error('[TenantProfileCard] fallback user fetch failed', e);
       }
-    }
-    loadUser();
-    return () => { cancelled = true; };
-  }, [user, data?.user_id]);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [rowUser, data?.user_id]);
   
   // Handle Contact button click with authentication check
   const handleContactClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -115,11 +103,13 @@ export default function TenantProfileCard({
     });
   };
 
-  // Use resolved user data (fallback to API-provided user)
-  const displayUser = resolvedUser ?? user ?? null;
-  const userName = displayUser?.display_name || user?.name || 'User';
-  const userAvatar = user?.avatar || displayUser?.photo_url;
-  const isCurrentUser = !!(currentUserId && displayUser?.nhost_user_id === currentUserId);
+  const displayUser: TenantProfileDisplayUser = resolveTenantProfileDisplayUser(embeddedUser);
+  const userName = displayUser.displayName || displayUser.name || 'User';
+  const userAvatar = displayUser.avatar;
+  const isCurrentUser = !!(
+    currentUserId &&
+    (displayUser.nhost_user_id === currentUserId || data?.user_id === currentUserId)
+  );
 
 
   return (

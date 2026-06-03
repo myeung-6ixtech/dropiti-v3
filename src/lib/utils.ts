@@ -34,36 +34,89 @@ export function capitalizeWords(str: string): string {
   return str.trim().toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/** Parse Hasura/jsonb address (object or JSON string) into a structured object. */
+export function parsePropertyAddress(address: unknown): AddressObject | null {
+  if (!address) return null;
+  if (typeof address === 'string') {
+    const trimmed = address.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed as AddressObject;
+        }
+      } catch {
+        return { addressLine1: trimmed };
+      }
+    }
+    return { addressLine1: trimmed };
+  }
+  if (typeof address === 'object' && address !== null) {
+    return address as AddressObject;
+  }
+  return null;
+}
+
+/**
+ * Build a string Google Geocoder can resolve (district-level or full address).
+ */
+export function resolveGeocodingAddress(options: {
+  address?: unknown;
+  location?: string;
+  showSpecificLocation?: boolean;
+}): string {
+  const parsed = parsePropertyAddress(options.address);
+  const showSpecific = options.showSpecificLocation === true;
+
+  if (parsed) {
+    const district = parsed.district?.trim() || '';
+    const country = parsed.country?.trim() || 'Hong Kong';
+    const capDistrict = district ? capitalizeWords(district) : '';
+    const capCountry = capitalizeWords(country);
+
+    if (!showSpecific) {
+      return capDistrict ? `${capDistrict}, ${capCountry}` : capCountry;
+    }
+
+    const line1 = (parsed.addressLine1 || '').trim();
+    const parts = [line1, capDistrict, capCountry].filter(Boolean);
+    if (parts.length > 0) return parts.join(', ');
+  }
+
+  const loc = options.location?.trim() || '';
+  if (
+    loc &&
+    loc !== 'Address not specified' &&
+    !loc.startsWith('{') &&
+    !loc.startsWith('[')
+  ) {
+    return loc;
+  }
+
+  return 'Hong Kong';
+}
+
 /**
  * Safely formats an address for display
  * Handles both string addresses and address objects
  */
 export function formatAddress(address: unknown): string {
-  if (!address) return 'Address not specified';
+  const addressObj = parsePropertyAddress(address);
+  if (!addressObj) return 'Address not specified';
 
-  // If address is already a string, return it
-  if (typeof address === 'string') return address;
+  const parts: string[] = [];
+  if (addressObj.unit) parts.push(`Unit ${addressObj.unit}`);
+  if (addressObj.floor) parts.push(`Floor ${addressObj.floor}`);
+  if (addressObj.block) parts.push(addressObj.block);
+  if (addressObj.buildingName) parts.push(addressObj.buildingName);
+  if (addressObj.addressLine1) parts.push(addressObj.addressLine1);
+  if (addressObj.addressLine2) parts.push(addressObj.addressLine2);
+  if (addressObj.district) parts.push(capitalizeWords(addressObj.district));
+  if (addressObj.state) parts.push(capitalizeWords(addressObj.state));
+  if (addressObj.country) parts.push(capitalizeWords(addressObj.country));
 
-  // If address is an object, format it
-  if (typeof address === 'object' && address !== null) {
-    const addressObj = address as AddressObject;
-    const parts = [];
-
-    // Check for all possible address fields
-    if (addressObj.unit) parts.push(`Unit ${addressObj.unit}`);
-    if (addressObj.floor) parts.push(`Floor ${addressObj.floor}`);
-    if (addressObj.block) parts.push(addressObj.block);
-    if (addressObj.buildingName) parts.push(addressObj.buildingName);
-    if (addressObj.addressLine1) parts.push(addressObj.addressLine1);
-    if (addressObj.addressLine2) parts.push(addressObj.addressLine2);
-    if (addressObj.district) parts.push(capitalizeWords(addressObj.district));
-    if (addressObj.state) parts.push(capitalizeWords(addressObj.state));
-    if (addressObj.country) parts.push(capitalizeWords(addressObj.country));
-
-    return parts.length > 0 ? parts.join(', ') : 'Address not specified';
-  }
-
-  return 'Address not specified';
+  return parts.length > 0 ? parts.join(', ') : 'Address not specified';
 }
 
 /**
@@ -74,6 +127,85 @@ export function formatPropertyLocation(location: unknown): string {
   return formatAddress(location);
 }
 
+/** True for Nhost Storage / CDN URLs (`*.storage.<region>.nhost.run/v1/files/...`). */
+export function isNhostStorageHostname(hostname: string): boolean {
+  return hostname.endsWith('.nhost.run') && hostname.includes('.storage.');
+}
+
+const ALLOWED_REMOTE_IMAGE_HOSTNAMES = [
+      'lh3.googleusercontent.com',
+      'lh4.googleusercontent.com',
+      'lh5.googleusercontent.com',
+      'lh6.googleusercontent.com',
+      'graph.facebook.com',
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'picsum.photos',
+      'placehold.co',
+      's3.amazonaws.com',
+      's3.us-east-1.amazonaws.com',
+      's3.us-west-1.amazonaws.com',
+      's3.us-west-2.amazonaws.com',
+      's3.eu-west-1.amazonaws.com',
+      's3.eu-central-1.amazonaws.com',
+      's3.ap-southeast-1.amazonaws.com',
+      's3.ap-northeast-1.amazonaws.com',
+      's3.ap-south-1.amazonaws.com',
+      'storage.googleapis.com',
+      'firebasestorage.googleapis.com',
+      'blob.core.windows.net',
+      'cdn.digitaloceanspaces.com',
+      'nyc3.digitaloceanspaces.com',
+      'fra1.digitaloceanspaces.com',
+      'sgp1.digitaloceanspaces.com',
+      'www.gravatar.com',
+      'gravatar.com',
+] as const;
+
+function isAllowedRemoteImageHostname(hostname: string): boolean {
+  if (isNhostStorageHostname(hostname)) return true;
+  if (ALLOWED_REMOTE_IMAGE_HOSTNAMES.includes(hostname as (typeof ALLOWED_REMOTE_IMAGE_HOSTNAMES)[number])) {
+    return true;
+  }
+  if (hostname.includes('.s3.') && hostname.includes('.amazonaws.com')) return true;
+  if (hostname.includes('.digitaloceanspaces.com')) return true;
+  return hostname === 'localhost' || hostname === '127.0.0.1';
+}
+
+/**
+ * Resolve a remote image URL safe for `next/image` (allowed host + valid URL).
+ */
+export function getSafeRemoteImage(
+  imageUrl?: string | null,
+  fallbackUrl: string = DEFAULT_AVATAR_URL,
+): string {
+  if (!imageUrl || !imageUrl.trim()) {
+    return fallbackUrl;
+  }
+
+  const trimmed = imageUrl.trim();
+
+  if (trimmed.startsWith('/') || trimmed.startsWith('./')) {
+    return trimmed;
+  }
+
+  if (trimmed.startsWith('data:')) {
+    return trimmed;
+  }
+
+  try {
+    const url = new URL(trimmed);
+    if (isAllowedRemoteImageHostname(url.hostname)) {
+      return trimmed;
+    }
+    console.warn(`Remote image hostname not allowed: ${url.hostname}`, { imageUrl: trimmed });
+    return fallbackUrl;
+  } catch {
+    console.warn(`Invalid remote image URL: ${trimmed}`);
+    return fallbackUrl;
+  }
+}
+
 /**
  * Safely get profile image URL with fallback
  * @param imageUrl - The original image URL
@@ -81,156 +213,25 @@ export function formatPropertyLocation(location: unknown): string {
  * @returns Safe image URL or fallback
  */
 export const getSafeProfileImage = (imageUrl?: string | null, fallbackUrl?: string): string => {
-  if (!imageUrl) {
-    return fallbackUrl || DEFAULT_AVATAR_URL;
-  }
-
-  // Check if the URL is valid
-  try {
-    const url = new URL(imageUrl);
-    
-    // Allow common profile image hostnames
-    const allowedHostnames = [
-      'lh3.googleusercontent.com',
-      'lh4.googleusercontent.com',
-      'lh5.googleusercontent.com',
-      'lh6.googleusercontent.com',
-      'graph.facebook.com',
-      'images.unsplash.com',
-      'via.placeholder.com',
-      'picsum.photos',
-      'placehold.co',
-      // S3 and cloud storage hostnames
-      's3.amazonaws.com',
-      's3.us-east-1.amazonaws.com',
-      's3.us-west-1.amazonaws.com',
-      's3.us-west-2.amazonaws.com',
-      's3.eu-west-1.amazonaws.com',
-      's3.eu-central-1.amazonaws.com',
-      's3.ap-southeast-1.amazonaws.com',
-      's3.ap-northeast-1.amazonaws.com',
-      's3.ap-south-1.amazonaws.com',
-      // Generic S3 patterns
-      '*.amazonaws.com',
-      // Other cloud providers
-      'storage.googleapis.com',
-      'firebasestorage.googleapis.com',
-      'blob.core.windows.net',
-      'cdn.digitaloceanspaces.com',
-      'nyc3.digitaloceanspaces.com',
-      'fra1.digitaloceanspaces.com',
-      'sgp1.digitaloceanspaces.com',
-      // Gravatar (used by Nhost as default avatars)
-      'www.gravatar.com',
-      'gravatar.com',
-    ];
-
-    // Check if the hostname is in the allowed list
-    if (allowedHostnames.includes(url.hostname)) {
-      return imageUrl;
-    }
-
-    // Check for S3-like patterns (bucket-name.s3.region.amazonaws.com)
-    if (url.hostname.includes('.s3.') && url.hostname.includes('.amazonaws.com')) {
-      return imageUrl;
-    }
-
-    // Check for DigitalOcean Spaces patterns
-    if (url.hostname.includes('.digitaloceanspaces.com')) {
-      return imageUrl;
-    }
-
-    // If it's a relative URL or localhost, allow it
-    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.protocol === 'data:') {
-      return imageUrl;
-    }
-
-    // If it's a relative path, allow it
-    if (!url.hostname) {
-      return imageUrl;
-    }
-
-    // For other external URLs, log and return fallback
-    console.warn(`Profile image hostname not allowed: ${url.hostname}`, { imageUrl });
-    return fallbackUrl || DEFAULT_AVATAR_URL;
-  } catch (error) {
-    // If URL parsing fails, it might be a relative path
-    if (imageUrl.startsWith('/') || imageUrl.startsWith('./')) {
-      return imageUrl;
-    }
-    
-    // Log the error for debugging
-    console.warn(`Invalid profile image URL: ${imageUrl}`, { error });
-    return fallbackUrl || DEFAULT_AVATAR_URL;
-  }
+  return getSafeRemoteImage(imageUrl, fallbackUrl || DEFAULT_AVATAR_URL);
 };
 
 /**
  * Check if an image URL is safe to use with Next.js Image component
- * @param imageUrl - The image URL to check
- * @returns boolean indicating if the URL is safe
  */
 export const isImageUrlSafe = (imageUrl?: string | null): boolean => {
-  if (!imageUrl) return false;
+  if (!imageUrl?.trim()) return false;
+
+  const trimmed = imageUrl.trim();
+  if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('data:')) {
+    return true;
+  }
 
   try {
-    const url = new URL(imageUrl);
-    
-    const allowedHostnames = [
-      'lh3.googleusercontent.com',
-      'lh4.googleusercontent.com',
-      'lh5.googleusercontent.com',
-      'lh6.googleusercontent.com',
-      'graph.facebook.com',
-      'images.unsplash.com',
-      'via.placeholder.com',
-      'picsum.photos',
-      'placehold.co',
-      // S3 and cloud storage hostnames
-      's3.amazonaws.com',
-      's3.us-east-1.amazonaws.com',
-      's3.us-west-1.amazonaws.com',
-      's3.us-west-2.amazonaws.com',
-      's3.eu-west-1.amazonaws.com',
-      's3.eu-central-1.amazonaws.com',
-      's3.ap-southeast-1.amazonaws.com',
-      's3.ap-northeast-1.amazonaws.com',
-      's3.ap-south-1.amazonaws.com',
-      // Other cloud providers
-      'storage.googleapis.com',
-      'firebasestorage.googleapis.com',
-      'blob.core.windows.net',
-      'cdn.digitaloceanspaces.com',
-      'nyc3.digitaloceanspaces.com',
-      'fra1.digitaloceanspaces.com',
-      'sgp1.digitaloceanspaces.com',
-      // Gravatar (used by Nhost as default avatars)
-      'www.gravatar.com',
-      'gravatar.com',
-    ];
-
-    // Check if the hostname is in the allowed list
-    if (allowedHostnames.includes(url.hostname)) {
-      return true;
-    }
-
-    // Check for S3-like patterns (bucket-name.s3.region.amazonaws.com)
-    if (url.hostname.includes('.s3.') && url.hostname.includes('.amazonaws.com')) {
-      return true;
-    }
-
-    // Check for DigitalOcean Spaces patterns
-    if (url.hostname.includes('.digitaloceanspaces.com')) {
-      return true;
-    }
-
-    return url.hostname === 'localhost' || 
-           url.hostname === '127.0.0.1' || 
-           url.protocol === 'data:' ||
-           !url.hostname; // Relative paths
+    const url = new URL(trimmed);
+    return isAllowedRemoteImageHostname(url.hostname);
   } catch {
-    // If URL parsing fails, it might be a relative path
-    return imageUrl.startsWith('/') || imageUrl.startsWith('./');
+    return trimmed.startsWith('/') || trimmed.startsWith('./');
   }
 };
 

@@ -11,7 +11,7 @@ import CreateOfferModal from '@/components/common/CreateOfferModal';
 import ClaimListingAuthModal from '@/components/property/ClaimListingAuthModal';
 import ClaimListingContactModal from '@/components/property/ClaimListingContactModal';
 import { groupAmenitiesByCategory } from '@/constants/amenities';
-import { capitalizeWords } from '@/lib/utils';
+import { capitalizeWords, formatAddress, resolveGeocodingAddress } from '@/lib/utils';
 import MobilePropertyPage from '@/components/property/MobilePropertyPage';
 import DesktopPropertyPage from '@/components/property/DesktopPropertyPage';
 import SEO, { createPropertySchema } from '@/components/SEO';
@@ -83,17 +83,21 @@ export default function PropertyDetailPage() {
   };
 
   // Function to format address based on show_specific_location flag
-  const formatAddressDisplay = (address: Record<string, unknown> | undefined, showSpecificLocation: boolean | undefined) => {
-    if (!address || !showSpecificLocation) {
-      // If show_specific_location is false or undefined, only show district and country (capitalized)
-      const district = capitalizeWords(String(address?.district || 'Unknown District'));
-      const country = capitalizeWords(String(address?.country || 'Unknown Country'));
-      return `${district}, ${country}`;
+  const formatAddressDisplay = (
+    address: Record<string, unknown> | undefined,
+    showSpecificLocation: boolean | undefined,
+  ) => {
+    if (!address) return null;
+
+    if (!showSpecificLocation) {
+      return resolveGeocodingAddress({
+        address,
+        showSpecificLocation: false,
+      });
     }
-    
-    // If show_specific_location is true, show full formatted address
-    // This will use the existing location field which is already formatted
-    return null; // Return null to use the existing location field
+
+    const formatted = formatAddress(address);
+    return formatted !== 'Address not specified' ? formatted : null;
   };
 
   // Function to check if the current user has existing offers for this property
@@ -186,11 +190,14 @@ export default function PropertyDetailPage() {
 
           const response = await propertiesAPI.getPropertyByUuid(params.id as string);
 
-          if (response.success && response.data) {
+          if (response.success && response.data?.property) {
             setPropertyData(response.data);
 
-            if (authUser?.id) {
-              checkExistingOffer(response.data.property.property_uuid, authUser.id);
+            if (authUser?.id && response.data.property.property_uuid) {
+              checkExistingOffer(
+                String(response.data.property.property_uuid),
+                authUser.id,
+              );
             }
           } else {
             setError(response.error || 'Failed to load property');
@@ -315,7 +322,7 @@ export default function PropertyDetailPage() {
     );
   }
 
-  if (error || !propertyData) {
+  if (error || !propertyData?.property) {
     return (
       <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

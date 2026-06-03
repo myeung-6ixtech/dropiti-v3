@@ -5,7 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
-import { fetchTenantProfileByNhostUserId } from '@/lib/tenant-profiles';
+import {
+  fetchMyTenantProfile,
+  resolveTenantProfileDisplayUser,
+  type TenantProfileEmbeddedUser,
+} from '@/lib/tenant-profiles';
 import TenantProfilePreview from '@/components/tenant-profile/TenantProfilePreview';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
 import { TenantProfileHeader } from './_components/tenant-profile-header';
@@ -16,25 +20,32 @@ export default function TenantProfilePage() {
   const { showToast } = useToast();
   const router = useRouter();
   const [profileData, setProfileData] = useState<TenantProfileData>({});
+  const [profileUser, setProfileUser] = useState<TenantProfileEmbeddedUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isUnpublishing, setIsUnpublishing] = useState(false);
 
   const nhostUserId = authUser?.id || '';
 
-  // Load existing profile data
+  // Load JWT user's tenant profile via Nhost GET /v1/client/tenants/profile
   useEffect(() => {
-    if (!nhostUserId) {
+    if (!isAuthenticated || !nhostUserId) {
       setLoading(false);
       return;
     }
-    
+
     (async () => {
       try {
         setLoading(true);
-        const res = await fetchTenantProfileByNhostUserId(nhostUserId);
+        const res = await fetchMyTenantProfile(nhostUserId);
         if (res.success && res.data) {
           setProfileData(res.data);
+          setProfileUser(res.user ?? null);
+        } else if (res.notFound) {
+          setProfileData({});
+          setProfileUser(null);
+        } else if (!res.success) {
+          showToast('error', res.error ?? 'Failed to load tenant profile');
         }
       } catch (error) {
         console.error(error);
@@ -43,7 +54,7 @@ export default function TenantProfilePage() {
         setLoading(false);
       }
     })();
-  }, [nhostUserId, showToast]);
+  }, [isAuthenticated, nhostUserId, showToast]);
 
   const handlePublish = async () => {
     if (!nhostUserId) return;
@@ -122,6 +133,14 @@ export default function TenantProfilePage() {
   // Check if profile exists
   const hasProfile = Boolean(profileData.tenant_listing_title || profileData.tenant_listing_description);
 
+  const displayUser = resolveTenantProfileDisplayUser(profileUser, {
+    displayName: authUser?.displayName,
+    name: authUser?.name,
+    avatar: authUser?.avatar || authUser?.photoUrl,
+    email: authUser?.email,
+    id: nhostUserId,
+  });
+
   return (
     <div className="h-full flex flex-col">
       <TenantProfileHeader
@@ -140,11 +159,7 @@ export default function TenantProfilePage() {
           {hasProfile ? (
             <TenantProfilePreview 
               data={profileData} 
-              user={{
-                name: authUser?.name,
-                displayName: authUser?.displayName,
-                avatar: authUser?.avatar || authUser?.photoUrl
-              }}
+              user={displayUser}
               showActions={true}
               onEdit={handleModify}
               onPublish={handlePublish}

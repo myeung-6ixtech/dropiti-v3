@@ -6,6 +6,7 @@ import { formatPropertyLocation } from '@/lib/utils';
 import { Bed, Bathtub } from '@/assets/icons';
 import Image from 'next/image';
 import { propertyCardClasses } from '@/styles/property-card';
+import { getSafeRemoteImage } from '@/lib/utils';
 
 interface DraftCardProps {
   draft: {
@@ -90,7 +91,7 @@ export function DraftCard({ draft, onContinue, onDelete }: DraftCardProps) {
       <div data-slot="draft-image" className={propertyCardClasses.image.container}>
         {draft.display_image && draft.display_image.trim() !== '' ? (
           <Image
-            src={draft.display_image}
+            src={getSafeRemoteImage(draft.display_image, '/images/placeholder.png')}
             alt={draft.title || 'Draft Property'}
             fill
             className={propertyCardClasses.image.placeholder}

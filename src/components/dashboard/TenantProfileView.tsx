@@ -6,7 +6,11 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
-import { fetchTenantProfileByNhostUserId } from '@/lib/tenant-profiles';
+import {
+  fetchMyTenantProfile,
+  resolveTenantProfileDisplayUser,
+  type TenantProfileEmbeddedUser,
+} from '@/lib/tenant-profiles';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
 import Step1BasicInfo from '@/components/tenant-profile/Step1BasicInfo';
 import Step2Preferences from '@/components/tenant-profile/Step2Preferences';
@@ -24,6 +28,7 @@ export default function TenantProfileView() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [profileData, setProfileData] = useState<TenantProfileData>({});
+  const [profileUser, setProfileUser] = useState<TenantProfileEmbeddedUser | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,9 +40,13 @@ export default function TenantProfileView() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetchTenantProfileByNhostUserId(nhostUserId);
+        const res = await fetchMyTenantProfile(nhostUserId);
         if (res.success && res.data) {
           setProfileData(res.data);
+          setProfileUser(res.user ?? null);
+        } else if (res.notFound) {
+          setProfileData({});
+          setProfileUser(null);
         }
       } catch (error) {
         console.error(error);
@@ -116,6 +125,14 @@ export default function TenantProfileView() {
     );
   };
 
+  const displayUser = resolveTenantProfileDisplayUser(profileUser, {
+    displayName: authUser?.displayName,
+    name: authUser?.name,
+    avatar: authUser?.avatar || authUser?.photoUrl,
+    email: authUser?.email,
+    id: nhostUserId,
+  });
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -123,11 +140,7 @@ export default function TenantProfileView() {
       case 2:
         return <Step2Preferences data={profileData} onUpdate={updateProfileData} />;
       case 3:
-        return <Step3Review data={profileData} user={{
-          name: authUser?.name,
-          displayName: authUser?.displayName,
-          avatar: authUser?.avatar || authUser?.photoUrl
-        }} onSubmit={publishProfile} isSubmitting={isSubmitting} />;
+        return <Step3Review data={profileData} user={displayUser} onSubmit={publishProfile} isSubmitting={isSubmitting} />;
       default:
         return <Step1BasicInfo data={profileData} onUpdate={updateProfileData} />;
     }

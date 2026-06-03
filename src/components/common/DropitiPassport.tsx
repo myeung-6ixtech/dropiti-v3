@@ -1,6 +1,11 @@
 'use client';
 import { useState, useEffect } from "react";
-import { getPublishedPropertyCountByStatus, getAverageUserRating, calculatePlatformDuration } from "@/lib/utils";
+import {
+  getPublishedPropertyCountByStatus,
+  getAverageUserRating,
+  calculatePlatformDuration,
+  getSafeProfileImage,
+} from "@/lib/utils";
 import Image from 'next/image';
 import { 
   StarIcon, 
@@ -88,7 +93,7 @@ export default function DropitiPassport({ user, nhostUserId }: DropitiPassportPr
           <div className={passportStyles.avatarContainer}>
             <div className={passportStyles.avatar}>
               <Image
-                src={user.avatar || '/images/Portrait_Placeholder.png'}
+                src={getSafeProfileImage(user.avatar, '/images/Portrait_Placeholder.png')}
                 alt={user.name}
                 width={64}
                 height={64}
