@@ -105,8 +105,8 @@ export const chatAPI = {
     try {
       const response = await apiClient.get('chat/get-chat-rooms');
       if (!response.data.success) throw new Error(response.data.error || 'Failed to fetch chat rooms');
-      const rawItems = Array.isArray(response.data.data) ? response.data.data : [];
-      return rawItems.map((item) => {
+      const rawItems: unknown[] = Array.isArray(response.data.data) ? response.data.data : [];
+      return rawItems.map((item: unknown) => {
         const row = item as Record<string, unknown>;
         if (row.other_participant != null && row.room_id != null) {
           return item as ChatRoom;
