@@ -14,7 +14,7 @@ import Step6Photos from '@/components/add-property/Step6Photos';
 import Step7RentalDetails from '@/components/add-property/Step7RentalDetails';
 import Step8Summary from '@/components/add-property/Step8Summary';
 import { propertiesAPI } from '@/lib/api-client';
-import { uploadService } from '@/lib/upload-client';
+import { uploadFilesToNhost, validateImageFile } from '@/lib/nhost-upload';
 import { PropertyData, PropertyDataForAPI } from '@/types';
 
 const steps = [
@@ -138,18 +138,27 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
         return;
       }
 
-      // Upload photos to S3 if they exist
+      // Upload photos to Nhost Storage if they exist
       let photoUrls: string[] = [];
       if (propertyData.photos && propertyData.photos.length > 0) {
         try {
-          console.log('Uploading photos to S3...');
-          const uploadResponse = await uploadService.uploadPropertyPhotos(propertyData.photos);
-          
-          if (uploadResponse.success && uploadResponse.data?.uploadedFiles) {
-            photoUrls = uploadResponse.data.uploadedFiles.map(file => file.url);
-            console.log('Photos uploaded successfully:', photoUrls);
+          const files = propertyData.photos as unknown as File[];
+          // Validate each file before uploading
+          for (const file of files) {
+            if (file instanceof File) {
+              const validation = validateImageFile(file, { maxMb: 10 });
+              if (!validation.valid) {
+                setSubmitError(validation.error ?? 'Invalid image file.');
+                return;
+              }
+            }
+          }
+          const filesToUpload = files.filter((f): f is File => f instanceof File);
+          if (filesToUpload.length > 0) {
+            photoUrls = await uploadFilesToNhost(filesToUpload);
           } else {
-            throw new Error(uploadResponse.error || 'Failed to upload photos');
+            // Already-resolved URL strings (e.g. from a previous save)
+            photoUrls = propertyData.photos as unknown as string[];
           }
         } catch (uploadError) {
           console.error('Error uploading photos:', uploadError);

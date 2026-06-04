@@ -58,92 +58,113 @@ export interface ChatContact {
   nhostUserId: string;
 }
 
+// Normalises a flat Nhost chat room record to the ChatRoom interface.
+// Nhost returns { id, room_uuid, participant_one_user_id, participant_two_user_id, property_uuid, updated_at }.
+function normalizeNhostChatRoom(
+  item: Record<string, unknown>,
+  currentUserId: string,
+): ChatRoom {
+  const roomUuid = String(item.room_uuid ?? item.id ?? '');
+  const otherUserId = String(
+    item.participant_one_user_id === currentUserId
+      ? item.participant_two_user_id
+      : item.participant_one_user_id
+  );
+  const updatedAt = String(item.updated_at ?? '');
+  return {
+    id: String(item.id ?? ''),
+    room_id: roomUuid,
+    user_id: currentUserId,
+    role: 'tenant',
+    joined_at: updatedAt,
+    last_read_at: updatedAt,
+    is_active: true,
+    room: {
+      id: String(item.id ?? ''),
+      title: null,
+      room_type: 'direct',
+      created_at: updatedAt,
+      updated_at: updatedAt,
+      last_message_at: updatedAt,
+      is_active: true,
+    },
+    last_message: null,
+    other_participant: {
+      room_id: roomUuid,
+      user_id: otherUserId,
+      role: 'landlord',
+      user_details: null,
+    },
+  };
+}
+
 // Chat API functions
 export const chatAPI = {
-  // Get user's chat rooms
+  // Get user's chat rooms — JWT-scoped, flat Nhost items normalised to ChatRoom shape
   getUserChatRooms: async (userId: string): Promise<ChatRoom[]> => {
     try {
-      const response = await apiClient.get('/chat/get-chat-rooms', {
-        params: { userId }
-      });
-      
-      if (response.data.success) {
-        return response.data.data;
-      } else {
-        throw new Error(response.data.error || 'Failed to fetch chat rooms');
-      }
+      const response = await apiClient.get('chat/get-chat-rooms');
+      if (!response.data.success) throw new Error(response.data.error || 'Failed to fetch chat rooms');
+      const rawItems: Record<string, unknown>[] = Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
+      return rawItems.map((item) => normalizeNhostChatRoom(item, userId));
     } catch (error) {
       console.error('Error fetching chat rooms:', error);
       throw error;
     }
   },
 
-  // Get messages for a specific room
-  getRoomMessages: async (roomId: string, limit: number = 50, offset: number = 0): Promise<ChatMessage[]> => {
+  // Get messages — offset not supported by Nhost; limit only
+  getRoomMessages: async (roomId: string, limit: number = 50, _offset: number = 0): Promise<ChatMessage[]> => {
     try {
-      const response = await apiClient.get('/chat/get-room-messages', {
-        params: { roomId, limit, offset }
-      });
-      
+      const response = await apiClient.get('chat/get-room-messages', { params: { roomId, limit } });
       if (response.data.success) {
         return response.data.data;
-      } else {
-        throw new Error(response.data.error || 'Failed to fetch messages');
       }
+      throw new Error(response.data.error || 'Failed to fetch messages');
     } catch (error) {
       console.error('Error fetching room messages:', error);
       throw error;
     }
   },
 
-  // Send a message
+  // Send a message — Nhost schema: { roomId, content, messageType? }; senderUserId is JWT-derived
   sendMessage: async (
     roomId: string, 
-    senderUserId: string, 
+    _senderUserId: string, 
     content: string,
     messageType: 'text' | 'property_share' = 'text',
-    metadata: Record<string, unknown> | null = null
+    _metadata: Record<string, unknown> | null = null
   ): Promise<ChatMessage> => {
     try {
-      const response = await apiClient.post('/chat/send-message', {
-        roomId,
-        senderUserId,
-        content,
-        messageType,
-        metadata
-      });
-      
+      const response = await apiClient.post('chat/send-message', { roomId, content, messageType });
       if (response.data.success) {
         return response.data.data;
-      } else {
-        throw new Error(response.data.error || 'Failed to send message');
       }
+      throw new Error(response.data.error || 'Failed to send message');
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;
     }
   },
 
-  // Get or create a direct chat room between two users
+  // Get or create a direct chat room — Nhost: { otherUserId }; caller is the JWT principal
   getOrCreateRoom: async (
-    user1UserId: string,
+    _user1UserId: string,
     user2UserId: string,
-    user1Role: string = 'tenant',
-    user2Role: string = 'landlord'
+    _user1Role: string = 'tenant',
+    _user2Role: string = 'landlord'
   ): Promise<{ roomId: string; room: ChatRoom['room']; isNew: boolean }> => {
     try {
-      const response = await apiClient.post('/chat/get-or-create-room', {
-        user1UserId,
-        user2UserId,
-        user1Role,
-        user2Role
-      });
-      
-      if (response.data.success) {
-        return response.data.data;
-      } else {
-        throw new Error(response.data.error || 'Failed to get or create room');
-      }
+      const response = await apiClient.post('chat/get-or-create-room', { otherUserId: user2UserId });
+      if (!response.data.success) throw new Error(response.data.error || 'Failed to get or create room');
+      const roomData = response.data.data as Record<string, unknown>;
+      return {
+        roomId: String(roomData.room_uuid ?? roomData.id ?? ''),
+        room: null,
+        isNew: false,
+      };
     } catch (error) {
       console.error('Error getting or creating room:', error);
       throw error;

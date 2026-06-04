@@ -49,6 +49,26 @@ function resolveListingIds(row: {
 export function isRawListingRow(value: unknown): value is RawListingRow {
   if (!value || typeof value !== 'object') return false;
   const row = value as Record<string, unknown>;
+
+  // Offers share property_uuid but must not be normalized as listings.
+  if (
+    'offer_status' in row ||
+    'offer_key' in row ||
+    'proposing_rent_price' in row ||
+    ('initiator_user_id' in row && 'property_uuid' in row)
+  ) {
+    return false;
+  }
+
+  // Notifications have title/id but are not listings.
+  if (
+    'is_read' in row ||
+    'is_archived' in row ||
+    'type_id' in row
+  ) {
+    return false;
+  }
+
   const hasId =
     (typeof row.id === 'string' && row.id.length > 0) ||
     (typeof row.id === 'number' && !Number.isNaN(row.id));

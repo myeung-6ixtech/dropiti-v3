@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { getSafeProfileImage } from '@/lib/utils';
+import { uploadFileToNhost } from '@/lib/nhost-upload';
 
 interface ProfilePhotoUploadProps {
   currentPhotoUrl: string;
@@ -75,43 +76,12 @@ export default function ProfilePhotoUpload({
     setUploadError(null);
 
     try {
-      // Create FormData for upload
-      const formData = new FormData();
-      formData.append('files', file);
-      formData.append('category', 'images');
-      formData.append('uploadType', 'direct');
-
-      // Upload to S3 via our API
-      const response = await fetch('/api/v1/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Upload failed: ${response.status}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.success && result.data?.uploadedFiles?.[0]) {
-        const uploadedFile = result.data.uploadedFiles[0];
-        
-        // Debug: Log the uploaded file data
-        console.log('Upload successful, file data:', uploadedFile);
-        console.log('Uploaded file URL:', uploadedFile.url);
-        console.log('Calling onPhotoChange with:', uploadedFile.url);
-        
-        onPhotoChange(uploadedFile.url);
-        setIsPreviewOpen(false);
-        setPreviewUrl(null);
-        
-        // Clear the file input
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
-      } else {
-        throw new Error(result.error || 'Upload failed');
+      const { publicUrl } = await uploadFileToNhost(file);
+      onPhotoChange(publicUrl);
+      setIsPreviewOpen(false);
+      setPreviewUrl(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
       }
     } catch (error) {
       console.error('Profile photo upload error:', error);

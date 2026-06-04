@@ -1,5 +1,4 @@
 import { tenantsAPI } from '@/lib/api-client';
-import { useNhostFunctions } from '@/lib/nhost-functions';
 import type { TenantProfileData } from '@/types/tenant';
 
 /** Stable React key for tenant marketplace cards (prefer `tenant_uuid`). */
@@ -225,18 +224,14 @@ async function loadTenantProfileResponse(
  * Logged-in user's tenant profile — BFF → Nhost `GET /v1/client/tenants/profile` (Bearer, no query).
  * Matches api-doc-v2 dashboard flow.
  */
-export function fetchMyTenantProfile(nhostUserId: string): Promise<{
+export function fetchMyTenantProfile(_nhostUserId: string): Promise<{
   success: boolean;
   data?: TenantProfileData | null;
   user?: TenantProfileEmbeddedUser | null;
   error?: string;
   notFound?: boolean;
 }> {
-  return loadTenantProfileResponse(() =>
-    useNhostFunctions()
-      ? tenantsAPI.getMyTenantProfile()
-      : tenantsAPI.getTenantProfile(nhostUserId),
-  );
+  return loadTenantProfileResponse(() => tenantsAPI.getMyTenantProfile());
 }
 
 /** Fetch tenant profile by `nhost_user_id` — public active or owner with JWT. */

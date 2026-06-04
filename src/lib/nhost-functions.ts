@@ -16,10 +16,6 @@ export type FunctionsFail = {
 
 export type FunctionsEnvelope<T> = FunctionsOk<T> | FunctionsFail;
 
-export function useNhostFunctions(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_FUNCTIONS_URL?.trim());
-}
-
 export const FUNCTIONS_BFF_PREFIX = "/api/v1/bff/functions";
 
 /** GET routes that allow anonymous access (Nhost `optionalAuth`). */
@@ -67,13 +63,10 @@ export function parseFunctionsEnvelope<T>(body: unknown): {
   };
 }
 
-/** Resolve API path: legacy Next route or BFF → Nhost Functions. */
+/** Resolve BFF → Nhost Functions path. */
 export function resolveApiPath(
-  legacyPath: string,
+  _legacyPath: string,
   functionsPath: string
 ): string {
-  if (!useNhostFunctions()) {
-    return legacyPath;
-  }
   return functionsBffUrl(functionsPath);
 }

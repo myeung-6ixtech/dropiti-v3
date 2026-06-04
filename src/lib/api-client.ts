@@ -10,7 +10,6 @@ import {
 } from '@/types/review';
 import { CreateOfferInput, CounterOfferInput } from '@/types/offer';
 import { StandardizedAddress, formatAddressForDatabase } from '@/utils/addressFormatter';
-import { useNhostFunctions } from '@/lib/nhost-functions';
 import { nhost } from '@/lib/nhost';
 import {
   isRawListingRow,
@@ -18,8 +17,18 @@ import {
   normalizeListings,
   mapPropertyDetailResponse,
 } from '@/lib/normalize-listing';
-
-const USE_NHOST_FUNCTIONS = useNhostFunctions();
+import {
+  isOfferItemsPayload,
+  isRawOfferRow,
+  normalizeOffer,
+  normalizeOffers,
+} from '@/lib/normalize-offer';
+import {
+  isNotificationItemsPayload,
+  isRawNotificationRow,
+  normalizeNotification,
+  normalizeNotifications,
+} from '@/lib/normalize-notification';
 
 function isListingItemsPayload(items: unknown[]): boolean {
   return items.length > 0 && items.some(isRawListingRow);
@@ -122,9 +131,9 @@ function parseReviewsByUserData(data: unknown): Review[] {
   return [];
 }
 
-// Base API configuration — when NEXT_PUBLIC_FUNCTIONS_URL is set, route via BFF → Nhost Functions
+// All requests route via BFF → Nhost Functions
 const apiClient = axios.create({
-  baseURL: USE_NHOST_FUNCTIONS ? '/api/v1/bff/functions/client' : '/api/v1',
+  baseURL: '/api/v1/bff/functions/client',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -133,10 +142,12 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    if (USE_NHOST_FUNCTIONS && config.url?.startsWith('/')) {
+    // Axios interprets a leading slash as an absolute path, bypassing baseURL.
+    // Strip any accidental leading slashes so all paths are relative to baseURL.
+    if (config.url?.startsWith('/')) {
       config.url = config.url.slice(1);
     }
-    if (USE_NHOST_FUNCTIONS && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       const token = nhost.auth.getAccessToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -150,7 +161,7 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => {
     const body = response.data as Record<string, unknown> | undefined;
-    if (USE_NHOST_FUNCTIONS && body && typeof body === 'object' && 'ok' in body) {
+    if (body && typeof body === 'object' && 'ok' in body) {
       if (body.ok === true) {
         const data = body.data as Record<string, unknown> | unknown;
         if (data && typeof data === 'object' && 'items' in (data as object)) {
@@ -160,6 +171,18 @@ apiClient.interceptors.response.use(
             response.data = {
               success: true,
               data: normalizeListings(items),
+              pagination: wrapped.pagination,
+            };
+          } else if (isOfferItemsPayload(items)) {
+            response.data = {
+              success: true,
+              data: normalizeOffers(items),
+              pagination: wrapped.pagination,
+            };
+          } else if (isNotificationItemsPayload(items)) {
+            response.data = {
+              success: true,
+              data: normalizeNotifications(items),
               pagination: wrapped.pagination,
             };
           } else {
@@ -178,6 +201,10 @@ apiClient.interceptors.response.use(
           response.data = { success: true, data: body.data };
         } else if (isRawListingRow(data)) {
           response.data = { success: true, data: normalizeListing(data) };
+        } else if (isRawOfferRow(data)) {
+          response.data = { success: true, data: normalizeOffer(data) };
+        } else if (isRawNotificationRow(data)) {
+          response.data = { success: true, data: normalizeNotification(data) };
         } else {
           response.data = { success: true, data: body.data };
         }
@@ -298,12 +325,7 @@ export const propertiesAPI = {
     }
     
     try {
-      const url = 'properties/get-property-by-uuid';
-      const params = USE_NHOST_FUNCTIONS
-        ? { uuid: propertyUuid }
-        : { property_uuid: propertyUuid };
-      
-      const response = await apiClient.get(url, { params });
+      const response = await apiClient.get('properties/get-property-by-uuid', { params: { uuid: propertyUuid } });
       const body = response.data as Record<string, unknown>;
       const payload =
         body?.success === true ? body.data : body?.data ?? body;
@@ -342,7 +364,7 @@ export const propertiesAPI = {
     return response.data;
   },
 
-  // Update an existing property
+  // Update an existing property — PATCH with flat body { property_uuid, ...updates }
   updateProperty: async (id: string, updates: {
     title?: string;
     description?: string;
@@ -364,43 +386,31 @@ export const propertiesAPI = {
     status?: string;
     photos?: string[]; // For backward compatibility
   }) => {
-    const response = await apiClient.put('/properties/update-property', { id, updates });
+    const response = await apiClient.patch('properties/update-property', { property_uuid: id, ...updates });
     return response.data;
   },
 
-  // Get user's drafts
-  getDrafts: async (landlordId: string) => {
-    const response = await apiClient.get('/properties/get-drafts', {
-      params: { landlord_id: landlordId }
-    });
+  // Get user's drafts — JWT-scoped, no landlordId needed
+  getDrafts: async (_landlordId?: string) => {
+    const response = await apiClient.get('properties/get-drafts');
     return response.data;
   },
 
   // Publish draft
   publishDraft: async (propertyUuid: string) => {
-    const response = await apiClient.post('/properties/publish-draft', {
-      property_uuid: propertyUuid
-    });
+    const response = await apiClient.post('properties/publish-draft', { property_uuid: propertyUuid });
     return response.data;
   },
 
   // Delete draft
   deleteDraft: async (propertyUuid: string) => {
-    const response = await apiClient.delete('/properties/delete-draft', {
-      params: { property_uuid: propertyUuid }
-    });
+    const response = await apiClient.delete('properties/delete-draft', { params: { property_uuid: propertyUuid } });
     return response.data;
   },
 
   // Update property status
   updatePropertyStatus: async (propertyUuid: string, status: 'draft' | 'published' | 'archived' | 'expired') => {
-    const response = await apiClient.put('/properties/update-property', {
-      id: propertyUuid,
-      updates: {
-        status: status
-      }
-    });
-    return response.data;
+    return propertiesAPI.updateProperty(propertyUuid, { status });
   },
 
   // Publish property (set to published status)
@@ -413,22 +423,13 @@ export const propertiesAPI = {
     return propertiesAPI.updatePropertyStatus(propertyUuid, 'draft');
   },
 
-  // Get total count of published properties by user
-  getPropertyCountByUser: async (landlordUserId: string) => {
+  // Get total count of published properties by user — JWT-scoped
+  getPropertyCountByUser: async (_landlordUserId?: string) => {
     try {
-      console.log("API Client: Fetching property count for user:", landlordUserId);
-      const response = await apiClient.get("/properties/get-property-count-by-user", { 
-        params: { landlordUserId } 
-      });
-      console.log("API Client: Property count response:", response.data);
+      const response = await apiClient.get('properties/get-property-count-by-user');
       return response.data;
     } catch (error) {
       console.error("Get property count by user error:", error);
-      if (error && typeof error === "object" && "response" in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error("Error response:", axiosError.response.data);
-        console.error("Error status:", axiosError.response.status);
-      }
       throw error;
     }
   },
@@ -473,7 +474,10 @@ function normalizeUserApiResult(
   if ('notFound' in parsed && parsed.notFound) {
     return { success: false, notFound: true };
   }
-  return { success: false, error: parsed.error };
+  if ('error' in parsed) {
+    return { success: false, error: parsed.error };
+  }
+  return { success: false };
 }
 
 // Users API
@@ -543,25 +547,19 @@ export const usersAPI = {
     }
   },
 
-  // Update user profile
-  updateUser: async (userId: string, updates: UpdateUserInput) => {
+  // Update user profile — flat PATCH body, JWT-scoped
+  updateUser: async (_userId: string, updates: UpdateUserInput) => {
     try {
-      let response;
-      if (USE_NHOST_FUNCTIONS) {
-        // Nhost update-user: flat PATCH body, user scoped to JWT
-        const body: Record<string, unknown> = { ...updates };
-        if (Array.isArray(body.languages)) {
-          body.languages = JSON.stringify(body.languages);
-        }
-        for (const key of ['preferences', 'notification_settings', 'privacy_settings'] as const) {
-          if (body[key] && typeof body[key] === 'object') {
-            body[key] = JSON.stringify(body[key]);
-          }
-        }
-        response = await apiClient.patch('/users/update-user', body);
-      } else {
-        response = await apiClient.put('/users/update-user', { id: userId, updates });
+      const body: Record<string, unknown> = { ...updates };
+      if (Array.isArray(body.languages)) {
+        body.languages = JSON.stringify(body.languages);
       }
+      for (const key of ['preferences', 'notification_settings', 'privacy_settings'] as const) {
+        if (body[key] && typeof body[key] === 'object') {
+          body[key] = JSON.stringify(body[key]);
+        }
+      }
+      const response = await apiClient.patch('/users/update-user', body);
       const parsed = parseUserProfileResponse(response.data);
       if (parsed.success) {
         return { success: true as const, data: parsed.data };
@@ -617,22 +615,15 @@ export const tenantsAPI = {
     const response = await apiClient.post('/tenants/profile', body);
     return response.data;
   },
-  updateTenantProfile: async (nhostUserId: string, updates: Record<string, unknown>) => {
-    if (USE_NHOST_FUNCTIONS) {
-      const { tenant_privacy_settings, privacy_settings, ...rest } = updates;
-      const body: Record<string, unknown> = {
-        ...rest,
-        ...(privacy_settings !== undefined || tenant_privacy_settings !== undefined
-          ? { privacy_settings: privacy_settings ?? tenant_privacy_settings }
-          : {}),
-      };
-      const response = await apiClient.patch('/tenants/profile', body);
-      return response.data;
-    }
-    const response = await apiClient.put('/tenants/profile', {
-      user_nhost_user_id: nhostUserId,
-      updates,
-    });
+  updateTenantProfile: async (_nhostUserId: string, updates: Record<string, unknown>) => {
+    const { tenant_privacy_settings, privacy_settings, ...rest } = updates;
+    const body: Record<string, unknown> = {
+      ...rest,
+      ...(privacy_settings !== undefined || tenant_privacy_settings !== undefined
+        ? { privacy_settings: privacy_settings ?? tenant_privacy_settings }
+        : {}),
+    };
+    const response = await apiClient.patch('tenants/profile', body);
     return response.data;
   },
   getTenantProfiles: async (
@@ -668,11 +659,9 @@ export const offersAPI = {
   // Get offers by recipient (landlord)
   getOffersByRecipient: async (recipientUserId: string, propertyUuid?: string) => {
     try {
-      const url = propertyUuid
-        ? `/offers/get-offers-by-id?recipientUserId=${recipientUserId}&propertyUuid=${propertyUuid}`
-        : `/offers/get-offers-by-id?recipientUserId=${recipientUserId}`;
-
-      const response = await apiClient.get(url);
+      const params: Record<string, string> = { recipientUserId };
+      if (propertyUuid) params.propertyUuid = propertyUuid;
+      const response = await apiClient.get('offers/get-offers-by-id', { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching offers by recipient:', error);
@@ -683,7 +672,7 @@ export const offersAPI = {
   // Get offers by initiator (tenant)
   getOffersByInitiator: async (initiatorUserId: string) => {
     try {
-      const response = await apiClient.get(`/offers/get-offers-by-initiator?initiatorUserId=${initiatorUserId}`);
+      const response = await apiClient.get('offers/get-offers-by-initiator', { params: { initiatorUserId } });
       return response.data;
     } catch (error) {
       console.error('Error fetching offers by initiator:', error);
@@ -753,7 +742,7 @@ export const offersAPI = {
   // Get offer action history
   getOfferActions: async (offerId: string) => {
     try {
-      const response = await apiClient.get(`/offers/get-offer-actions?offerId=${offerId}`);
+      const response = await apiClient.get('offers/get-offer-actions', { params: { offerId } });
       return response.data;
     } catch (error) {
       console.error('Error fetching offer actions:', error);
@@ -803,7 +792,7 @@ export const offersAPI = {
   // Get negotiation state
   getNegotiationState: async (offerId: string, currentUserId: string) => {
     try {
-      const response = await apiClient.get(`/offers/get-negotiation-state?offerId=${offerId}&currentUserId=${currentUserId}`);
+      const response = await apiClient.get('offers/get-negotiation-state', { params: { offerId, currentUserId } });
       return response.data;
     } catch (error) {
       console.error('Error fetching negotiation state:', error);
@@ -812,40 +801,21 @@ export const offersAPI = {
   },
 };
 
-// Search API (placeholder for future endpoints)
-export const searchAPI = {
-  // Search properties with advanced filters
-      searchProperties: async (searchParams: {
-      location?: string;
-      minPrice?: number;
-      maxPrice?: number;
-      bedrooms?: number;
-      type?: string;
-      limit?: number;
-      offset?: number;
-    }) => {
-    const response = await apiClient.post('/search/properties', searchParams);
-    return response.data;
-  },
-};
-
-// Notifications API
+// Notifications API — all JWT-scoped; userId params accepted for backwards-compat but ignored by Nhost
 export const notificationsAPI = {
-  // Get notifications for a user
-  getNotifications: async (userId: string, filters?: {
+  getNotifications: async (_userId?: string, filters?: {
     isRead?: boolean;
     category?: string;
     limit?: number;
     offset?: number;
   }) => {
     try {
-      const params = new URLSearchParams({ userId });
-      if (filters?.isRead !== undefined) params.append('isRead', filters.isRead.toString());
-      if (filters?.category) params.append('category', filters.category);
-      if (filters?.limit) params.append('limit', filters.limit.toString());
-      if (filters?.offset) params.append('offset', filters.offset.toString());
-      
-      const response = await apiClient.get(`/notifications?${params.toString()}`);
+      const params: Record<string, string | number> = {};
+      if (filters?.isRead !== undefined) params.isRead = filters.isRead.toString();
+      if (filters?.category) params.category = filters.category;
+      if (filters?.limit) params.limit = filters.limit;
+      if (filters?.offset) params.offset = filters.offset;
+      const response = await apiClient.get('notifications', { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -853,10 +823,9 @@ export const notificationsAPI = {
     }
   },
 
-  // Get unread count
-  getUnreadCount: async (userId: string) => {
+  getUnreadCount: async (_userId?: string) => {
     try {
-      const response = await apiClient.get(`/notifications/unread-count?userId=${userId}`);
+      const response = await apiClient.get('notifications/unread-count');
       return response.data;
     } catch (error) {
       console.error('Error fetching unread count:', error);
@@ -864,10 +833,9 @@ export const notificationsAPI = {
     }
   },
 
-  // Mark notification as read
   markAsRead: async (notificationId: string) => {
     try {
-      const response = await apiClient.post('/notifications/mark-read', { notificationId });
+      const response = await apiClient.post('notifications/mark-read', { notificationId });
       return response.data;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -875,10 +843,9 @@ export const notificationsAPI = {
     }
   },
 
-  // Mark all notifications as read
-  markAllAsRead: async (userId: string) => {
+  markAllAsRead: async (_userId?: string) => {
     try {
-      const response = await apiClient.post('/notifications/mark-all-read', { userId });
+      const response = await apiClient.post('notifications/mark-all-read', {});
       return response.data;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -886,10 +853,9 @@ export const notificationsAPI = {
     }
   },
 
-  // Archive notification
   archiveNotification: async (notificationId: string) => {
     try {
-      const response = await apiClient.post('/notifications/archive', { notificationId });
+      const response = await apiClient.post('notifications/archive', { notificationId });
       return response.data;
     } catch (error) {
       console.error('Error archiving notification:', error);
@@ -1000,56 +966,42 @@ export const reviewsAPI = {
     }
   },
 
-  // Update a review
-  updateReview: async (reviewUuid: string, updateData: UpdateReviewInput) => {
+  /** Update a review — PATCH body { reviewId: number, ...updateData } */
+  updateReview: async (reviewId: string | number, updateData: UpdateReviewInput) => {
     try {
-      console.log('API Client: Updating review:', { reviewUuid, updateData });
-      const response = await apiClient.put(`/reviews/update-review?reviewUuid=${reviewUuid}`, updateData);
-      console.log('API Client: Review update response:', response.data);
+      const response = await apiClient.patch('reviews/update-review', {
+        reviewId: parseInt(String(reviewId), 10),
+        ...updateData,
+      });
       return response.data;
     } catch (error) {
       console.error('API Client: Update review error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
       throw error;
     }
   },
 
-  // Delete a review
-  deleteReview: async (reviewUuid: string) => {
+  /** Delete a review — DELETE ?reviewId=<number> */
+  deleteReview: async (reviewId: string | number) => {
     try {
-      console.log('API Client: Deleting review:', reviewUuid);
-      const response = await apiClient.delete(`/reviews/delete-review?reviewUuid=${reviewUuid}`);
-      console.log('API Client: Review deletion response:', response.data);
+      const response = await apiClient.delete('reviews/delete-review', {
+        params: { reviewId: parseInt(String(reviewId), 10) },
+      });
       return response.data;
     } catch (error) {
       console.error('API Client: Delete review error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
       throw error;
     }
   },
 
-  // Mark a review as helpful
-  markReviewHelpful: async (reviewUuid: string) => {
+  /** Mark a review as helpful — POST body { reviewId: number } */
+  markReviewHelpful: async (reviewId: string | number) => {
     try {
-      console.log('API Client: Marking review as helpful:', reviewUuid);
-      const response = await apiClient.post(`/reviews/mark-helpful?reviewUuid=${reviewUuid}`);
-      console.log('API Client: Mark helpful response:', response.data);
+      const response = await apiClient.post('reviews/mark-helpful', {
+        reviewId: parseInt(String(reviewId), 10),
+      });
       return response.data;
     } catch (error) {
       console.error('API Client: Mark review helpful error:', error);
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response: { data: unknown; status: number } };
-        console.error('Error response:', axiosError.response.data);
-        console.error('Error status:', axiosError.response.status);
-      }
       throw error;
     }
   },

@@ -5,6 +5,8 @@ import { PencilIcon, PhotoIcon, TrashIcon, ArrowUpTrayIcon } from '@heroicons/re
 import { PropertyData } from '@/types/property';
 import Image from 'next/image';
 import { useToast } from '@/context/ToastContext';
+import { uploadFilesToNhost, validateImageFile } from '@/lib/nhost-upload';
+import { propertiesAPI } from '@/lib/api-client';
 
 interface UploadedFile {
   url: string;
@@ -142,96 +144,45 @@ export function PhotosSection({
 
   const handleSave = async () => {
     try {      
-      // If there are new files to upload, handle S3 upload here
       if (selectedFiles.length > 0) {
-        
-        // Create FormData for the upload API
-        const formData = new FormData();
-        selectedFiles.forEach(file => {
-          formData.append('files', file);
-        });
-        formData.append('category', 'images');
-        formData.append('uploadType', 'direct');
-
-        // Upload files to S3
-        const uploadResponse = await fetch('/api/v1/upload', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload photos');
+        // Validate each file before uploading
+        for (const file of selectedFiles) {
+          const validation = validateImageFile(file, { maxMb: 10 });
+          if (!validation.valid) {
+            throw new Error(validation.error ?? 'Invalid image file.');
+          }
         }
 
-        const uploadResult: { success: boolean; data?: { uploadedFiles: UploadedFile[] }; error?: string } = await uploadResponse.json();
-        
-        if (uploadResult.success && uploadResult.data?.uploadedFiles) {
-          // Get the URLs of uploaded files
-          const uploadedUrls = uploadResult.data.uploadedFiles.map((file: UploadedFile) => file.url);        
-          // Update the property data with new photo URLs
-          const currentUploadedImages = data.uploadedImages || [];
-          const newUploadedImages = [...currentUploadedImages, ...uploadedUrls];
-          
-          // Update the uploadedImages field - this is a top-level field
-          onUpdateField('', 'uploadedImages', newUploadedImages);
-          
-          // Update the displayImage field to the first photo if it's empty - this is also a top-level field
-          if (!data.displayImage && uploadedUrls.length > 0) {
-            onUpdateField('', 'displayImage', uploadedUrls[0]);
-          }
-          
-          // Clear selected files after successful upload
-          setSelectedFiles([]);
-          
-          // NEW: Call property update API directly
-          const propertyUpdateData = {
-            display_image: data.displayImage || uploadedUrls[0],
-            uploaded_images: newUploadedImages,
-            photos: newUploadedImages, // backward compatibility
-          };
-                  
-          try {
-            const propertyResponse = await fetch(`/api/v1/properties/update-property`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                id: propertyId,
-                updates: propertyUpdateData
-              }),
-            });
-            
-            if (!propertyResponse.ok) {
-              const errorText = await propertyResponse.text();
-              throw new Error(`Failed to update property photos: ${propertyResponse.status} - ${errorText}`);
-            }
-            
-            const propertyResult = await propertyResponse.json();
-            
-            if (propertyResult.success) {
-              showToast('success', 'The photos have been updated.');
-              onPhotoSaveSuccess?.();
-              // Exit editing mode
-              onSaveEdit();
-            } else {
-              throw new Error(propertyResult.error || 'Failed to save photos');
-            }
-          } catch (propertyError) {
-            console.error('Error updating property photos:', propertyError);
-            const errorMessage = propertyError instanceof Error ? propertyError.message : 'Failed to update property photos';
-            onPhotoSaveError?.(errorMessage);
-            // Don't exit editing mode on error
-            return;
-          }
-          
-          return; // Don't call onSaveEdit immediately
+        // Upload to Nhost Storage
+        const uploadedUrls = await uploadFilesToNhost(selectedFiles);
+
+        const currentUploadedImages = data.uploadedImages || [];
+        const newUploadedImages = [...currentUploadedImages, ...uploadedUrls];
+
+        onUpdateField('', 'uploadedImages', newUploadedImages);
+        if (!data.displayImage && uploadedUrls.length > 0) {
+          onUpdateField('', 'displayImage', uploadedUrls[0]);
+        }
+        setSelectedFiles([]);
+
+        // Persist to Hasura via propertiesAPI (routes through BFF → Nhost)
+        const propertyUpdateData = {
+          display_image: data.displayImage || uploadedUrls[0],
+          uploaded_images: newUploadedImages,
+        };
+
+        const propertyResult = await propertiesAPI.updateProperty(propertyId, propertyUpdateData);
+        if (propertyResult?.success !== false) {
+          showToast('success', 'The photos have been updated.');
+          onPhotoSaveSuccess?.();
+          onSaveEdit();
         } else {
-          throw new Error(uploadResult.error || 'Upload failed');
+          throw new Error(propertyResult?.error || 'Failed to save photos');
         }
+
+        return;
       } else {
-        console.log('PhotosSection: No new files to upload');
-        // If no new files, just exit editing mode
+        // No new files — just exit editing mode
         onSaveEdit();
       }
     } catch (error) {
