@@ -69,6 +69,31 @@ export function isRawListingRow(value: unknown): value is RawListingRow {
     return false;
   }
 
+  // Tenant marketplace / profile rows (numeric id + user_id, no property_uuid).
+  if (
+    'tenant_listing_title' in row ||
+    'tenant_uuid' in row ||
+    'tenant_listing_status' in row
+  ) {
+    return false;
+  }
+
+  // Chat rooms (flat Nhost or participant rows with room_uuid).
+  if (
+    'room_uuid' in row &&
+    ('participant_one_user_id' in row || 'participant_two_user_id' in row)
+  ) {
+    return false;
+  }
+  if ('room_id' in row && 'user_id' in row && 'joined_at' in row && 'role' in row) {
+    return false;
+  }
+
+  // Chat messages.
+  if ('sender_user_id' in row && ('message_type' in row || 'status' in row)) {
+    return false;
+  }
+
   const hasId =
     (typeof row.id === 'string' && row.id.length > 0) ||
     (typeof row.id === 'number' && !Number.isNaN(row.id));

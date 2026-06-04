@@ -105,10 +105,14 @@ export const chatAPI = {
     try {
       const response = await apiClient.get('chat/get-chat-rooms');
       if (!response.data.success) throw new Error(response.data.error || 'Failed to fetch chat rooms');
-      const rawItems: Record<string, unknown>[] = Array.isArray(response.data.data)
-        ? response.data.data
-        : [];
-      return rawItems.map((item) => normalizeNhostChatRoom(item, userId));
+      const rawItems = Array.isArray(response.data.data) ? response.data.data : [];
+      return rawItems.map((item) => {
+        const row = item as Record<string, unknown>;
+        if (row.other_participant != null && row.room_id != null) {
+          return item as ChatRoom;
+        }
+        return normalizeNhostChatRoom(row, userId);
+      });
     } catch (error) {
       console.error('Error fetching chat rooms:', error);
       throw error;
@@ -161,9 +165,9 @@ export const chatAPI = {
       if (!response.data.success) throw new Error(response.data.error || 'Failed to get or create room');
       const roomData = response.data.data as Record<string, unknown>;
       return {
-        roomId: String(roomData.room_uuid ?? roomData.id ?? ''),
-        room: null,
-        isNew: false,
+        roomId: String(roomData.roomId ?? roomData.room_uuid ?? roomData.id ?? ''),
+        room: (roomData.room as ChatRoom['room']) ?? null,
+        isNew: Boolean(roomData.isNew),
       };
     } catch (error) {
       console.error('Error getting or creating room:', error);

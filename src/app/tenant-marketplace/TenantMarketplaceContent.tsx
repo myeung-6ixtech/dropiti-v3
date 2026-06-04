@@ -281,14 +281,29 @@ export default function TenantMarketplaceContent() {
               <TenantProfileCardSkeletonGrid count={12} />
             ) : tenantProfiles.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {paginatedProfiles.map((profile, index) => (
-                  <TenantProfileCard
-                    key={getTenantProfileKey(profile, startIndex + index)}
-                    data={profile}
-                    user={profile.user}
-                    currentUserId={currentUser?.id}
-                  />
-                ))}
+                {paginatedProfiles.map((profile, index) => {
+                  const isOwnCard =
+                    Boolean(currentUser?.id) && profile.user_id === currentUser?.id;
+                  return (
+                    <TenantProfileCard
+                      key={getTenantProfileKey(profile, startIndex + index)}
+                      data={profile}
+                      user={profile.user}
+                      currentUserId={currentUser?.id}
+                      authUserFallback={
+                        isOwnCard
+                          ? {
+                              displayName: currentUser?.displayName,
+                              name: currentUser?.name,
+                              avatar: currentUser?.avatar || currentUser?.photoUrl,
+                              email: currentUser?.email,
+                              id: currentUser?.id,
+                            }
+                          : undefined
+                      }
+                    />
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">

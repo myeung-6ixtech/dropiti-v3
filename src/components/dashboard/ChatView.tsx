@@ -39,7 +39,10 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
 
   // Fetch user's chat rooms
   const fetchChatRooms = useCallback(async () => {
-    if (!authUser?.id) return;
+    if (!authUser?.id) {
+      setIsLoadingContacts(false);
+      return;
+    }
 
     try {
       setIsLoadingContacts(true);

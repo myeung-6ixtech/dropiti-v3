@@ -1,4 +1,4 @@
-import { tenantsAPI } from '@/lib/api-client';
+import { tenantsAPI, usersAPI } from '@/lib/api-client';
 import type { TenantProfileData } from '@/types/tenant';
 
 /** Stable React key for tenant marketplace cards (prefer `tenant_uuid`). */
@@ -50,44 +50,123 @@ export type TenantProfileRow = TenantProfileData & {
   user_id?: string;
   privacy_settings?: Record<string, boolean>;
   user?: TenantProfileEmbeddedUser | null;
+  real_estate_user?: Record<string, unknown> | null;
 };
 
-/** Map API `user` (auth.users or real_estate_user) to a single embedded shape. */
+function readStringField(row: Record<string, unknown>, snake: string, camel: string): string | undefined {
+  const value = row[snake] ?? row[camel];
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function isRealEstateUserRecord(row: Record<string, unknown>): boolean {
+  if ('tenant_listing_title' in row || 'tenant_uuid' in row) return false;
+  const hasIdentity =
+    readStringField(row, 'display_name', 'displayName') ||
+    readStringField(row, 'photo_url', 'photoUrl');
+  const hasUserKey = Boolean(row.nhost_user_id ?? row.uuid);
+  return Boolean(hasIdentity && hasUserKey);
+}
+
+function readRealEstateUserFields(
+  reUser: Record<string, unknown> | null,
+): Pick<
+  TenantProfileEmbeddedUser,
+  'display_name' | 'photo_url' | 'avatar' | 'email' | 'rating' | 'review_count'
+> {
+  if (!reUser) return {};
+  const display_name =
+    readStringField(reUser, 'display_name', 'displayName') ||
+    (typeof reUser.name === 'string' && reUser.name.trim() ? reUser.name.trim() : undefined);
+  const photo_url =
+    readStringField(reUser, 'photo_url', 'photoUrl') ||
+    (typeof reUser.avatar === 'string' && reUser.avatar.trim() ? reUser.avatar.trim() : undefined);
+  return {
+    display_name,
+    photo_url,
+    avatar: photo_url,
+    email: typeof reUser.email === 'string' ? reUser.email : undefined,
+    rating: typeof reUser.rating === 'number' ? reUser.rating : undefined,
+    review_count:
+      typeof reUser.review_count === 'number' ? reUser.review_count : undefined,
+  };
+}
+
+/** Map API `user` (merged auth + real_estate_user from Nhost) to embedded card shape. */
 export function normalizeTenantProfileUser(
   raw: unknown,
   userId?: string,
+  realEstateUser?: unknown,
 ): TenantProfileEmbeddedUser | null {
-  if (!raw || typeof raw !== 'object') return null;
-  const u = raw as Record<string, unknown>;
-  const nhostId =
-    String(u.nhost_user_id ?? u.id ?? userId ?? '').trim() || undefined;
+  let auth = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : null;
+  let re =
+    realEstateUser && typeof realEstateUser === 'object'
+      ? (realEstateUser as Record<string, unknown>)
+      : null;
 
-  if ('avatarUrl' in u || (u.id && !u.display_name && !u.photo_url)) {
-    const avatarUrl = (u.avatarUrl as string | null) ?? undefined;
-    const email = u.email as string | undefined;
-    return {
-      id: String(u.id ?? userId ?? ''),
-      email,
-      avatarUrl,
-      nhost_user_id: nhostId,
-      display_name: email?.split('@')[0],
-      photo_url: avatarUrl,
-      avatar: avatarUrl,
-    };
+  // `getUserByNhostUserId` returns a full `real_estate.user` row as the payload.
+  if (!re && auth && isRealEstateUserRecord(auth)) {
+    re = auth;
+    auth = null;
   }
 
+  if (!auth && !re) return null;
+
+  const nhostId =
+    String(re?.nhost_user_id ?? auth?.nhost_user_id ?? auth?.id ?? userId ?? '').trim() ||
+    undefined;
+  const fromRe = readRealEstateUserFields(re);
+  const authAvatar =
+    (auth?.avatarUrl as string | null) ??
+    readStringField(auth ?? {}, 'photo_url', 'photoUrl') ??
+    undefined;
+  const photo_url = fromRe.photo_url || authAvatar;
+  const display_name =
+    fromRe.display_name ||
+    readStringField(auth ?? {}, 'display_name', 'displayName') ||
+    (typeof auth?.name === 'string' && auth.name.trim() ? auth.name.trim() : undefined);
+
   return {
-    uuid: u.uuid as string | undefined,
-    nhost_user_id: nhostId,
-    display_name: (u.display_name as string) || (u.name as string),
-    name: u.name as string | undefined,
-    photo_url: (u.photo_url as string) || (u.avatar as string),
-    avatar: (u.avatar as string) || (u.photo_url as string),
-    email: u.email as string | undefined,
-    rating: u.rating as number | undefined,
-    review_count: u.review_count as number | undefined,
     id: nhostId,
+    nhost_user_id: nhostId,
+    uuid: (re?.uuid as string) ?? undefined,
+    email: fromRe.email ?? (auth?.email as string | undefined),
+    avatarUrl: photo_url ?? authAvatar ?? null,
+    display_name,
+    name: display_name,
+    photo_url,
+    avatar: photo_url,
+    rating: fromRe.rating,
+    review_count: fromRe.review_count,
   };
+}
+
+/** True when `real_estate.user` display name is already present (Gravatar alone is not enough). */
+export function tenantEmbeddedUserHasProfileFields(
+  user: TenantProfileEmbeddedUser | null | undefined,
+): boolean {
+  return Boolean(user?.display_name?.trim());
+}
+
+/**
+ * Load `display_name` / `photo_url` from `real_estate.user` when the tenant API
+ * only returned auth.users (or an incomplete merge).
+ */
+export async function ensureRealEstateEmbeddedUser(
+  nhostUserId: string | undefined,
+  embedded: TenantProfileEmbeddedUser | null | undefined,
+): Promise<TenantProfileEmbeddedUser | null> {
+  if (!nhostUserId) return embedded ?? null;
+  if (tenantEmbeddedUserHasProfileFields(embedded)) return embedded ?? null;
+
+  try {
+    const res = await usersAPI.getUserByNhostUserId(nhostUserId);
+    if (res.success && res.data) {
+      return normalizeTenantProfileUser(res.data, nhostUserId) ?? embedded ?? null;
+    }
+  } catch (error) {
+    console.error('[tenant-profiles] ensureRealEstateEmbeddedUser failed', error);
+  }
+  return embedded ?? null;
 }
 
 /** Resolve avatar + display name for UI; optional auth session fallback on dashboard. */
@@ -104,15 +183,15 @@ export function resolveTenantProfileDisplayUser(
 ): TenantProfileDisplayUser {
   const displayName =
     embedded?.display_name?.trim() ||
-    embedded?.email?.split('@')[0] ||
-    fallback?.displayName ||
-    fallback?.name;
+    fallback?.displayName?.trim() ||
+    fallback?.name?.trim() ||
+    embedded?.email?.split('@')[0];
   const avatar =
-    embedded?.photo_url ||
-    embedded?.avatar ||
-    embedded?.avatarUrl ||
-    fallback?.avatar ||
-    fallback?.photoUrl;
+    embedded?.photo_url?.trim() ||
+    embedded?.avatar?.trim() ||
+    (typeof embedded?.avatarUrl === 'string' ? embedded.avatarUrl.trim() : undefined) ||
+    fallback?.avatar?.trim() ||
+    fallback?.photoUrl?.trim();
   return {
     displayName,
     name: displayName,
@@ -197,10 +276,17 @@ async function loadTenantProfileResponse(
     if (!parsed.data) {
       return { success: true, data: null, user: null, notFound: true };
     }
+    const userId = parsed.data.user_id;
+    let user = normalizeTenantProfileUser(
+      parsed.data.user,
+      userId,
+      parsed.data.real_estate_user,
+    );
+    user = await ensureRealEstateEmbeddedUser(userId, user);
     return {
       success: true,
       data: mapTenantProfileRow(parsed.data),
-      user: normalizeTenantProfileUser(parsed.data.user, parsed.data.user_id),
+      user,
     };
   } catch (error) {
     if (error && typeof error === 'object' && 'response' in error) {
@@ -280,10 +366,16 @@ export async function fetchTenantMarketplace(params: TenantMarketplaceParams = {
             Array.isArray((data as { items: unknown }).items)
           ? ((data as { items: TenantProfileRow[] }).items)
           : [];
-      const profiles = rawProfiles.map((row) => ({
-        ...row,
-        user: normalizeTenantProfileUser(row.user, row.user_id) ?? row.user ?? null,
-      }));
+      const profiles = await Promise.all(
+        rawProfiles.map(async (row) => {
+          let user =
+            normalizeTenantProfileUser(row.user, row.user_id, row.real_estate_user) ??
+            row.user ??
+            null;
+          user = await ensureRealEstateEmbeddedUser(row.user_id, user);
+          return { ...row, user };
+        }),
+      );
       return {
         success: true,
         profiles,

@@ -29,6 +29,12 @@ import {
   normalizeNotification,
   normalizeNotifications,
 } from '@/lib/normalize-notification';
+import {
+  isTenantProfileItemsPayload,
+  isRawTenantProfileRow,
+  normalizeTenantProfile,
+  normalizeTenantProfiles,
+} from '@/lib/normalize-tenant-profile';
 
 function isListingItemsPayload(items: unknown[]): boolean {
   return items.length > 0 && items.some(isRawListingRow);
@@ -185,6 +191,12 @@ apiClient.interceptors.response.use(
               data: normalizeNotifications(items),
               pagination: wrapped.pagination,
             };
+          } else if (isTenantProfileItemsPayload(items)) {
+            response.data = {
+              success: true,
+              data: normalizeTenantProfiles(items),
+              pagination: wrapped.pagination,
+            };
           } else {
             response.data = {
               success: true,
@@ -205,6 +217,8 @@ apiClient.interceptors.response.use(
           response.data = { success: true, data: normalizeOffer(data) };
         } else if (isRawNotificationRow(data)) {
           response.data = { success: true, data: normalizeNotification(data) };
+        } else if (isRawTenantProfileRow(data)) {
+          response.data = { success: true, data: normalizeTenantProfile(data) };
         } else {
           response.data = { success: true, data: body.data };
         }

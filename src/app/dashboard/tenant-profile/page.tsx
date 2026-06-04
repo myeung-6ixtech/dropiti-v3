@@ -5,11 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
-import {
-  fetchMyTenantProfile,
-  resolveTenantProfileDisplayUser,
-  type TenantProfileEmbeddedUser,
-} from '@/lib/tenant-profiles';
+import { fetchMyTenantProfile, type TenantProfileEmbeddedUser } from '@/lib/tenant-profiles';
+import { useTenantProfileDisplayUser } from '@/hooks/useTenantProfileDisplayUser';
 import TenantProfilePreview from '@/components/tenant-profile/TenantProfilePreview';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
 import { TenantProfileHeader } from './_components/tenant-profile-header';
@@ -26,6 +23,14 @@ export default function TenantProfilePage() {
   const [isUnpublishing, setIsUnpublishing] = useState(false);
 
   const nhostUserId = authUser?.id || '';
+
+  const { displayUser } = useTenantProfileDisplayUser(nhostUserId, profileUser, {
+    displayName: authUser?.displayName,
+    name: authUser?.name,
+    avatar: authUser?.avatar || authUser?.photoUrl,
+    email: authUser?.email,
+    id: nhostUserId,
+  });
 
   // Load JWT user's tenant profile via Nhost GET /v1/client/tenants/profile
   useEffect(() => {
@@ -132,14 +137,6 @@ export default function TenantProfilePage() {
 
   // Check if profile exists
   const hasProfile = Boolean(profileData.tenant_listing_title || profileData.tenant_listing_description);
-
-  const displayUser = resolveTenantProfileDisplayUser(profileUser, {
-    displayName: authUser?.displayName,
-    name: authUser?.name,
-    avatar: authUser?.avatar || authUser?.photoUrl,
-    email: authUser?.email,
-    id: nhostUserId,
-  });
 
   return (
     <div className="h-full flex flex-col">

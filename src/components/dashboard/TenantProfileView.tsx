@@ -6,11 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
-import {
-  fetchMyTenantProfile,
-  resolveTenantProfileDisplayUser,
-  type TenantProfileEmbeddedUser,
-} from '@/lib/tenant-profiles';
+import { fetchMyTenantProfile, type TenantProfileEmbeddedUser } from '@/lib/tenant-profiles';
+import { useTenantProfileDisplayUser } from '@/hooks/useTenantProfileDisplayUser';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
 import Step1BasicInfo from '@/components/tenant-profile/Step1BasicInfo';
 import Step2Preferences from '@/components/tenant-profile/Step2Preferences';
@@ -125,7 +122,7 @@ export default function TenantProfileView() {
     );
   };
 
-  const displayUser = resolveTenantProfileDisplayUser(profileUser, {
+  const { displayUser } = useTenantProfileDisplayUser(nhostUserId, profileUser, {
     displayName: authUser?.displayName,
     name: authUser?.name,
     avatar: authUser?.avatar || authUser?.photoUrl,
