@@ -17,7 +17,7 @@ interface PropertyCardProps {
     property_uuid?: string;
     // Dashboard-specific fields
     id?: string;
-    address?: string;
+    address?: string | unknown;
     rental_price?: number;
     num_bedroom?: number;
     num_bathroom?: number;

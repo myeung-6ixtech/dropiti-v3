@@ -13,6 +13,13 @@ import { PropertyAmenitiesSection } from './_components/property-amenities-secti
 import { PropertyDetailsSidebar } from './_components/property-details-sidebar';
 import { PropertyMapSection } from './_components/property-map-section';
 import { PropertyErrorState } from './_components/property-error-state';
+import {
+  detailBoolean,
+  detailNumber,
+  detailPropertyType,
+  detailString,
+  detailStringArray,
+} from '@/lib/normalize-listing';
 
 interface Property {
   id: string;
@@ -78,29 +85,29 @@ export default function PropertyDetailPage() {
         if (response.success && response.data?.property) {
           const propertyData = response.data.property;
           setProperty({
-            id: propertyData.id,
-            property_uuid: propertyData.property_uuid,
-            title: propertyData.title,
-            description: propertyData.description,
-            location: propertyData.location,
-            address: propertyData.address,
-            price: propertyData.price,
-            property_type: propertyData.details?.type || 'Unknown',
-            rental_space: propertyData.rental_space || 'entire-apartment',
-            bedrooms: propertyData.bedrooms,
-            bathrooms: propertyData.bathrooms,
-            gross_area_size: propertyData.gross_area_size || 0,
-            gross_area_size_unit: propertyData.gross_area_size_unit || 'sqft',
-            furnished: propertyData.furnished || false,
-            pets_allowed: propertyData.pets_allowed || false,
-            amenities: propertyData.amenities || [],
-            display_image: propertyData.display_image || '',
-            uploaded_images: propertyData.uploaded_images || [],
-            is_public: propertyData.is_public ?? false,
-            status: propertyData.status || 'draft',
-            created_at: propertyData.created_at,
-            updated_at: propertyData.updated_at,
-            owner_id: propertyData.owner_id,
+            id: detailString(propertyData, 'id', detailString(propertyData, 'property_uuid')),
+            property_uuid: detailString(propertyData, 'property_uuid'),
+            title: detailString(propertyData, 'title'),
+            description: detailString(propertyData, 'description'),
+            location: detailString(propertyData, 'location'),
+            address: propertyData.address as string | object,
+            price: detailNumber(propertyData, 'price'),
+            property_type: detailPropertyType(propertyData),
+            rental_space: detailString(propertyData, 'rental_space', 'entire-apartment'),
+            bedrooms: detailNumber(propertyData, 'bedrooms'),
+            bathrooms: detailNumber(propertyData, 'bathrooms'),
+            gross_area_size: detailNumber(propertyData, 'gross_area_size'),
+            gross_area_size_unit: detailString(propertyData, 'gross_area_size_unit', 'sqft'),
+            furnished: detailBoolean(propertyData, 'furnished'),
+            pets_allowed: detailBoolean(propertyData, 'pets_allowed'),
+            amenities: detailStringArray(propertyData, 'amenities'),
+            display_image: detailString(propertyData, 'display_image'),
+            uploaded_images: detailStringArray(propertyData, 'uploaded_images'),
+            is_public: detailBoolean(propertyData, 'is_public'),
+            status: detailString(propertyData, 'status', 'draft'),
+            created_at: detailString(propertyData, 'created_at'),
+            updated_at: detailString(propertyData, 'updated_at'),
+            owner_id: detailString(propertyData, 'owner_id'),
           });
           console.log('Property details fetched:', propertyData);
         } else {

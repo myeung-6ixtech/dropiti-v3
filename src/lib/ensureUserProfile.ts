@@ -89,9 +89,9 @@ export async function ensureUserProfile(
         }
       }
 
-      if (!createResult.success || !createResult.data) {
+      if (createResult.success !== true || !('data' in createResult) || !createResult.data) {
         const message =
-          (createResult as { error?: string }).error || 'Could not create your profile.';
+          ('error' in createResult && createResult.error) || 'Could not create your profile.';
         return { ok: false, error: message };
       }
 

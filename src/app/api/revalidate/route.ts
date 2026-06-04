@@ -25,6 +25,9 @@ import { revalidateTag, revalidatePath } from 'next/cache';
 const ALLOWED_TAGS = ['properties'] as const;
 type AllowedTag = (typeof ALLOWED_TAGS)[number];
 
+/** Next.js 16+ requires a cache profile; immediate expiry for admin webhooks. */
+const REVALIDATE_PROFILE = { expire: 0 } as const;
+
 export async function POST(req: NextRequest) {
   const secret = req.headers.get('x-revalidate-secret');
   if (!process.env.REVALIDATION_SECRET || secret !== process.env.REVALIDATION_SECRET) {
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    revalidateTag(tag);
+    revalidateTag(tag, REVALIDATE_PROFILE);
   }
 
   if (path) {
@@ -57,7 +60,7 @@ export async function POST(req: NextRequest) {
 
   if (!tag && !path) {
     // Blanket revalidation — bust everything
-    revalidateTag('properties');
+    revalidateTag('properties', REVALIDATE_PROFILE);
     revalidatePath('/');
     revalidatePath('/search');
   }

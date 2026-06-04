@@ -18,7 +18,7 @@ interface TenantProfileWithUser extends TenantProfileData {
   id?: string | number;
   user?: {
     uuid?: string;
-    nhost_user_id: string;
+    nhost_user_id?: string;
     display_name?: string;
     name?: string;
     photo_url?: string;

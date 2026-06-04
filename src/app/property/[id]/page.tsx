@@ -190,7 +190,10 @@ export default function PropertyDetailPage() {
           const response = await propertiesAPI.getPropertyByUuid(params.id as string);
 
           if (response.success && response.data?.property) {
-            setPropertyData(response.data);
+            setPropertyData({
+              property: response.data.property as unknown as PropertyData,
+              landlord: response.data.landlord as LandlordData | null,
+            });
 
             if (authUser?.id && response.data.property.property_uuid) {
               checkExistingOffer(

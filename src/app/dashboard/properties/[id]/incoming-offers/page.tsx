@@ -8,6 +8,11 @@ import IncomingOffers from '@/components/common/IncomingOffers';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import { IncomingOffersHeader } from './_components/incoming-offers-header';
 import { PropertyErrorState } from '../../[id]/_components/property-error-state';
+import {
+  detailNumber,
+  detailPropertyType,
+  detailString,
+} from '@/lib/normalize-listing';
 
 interface Property {
   id: string;
@@ -51,14 +56,14 @@ export default function IncomingOffersPage() {
           // Extract property data from the nested response
           const propertyData = response.data.property;
           setProperty({
-            id: propertyData.id,
-            property_uuid: propertyData.property_uuid,
-            title: propertyData.title,
-            location: propertyData.location,
-            price: propertyData.price,
-            property_type: propertyData.details?.type || propertyData.type || 'Unknown',
-            bedrooms: propertyData.bedrooms,
-            bathrooms: propertyData.bathrooms,
+            id: detailString(propertyData, 'id', detailString(propertyData, 'property_uuid')),
+            property_uuid: detailString(propertyData, 'property_uuid'),
+            title: detailString(propertyData, 'title'),
+            location: detailString(propertyData, 'location'),
+            price: detailNumber(propertyData, 'price'),
+            property_type: detailPropertyType(propertyData),
+            bedrooms: detailNumber(propertyData, 'bedrooms'),
+            bathrooms: detailNumber(propertyData, 'bathrooms'),
           });
           console.log('Property details fetched:', propertyData);
         } else {

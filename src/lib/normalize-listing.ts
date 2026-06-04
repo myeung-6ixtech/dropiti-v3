@@ -147,6 +147,54 @@ export type PropertyDetailPayload = {
   landlord: Record<string, unknown> | null;
 };
 
+export function detailString(
+  row: Record<string, unknown>,
+  key: string,
+  fallback = '',
+): string {
+  const value = row[key];
+  return value == null ? fallback : String(value);
+}
+
+export function detailNumber(
+  row: Record<string, unknown>,
+  key: string,
+  fallback = 0,
+): number {
+  const value = row[key];
+  if (value == null || value === '') return fallback;
+  const num = Number(value);
+  return Number.isNaN(num) ? fallback : num;
+}
+
+export function detailBoolean(
+  row: Record<string, unknown>,
+  key: string,
+  fallback = false,
+): boolean {
+  const value = row[key];
+  if (typeof value === 'boolean') return value;
+  return fallback;
+}
+
+export function detailStringArray(
+  row: Record<string, unknown>,
+  key: string,
+): string[] {
+  const value = row[key];
+  return Array.isArray(value) ? value.map(String) : [];
+}
+
+export function detailPropertyType(row: Record<string, unknown>): string {
+  const details = row.details;
+  if (details && typeof details === 'object' && details !== null && 'type' in details) {
+    const type = (details as { type?: unknown }).type;
+    if (type != null && type !== '') return String(type);
+  }
+  const direct = row.type ?? row.property_type;
+  return direct == null || direct === '' ? 'Unknown' : String(direct);
+}
+
 function rawListingToDetailProperty(row: RawListingRow): Record<string, unknown> {
   const ids = resolveListingIds(row);
   const location = resolvePropertyLocation(row);

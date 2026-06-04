@@ -5,7 +5,7 @@ import { calculatePlatformDuration, getSafeProfileImage } from '@/lib/utils';
 import { DEFAULT_AVATAR_URL } from '@/constants';
 
 interface OfferUserDetailsProps {
-  offer: Pick<Offer, 'createdAt' | 'initiator' | 'recipient'>;
+  offer: Pick<Offer, 'createdAt' | 'initiator' | 'recipient' | 'initiatorUserId' | 'recipientUserId'>;
   isIncomingOffer: boolean;
   offerStatus: string;
 }
