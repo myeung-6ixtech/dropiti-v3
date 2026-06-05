@@ -8,6 +8,11 @@ export function isRawOfferRow(value: unknown): value is RawOfferRow {
   if (!value || typeof value !== 'object') return false;
   const row = value as Record<string, unknown>;
 
+  // Already enriched by Nhost (camelCase + nested recipient/property).
+  if ('recipientUserId' in row && ('recipient' in row || 'property' in row)) {
+    return false;
+  }
+
   // Notifications also carry recipient_user_id — exclude them first.
   if ('is_read' in row || 'is_archived' in row || 'type_id' in row) {
     return false;
@@ -102,4 +107,11 @@ export function normalizeOffers(items: unknown[]): Offer[] {
     }
     return item as Offer;
   });
+}
+
+/** True when the API already attached counterparty + property details. */
+export function isEnrichedOffer(value: unknown): value is Offer {
+  if (!value || typeof value !== 'object') return false;
+  const row = value as Offer;
+  return Boolean(row.recipient?.displayName || row.initiator?.displayName);
 }
