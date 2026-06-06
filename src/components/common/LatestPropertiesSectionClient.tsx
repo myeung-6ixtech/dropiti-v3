@@ -45,7 +45,7 @@ export default function LatestPropertiesSectionClient() {
               Recently added properties
             </h2>
           </div>
-          <PropertyCardSkeletonGrid count={4} />
+          <PropertyCardSkeletonGrid count={8} />
         </div>
       </section>
     );
