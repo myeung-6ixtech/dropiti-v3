@@ -32,7 +32,7 @@ export default function HomePage() {
       {/* New Modern Hero Section */}
       <ModernHeroSection />
 
-      {/* Latest properties carousel — 4 most recent published listings */}
+      {/* Latest properties carousel — 8 most recent published listings */}
       <LatestPropertiesSection />
 
       {/* Commercial Sections - Product features */}

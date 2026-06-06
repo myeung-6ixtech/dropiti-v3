@@ -16,7 +16,7 @@ export default function LatestPropertiesSectionClient() {
     async function load() {
       setIsLoading(true);
       try {
-        const result = await fetchPublishedListings({ limit: 4, offset: 0 });
+        const result = await fetchPublishedListings({ limit: 8, offset: 0 });
         if (cancelled) return;
         setProperties(result.success ? result.properties : []);
       } catch (error) {
