@@ -17,9 +17,17 @@ import {
   ClockIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
-import { educationOptions, occupationOptions, maritalStatusOptions, availableLanguages } from '@/types';
+import { educationOptions, maritalStatusOptions, availableLanguages } from '@/types';
 import { User } from '@/types/user';
 import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
+import ProfileLocationSelect from '@/components/profile/ProfileLocationSelect';
+import ProfileOccupationSelect from '@/components/profile/ProfileOccupationSelect';
+import {
+  parseStoredLocation,
+  parseStoredOccupation,
+  resolveOccupationForSave,
+} from '@/lib/profile-field-utils';
+import { uploadProfilePhoto } from '@/lib/nhost-upload';
 
 // ---------------------------------------------------------------------------
 // Display name helpers
@@ -106,6 +114,8 @@ export default function EditProfilePage() {
   });
 
   const [tempProfile, setTempProfile] = useState<UserProfile>(profile);
+  const [occupationSelect, setOccupationSelect] = useState('');
+  const [occupationOther, setOccupationOther] = useState('');
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [nameParts, setNameParts] = useState<NameParts>({ firstName: '', middleName: '', lastName: '' });
@@ -169,6 +179,11 @@ export default function EditProfilePage() {
             setNameParts(parts);
             setDisplayNameMode(detectMode(newProfile.displayName, parts));
 
+            const parsedOccupation = parseStoredOccupation(userData.occupation);
+            setOccupationSelect(parsedOccupation.select);
+            setOccupationOther(parsedOccupation.other);
+            newProfile.location = parseStoredLocation(userData.location);
+
             setProfile(newProfile);
             setTempProfile(newProfile);
           }
@@ -222,33 +237,10 @@ export default function EditProfilePage() {
 
       let finalPhotoUrl = tempProfile.avatar;
 
-      // If there's a selected image file, upload it to S3 first
+      // If there's a selected image file, upload via media catalog proxy
       if (selectedImageFile) {
-        try {          
-          // Create FormData for the API request
-          const formData = new FormData();
-          formData.append('file', selectedImageFile);
-          formData.append('category', 'images');
-          
-          // Upload to our S3 API route
-          const uploadResponse = await fetch('/api/v1/upload/s3', {
-            method: 'POST',
-            body: formData,
-          });
-          
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json();
-            throw new Error(errorData.error || 'Upload failed');
-          }
-          
-          const uploadResult = await uploadResponse.json();
-          
-          if (uploadResult.success && uploadResult.data) {
-            finalPhotoUrl = uploadResult.data.url;
-            console.log('Profile Edit: Image uploaded successfully to:', finalPhotoUrl);
-          } else {
-            throw new Error(uploadResult.error || 'Failed to upload image');
-          }
+        try {
+          finalPhotoUrl = await uploadProfilePhoto(selectedImageFile);
         } catch (uploadError) {
           console.error('Profile Edit: Image upload error:', uploadError);
           showToast('error', `Failed to upload profile image: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}. Please try again.`);
@@ -269,8 +261,9 @@ export default function EditProfilePage() {
       if (tempProfile.education) {
         updates.education = tempProfile.education;
       }
-      if (tempProfile.occupation) {
-        updates.occupation = tempProfile.occupation;
+      const occupationToSave = resolveOccupationForSave(occupationSelect, occupationOther);
+      if (occupationToSave) {
+        updates.occupation = occupationToSave;
       }
       if (tempProfile.maritalStatus) {
         updates.marital_status = tempProfile.maritalStatus;
@@ -508,26 +501,20 @@ export default function EditProfilePage() {
           </div>
 
           {/* Occupation */}
-          <div>
-            <label className="form-label">
+          <ProfileOccupationSelect
+            selectValue={occupationSelect}
+            otherValue={occupationOther}
+            onSelectChange={setOccupationSelect}
+            onOtherChange={setOccupationOther}
+            label={
               <span className="flex items-center">
                 <BriefcaseIcon className="h-4 w-4 mr-2 text-black" />
                 What is your occupation?
               </span>
-            </label>
-            <select
-              value={tempProfile.occupation || ''}
-              onChange={(e) => handleInputChange('occupation', e.target.value)}
-              className="form-select"
-            >
-              <option value="">Select occupation</option>
-              {occupationOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-          </div>
+            }
+            selectClassName="form-select"
+            inputClassName="form-input mt-2"
+          />
 
           {/* Marital Status */}
           <div>
@@ -592,21 +579,17 @@ export default function EditProfilePage() {
           </div>
 
           {/* Location */}
-          <div>
-            <label className="form-label">
+          <ProfileLocationSelect
+            value={tempProfile.location || ''}
+            onChange={(value) => handleInputChange('location', value)}
+            label={
               <span className="flex items-center">
                 <MapPinIcon className="h-4 w-4 mr-2 text-black" />
                 Location
               </span>
-            </label>
-            <input
-              type="text"
-              value={tempProfile.location || ''}
-              onChange={(e) => handleInputChange('location', e.target.value)}
-              className="form-input"
-              placeholder="Enter your city and country"
-            />
-          </div>
+            }
+            selectClassName="form-select"
+          />
         </div>
 
         {/* Action Buttons */}

@@ -79,6 +79,12 @@ export function PhotosSection({
 
   const existingPhotos = getExistingPhotos();
 
+  const featuredImageBadge = (
+    <span className="absolute top-2 left-2 z-10 px-2 py-1 text-xs font-medium rounded-full bg-purple-600 text-white shadow-sm">
+      Featured Image
+    </span>
+  );
+
   const handleFileSelect = useCallback((files: FileList) => {
     const newPhotos = Array.from(files).filter(file => 
       file.type.startsWith('image/') && !selectedFiles.find(p => p.name === file.name)
@@ -223,6 +229,7 @@ export function PhotosSection({
               <div className="grid grid-cols-3 gap-4">
                 {existingPhotos.map((photoUrl, index) => (
                   <div key={index} className="relative group">
+                    {index === 0 && featuredImageBadge}
                     <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                       <Image
                         src={photoUrl}
@@ -240,7 +247,7 @@ export function PhotosSection({
                       <TrashIcon className="h-4 w-4" />
                     </button>
                     <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
-                      Photo {index + 1}
+                      {index === 0 ? 'Featured' : `Photo ${index + 1}`}
                     </div>
                   </div>
                 ))}
@@ -384,7 +391,8 @@ export function PhotosSection({
           {existingPhotos.length > 0 ? (
             <div className="grid grid-cols-3 gap-4">
               {existingPhotos.map((photoUrl, index) => (
-                <div key={index} className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+                  {index === 0 && featuredImageBadge}
                   <Image
                     src={photoUrl}
                     alt={`Property photo ${index + 1}`}

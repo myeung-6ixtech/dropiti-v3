@@ -244,7 +244,7 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
       case 7:
         return <Step7RentalDetails data={propertyData} onUpdate={updatePropertyData} />;
       case 8:
-        return <Step8Summary data={propertyData} onSubmit={handleSubmit} isSubmitting={isSubmitting} />;
+        return <Step8Summary data={propertyData} />;
       default:
         return <Step1PropertyType data={propertyData} onUpdate={updatePropertyData} />;
     }
@@ -358,31 +358,46 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
             </div>
 
             {/* Step Navigation */}
-            {currentStep !== 8 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-white">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+            <div className="px-6 py-4 border-t border-gray-200 bg-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={prevStep}
+                    disabled={currentStep === 1}
+                    className="btn-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <ArrowLeftIcon className="h-4 w-4" />
+                    <span>{currentStep === 8 ? 'Back' : 'Previous'}</span>
+                  </button>
+
+                  {/* Save Draft Button - Only show after Step 2, not on summary */}
+                  {currentStep > 2 && currentStep < 8 && (
                     <button
-                      onClick={prevStep}
-                      disabled={currentStep === 1}
+                      onClick={saveDraft}
+                      disabled={isSubmitting}
                       className="btn-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <ArrowLeftIcon className="h-4 w-4" />
-                      <span>Previous</span>
+                      <span>Save Draft</span>
                     </button>
+                  )}
+                </div>
 
-                    {/* Save Draft Button - Only show after Step 2 */}
-                    {currentStep > 2 && (
-                      <button
-                        onClick={saveDraft}
-                        disabled={isSubmitting}
-                        className="btn-secondary inline-flex items-center justify-center w-auto max-w-[200px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span>Save Draft</span>
-                      </button>
+                {currentStep === 8 ? (
+                  <button
+                    onClick={handleSubmit}
+                    disabled={!isFormComplete() || isSubmitting}
+                    className="form-button inline-flex items-center justify-center w-auto max-w-[240px] gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                        <span>Submitting...</span>
+                      </>
+                    ) : (
+                      <span>Submit Property Listing</span>
                     )}
-                  </div>
-
+                  </button>
+                ) : (
                   <button
                     onClick={nextStep}
                     disabled={!isStepComplete(currentStep)}
@@ -391,9 +406,9 @@ export default function AddPropertyView({ userType = 'landlord' }: AddPropertyVi
                     <span>Next</span>
                     <ArrowRightIcon className="h-4 w-4" />
                   </button>
-                </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>

@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { CameraIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { getSafeProfileImage } from '@/lib/utils';
-import { uploadFileToNhost } from '@/lib/nhost-upload';
+import { uploadProfilePhoto } from '@/lib/nhost-upload';
 
 interface ProfilePhotoUploadProps {
   currentPhotoUrl: string;
@@ -76,7 +76,7 @@ export default function ProfilePhotoUpload({
     setUploadError(null);
 
     try {
-      const { publicUrl } = await uploadFileToNhost(file);
+      const publicUrl = await uploadProfilePhoto(file);
       onPhotoChange(publicUrl);
       setIsPreviewOpen(false);
       setPreviewUrl(null);

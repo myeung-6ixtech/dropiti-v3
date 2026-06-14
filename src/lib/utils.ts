@@ -4,6 +4,7 @@
 
 import { twMerge } from 'tailwind-merge';
 import { DEFAULT_AVATAR_URL } from '@/constants/images';
+import { getMediaDisplayUrl, isNhostStorageUrl } from '@/lib/media-url';
 
 /**
  * Utility function to merge Tailwind CSS classes
@@ -257,6 +258,10 @@ export function getSafeRemoteImage(
   }
 
   try {
+    if (isNhostStorageUrl(trimmed)) {
+      return getMediaDisplayUrl(trimmed);
+    }
+
     const url = new URL(trimmed);
     if (isAllowedRemoteImageHostname(url.hostname)) {
       return trimmed;

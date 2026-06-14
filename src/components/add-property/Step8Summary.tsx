@@ -39,11 +39,9 @@ interface Step8SummaryProps {
       availableDate?: Date | string | null;
     };
   };
-  onSubmit: () => void;
-  isSubmitting?: boolean;
 }
 
-export default function Step8Summary({ data, onSubmit, isSubmitting = false }: Step8SummaryProps) {
+export default function Step8Summary({ data }: Step8SummaryProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-HK', {
       style: 'currency',
@@ -243,25 +241,10 @@ export default function Step8Summary({ data, onSubmit, isSubmitting = false }: S
               Ready to submit your listing?
             </h4>
             <p className="text-purple-700 text-sm">
-              By submitting this listing, you agree to our terms of service and confirm that all information provided is accurate and truthful.
+              By submitting this listing, you agree to our terms of service and confirm that all information provided is accurate and truthful. Use Back below to edit any step before submitting.
             </p>
           </div>
         </div>
-        
-        <button
-          onClick={onSubmit}
-          disabled={isSubmitting}
-          className="mt-4 w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {isSubmitting ? (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>Submitting...</span>
-            </div>
-          ) : (
-            'Submit Property Listing'
-          )}
-        </button>
       </div>
     </div>
   );

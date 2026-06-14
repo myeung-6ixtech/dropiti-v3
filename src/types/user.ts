@@ -257,6 +257,8 @@ export const educationOptions = [
   'PhD'
 ] as const;
 
+export const locationOptions = ['Hong Kong', 'Macau'] as const;
+
 export const occupationOptions = [
   'Student',
   'Engineer',
@@ -301,6 +303,7 @@ export const availableLanguages = [
 // ========================================
 
 export type Education = typeof educationOptions[number];
+export type UserLocation = typeof locationOptions[number];
 export type Occupation = typeof occupationOptions[number];
 export type MaritalStatus = typeof maritalStatusOptions[number];
 export type Language = typeof availableLanguages[number];

@@ -241,121 +241,133 @@ export function LocationSection({
         )}
       </div>
       {isEditing ? (
-        <div className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <h4 className="font-medium text-gray-900 text-base">Location Details</h4>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Address Line 1 (*)
+              </label>
               <input
                 type="text"
-                value={localAddress?.unit || ''}
-                onChange={(e) => setLocalAddress({ ...localAddress, unit: e.target.value })}
+                value={localAddress?.addressLine1 || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, addressLine1: e.target.value })}
                 className="form-input w-full"
-                placeholder="Unit number"
+                placeholder="e.g., 123 Hennessy Road"
+                required
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Floor</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 2</label>
               <input
                 type="text"
-                value={localAddress?.floor || ''}
-                onChange={(e) => setLocalAddress({ ...localAddress, floor: e.target.value })}
+                value={localAddress?.addressLine2 || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, addressLine2: e.target.value })}
                 className="form-input w-full"
-                placeholder="Floor number"
+                placeholder="Apartment, suite, etc."
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Block</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
               <input
                 type="text"
-                value={localAddress?.block || ''}
-                onChange={(e) => setLocalAddress({ ...localAddress, block: e.target.value })}
+                value={localAddress?.city || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, city: e.target.value })}
                 className="form-input w-full"
-                placeholder="Block number"
+                placeholder="City"
               />
             </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Estate/Building</label>
-            <input
-              type="text"
-              value={localAddress?.building || ''}
-              onChange={(e) => setLocalAddress({ ...localAddress, building: e.target.value })}
-              className="form-input w-full"
-              placeholder="Building, apartment, or estate name"
-            />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 1</label>
-            <input
-              type="text"
-              value={localAddress?.addressLine1 || ''}
-              onChange={(e) => setLocalAddress({ ...localAddress, addressLine1: e.target.value })}
-              className="form-input w-full"
-              placeholder="Additional address info"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Address Line 2</label>
-            <input
-              type="text"
-              value={localAddress?.addressLine2 || ''}
-              onChange={(e) => setLocalAddress({ ...localAddress, addressLine2: e.target.value })}
-              className="form-input w-full"
-              placeholder="Apartment, suite, etc."
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
-            <input
-              type="text"
-              value={localAddress?.city || ''}
-              onChange={(e) => setLocalAddress({ ...localAddress, city: e.target.value })}
-              className="form-input w-full"
-              placeholder="City"
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-              <select
-                value={localAddress?.country || DEFAULT_COUNTRY}
-                onChange={(e) => setLocalAddress({ ...localAddress, country: e.target.value })}
-                className="form-select w-full"
-              >
-                {COUNTRIES.map((country) => (
-                  <option key={country.code} value={country.code}>
-                    {country.name}
-                  </option>
-                ))}
-              </select>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Country (*)</label>
+                <select 
+                  value={localAddress?.country || DEFAULT_COUNTRY}
+                  onChange={(e) => setLocalAddress({ ...localAddress, country: e.target.value })}
+                  className="form-select w-full"
+                >
+                  {COUNTRIES.map((country) => (
+                    <option key={country.code} value={country.code}>
+                      {country.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">District (*)</label>
+                <select
+                  value={localAddress?.district || ''}
+                  onChange={(e) => setLocalAddress({ ...localAddress, district: e.target.value })}
+                  className="form-select w-full"
+                >
+                  <option value="">Select a district</option>
+                  {districts.map((district) => (
+                    <option key={district.code} value={district.name}>
+                      {district.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                <input
+                  type="text"
+                  value={localAddress?.state || ''}
+                  onChange={(e) => setLocalAddress({ ...localAddress, state: e.target.value })}
+                  className="form-input w-full"
+                  placeholder="State"
+                />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">District</label>
-              <select
-                value={localAddress?.district || ''}
-                onChange={(e) => setLocalAddress({ ...localAddress, district: e.target.value })}
-                className="form-select w-full"
-              >
-                <option value="">Select a district</option>
-                {districts.map((district) => (
-                  <option key={district.code} value={district.name}>
-                    {district.name}
-                  </option>
-                ))}
-              </select>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-medium text-gray-900 text-base">Building Details</h4>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Unit</label>
+                <input
+                  type="text"
+                  value={localAddress?.unit || ''}
+                  onChange={(e) => setLocalAddress({ ...localAddress, unit: e.target.value })}
+                  className="form-input w-full"
+                  placeholder="Unit number"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Floor</label>
+                <input
+                  type="text"
+                  value={localAddress?.floor || ''}
+                  onChange={(e) => setLocalAddress({ ...localAddress, floor: e.target.value })}
+                  className="form-input w-full"
+                  placeholder="Floor number"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Block</label>
+                <input
+                  type="text"
+                  value={localAddress?.block || ''}
+                  onChange={(e) => setLocalAddress({ ...localAddress, block: e.target.value })}
+                  className="form-input w-full"
+                  placeholder="Block number"
+                />
+              </div>
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Estate/Building</label>
               <input
                 type="text"
-                value={localAddress?.state || ''}
-                onChange={(e) => setLocalAddress({ ...localAddress, state: e.target.value })}
+                value={localAddress?.building || ''}
+                onChange={(e) => setLocalAddress({ ...localAddress, building: e.target.value })}
                 className="form-input w-full"
-                placeholder="State"
+                placeholder="Building, apartment, or estate name"
               />
             </div>
           </div>

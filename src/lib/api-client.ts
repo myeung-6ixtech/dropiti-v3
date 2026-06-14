@@ -670,12 +670,12 @@ export const offersAPI = {
     }
   },
 
-  // Get offers by recipient (landlord)
+  // Get offers by recipient (landlord) — lists incoming offers for the authenticated user
   getOffersByRecipient: async (recipientUserId: string, propertyUuid?: string) => {
     try {
-      const params: Record<string, string> = { recipientUserId };
+      const params: Record<string, string> = {};
       if (propertyUuid) params.propertyUuid = propertyUuid;
-      const response = await apiClient.get('offers/get-offers-by-id', { params });
+      const response = await apiClient.get('offers/get-offers-by-recipient', { params });
       return response.data;
     } catch (error) {
       console.error('Error fetching offers by recipient:', error);

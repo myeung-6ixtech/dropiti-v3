@@ -69,7 +69,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
             
             <div className="space-y-2">
               <label className="form-label">
-                Gross Area (sq ft)
+                Gross Area (sq ft) (*)
               </label>
               <input
                 type="number"
@@ -104,7 +104,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
             
             <div className="space-y-2">
               <label className="form-label">
-                Number of Bedrooms
+                Number of Bedrooms (*)
               </label>
               <input
                 type="number"
@@ -119,7 +119,7 @@ export default function Step4UnitDetails({ data, onUpdate }: Step4UnitDetailsPro
 
             <div className="space-y-2">
               <label className="form-label">
-                Number of Bathrooms
+                Number of Bathrooms (*)
               </label>
               <input
                 type="number"

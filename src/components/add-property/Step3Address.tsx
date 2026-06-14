@@ -135,6 +135,89 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
           {/* Left Column: Address Form */}
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
+              {/* Location Details */}
+              <div className="space-y-5">
+                <h4 className="font-medium text-gray-900 text-base">Location Details</h4>
+                <div className="space-y-2">
+                  <label className="form-label">
+                    Address Line 1 (*)
+                  </label>
+                  <input
+                    type="text"
+                    value={address.addressLine1 || ''}
+                    onChange={(e) => handleInputChange('addressLine1', e.target.value)}
+                    placeholder="e.g., 123 Hennessy Road"
+                    className="form-input"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="form-label">
+                    Address Line 2
+                  </label>
+                  <input
+                    type="text"
+                    value={address.addressLine2 || ''}
+                    onChange={(e) => handleInputChange('addressLine2', e.target.value)}
+                    placeholder="e.g., Suite 100"
+                    className="form-input"
+                  />
+                </div>
+                 {/* District and State/Region in one row */}
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                     <label className="form-label">
+                       District (*)
+                     </label>
+                     <select
+                       value={address.district || ''}
+                       onChange={(e) => handleInputChange('district', e.target.value)}
+                       className="form-select"
+                       required
+                     >
+                       <option value="">Select a district</option>
+                       {districts.map((district) => (
+                         <option key={district.code} value={district.name}>
+                           {district.name}
+                         </option>
+                       ))}
+                     </select>
+                   </div>
+
+                   <div className="space-y-2">
+                     <label className="form-label">
+                       State/Region
+                     </label>
+                     <input
+                       type="text"
+                       value={address.state || ''}
+                       onChange={(e) => handleInputChange('state', e.target.value)}
+                       placeholder="e.g., Hong Kong"
+                       className="form-input"
+                     />
+                   </div>
+                 </div>
+
+                <div className="space-y-2">
+                  <label className="form-label">
+                    Country (*)
+                  </label>
+                  <select
+                    value={address.country || DEFAULT_COUNTRY}
+                    onChange={(e) => handleInputChange('country', e.target.value)}
+                    className="form-select"
+                    required
+                  >
+                    {COUNTRIES.map((country) => (
+                      <option key={country.code} value={country.code}>
+                        {country.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               {/* Building Details */}
               <div className="space-y-5">
                 <h4 className="font-medium text-gray-900 text-base">Building Details</h4>
@@ -191,89 +274,6 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
                     placeholder="e.g., The Arch, Causeway Bay"
                     className="form-input"
                   />
-                </div>
-              </div>
-
-              {/* Street Address */}
-              <div className="space-y-5">
-                <h4 className="font-medium text-gray-900 text-base">Location Details</h4>
-                <div className="space-y-2">
-                  <label className="form-label">
-                    Address Line 1 *
-                  </label>
-                  <input
-                    type="text"
-                    value={address.addressLine1 || ''}
-                    onChange={(e) => handleInputChange('addressLine1', e.target.value)}
-                    placeholder="e.g., 123 Hennessy Road"
-                    className="form-input"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="form-label">
-                    Address Line 2
-                  </label>
-                  <input
-                    type="text"
-                    value={address.addressLine2 || ''}
-                    onChange={(e) => handleInputChange('addressLine2', e.target.value)}
-                    placeholder="e.g., Suite 100"
-                    className="form-input"
-                  />
-                </div>
-                 {/* District and State/Region in one row */}
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   <div className="space-y-2">
-                     <label className="form-label">
-                       District *
-                     </label>
-                     <select
-                       value={address.district || ''}
-                       onChange={(e) => handleInputChange('district', e.target.value)}
-                       className="form-select"
-                       required
-                     >
-                       <option value="">Select a district</option>
-                       {districts.map((district) => (
-                         <option key={district.code} value={district.name}>
-                           {district.name}
-                         </option>
-                       ))}
-                     </select>
-                   </div>
-
-                   <div className="space-y-2">
-                     <label className="form-label">
-                       State/Region
-                     </label>
-                     <input
-                       type="text"
-                       value={address.state || ''}
-                       onChange={(e) => handleInputChange('state', e.target.value)}
-                       placeholder="e.g., Hong Kong"
-                       className="form-input"
-                     />
-                   </div>
-                 </div>
-
-                <div className="space-y-2">
-                  <label className="form-label">
-                    Country *
-                  </label>
-                  <select
-                    value={address.country || DEFAULT_COUNTRY}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="form-select"
-                    required
-                  >
-                    {COUNTRIES.map((country) => (
-                      <option key={country.code} value={country.code}>
-                        {country.name}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
           </div>

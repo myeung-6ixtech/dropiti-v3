@@ -9,6 +9,7 @@ import {
   ensureUserProfile,
 } from '@/lib/ensureUserProfile';
 import ProfileImageUpload from '@/components/profile/ProfileImageUpload';
+import { uploadProfilePhoto } from '@/lib/nhost-upload';
 
 export default function OnboardingPhoto() {
   const { user } = useAuth();
@@ -50,27 +51,7 @@ export default function OnboardingPhoto() {
 
       if (selectedImageFile) {
         try {
-          const formData = new FormData();
-          formData.append('file', selectedImageFile);
-          formData.append('category', 'images');
-
-          const uploadResponse = await fetch('/api/v1/upload/s3', {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse.json();
-            throw new Error(errorData.error || 'Upload failed');
-          }
-
-          const uploadResult = await uploadResponse.json();
-
-          if (uploadResult.success && uploadResult.data) {
-            finalPhotoUrl = uploadResult.data.url;
-          } else {
-            throw new Error(uploadResult.error || 'Failed to upload image');
-          }
+          finalPhotoUrl = await uploadProfilePhoto(selectedImageFile);
         } catch (uploadError) {
           console.error('Onboarding: Image upload error:', uploadError);
           showToast(

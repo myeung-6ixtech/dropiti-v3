@@ -9,7 +9,14 @@ import {
   buildProfileInputFromNhostUser,
   ensureUserProfile,
 } from '@/lib/ensureUserProfile';
-import { availableLanguages, educationOptions, occupationOptions } from '@/types/user';
+import { availableLanguages, educationOptions } from '@/types/user';
+import ProfileLocationSelect from '@/components/profile/ProfileLocationSelect';
+import ProfileOccupationSelect from '@/components/profile/ProfileOccupationSelect';
+import {
+  parseStoredLocation,
+  parseStoredOccupation,
+  resolveOccupationForSave,
+} from '@/lib/profile-field-utils';
 import {
   UserIcon,
   MapPinIcon,
@@ -54,12 +61,14 @@ export default function OnboardingStepOne() {
 
   const [form, setForm] = useState({
     name: user?.displayName || user?.name || '',
-    location: user?.location || '',
+    location: parseStoredLocation(user?.location),
     about: user?.about || '',
     education: user?.education || '',
-    occupation: user?.occupation || '',
     languages: Array.isArray(user?.languages) ? user.languages : [],
   });
+  const initialOccupation = parseStoredOccupation(user?.occupation);
+  const [occupationSelect, setOccupationSelect] = useState(initialOccupation.select);
+  const [occupationOther, setOccupationOther] = useState(initialOccupation.other);
   const [saving, setSaving] = useState(false);
   const [profileEnsuring, setProfileEnsuring] = useState(false);
   const [profileNhostId, setProfileNhostId] = useState<string | null>(user?.id ?? null);
@@ -96,6 +105,16 @@ export default function OnboardingStepOne() {
           if (currentName) {
             setForm((prev) => ({ ...prev, name: currentName }));
           }
+          const parsedLocation = parseStoredLocation(d.location);
+          const parsedOccupation = parseStoredOccupation(d.occupation);
+          setForm((prev) => ({
+            ...prev,
+            location: parsedLocation,
+            about: d.about || prev.about,
+            education: d.education || prev.education,
+          }));
+          setOccupationSelect(parsedOccupation.select);
+          setOccupationOther(parsedOccupation.other);
         } else {
           showToast('error', result.error);
         }
@@ -150,7 +169,7 @@ export default function OnboardingStepOne() {
         location: form.location,
         about: form.about,
         education: form.education,
-        occupation: form.occupation,
+        occupation: resolveOccupationForSave(occupationSelect, occupationOther),
         languages: form.languages,
       });
 
@@ -240,22 +259,17 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">This is the name that will be visible to other users</p>
           </div>
 
-          <div>
-            <label className="form-label text-xs">
+          <ProfileLocationSelect
+            value={form.location}
+            onChange={(value) => handleChange('location', value)}
+            label={
               <span className="flex items-center">
                 <MapPinIcon className="h-4 w-4 mr-2 text-black" />
                 Where are you based?
               </span>
-            </label>
-            <input
-              type="text"
-              value={form.location}
-              onChange={(e) => handleChange('location', e.target.value)}
-              className="form-input-sm"
-              placeholder="City, Country"
-            />
-            <p className="text-xs text-gray-500 mt-1">Help others understand your location</p>
-          </div>
+            }
+            helperText="Help others understand your location"
+          />
 
           <div>
             <label className="form-label text-xs">
@@ -296,27 +310,19 @@ export default function OnboardingStepOne() {
             <p className="text-xs text-gray-500 mt-1">Optional: Share your educational background</p>
           </div>
 
-          <div>
-            <label className="form-label text-xs">
+          <ProfileOccupationSelect
+            selectValue={occupationSelect}
+            otherValue={occupationOther}
+            onSelectChange={setOccupationSelect}
+            onOtherChange={setOccupationOther}
+            label={
               <span className="flex items-center">
                 <BriefcaseIcon className="h-4 w-4 mr-2 text-black" />
                 What do you do?
               </span>
-            </label>
-            <select
-              value={form.occupation}
-              onChange={(e) => handleChange('occupation', e.target.value)}
-              className="form-select text-sm"
-            >
-              <option value="">Select occupation</option>
-              {occupationOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-gray-500 mt-1">Optional: Tell us about your profession</p>
-          </div>
+            }
+            helperText="Optional: Tell us about your profession"
+          />
 
           <div>
             <label className="form-label text-xs">
