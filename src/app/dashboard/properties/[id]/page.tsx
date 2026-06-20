@@ -267,7 +267,7 @@ export default function PropertyDetailPage() {
       {/* Google Maps Script */}
       {process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY && (
         <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`}
           onLoad={() => {
             console.log('Google Maps script loaded successfully');
             setMapLoaded(true);

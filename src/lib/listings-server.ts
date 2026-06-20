@@ -1,9 +1,8 @@
 import {
   buildListingsQueryParams,
-  fetchPublishedListings,
   LISTINGS_PAGE_SIZE,
   type SearchFilters,
-} from '@/lib/listings';
+} from '@/lib/listings-params';
 import { normalizeListings } from '@/lib/normalize-listing';
 import type { Property } from '@/types';
 
@@ -41,8 +40,12 @@ export async function prefetchSearchListings(
       ok?: boolean;
       data?: { items?: unknown[]; pagination?: { total?: number } };
     };
-    const items = body.data?.items ?? [];
-    const total = body.data?.pagination?.total ?? items.length;
+    if (body.ok !== true || !body.data) return null;
+
+    const items = body.data.items ?? [];
+    if (items.length === 0) return null;
+
+    const total = body.data.pagination?.total ?? items.length;
 
     return {
       properties: normalizeListings(items),

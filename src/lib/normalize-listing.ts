@@ -369,11 +369,23 @@ export function normalizeListings(items: unknown[]): Property[] {
       location?: unknown;
     };
     const ids = resolveListingIds(row);
+    const record = row as Record<string, unknown>;
+    const imageUrl =
+      (typeof row.imageUrl === 'string' && row.imageUrl.trim()) ||
+      (typeof record.display_image === 'string' && record.display_image.trim()) ||
+      (typeof record.image_url === 'string' && record.image_url.trim()) ||
+      '';
     return {
       ...row,
       id: ids.id || getListingKey(row, index),
       property_uuid: ids.property_uuid || getListingKey(row, index),
       location: resolvePropertyLocation(row),
+      ...(imageUrl ? { imageUrl } : {}),
+      latitude: row.latitude ?? (record.latitude as number | null | undefined) ?? null,
+      longitude: row.longitude ?? (record.longitude as number | null | undefined) ?? null,
+      show_specific_location:
+        row.show_specific_location ??
+        (record.show_specific_location === true),
     };
   });
 }

@@ -137,7 +137,12 @@ export default function SearchPageContent({
 
   useEffect(() => {
     const hasFilters = Boolean(filters.location || filters.bedrooms || filters.maxPrice);
-    if (initialData && !hasFilters && !needsBulkFetch) {
+    const hasUsablePrefetch =
+      initialData != null &&
+      initialData.properties.length > 0 &&
+      !hasFilters &&
+      !needsBulkFetch;
+    if (hasUsablePrefetch) {
       return;
     }
     fetchProperties(needsBulkFetch ? 1 : currentPage);
@@ -431,7 +436,6 @@ export default function SearchPageContent({
                     </div>
                   )}
                 </PullToRefreshWrapper>
-              )
             ) : (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">

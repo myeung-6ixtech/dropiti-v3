@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { GoogleMap, OverlayView, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, OverlayView } from '@react-google-maps/api';
+import { useGoogleMapsLoader } from '@/lib/google-maps-loader';
 
 export interface MapProperty {
   id: string;
@@ -77,10 +78,7 @@ export default function SearchMap({
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: apiKey,
-  });
+  const { isLoaded, loadError } = useGoogleMapsLoader();
 
   useEffect(() => {
     if (!mapRef.current || !isLoaded) return;

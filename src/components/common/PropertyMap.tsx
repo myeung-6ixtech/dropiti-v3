@@ -1,6 +1,7 @@
 'use client';
 
-import { GoogleMap, Marker, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import { useGoogleMapsLoader } from '@/lib/google-maps-loader';
 import { useState, useCallback, useMemo } from 'react';
 import { parsePropertyAddress, resolveGeocodingAddress } from '@/lib/utils';
 
@@ -53,11 +54,7 @@ const PropertyMap: React.FC<PropertyMapProps> = ({
     return [...new Set(queries.filter(Boolean))];
   }, [address, location, showSpecificLocation]);
 
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: apiKey || '',
-    libraries: ['places'],
-  });
+  const { isLoaded, loadError } = useGoogleMapsLoader();
 
   const geocodeAddress = useCallback(async (queries: string[]) => {
     if (!window.google?.maps?.Geocoder) {

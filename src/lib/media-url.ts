@@ -94,5 +94,6 @@ export function getMediaCanonicalUrl(input: string | MediaAssetUrlFields): strin
 }
 
 export function buildClientMediaFileProxyUrl(fileId: string): string {
-  return `${CLIENT_MEDIA_FILE_PROXY_PREFIX}/${fileId}`;
+  // Match next.config.js trailingSlash — avoids 308 redirects that break next/image.
+  return `${CLIENT_MEDIA_FILE_PROXY_PREFIX}/${fileId}/`;
 }
