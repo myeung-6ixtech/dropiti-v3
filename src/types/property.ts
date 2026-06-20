@@ -188,6 +188,13 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   imageUrl: string;
+  /** Stored map coordinates from Hasura (server-resolved). */
+  latitude?: number | null;
+  longitude?: number | null;
+  /** When true and street present, pin is street-level (Phase 4 geocode). */
+  show_specific_location?: boolean;
+  /** Read-time inferred pin styling: exact vs approximate. */
+  pinPrecision?: 'exact' | 'approximate';
   details: Record<string, unknown>;
   rules: string[];
   amenities: string[];

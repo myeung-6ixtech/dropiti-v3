@@ -371,7 +371,10 @@ export default function Step3Address({ data, onUpdate }: Step3AddressProps) {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-yellow-100 text-yellow-800'
                     }`}>
-                      {showSpecificLocation ? 'Address Line 1 shown' : 'District only shown'}
+                      {showSpecificLocation ? 'Exact pin after save' : 'Approximate area after save'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      Coordinates are set when you save the listing
                     </span>
                   </div>
                 </div>

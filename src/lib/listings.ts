@@ -1,6 +1,7 @@
 import { propertiesAPI } from '@/lib/api-client';
 import type { Property } from '@/types';
 import type { PropertyResponse } from '@/types/property';
+import { inferPinPrecisionFromListing } from '@/lib/infer-pin-precision';
 
 export const LISTINGS_PAGE_SIZE = 12;
 /** Nhost `get-listings` max page size (see `parsePagination` in functions). */
@@ -9,6 +10,7 @@ export const LISTINGS_MAP_FETCH_LIMIT = 100;
 export type PublishedListingsParams = {
   limit?: number;
   offset?: number;
+  location?: string;
   minPrice?: number;
   maxPrice?: number;
   bedrooms?: number;
@@ -24,13 +26,18 @@ export type SearchFilters = {
 
 /** Build query params for `GET .../properties/get-listings`. */
 export function buildListingsQueryParams(
-  filters: Pick<SearchFilters, 'bedrooms' | 'maxPrice'>,
+  filters: Pick<SearchFilters, 'bedrooms' | 'maxPrice' | 'location'>,
   paging: { limit: number; offset: number },
 ): PublishedListingsParams {
   const params: PublishedListingsParams = {
     limit: paging.limit,
     offset: paging.offset,
   };
+
+  const location = filters.location?.trim();
+  if (location) {
+    params.location = location;
+  }
 
   const maxPrice = filters.maxPrice?.trim() ? parseInt(filters.maxPrice, 10) : NaN;
   if (!Number.isNaN(maxPrice)) {
@@ -46,11 +53,13 @@ export function buildListingsQueryParams(
   return params;
 }
 
-/** Location text search is not on Nhost — filter client-side after fetch. */
+/** Location text search — server-side when Nhost `location` param is set; client fallback otherwise. */
 export function applyLocationFilter(
   properties: Property[],
   location?: string,
+  serverFiltered = false,
 ): Property[] {
+  if (serverFiltered) return properties;
   const term = location?.trim().toLowerCase();
   if (!term) return properties;
 
@@ -59,6 +68,13 @@ export function applyLocationFilter(
     const title = (property.title || '').toLowerCase();
     return loc.includes(term) || title.includes(term);
   });
+}
+
+function enrichListingCoords(properties: Property[]): Property[] {
+  return properties.map((p) => ({
+    ...p,
+    pinPrecision: p.pinPrecision ?? inferPinPrecisionFromListing(p),
+  }));
 }
 
 function toPropertyList(data: PropertyResponse['data'] | Property | Property[]): Property[] {
@@ -90,7 +106,7 @@ export async function fetchPublishedListings(
 
   return {
     success: true,
-    properties: toPropertyList(response.data),
+    properties: enrichListingCoords(toPropertyList(response.data)),
     pagination: response.pagination,
   };
 }

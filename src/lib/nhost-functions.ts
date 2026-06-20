@@ -22,6 +22,7 @@ export const FUNCTIONS_BFF_PREFIX = "/api/v1/bff/functions";
 export const PUBLIC_CLIENT_BFF_GET_PATHS = new Set([
   "client/transfer-ownership/validate",
   "client/properties/get-listings",
+  "client/properties/get-listings-map",
   "client/properties/get-property",
   "client/properties/get-property-by-uuid",
   "client/reviews/get-reviews-by-property",

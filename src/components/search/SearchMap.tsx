@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { GoogleMap, OverlayView, useJsApiLoader } from '@react-google-maps/api';
 
 export interface MapProperty {
@@ -9,6 +9,9 @@ export interface MapProperty {
   title: string;
   location: string;
   price: number;
+  latitude?: number | null;
+  longitude?: number | null;
+  pinPrecision?: 'exact' | 'approximate';
 }
 
 interface LatLng {
@@ -45,8 +48,12 @@ const formatPrice = (price: number) => {
   return `$${price}`;
 };
 
-type Libraries = ('places')[];
-const LIBRARIES: Libraries = ['places'];
+function resolveCoords(prop: MapProperty): LatLng | null {
+  if (typeof prop.latitude === 'number' && typeof prop.longitude === 'number') {
+    return { lat: prop.latitude, lng: prop.longitude };
+  }
+  return null;
+}
 
 export default function SearchMap({
   properties,
@@ -57,102 +64,26 @@ export default function SearchMap({
   onReady,
 }: SearchMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
-  const [coords, setCoords] = useState<Record<string, LatLng>>({});
-  const coordsRef = useRef(coords);
-  coordsRef.current = coords;
   const lastFitSignatureRef = useRef<string>('');
-  const geocoderRef = useRef<google.maps.Geocoder | null>(null);
-  const geocodeCacheRef = useRef<Record<string, LatLng>>({});
 
-  const propertyListFingerprint = useMemo(
-    () =>
-      properties
-        .map((p) => `${p.id}\u001f${p.location ?? ''}`)
-        .sort()
-        .join('\n'),
-    [properties],
-  );
+  const coords = useMemo(() => {
+    const out: Record<string, LatLng> = {};
+    for (const prop of properties) {
+      const point = resolveCoords(prop);
+      if (point) out[prop.id] = point;
+    }
+    return out;
+  }, [properties]);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: apiKey,
-    libraries: LIBRARIES,
   });
 
-  const geocodeProperty = useCallback(
-    async (property: MapProperty): Promise<LatLng | null> => {
-      const cacheKey = property.location || property.title;
-      if (geocodeCacheRef.current[cacheKey]) return geocodeCacheRef.current[cacheKey];
-
-      if (!geocoderRef.current) return null;
-
-      try {
-        const result = await new Promise<google.maps.GeocoderResult[]>((resolve, reject) => {
-          geocoderRef.current!.geocode({ address: property.location }, (results, status) => {
-            if (status === 'OK' && results) resolve(results);
-            else reject(new Error(status));
-          });
-        });
-
-        if (result.length > 0) {
-          const loc = result[0].geometry.location;
-          const point = { lat: loc.lat(), lng: loc.lng() };
-          geocodeCacheRef.current[cacheKey] = point;
-          return point;
-        }
-      } catch {
-        // geocoding failed for this property — skip it
-      }
-      return null;
-    },
-    [],
-  );
-
   useEffect(() => {
-    if (!isLoaded || !window.google?.maps?.Geocoder) return;
-    if (!geocoderRef.current) {
-      geocoderRef.current = new window.google.maps.Geocoder();
-    }
-
-    lastFitSignatureRef.current = '';
-
-    let cancelled = false;
-
-    const geocodeAll = async () => {
-      const newCoords: Record<string, LatLng> = {};
-      const snapshot = coordsRef.current;
-      const allowedIds = new Set(properties.map((p) => p.id));
-
-      for (const prop of properties) {
-        if (cancelled) break;
-        if (snapshot[prop.id]) {
-          newCoords[prop.id] = snapshot[prop.id];
-          continue;
-        }
-        const point = await geocodeProperty(prop);
-        if (point) newCoords[prop.id] = point;
-        await new Promise((r) => setTimeout(r, 120));
-      }
-      if (!cancelled) {
-        setCoords((prev) => {
-          const base: Record<string, LatLng> = {};
-          for (const id of Object.keys(prev)) {
-            if (allowedIds.has(id)) base[id] = prev[id];
-          }
-          return { ...base, ...newCoords };
-        });
-      }
-    };
-
-    geocodeAll();
-    return () => { cancelled = true; };
-  }, [isLoaded, propertyListFingerprint, geocodeProperty]);
-
-  // Fit bounds when coords change (skip if camera already fitted to this set — avoids jumps on re-render)
-  useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !isLoaded) return;
     const ids = Object.keys(coords).sort();
     if (ids.length === 0) return;
 
@@ -176,21 +107,23 @@ export default function SearchMap({
     const bounds = new window.google.maps.LatLngBounds();
     entries.forEach((c) => bounds.extend(c));
     mapRef.current.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
-  }, [coords]);
+  }, [coords, isLoaded]);
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
   }, []);
 
-  const panTo = useCallback((id: string) => {
-    const c = coords[id];
-    if (c && mapRef.current) {
-      mapRef.current.panTo(c);
-      mapRef.current.setZoom(16);
-    }
-  }, [coords]);
+  const panTo = useCallback(
+    (id: string) => {
+      const c = coords[id];
+      if (c && mapRef.current) {
+        mapRef.current.panTo(c);
+        mapRef.current.setZoom(16);
+      }
+    },
+    [coords],
+  );
 
-  // Notify parent when panTo becomes available / updates
   useEffect(() => {
     onReady?.({ panTo });
   }, [panTo, onReady]);
@@ -225,6 +158,7 @@ export default function SearchMap({
         const c = coords[prop.id];
         const isSelected = selectedId === prop.id;
         const isHovered = hoveredId === prop.id;
+        const isApproximate = prop.pinPrecision === 'approximate';
 
         return (
           <OverlayView
@@ -233,6 +167,7 @@ export default function SearchMap({
             mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
           >
             <button
+              type="button"
               onClick={() => onMarkerClick(prop.id)}
               onMouseEnter={() => onMarkerHover(prop.id)}
               onMouseLeave={() => onMarkerHover(null)}
@@ -244,7 +179,9 @@ export default function SearchMap({
                   ? 'bg-gray-900 text-white border-gray-900 scale-110 z-10'
                   : isHovered
                     ? 'bg-gray-900 text-white border-gray-900 scale-105'
-                    : 'bg-white text-gray-900 border-gray-200 hover:scale-105'}
+                    : isApproximate
+                      ? 'bg-white text-gray-700 border-dashed border-gray-400 hover:scale-105'
+                      : 'bg-white text-gray-900 border-gray-200 hover:scale-105'}
               `}
             >
               {formatPrice(prop.price)}
@@ -255,4 +192,3 @@ export default function SearchMap({
     </GoogleMap>
   );
 }
-

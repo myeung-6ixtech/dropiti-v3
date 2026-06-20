@@ -1,4 +1,5 @@
 import { formatPropertyLocation, parseUploadedImages } from '@/lib/utils';
+import { inferPinPrecisionFromListing } from '@/lib/infer-pin-precision';
 import type { Property } from '@/types';
 
 /** Raw Hasura row shape from Nhost Functions `get-listings` / `get-property`. */
@@ -18,6 +19,9 @@ export type RawListingRow = {
   pets_allowed?: boolean | null;
   amenities?: string[] | null;
   availability_date?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  show_specific_location?: boolean | null;
   created_at?: string;
 };
 
@@ -140,7 +144,7 @@ export function normalizeListing(property: RawListingRow): Property {
   const location = resolvePropertyLocation(property);
   const ids = resolveListingIds(property);
 
-  return {
+  const normalized: Property = {
     id: ids.id,
     property_uuid: ids.property_uuid,
     title: property.title,
@@ -150,6 +154,9 @@ export function normalizeListing(property: RawListingRow): Property {
     bedrooms: property.num_bedroom || 0,
     bathrooms: property.num_bathroom || 0,
     imageUrl: property.display_image || property.uploaded_images?.[0] || '',
+    latitude: property.latitude ?? null,
+    longitude: property.longitude ?? null,
+    show_specific_location: property.show_specific_location === true,
     details: {
       type: property.property_type || 'residential',
       furnished: property.furnished || 'non-furnished',
@@ -164,6 +171,13 @@ export function normalizeListing(property: RawListingRow): Property {
     updatedAt: property.created_at || new Date().toISOString(),
     ownerId: '',
   };
+
+  normalized.pinPrecision = inferPinPrecisionFromListing({
+    ...normalized,
+    address: property.address,
+  });
+
+  return normalized;
 }
 
 /** `{ property, landlord }` from get-property-by-uuid (Next route + Nhost). */

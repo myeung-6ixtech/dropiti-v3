@@ -23,22 +23,24 @@ import {
 } from '@/lib/listings';
 import { getListingKey } from '@/lib/normalize-listing';
 
-export default function SearchPageContent() {
+export default function SearchPageContent({
+  initialData,
+}: {
+  initialData?: { properties: Property[]; totalCount: number };
+}) {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [mapProperties, setMapProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<Property[]>(initialData?.properties ?? []);
+  const [mapProperties, setMapProperties] = useState<Property[]>(initialData?.properties ?? []);
   /** Full match set when map mode or location filter requires a bulk fetch. */
-  const [bulkMatches, setBulkMatches] = useState<Property[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [bulkMatches, setBulkMatches] = useState<Property[]>(initialData?.properties ?? []);
+  const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0);
+  const [isLoading, setIsLoading] = useState(!initialData);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-
-  useEffect(() => {
-    const isDesktop = window.innerWidth >= 1024;
-    setViewMode(isDesktop ? 'map' : 'list');
-  }, []);
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (typeof window === 'undefined') return 'list';
+    return window.matchMedia('(min-width: 1024px)').matches ? 'map' : 'list';
+  });
 
   const [filters, setFilters] = useState({
     location: searchParams.get('location') || '',
@@ -98,7 +100,11 @@ export default function SearchPageContent() {
           return;
         }
 
-        const matched = applyLocationFilter(result.properties, filters.location);
+        const matched = applyLocationFilter(
+          result.properties,
+          filters.location,
+          Boolean(filters.location?.trim()),
+        );
 
         if (needsBulkFetch) {
           setBulkMatches(matched);
@@ -130,8 +136,12 @@ export default function SearchPageContent() {
   const serverListPage = needsBulkFetch ? null : currentPage;
 
   useEffect(() => {
+    const hasFilters = Boolean(filters.location || filters.bedrooms || filters.maxPrice);
+    if (initialData && !hasFilters && !needsBulkFetch) {
+      return;
+    }
     fetchProperties(needsBulkFetch ? 1 : currentPage);
-  }, [fetchProperties, filters, viewMode, needsBulkFetch, serverListPage]);
+  }, [fetchProperties, filters, needsBulkFetch, serverListPage, initialData]);
 
   // Client-side list pagination over bulk fetch (map / location filter)
   useEffect(() => {
@@ -284,16 +294,24 @@ export default function SearchPageContent() {
               </button>
             )}
 
-            {isLoading ? (
-              isMapMode ? (
+            {isMapMode ? (
+              isLoading && mapList.length === 0 ? (
                 <SearchMapViewSkeleton />
-              ) : (
-                <PropertyCardSkeletonGrid count={LISTINGS_PAGE_SIZE} />
-              )
-            ) : totalCount > 0 ? (
-              viewMode === 'map' ? (
+              ) : totalCount > 0 ? (
                 <SearchMapView properties={mapList} />
               ) : (
+                <div className="text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No properties found
+                  </h3>
+                  <p className="text-gray-600">
+                    Try adjusting your filters or search criteria
+                  </p>
+                </div>
+              )
+            ) : isLoading ? (
+              <PropertyCardSkeletonGrid count={LISTINGS_PAGE_SIZE} />
+            ) : totalCount > 0 ? (
                 <PullToRefreshWrapper onRefresh={refreshListings}>
                   <div className={propertyCardClasses.grid.search}>
                     {properties.map((property, index) => {
