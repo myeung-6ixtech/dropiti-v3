@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { GoogleMap, OverlayView } from '@react-google-maps/api';
 import { useGoogleMapsLoader } from '@/lib/google-maps-loader';
+import type { MapBounds } from '@/lib/listings-params';
 
 export interface MapProperty {
   id: string;
@@ -27,6 +28,10 @@ interface SearchMapProps {
   onMarkerClick: (id: string) => void;
   onMarkerHover: (id: string | null) => void;
   onReady?: (controls: { panTo: (id: string) => void }) => void;
+  /** Fired on map idle with the visible viewport (debounced fetch in parent). */
+  onBoundsChange?: (bounds: MapBounds) => void;
+  /** When this changes (e.g. filters), fit map to markers once. */
+  fitBoundsKey?: string;
 }
 
 const HONG_KONG_CENTER: LatLng = { lat: 22.3193, lng: 114.1694 };
@@ -56,6 +61,19 @@ function resolveCoords(prop: MapProperty): LatLng | null {
   return null;
 }
 
+function readMapBounds(map: google.maps.Map): MapBounds | null {
+  const bounds = map.getBounds();
+  if (!bounds) return null;
+  const ne = bounds.getNorthEast();
+  const sw = bounds.getSouthWest();
+  return {
+    north: ne.lat(),
+    south: sw.lat(),
+    east: ne.lng(),
+    west: sw.lng(),
+  };
+}
+
 export default function SearchMap({
   properties,
   selectedId,
@@ -63,9 +81,11 @@ export default function SearchMap({
   onMarkerClick,
   onMarkerHover,
   onReady,
+  onBoundsChange,
+  fitBoundsKey = '',
 }: SearchMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
-  const lastFitSignatureRef = useRef<string>('');
+  const lastAutoFitKeyRef = useRef<string>('');
 
   const coords = useMemo(() => {
     const out: Record<string, LatLng> = {};
@@ -80,21 +100,21 @@ export default function SearchMap({
 
   const { isLoaded, loadError } = useGoogleMapsLoader();
 
+  const emitBounds = useCallback(() => {
+    if (!mapRef.current || !onBoundsChange) return;
+    const bounds = readMapBounds(mapRef.current);
+    if (bounds) onBoundsChange(bounds);
+  }, [onBoundsChange]);
+
+  // Fit to markers once per filter session — not when viewport listings refresh after pan.
   useEffect(() => {
     if (!mapRef.current || !isLoaded) return;
-    const ids = Object.keys(coords).sort();
-    if (ids.length === 0) return;
+    if (fitBoundsKey === lastAutoFitKeyRef.current) return;
+    if (Object.keys(coords).length === 0) return;
 
-    const signature = ids
-      .map((id) => {
-        const c = coords[id];
-        return `${id}:${c.lat.toFixed(6)},${c.lng.toFixed(6)}`;
-      })
-      .join('|');
-    if (signature === lastFitSignatureRef.current) return;
-    lastFitSignatureRef.current = signature;
+    lastAutoFitKeyRef.current = fitBoundsKey;
 
-    const entries = ids.map((id) => coords[id]);
+    const entries = Object.values(coords);
 
     if (entries.length === 1) {
       mapRef.current.panTo(entries[0]);
@@ -105,11 +125,19 @@ export default function SearchMap({
     const bounds = new window.google.maps.LatLngBounds();
     entries.forEach((c) => bounds.extend(c));
     mapRef.current.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
-  }, [coords, isLoaded]);
+  }, [coords, fitBoundsKey, isLoaded]);
 
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-  }, []);
+  const onMapLoad = useCallback(
+    (map: google.maps.Map) => {
+      mapRef.current = map;
+      emitBounds();
+    },
+    [emitBounds],
+  );
+
+  const onMapIdle = useCallback(() => {
+    emitBounds();
+  }, [emitBounds]);
 
   const panTo = useCallback(
     (id: string) => {
@@ -150,6 +178,7 @@ export default function SearchMap({
       center={HONG_KONG_CENTER}
       zoom={12}
       onLoad={onMapLoad}
+      onIdle={onMapIdle}
       options={MAP_OPTIONS}
     >
       {markersWithCoords.map((prop) => {

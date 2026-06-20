@@ -8,12 +8,22 @@ import SearchMap from './SearchMap';
 import MapBottomSheet from './MapBottomSheet';
 import { useHaptic } from '@/hooks/useHaptic';
 import { getListingKey } from '@/lib/normalize-listing';
+import type { MapBounds } from '@/lib/listings-params';
+import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkeleton';
 
 interface SearchMapViewProps {
   properties: (Property & { property_uuid?: string })[];
+  isViewportLoading?: boolean;
+  onBoundsChange: (bounds: MapBounds) => void;
+  fitBoundsKey: string;
 }
 
-export default function SearchMapViewInner({ properties }: SearchMapViewProps) {
+export default function SearchMapViewInner({
+  properties,
+  isViewportLoading = false,
+  onBoundsChange,
+  fitBoundsKey,
+}: SearchMapViewProps) {
   const router = useRouter();
   const { tap } = useHaptic();
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -90,36 +100,44 @@ export default function SearchMapViewInner({ properties }: SearchMapViewProps) {
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  const cardList = properties.map((property, index) => {
-    const listingKey = getListingKey(property, index);
-    const propertyUuid = property.property_uuid || String(property.id ?? listingKey);
-    const isSelected = selectedId === listingKey;
-    const isHovered = hoveredId === listingKey;
-
-    return (
-      <div
-        key={listingKey}
-        ref={(el) => {
-          cardRefs.current[listingKey] = el;
-        }}
-        onMouseEnter={() => handleCardHover(listingKey)}
-        onMouseLeave={() => handleCardHover(null)}
-        onClick={() => handleCardClick(listingKey)}
-        className={`
-          rounded-xl transition-all duration-200 cursor-pointer
-          ${isHovered ? 'ring-2 ring-gray-400 ring-offset-1' : ''}
-        `}
-      >
-        <PropertyCard
-          property={{
-            ...property,
-            property_uuid: propertyUuid,
-          }}
-          onViewDetails={(uuid) => router.push(`/property/${uuid}`)}
-        />
+  const cardList =
+    properties.length === 0 && isViewportLoading ? (
+      <PropertyCardSkeletonGrid count={4} />
+    ) : properties.length === 0 ? (
+      <div className="col-span-2 py-8 text-center text-gray-500 text-sm">
+        No properties in this map area. Try zooming out or panning to another district.
       </div>
+    ) : (
+      properties.map((property, index) => {
+        const listingKey = getListingKey(property, index);
+        const propertyUuid = property.property_uuid || String(property.id ?? listingKey);
+        const isHovered = hoveredId === listingKey;
+
+        return (
+          <div
+            key={listingKey}
+            ref={(el) => {
+              cardRefs.current[listingKey] = el;
+            }}
+            onMouseEnter={() => handleCardHover(listingKey)}
+            onMouseLeave={() => handleCardHover(null)}
+            onClick={() => handleCardClick(listingKey)}
+            className={`
+              rounded-xl transition-all duration-200 cursor-pointer
+              ${isHovered ? 'ring-2 ring-gray-400 ring-offset-1' : ''}
+            `}
+          >
+            <PropertyCard
+              property={{
+                ...property,
+                property_uuid: propertyUuid,
+              }}
+              onViewDetails={(uuid) => router.push(`/property/${uuid}`)}
+            />
+          </div>
+        );
+      })
     );
-  });
 
   const mapElement = (
     <SearchMap
@@ -129,6 +147,8 @@ export default function SearchMapViewInner({ properties }: SearchMapViewProps) {
       onMarkerClick={handleMarkerClick}
       onMarkerHover={handleMarkerHover}
       onReady={handleMapReady}
+      onBoundsChange={onBoundsChange}
+      fitBoundsKey={fitBoundsKey}
     />
   );
 
@@ -137,9 +157,6 @@ export default function SearchMapViewInner({ properties }: SearchMapViewProps) {
       <div className="fixed inset-0 top-16 z-10">
         <div className="absolute inset-0">{mapElement}</div>
         <MapBottomSheet>
-          <p className="text-sm text-gray-500 mb-3 px-1">
-            {properties.length} {properties.length === 1 ? 'property' : 'properties'}
-          </p>
           <div className="flex flex-col gap-4 pb-4">{cardList}</div>
         </MapBottomSheet>
       </div>

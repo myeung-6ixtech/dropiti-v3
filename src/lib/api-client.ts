@@ -314,7 +314,11 @@ export const propertiesAPI = {
     maxPrice?: number;
     bedrooms?: number;
     type?: string;
-    landlord_user_id?: string; // Add landlord filter parameter
+    landlord_user_id?: string;
+    north?: number;
+    south?: number;
+    east?: number;
+    west?: number;
   }) => {
     const response = await apiClient.get('/properties/get-listings', { params });
     return response.data;

@@ -3,6 +3,7 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { Bed } from '@/assets/icons';
+import { formatFilterPrice } from '@/lib/format-filter-price';
 
 interface FilterTagsProps {
   filters: {
@@ -38,7 +39,7 @@ export default function FilterTags({ filters, onRemoveFilter, onClearAll }: Filt
   if (filters.maxPrice) {
     activeFilters.push({
       key: 'maxPrice',
-      label: `Under ${parseInt(filters.maxPrice).toLocaleString()} HKD`,
+      label: `Under ${formatFilterPrice(filters.maxPrice)} HKD`,
       icon: CurrencyDollarIcon,
     });
   }

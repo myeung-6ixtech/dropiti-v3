@@ -4,9 +4,13 @@ import type { PropertyResponse } from '@/types/property';
 import { inferPinPrecisionFromListing } from '@/lib/infer-pin-precision';
 import {
   applyLocationFilter,
+  boundsCacheKey,
   buildListingsQueryParams,
+  filterPropertiesInBounds,
   LISTINGS_MAP_FETCH_LIMIT,
   LISTINGS_PAGE_SIZE,
+  roundBounds,
+  type MapBounds,
   type PublishedListingsParams,
   type SearchFilters,
 } from '@/lib/listings-params';
@@ -14,8 +18,12 @@ import {
 export {
   applyLocationFilter,
   buildListingsQueryParams,
+  boundsCacheKey,
+  filterPropertiesInBounds,
   LISTINGS_MAP_FETCH_LIMIT,
   LISTINGS_PAGE_SIZE,
+  roundBounds,
+  type MapBounds,
   type PublishedListingsParams,
   type SearchFilters,
 };

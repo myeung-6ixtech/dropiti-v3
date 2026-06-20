@@ -61,8 +61,6 @@ export default function PropertyCard({ property, onViewDetails, isDashboard = fa
     // Location format is: "building, addressLine1, addressLine2, district, state, country"
     if (location.includes(',')) {
       const parts = location.split(',').map(part => part.trim());
-      console.log('PropertyCard: Location parts:', parts);
-      
       // Find district and country in the parts array
       // District is typically one of the last 3 parts, country is usually the last
       let district = '';

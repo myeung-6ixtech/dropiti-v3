@@ -1,7 +1,11 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
 import SearchPageContent from './SearchPageContent';
+import SearchPagePlaceholder from './SearchPagePlaceholder';
 import { prefetchSearchListings } from '@/lib/listings-server';
+import type { SearchFilters } from '@/lib/listings-params';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Search Properties - dropiti',
@@ -35,17 +39,20 @@ function readParam(
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
   const params = await searchParams;
-  const filters = {
+  const initialFilters: SearchFilters = {
     location: readParam(params, 'location'),
     bedrooms: readParam(params, 'bedrooms'),
     maxPrice: readParam(params, 'maxPrice'),
   };
-  const initialData = await prefetchSearchListings(filters);
+  const initialData = await prefetchSearchListings(initialFilters);
 
   return (
     <div className="min-h-screen bg-white">
-      <Suspense fallback={<div>Loading...</div>}>
-        <SearchPageContent initialData={initialData ?? undefined} />
+      <Suspense fallback={<SearchPagePlaceholder />}>
+        <SearchPageContent
+          initialData={initialData ?? undefined}
+          initialFilters={initialFilters}
+        />
       </Suspense>
     </div>
   );

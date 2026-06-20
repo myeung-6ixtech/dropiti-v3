@@ -7,11 +7,13 @@ export type ViewMode = 'list' | 'map';
 interface ViewModeToggleProps {
   viewMode: ViewMode;
   onToggle: (mode: ViewMode) => void;
+  /** Override root layout (e.g. `w-auto shrink-0` when inline beside Filter). */
+  className?: string;
 }
 
-export default function ViewModeToggle({ viewMode, onToggle }: ViewModeToggleProps) {
+export default function ViewModeToggle({ viewMode, onToggle, className }: ViewModeToggleProps) {
   return (
-    <div className="w-full flex justify-center lg:justify-start">
+    <div className={className ?? 'w-full flex justify-center lg:justify-start'}>
       <div
         className="inline-flex items-center bg-gray-900 rounded-full shadow-md lg:shadow-xl p-1 gap-1 max-w-full"
         role="group"

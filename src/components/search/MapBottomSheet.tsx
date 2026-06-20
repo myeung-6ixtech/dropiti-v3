@@ -28,7 +28,7 @@ export default function MapBottomSheet({ children }: MapBottomSheetProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [snap, setSnap] = useState<Snap>('peek');
-  const [vh, setVh] = useState(typeof window !== 'undefined' ? window.innerHeight : 800);
+  const [vh, setVh] = useState(800);
   const [isDragging, setIsDragging] = useState(false);
   const [sheetHeight, setSheetHeight] = useState(PEEK_HEIGHT);
 
