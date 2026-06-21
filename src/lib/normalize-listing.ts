@@ -367,13 +367,17 @@ export function normalizeListings(items: unknown[]): Property[] {
       property_uuid?: string;
       address?: unknown;
       location?: unknown;
+      display_image?: string | null;
+      image_url?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+      show_specific_location?: boolean | null;
     };
     const ids = resolveListingIds(row);
-    const record = row as Record<string, unknown>;
     const imageUrl =
       (typeof row.imageUrl === 'string' && row.imageUrl.trim()) ||
-      (typeof record.display_image === 'string' && record.display_image.trim()) ||
-      (typeof record.image_url === 'string' && record.image_url.trim()) ||
+      (typeof row.display_image === 'string' && row.display_image.trim()) ||
+      (typeof row.image_url === 'string' && row.image_url.trim()) ||
       '';
     return {
       ...row,
@@ -381,11 +385,9 @@ export function normalizeListings(items: unknown[]): Property[] {
       property_uuid: ids.property_uuid || getListingKey(row, index),
       location: resolvePropertyLocation(row),
       ...(imageUrl ? { imageUrl } : {}),
-      latitude: row.latitude ?? (record.latitude as number | null | undefined) ?? null,
-      longitude: row.longitude ?? (record.longitude as number | null | undefined) ?? null,
-      show_specific_location:
-        row.show_specific_location ??
-        (record.show_specific_location === true),
+      latitude: row.latitude ?? null,
+      longitude: row.longitude ?? null,
+      show_specific_location: row.show_specific_location ?? false,
     };
   });
 }
