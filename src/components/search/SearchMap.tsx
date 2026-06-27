@@ -86,6 +86,7 @@ export default function SearchMap({
 }: SearchMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
   const lastAutoFitKeyRef = useRef<string>('');
+  const suppressNextIdleRef = useRef(false);
 
   const coords = useMemo(() => {
     const out: Record<string, LatLng> = {};
@@ -117,6 +118,7 @@ export default function SearchMap({
     const entries = Object.values(coords);
 
     if (entries.length === 1) {
+      suppressNextIdleRef.current = true;
       mapRef.current.panTo(entries[0]);
       mapRef.current.setZoom(15);
       return;
@@ -124,6 +126,7 @@ export default function SearchMap({
 
     const bounds = new window.google.maps.LatLngBounds();
     entries.forEach((c) => bounds.extend(c));
+    suppressNextIdleRef.current = true;
     mapRef.current.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
   }, [coords, fitBoundsKey, isLoaded]);
 
@@ -136,6 +139,10 @@ export default function SearchMap({
   );
 
   const onMapIdle = useCallback(() => {
+    if (suppressNextIdleRef.current) {
+      suppressNextIdleRef.current = false;
+      return;
+    }
     emitBounds();
   }, [emitBounds]);
 

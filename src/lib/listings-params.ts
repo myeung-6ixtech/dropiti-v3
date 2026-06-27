@@ -1,6 +1,7 @@
 import type { Property } from '@/types';
 
 export const LISTINGS_PAGE_SIZE = 12;
+export const MAP_LISTINGS_PAGE_SIZE = 10;
 /** Nhost `get-listings` max page size (see `parsePagination` in functions). */
 export const LISTINGS_MAP_FETCH_LIMIT = 100;
 
@@ -86,6 +87,27 @@ export function roundBounds(bounds: MapBounds, decimals = 2): MapBounds {
     east: round(bounds.east),
     west: round(bounds.west),
   };
+}
+
+export function expandMapBounds(bounds: MapBounds, paddingRatio = 0.5): MapBounds {
+  const latPadding = (bounds.north - bounds.south) * paddingRatio;
+  const lngPadding = (bounds.east - bounds.west) * paddingRatio;
+
+  return {
+    north: Math.min(90, bounds.north + latPadding),
+    south: Math.max(-90, bounds.south - latPadding),
+    east: bounds.east + lngPadding,
+    west: bounds.west - lngPadding,
+  };
+}
+
+export function boundsContains(outer: MapBounds, inner: MapBounds): boolean {
+  return (
+    inner.north <= outer.north &&
+    inner.south >= outer.south &&
+    inner.east <= outer.east &&
+    inner.west >= outer.west
+  );
 }
 
 export function boundsCacheKey(

@@ -13,14 +13,28 @@ import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkelet
 
 interface SearchMapViewProps {
   properties: (Property & { property_uuid?: string })[];
+  currentPage: number;
+  totalPages: number;
+  totalCount: number;
+  pageSize: number;
   isViewportLoading?: boolean;
+  isViewportRefreshing?: boolean;
+  viewportError?: string | null;
+  onPageChange: (page: number) => void;
   onBoundsChange: (bounds: MapBounds) => void;
   fitBoundsKey: string;
 }
 
 export default function SearchMapViewInner({
   properties,
+  currentPage,
+  totalPages,
+  totalCount,
+  pageSize,
   isViewportLoading = false,
+  isViewportRefreshing = false,
+  viewportError = null,
+  onPageChange,
   onBoundsChange,
   fitBoundsKey,
 }: SearchMapViewProps) {
@@ -139,6 +153,71 @@ export default function SearchMapViewInner({
       })
     );
 
+  const startIndex = totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endIndex = Math.min(currentPage * pageSize, totalCount);
+
+  const paginationControls =
+    totalCount > pageSize ? (
+      <div className="mt-6 flex flex-col items-center gap-3">
+        <p className="text-xs text-gray-500">
+          Showing {startIndex}-{endIndex} of {totalCount} properties in this area
+        </p>
+        <nav className="flex items-center space-x-2" aria-label="Map listings pagination">
+          <button
+            onClick={() => onPageChange(currentPage - 1)}
+            disabled={currentPage === 1 || isViewportRefreshing}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              currentPage === 1 || isViewportRefreshing
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            }`}
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+          </button>
+
+          <span className="px-3 py-2 text-sm font-medium text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={() => onPageChange(currentPage + 1)}
+            disabled={currentPage === totalPages || isViewportRefreshing}
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              currentPage === totalPages || isViewportRefreshing
+                ? 'text-gray-400 cursor-not-allowed'
+                : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            }`}
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </nav>
+      </div>
+    ) : null;
+
   const mapElement = (
     <SearchMap
       properties={mapProperties}
@@ -152,12 +231,23 @@ export default function SearchMapViewInner({
     />
   );
 
+  const statusPill =
+    isViewportRefreshing || viewportError ? (
+      <div className="pointer-events-none absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-white/95 px-4 py-2 text-sm font-medium text-gray-800 shadow-lg ring-1 ring-gray-200 backdrop-blur">
+        {isViewportRefreshing ? 'Searching this area...' : viewportError}
+      </div>
+    ) : null;
+
   if (isMobile) {
     return (
       <div className="fixed inset-0 top-16 z-10">
         <div className="absolute inset-0">{mapElement}</div>
+        {statusPill}
         <MapBottomSheet>
-          <div className="flex flex-col gap-4 pb-4">{cardList}</div>
+          <div className="flex flex-col gap-4 pb-4">
+            {cardList}
+            {paginationControls}
+          </div>
         </MapBottomSheet>
       </div>
     );
@@ -167,10 +257,12 @@ export default function SearchMapViewInner({
     <div className="flex flex-row h-[calc(100vh-180px)] min-h-[500px] w-full gap-0">
       <div className="w-[40%] h-full overflow-y-auto pr-4 pb-20">
         <div className="grid grid-cols-2 gap-4">{cardList}</div>
+        {paginationControls}
       </div>
 
-      <div className="w-[60%] h-full sticky top-0 rounded-xl overflow-hidden border border-gray-200">
+      <div className="relative w-[60%] h-full sticky top-0 rounded-xl overflow-hidden border border-gray-200">
         {mapElement}
+        {statusPill}
       </div>
     </div>
   );

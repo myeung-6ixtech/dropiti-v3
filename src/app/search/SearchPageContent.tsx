@@ -19,6 +19,7 @@ import {
   fetchPublishedListings,
   LISTINGS_MAP_FETCH_LIMIT,
   LISTINGS_PAGE_SIZE,
+  MAP_LISTINGS_PAGE_SIZE,
   type SearchFilters,
 } from '@/lib/listings';
 import { getListingKey } from '@/lib/normalize-listing';
@@ -223,8 +224,14 @@ export default function SearchPageContent({
 
   const mapList = viewport.properties;
   const mapIsInitialLoad = viewport.isInitialLoad && mapList.length === 0;
-  const displayCount = isMapMode ? mapList.length : totalCount;
+  const displayCount = isMapMode ? viewport.totalCount : totalCount;
   const displayLoading = isMapMode ? mapIsInitialLoad : isLoading;
+  const mapStartIndex =
+    viewport.totalCount === 0 ? 0 : (viewport.currentPage - 1) * MAP_LISTINGS_PAGE_SIZE + 1;
+  const mapEndIndex = Math.min(
+    viewport.currentPage * MAP_LISTINGS_PAGE_SIZE,
+    viewport.totalCount,
+  );
 
   const titleBlock = (
     <div>
@@ -239,6 +246,11 @@ export default function SearchPageContent({
       {!isMapMode && !isLoading && totalCount > 0 && (
         <p className="text-sm text-gray-500 mt-1">
           Showing {startIndex + 1}-{endIndex} of {totalCount} properties
+        </p>
+      )}
+      {isMapMode && !displayLoading && viewport.totalCount > 0 && (
+        <p className="text-sm text-gray-500 mt-1">
+          Showing {mapStartIndex}-{mapEndIndex} of {viewport.totalCount} in this map area
         </p>
       )}
     </div>
@@ -337,9 +349,16 @@ export default function SearchPageContent({
             {isMapMode ? (
               <SearchMapView
                 properties={mapList}
-                isViewportLoading={viewport.isLoading || mapIsInitialLoad}
+                currentPage={viewport.currentPage}
+                totalPages={viewport.totalPages}
+                totalCount={viewport.totalCount}
+                pageSize={MAP_LISTINGS_PAGE_SIZE}
+                isViewportLoading={mapIsInitialLoad}
+                isViewportRefreshing={viewport.isRefreshing}
+                viewportError={viewport.error}
+                onPageChange={viewport.goToPage}
                 onBoundsChange={viewport.onBoundsChange}
-                fitBoundsKey={viewport.fitBoundsKey}
+                fitBoundsKey={`${viewport.fitBoundsKey}|map-page:${viewport.currentPage}`}
               />
             ) : isLoading ? (
               <PropertyCardSkeletonGrid count={LISTINGS_PAGE_SIZE} />

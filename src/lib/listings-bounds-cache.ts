@@ -2,7 +2,13 @@ import type { Property } from '@/types';
 
 type CacheEntry = {
   properties: Property[];
+  totalCount: number;
   fetchedAt: number;
+};
+
+export type ListingsBoundsCacheValue = {
+  properties: Property[];
+  totalCount: number;
 };
 
 const MAX_ENTRIES = 48;
@@ -12,7 +18,7 @@ const TTL_MS = 60_000;
 class ListingsBoundsCache {
   private store = new Map<string, CacheEntry>();
 
-  get(key: string): Property[] | null {
+  get(key: string): ListingsBoundsCacheValue | null {
     const entry = this.store.get(key);
     if (!entry) return null;
     if (Date.now() - entry.fetchedAt > TTL_MS) {
@@ -21,14 +27,17 @@ class ListingsBoundsCache {
     }
     this.store.delete(key);
     this.store.set(key, entry);
-    return entry.properties;
+    return {
+      properties: entry.properties,
+      totalCount: entry.totalCount,
+    };
   }
 
-  set(key: string, properties: Property[]): void {
+  set(key: string, value: ListingsBoundsCacheValue): void {
     if (this.store.has(key)) {
       this.store.delete(key);
     }
-    this.store.set(key, { properties, fetchedAt: Date.now() });
+    this.store.set(key, { ...value, fetchedAt: Date.now() });
     while (this.store.size > MAX_ENTRIES) {
       const oldest = this.store.keys().next().value;
       if (oldest) this.store.delete(oldest);
