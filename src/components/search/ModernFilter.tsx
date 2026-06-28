@@ -14,7 +14,7 @@ interface ModernFilterProps {
   filters: FilterData;
   onFilterChange: (key: string, value: string) => void;
   onClearFilters: () => void;
-  onApplyFilters: () => void;
+  onApplyFilters: () => void | Promise<void>;
   isOpen: boolean;
   onToggle: () => void;
 }
@@ -28,9 +28,9 @@ export default function ModernFilter({
   onToggle
 }: ModernFilterProps) {
 
-  const handleApply = () => {
-    onApplyFilters();
-    onToggle(); // Close the filter panel
+  const handleApply = async () => {
+    await onApplyFilters();
+    onToggle();
   };
 
   const handleClear = () => {

@@ -27,11 +27,18 @@ interface SearchMapProps {
   hoveredId: string | null;
   onMarkerClick: (id: string) => void;
   onMarkerHover: (id: string | null) => void;
-  onReady?: (controls: { panTo: (id: string) => void }) => void;
+  onReady?: (controls: {
+    panTo: (id: string) => void;
+    fitToBounds: (bounds: MapBounds) => void;
+  }) => void;
   /** Fired on map idle with the visible viewport (debounced fetch in parent). */
   onBoundsChange?: (bounds: MapBounds) => void;
   /** When this changes (e.g. filters), fit map to markers once. */
   fitBoundsKey?: string;
+  /** When this changes (e.g. pagination), fit map to the current page markers. */
+  markerFitKey?: string;
+  /** Pan/zoom map to a geocoded region (location filter apply). */
+  regionFitBounds?: MapBounds | null;
 }
 
 const HONG_KONG_CENTER: LatLng = { lat: 22.3193, lng: 114.1694 };
@@ -83,9 +90,14 @@ export default function SearchMap({
   onReady,
   onBoundsChange,
   fitBoundsKey = '',
+  markerFitKey = '',
+  regionFitBounds = null,
 }: SearchMapProps) {
   const mapRef = useRef<google.maps.Map | null>(null);
-  const lastAutoFitKeyRef = useRef<string>('');
+  const lastFilterFitKeyRef = useRef<string>('');
+  const lastMarkerFitKeyRef = useRef<string>('');
+  const lastRegionFitKeyRef = useRef<string>('');
+  const hadRegionFitRef = useRef(false);
   const suppressNextIdleRef = useRef(false);
 
   const coords = useMemo(() => {
@@ -107,13 +119,18 @@ export default function SearchMap({
     if (bounds) onBoundsChange(bounds);
   }, [onBoundsChange]);
 
-  // Fit to markers once per filter session — not when viewport listings refresh after pan.
-  useEffect(() => {
-    if (!mapRef.current || !isLoaded) return;
-    if (fitBoundsKey === lastAutoFitKeyRef.current) return;
-    if (Object.keys(coords).length === 0) return;
+  const fitMapToBounds = useCallback((bounds: MapBounds) => {
+    if (!mapRef.current) return;
+    const latLngBounds = new window.google.maps.LatLngBounds(
+      { lat: bounds.south, lng: bounds.west },
+      { lat: bounds.north, lng: bounds.east },
+    );
+    suppressNextIdleRef.current = true;
+    mapRef.current.fitBounds(latLngBounds, { top: 48, bottom: 48, left: 48, right: 48 });
+  }, []);
 
-    lastAutoFitKeyRef.current = fitBoundsKey;
+  const fitMapToMarkers = useCallback(() => {
+    if (!mapRef.current || Object.keys(coords).length === 0) return;
 
     const entries = Object.values(coords);
 
@@ -128,7 +145,52 @@ export default function SearchMap({
     entries.forEach((c) => bounds.extend(c));
     suppressNextIdleRef.current = true;
     mapRef.current.fitBounds(bounds, { top: 40, bottom: 40, left: 40, right: 40 });
-  }, [coords, fitBoundsKey, isLoaded]);
+  }, [coords]);
+
+  // Fit once when filters change.
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (fitBoundsKey === lastFilterFitKeyRef.current) return;
+    if (Object.keys(coords).length === 0) return;
+
+    lastFilterFitKeyRef.current = fitBoundsKey;
+    fitMapToMarkers();
+  }, [coords, fitBoundsKey, fitMapToMarkers, isLoaded]);
+
+  // Fit when paginating within the same map area.
+  useEffect(() => {
+    if (!isLoaded || !markerFitKey) return;
+    if (markerFitKey === lastMarkerFitKeyRef.current) return;
+    if (Object.keys(coords).length === 0) return;
+
+    lastMarkerFitKeyRef.current = markerFitKey;
+    fitMapToMarkers();
+  }, [coords, fitMapToMarkers, isLoaded, markerFitKey]);
+
+  // Pan/zoom to geocoded region when location filter is applied.
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!regionFitBounds) {
+      if (hadRegionFitRef.current) {
+        hadRegionFitRef.current = false;
+        queueMicrotask(() => emitBounds());
+      }
+      lastRegionFitKeyRef.current = '';
+      return;
+    }
+
+    hadRegionFitRef.current = true;
+    const key = [
+      regionFitBounds.north,
+      regionFitBounds.south,
+      regionFitBounds.east,
+      regionFitBounds.west,
+    ].join('|');
+    if (key === lastRegionFitKeyRef.current) return;
+
+    lastRegionFitKeyRef.current = key;
+    fitMapToBounds(regionFitBounds);
+  }, [emitBounds, fitMapToBounds, isLoaded, regionFitBounds]);
 
   const onMapLoad = useCallback(
     (map: google.maps.Map) => {
@@ -157,9 +219,16 @@ export default function SearchMap({
     [coords],
   );
 
+  const fitToBounds = useCallback(
+    (bounds: MapBounds) => {
+      fitMapToBounds(bounds);
+    },
+    [fitMapToBounds],
+  );
+
   useEffect(() => {
-    onReady?.({ panTo });
-  }, [panTo, onReady]);
+    onReady?.({ panTo, fitToBounds });
+  }, [panTo, fitToBounds, onReady]);
 
   if (loadError || !apiKey) {
     return (

@@ -26,6 +26,9 @@ nhostStoragePatterns.push({
 const nextConfig = {
   // SEO optimizations
   trailingSlash: true, // Better for SEO consistency
+  // Keep page URLs with trailing slashes but do not 308-redirect API/BFF calls
+  // (redirect breaks catch-all routes like /api/v1/bff/functions/[...path]).
+  skipTrailingSlashRedirect: true,
   compress: true,
   
   // Security headers for SEO

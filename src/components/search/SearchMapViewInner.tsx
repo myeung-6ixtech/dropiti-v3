@@ -9,7 +9,7 @@ import MapBottomSheet from './MapBottomSheet';
 import { useHaptic } from '@/hooks/useHaptic';
 import { getListingKey } from '@/lib/normalize-listing';
 import type { MapBounds } from '@/lib/listings-params';
-import { PropertyCardSkeletonGrid } from '@/components/common/PropertyCardSkeleton';
+import PropertyCardSkeleton from '@/components/common/PropertyCardSkeleton';
 
 interface SearchMapViewProps {
   properties: (Property & { property_uuid?: string })[];
@@ -20,9 +20,13 @@ interface SearchMapViewProps {
   isViewportLoading?: boolean;
   isViewportRefreshing?: boolean;
   viewportError?: string | null;
+  hasLocationRegion?: boolean;
+  locationLabel?: string;
+  regionFitBounds?: MapBounds | null;
   onPageChange: (page: number) => void;
   onBoundsChange: (bounds: MapBounds) => void;
   fitBoundsKey: string;
+  markerFitKey: string;
 }
 
 export default function SearchMapViewInner({
@@ -34,9 +38,13 @@ export default function SearchMapViewInner({
   isViewportLoading = false,
   isViewportRefreshing = false,
   viewportError = null,
+  hasLocationRegion = false,
+  locationLabel = '',
+  regionFitBounds = null,
   onPageChange,
   onBoundsChange,
   fitBoundsKey,
+  markerFitKey,
 }: SearchMapViewProps) {
   const router = useRouter();
   const { tap } = useHaptic();
@@ -44,6 +52,7 @@ export default function SearchMapViewInner({
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const listContainerRef = useRef<HTMLDivElement | null>(null);
   const mapControlsRef = useRef<{ panTo: (id: string) => void } | null>(null);
 
   useEffect(() => {
@@ -61,6 +70,15 @@ export default function SearchMapViewInner({
       document.body.style.overflow = prev;
     };
   }, [isMobile]);
+
+  useEffect(() => {
+    setSelectedId(null);
+    setHoveredId(null);
+  }, [markerFitKey, properties]);
+
+  useEffect(() => {
+    listContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
   const mapProperties = useMemo(
     () =>
@@ -114,12 +132,20 @@ export default function SearchMapViewInner({
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
+  const mapSkeletons = Array.from({ length: 4 }, (_, i) => (
+    <PropertyCardSkeleton key={`map-skeleton-${i}`} />
+  ));
+
+  const emptyMessage = hasLocationRegion && locationLabel
+    ? `No properties found in ${locationLabel}. Try adjusting bedrooms or price filters.`
+    : 'No properties in this map area. Try zooming out or panning to another district.';
+
   const cardList =
     properties.length === 0 && isViewportLoading ? (
-      <PropertyCardSkeletonGrid count={4} />
+      mapSkeletons
     ) : properties.length === 0 ? (
       <div className="col-span-2 py-8 text-center text-gray-500 text-sm">
-        No properties in this map area. Try zooming out or panning to another district.
+        {emptyMessage}
       </div>
     ) : (
       properties.map((property, index) => {
@@ -157,7 +183,7 @@ export default function SearchMapViewInner({
   const endIndex = Math.min(currentPage * pageSize, totalCount);
 
   const paginationControls =
-    totalCount > pageSize ? (
+    totalPages > 1 ? (
       <div className="mt-6 flex flex-col items-center gap-3">
         <p className="text-xs text-gray-500">
           Showing {startIndex}-{endIndex} of {totalCount} properties in this area
@@ -228,6 +254,8 @@ export default function SearchMapViewInner({
       onReady={handleMapReady}
       onBoundsChange={onBoundsChange}
       fitBoundsKey={fitBoundsKey}
+      markerFitKey={markerFitKey}
+      regionFitBounds={regionFitBounds}
     />
   );
 
@@ -245,7 +273,7 @@ export default function SearchMapViewInner({
         {statusPill}
         <MapBottomSheet>
           <div className="flex flex-col gap-4 pb-4">
-            {cardList}
+            <div className="grid grid-cols-1 gap-4">{cardList}</div>
             {paginationControls}
           </div>
         </MapBottomSheet>
@@ -255,7 +283,7 @@ export default function SearchMapViewInner({
 
   return (
     <div className="flex flex-row h-[calc(100vh-180px)] min-h-[500px] w-full gap-0">
-      <div className="w-[40%] h-full overflow-y-auto pr-4 pb-20">
+      <div className="w-[40%] h-full overflow-y-auto pr-4 pb-20" ref={listContainerRef}>
         <div className="grid grid-cols-2 gap-4">{cardList}</div>
         {paginationControls}
       </div>

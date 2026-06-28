@@ -52,8 +52,9 @@ export function buildListingsQueryParams(
     offset: paging.offset,
   };
 
+  // Bbox defines the search area on the map; omit text location to avoid over-filtering.
   const location = filters.location?.trim();
-  if (location) {
+  if (location && !bounds) {
     params.location = location;
   }
 

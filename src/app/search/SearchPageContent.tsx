@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import PropertyCard from '@/components/PropertyCard';
@@ -14,17 +14,17 @@ import PullToRefreshWrapper from '@/components/common/PullToRefreshWrapper';
 import { Property } from '@/types';
 import { propertyCardClasses } from '@/styles/property-card';
 import {
-  applyLocationFilter,
   buildListingsQueryParams,
   fetchPublishedListings,
-  LISTINGS_MAP_FETCH_LIMIT,
   LISTINGS_PAGE_SIZE,
   MAP_LISTINGS_PAGE_SIZE,
+  type MapBounds,
   type SearchFilters,
 } from '@/lib/listings';
 import { getListingKey } from '@/lib/normalize-listing';
 import { useMapViewportListings } from '@/hooks/useMapViewportListings';
 import { formatFilterPrice } from '@/lib/format-filter-price';
+import { resolveSearchLocationBounds } from '@/lib/resolve-search-location-bounds';
 import SearchPagePlaceholder from './SearchPagePlaceholder';
 
 export default function SearchPageContent({
@@ -38,8 +38,6 @@ export default function SearchPageContent({
   const router = useRouter();
   const [hasMounted, setHasMounted] = useState(false);
   const [properties, setProperties] = useState<Property[]>(initialData?.properties ?? []);
-  /** Full match set when list mode + location filter requires a bulk fetch. */
-  const [bulkMatches, setBulkMatches] = useState<Property[]>(initialData?.properties ?? []);
   const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0);
   const [isLoading, setIsLoading] = useState(!initialData);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -58,13 +56,16 @@ export default function SearchPageContent({
   }, []);
 
   const [filters, setFilters] = useState(initialFilters);
+  const [draftFilters, setDraftFilters] = useState(initialFilters);
 
   const [currentPage, setCurrentPage] = useState(1);
 
+  const pendingMapApplyRef = useRef<'region' | 'viewport' | null>(null);
+  const pendingRegionBoundsRef = useRef<MapBounds | null>(null);
+  const locationAppliedRef = useRef<string | null>(null);
+  const prefetchConsumedRef = useRef(false);
+
   const isMapMode = viewMode === 'map';
-  const hasLocationFilter = Boolean(filters.location?.trim());
-  /** List mode with text location filter — bulk fetch then paginate client-side. */
-  const needsBulkFetch = hasLocationFilter && !isMapMode;
 
   const viewport = useMapViewportListings(filters, isMapMode);
 
@@ -85,109 +86,169 @@ export default function SearchPageContent({
   );
 
   useEffect(() => {
-    setFilters({
+    const next: SearchFilters = {
       location: searchParams.get('location') || '',
       bedrooms: searchParams.get('bedrooms') || '',
       maxPrice: searchParams.get('maxPrice') || '',
-    });
+    };
+    setFilters(next);
+    setDraftFilters(next);
   }, [searchParams]);
 
-  const fetchProperties = useCallback(
-    async (page: number) => {
-      setIsLoading(true);
-      try {
-        const paging = needsBulkFetch
-          ? { limit: LISTINGS_MAP_FETCH_LIMIT, offset: 0 }
-          : {
-              limit: LISTINGS_PAGE_SIZE,
-              offset: (page - 1) * LISTINGS_PAGE_SIZE,
-            };
+  /** After applied filters change, run queued map search (post viewport reset). */
+  useEffect(() => {
+    if (!isMapMode || !pendingMapApplyRef.current) return;
 
-        const result = await fetchPublishedListings(
-          buildListingsQueryParams(filters, paging),
-        );
+    const kind = pendingMapApplyRef.current;
+    pendingMapApplyRef.current = null;
 
-        if (!result.success) {
-          setProperties([]);
-          setBulkMatches([]);
-          setTotalCount(0);
-          return;
-        }
+    if (kind === 'region' && pendingRegionBoundsRef.current) {
+      viewport.applyMapSearch({ regionBounds: pendingRegionBoundsRef.current });
+      pendingRegionBoundsRef.current = null;
+      return;
+    }
 
-        const matched = applyLocationFilter(
-          result.properties,
-          filters.location,
-          Boolean(filters.location?.trim()),
-        );
+    viewport.applyMapSearch();
+  }, [filters, isMapMode, viewport.applyMapSearch]);
 
-        if (needsBulkFetch) {
-          setBulkMatches(matched);
-          setTotalCount(matched.length);
-        } else {
-          setBulkMatches([]);
-          setProperties(matched);
-          setTotalCount(result.pagination?.total ?? matched.length);
-        }
-      } catch (error) {
-        console.error('Search page: Failed to fetch properties:', error);
+  /** Initial / URL location in map mode — geocode region once per location. */
+  useEffect(() => {
+    if (!hasMounted || !isMapMode || pendingMapApplyRef.current) return;
+
+    const location = filters.location?.trim() || '';
+    if (!location || locationAppliedRef.current === location) return;
+
+    locationAppliedRef.current = location;
+    let cancelled = false;
+
+    void resolveSearchLocationBounds(location).then((bounds) => {
+      if (cancelled || !bounds) return;
+      viewport.applyMapSearch({ regionBounds: bounds });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasMounted, isMapMode, filters.location, viewport.applyMapSearch]);
+
+  useEffect(() => {
+    if (!filters.location?.trim()) {
+      locationAppliedRef.current = null;
+    }
+  }, [filters.location]);
+
+  const fetchProperties = useCallback(async (page: number) => {
+    setIsLoading(true);
+    try {
+      const result = await fetchPublishedListings(
+        buildListingsQueryParams(filters, {
+          limit: LISTINGS_PAGE_SIZE,
+          offset: (page - 1) * LISTINGS_PAGE_SIZE,
+        }),
+      );
+
+      if (!result.success) {
         setProperties([]);
-        setBulkMatches([]);
         setTotalCount(0);
-      } finally {
-        setIsLoading(false);
+        return;
       }
-    },
-    [filters, needsBulkFetch],
-  );
+
+      setProperties(result.properties);
+      setTotalCount(result.pagination?.total ?? result.properties.length);
+    } catch (error) {
+      console.error('Search page: Failed to fetch properties:', error);
+      setProperties([]);
+      setTotalCount(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [filters]);
 
   const refreshListings = useCallback(() => {
-    return fetchProperties(needsBulkFetch ? 1 : currentPage);
-  }, [fetchProperties, currentPage, needsBulkFetch]);
-
-  const serverListPage = needsBulkFetch ? null : currentPage;
+    return fetchProperties(currentPage);
+  }, [fetchProperties, currentPage]);
 
   useEffect(() => {
     if (isMapMode) return;
 
     const hasFilters = Boolean(filters.location || filters.bedrooms || filters.maxPrice);
-    const hasUsablePrefetch =
+    const canUsePrefetch =
+      !prefetchConsumedRef.current &&
+      currentPage === 1 &&
       initialData != null &&
       initialData.properties.length > 0 &&
-      !hasFilters &&
-      !needsBulkFetch;
-    if (hasUsablePrefetch) {
+      !hasFilters;
+
+    if (canUsePrefetch) {
+      prefetchConsumedRef.current = true;
       return;
     }
-    fetchProperties(needsBulkFetch ? 1 : currentPage);
-  }, [fetchProperties, filters, needsBulkFetch, serverListPage, initialData, isMapMode, currentPage]);
 
-  // Client-side list pagination over bulk fetch (map / location filter)
-  useEffect(() => {
-    if (!needsBulkFetch || viewMode !== 'list') return;
-    setProperties(
-      bulkMatches.slice(startIndex, startIndex + LISTINGS_PAGE_SIZE),
-    );
-  }, [needsBulkFetch, viewMode, bulkMatches, startIndex]);
+    fetchProperties(currentPage);
+  }, [fetchProperties, filters, initialData, isMapMode, currentPage]);
 
-  const handleFilterChange = (key: string, value: string) => {
+  const handleDraftFilterChange = (key: string, value: string) => {
+    setDraftFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const applyFilters = async () => {
     setCurrentPage(1);
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    updateURL(newFilters);
+    const next = { ...draftFilters };
+
+    if (isMapMode) {
+      const location = next.location?.trim();
+      if (location) {
+        pendingRegionBoundsRef.current = await resolveSearchLocationBounds(location);
+        pendingMapApplyRef.current = 'region';
+        locationAppliedRef.current = location;
+      } else {
+        pendingMapApplyRef.current = 'viewport';
+        locationAppliedRef.current = null;
+      }
+    }
+
+    setFilters(next);
+    updateURL(next);
   };
 
   const clearFilters = () => {
     setCurrentPage(1);
-    const newFilters = { location: '', bedrooms: '', maxPrice: '' };
+    const empty: SearchFilters = { location: '', bedrooms: '', maxPrice: '' };
+    setDraftFilters(empty);
+    if (isMapMode) {
+      pendingMapApplyRef.current = 'viewport';
+      locationAppliedRef.current = null;
+      pendingRegionBoundsRef.current = null;
+    }
+    setFilters(empty);
+    updateURL(empty);
+  };
+
+  const removeFilter = async (key: string) => {
+    setCurrentPage(1);
+    const newFilters = { ...filters, [key]: '' };
+    setDraftFilters(newFilters);
+
+    if (isMapMode) {
+      const location = newFilters.location?.trim();
+      if (location) {
+        pendingRegionBoundsRef.current = await resolveSearchLocationBounds(location);
+        pendingMapApplyRef.current = 'region';
+        locationAppliedRef.current = location;
+      } else {
+        pendingMapApplyRef.current = 'viewport';
+        locationAppliedRef.current = null;
+        pendingRegionBoundsRef.current = null;
+      }
+    }
+
     setFilters(newFilters);
     updateURL(newFilters);
   };
 
-  const removeFilter = (key: string) => {
-    setCurrentPage(1);
-    const newFilters = { ...filters, [key]: '' };
-    setFilters(newFilters);
-    updateURL(newFilters);
+  const openFilterPanel = () => {
+    setDraftFilters(filters);
+    setIsFilterOpen(true);
   };
 
   const handleViewModeToggle = (mode: ViewMode) => {
@@ -250,7 +311,10 @@ export default function SearchPageContent({
       )}
       {isMapMode && !displayLoading && viewport.totalCount > 0 && (
         <p className="text-sm text-gray-500 mt-1">
-          Showing {mapStartIndex}-{mapEndIndex} of {viewport.totalCount} in this map area
+          Showing {mapStartIndex}-{mapEndIndex} of {viewport.totalCount}
+          {viewport.hasLocationRegion && viewport.locationLabel
+            ? ` in ${viewport.locationLabel}`
+            : ' in this map area'}
         </p>
       )}
     </div>
@@ -258,7 +322,7 @@ export default function SearchPageContent({
 
   const filterButton = (
     <button
-      onClick={() => setIsFilterOpen(true)}
+      onClick={openFilterPanel}
       className="inline-flex items-center px-4 py-2 border border-black text-gray-900 font-semibold rounded-lg hover:bg-black hover:text-white transition-all duration-200 shrink-0"
     >
       <svg
@@ -326,7 +390,7 @@ export default function SearchPageContent({
 
             {isMapMode && (
               <button
-                onClick={() => setIsFilterOpen(true)}
+                onClick={openFilterPanel}
                 className="lg:hidden fixed top-[84px] right-4 z-40 flex items-center gap-1.5 px-3 py-2 bg-white rounded-full shadow-lg border border-gray-200 text-sm font-medium text-gray-900"
               >
                 <svg
@@ -356,9 +420,13 @@ export default function SearchPageContent({
                 isViewportLoading={mapIsInitialLoad}
                 isViewportRefreshing={viewport.isRefreshing}
                 viewportError={viewport.error}
+                hasLocationRegion={viewport.hasLocationRegion}
+                locationLabel={viewport.locationLabel}
+                regionFitBounds={viewport.regionFitBounds}
                 onPageChange={viewport.goToPage}
                 onBoundsChange={viewport.onBoundsChange}
-                fitBoundsKey={`${viewport.fitBoundsKey}|map-page:${viewport.currentPage}`}
+                fitBoundsKey={viewport.fitBoundsKey}
+                markerFitKey={viewport.markerFitKey}
               />
             ) : isLoading ? (
               <PropertyCardSkeletonGrid count={LISTINGS_PAGE_SIZE} />
@@ -518,10 +586,10 @@ export default function SearchPageContent({
       </div>
 
       <ModernFilter
-        filters={filters}
-        onFilterChange={handleFilterChange}
+        filters={draftFilters}
+        onFilterChange={handleDraftFilterChange}
         onClearFilters={clearFilters}
-        onApplyFilters={() => {}}
+        onApplyFilters={applyFilters}
         isOpen={isFilterOpen}
         onToggle={() => setIsFilterOpen(false)}
       />

@@ -3,10 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Property } from '@/types';
 import {
-  boundsContains,
   boundsCacheKey,
   buildListingsQueryParams,
-  expandMapBounds,
   MAP_LISTINGS_PAGE_SIZE,
   type MapBounds,
   type SearchFilters,
@@ -25,10 +23,14 @@ type ViewportListingsState = {
   isInitialLoad: boolean;
   isRefreshing: boolean;
   error: string | null;
+  hasLocationRegion: boolean;
+  locationLabel: string;
+  regionFitBounds: MapBounds | null;
   onBoundsChange: (bounds: MapBounds) => void;
   goToPage: (page: number) => void;
-  /** Changes when filters change — triggers one-time map fit in SearchMap. */
+  applyMapSearch: (opts?: { regionBounds?: MapBounds | null }) => void;
   fitBoundsKey: string;
+  markerFitKey: string;
 };
 
 export function useMapViewportListings(
@@ -41,10 +43,14 @@ export function useMapViewportListings(
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [visibleAreaKey, setVisibleAreaKey] = useState('');
+  const [regionFitBounds, setRegionFitBounds] = useState<MapBounds | null>(null);
+  const [isRegionSearch, setIsRegionSearch] = useState(false);
 
   const lastFetchedKeyRef = useRef<string | null>(null);
-  const fetchedBoundsRef = useRef<MapBounds | null>(null);
-  const activeQueryBoundsRef = useRef<MapBounds | null>(null);
+  const lastVisibleAreaKeyRef = useRef<string | null>(null);
+  const activeVisibleBoundsRef = useRef<MapBounds | null>(null);
+  const locationRegionBoundsRef = useRef<MapBounds | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const requestIdRef = useRef(0);
 
@@ -56,18 +62,26 @@ export function useMapViewportListings(
     [filters.location, filters.bedrooms, filters.maxPrice],
   );
 
-  useEffect(() => {
+  const resetViewportState = useCallback(() => {
     requestIdRef.current += 1;
     lastFetchedKeyRef.current = null;
-    fetchedBoundsRef.current = null;
-    activeQueryBoundsRef.current = null;
+    lastVisibleAreaKeyRef.current = null;
+    activeVisibleBoundsRef.current = null;
+    locationRegionBoundsRef.current = null;
     setProperties([]);
     setTotalCount(0);
     setCurrentPage(1);
+    setVisibleAreaKey('');
+    setRegionFitBounds(null);
+    setIsRegionSearch(false);
     setIsInitialLoad(true);
     setError(null);
     listingsBoundsCache.clear();
-  }, [filterKey]);
+  }, []);
+
+  useEffect(() => {
+    resetViewportState();
+  }, [filterKey, resetViewportState]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -76,19 +90,23 @@ export function useMapViewportListings(
     };
   }, [enabled, filterKey]);
 
-  const fetchForQueryBounds = useCallback(
-    async (queryBounds: MapBounds, page: number) => {
+  const fetchForBounds = useCallback(
+    async (queryBounds: MapBounds, page: number, visibleBoundsForKey?: MapBounds) => {
       if (!enabled) return;
 
-      const cacheKey = `${boundsCacheKey(queryBounds, filters)}|page:${page}`;
+      const areaKey = boundsCacheKey(queryBounds, filters);
+      const cacheKey = `${areaKey}|page:${page}`;
       if (cacheKey === lastFetchedKeyRef.current) return;
 
       const cached = listingsBoundsCache.get(cacheKey);
       if (cached) {
         requestIdRef.current += 1;
         lastFetchedKeyRef.current = cacheKey;
-        fetchedBoundsRef.current = queryBounds;
-        activeQueryBoundsRef.current = queryBounds;
+        lastVisibleAreaKeyRef.current = areaKey;
+        if (visibleBoundsForKey) {
+          activeVisibleBoundsRef.current = visibleBoundsForKey;
+        }
+        setVisibleAreaKey(areaKey);
         setProperties(cached.properties);
         setTotalCount(cached.totalCount);
         setCurrentPage(page);
@@ -123,8 +141,11 @@ export function useMapViewportListings(
             totalCount: nextTotalCount,
           });
           lastFetchedKeyRef.current = cacheKey;
-          fetchedBoundsRef.current = queryBounds;
-          activeQueryBoundsRef.current = queryBounds;
+          lastVisibleAreaKeyRef.current = areaKey;
+          if (visibleBoundsForKey) {
+            activeVisibleBoundsRef.current = visibleBoundsForKey;
+          }
+          setVisibleAreaKey(areaKey);
           setProperties(result.properties);
           setTotalCount(nextTotalCount);
           setCurrentPage(page);
@@ -145,35 +166,71 @@ export function useMapViewportListings(
     [enabled, filters],
   );
 
+  const getActiveQueryBounds = useCallback((): MapBounds | null => {
+    if (locationRegionBoundsRef.current) {
+      return locationRegionBoundsRef.current;
+    }
+    return activeVisibleBoundsRef.current;
+  }, []);
+
   const onBoundsChange = useCallback(
     (bounds: MapBounds) => {
       if (!enabled) return;
+      // Region search owns fetching while a location filter is active.
+      if (locationRegionBoundsRef.current || filters.location?.trim()) return;
 
-      if (fetchedBoundsRef.current && boundsContains(fetchedBoundsRef.current, bounds)) {
-        return;
-      }
-
-      const queryBounds = expandMapBounds(bounds);
+      const areaKey = boundsCacheKey(bounds, filters);
+      if (areaKey === lastVisibleAreaKeyRef.current) return;
 
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
       }
 
       debounceTimerRef.current = setTimeout(() => {
-        void fetchForQueryBounds(queryBounds, 1);
+        void fetchForBounds(bounds, 1, bounds);
       }, DEBOUNCE_MS);
     },
-    [enabled, fetchForQueryBounds],
+    [enabled, filters, fetchForBounds],
   );
 
   const goToPage = useCallback(
     (page: number) => {
-      const nextPage = Math.max(1, Math.min(page, Math.max(1, Math.ceil(totalCount / MAP_LISTINGS_PAGE_SIZE))));
-      const queryBounds = activeQueryBoundsRef.current;
-      if (!enabled || !queryBounds || nextPage === currentPage) return;
-      void fetchForQueryBounds(queryBounds, nextPage);
+      const queryBounds = getActiveQueryBounds();
+      if (!enabled || !queryBounds) return;
+
+      const maxPage = Math.max(1, Math.ceil(totalCount / MAP_LISTINGS_PAGE_SIZE));
+      const nextPage = Math.max(1, Math.min(page, maxPage));
+      if (nextPage === currentPage) return;
+
+      void fetchForBounds(queryBounds, nextPage, activeVisibleBoundsRef.current ?? queryBounds);
     },
-    [currentPage, enabled, fetchForQueryBounds, totalCount],
+    [currentPage, enabled, fetchForBounds, getActiveQueryBounds, totalCount],
+  );
+
+  const applyMapSearch = useCallback(
+    (opts?: { regionBounds?: MapBounds | null }) => {
+      if (!enabled) return;
+
+      lastFetchedKeyRef.current = null;
+
+      if (opts?.regionBounds) {
+        locationRegionBoundsRef.current = opts.regionBounds;
+        setRegionFitBounds(opts.regionBounds);
+        setIsRegionSearch(true);
+        void fetchForBounds(opts.regionBounds, 1, opts.regionBounds);
+        return;
+      }
+
+      locationRegionBoundsRef.current = null;
+      setRegionFitBounds(null);
+      setIsRegionSearch(false);
+
+      const visible = activeVisibleBoundsRef.current;
+      if (visible) {
+        void fetchForBounds(visible, 1, visible);
+      }
+    },
+    [enabled, fetchForBounds],
   );
 
   const totalPages = Math.max(1, Math.ceil(totalCount / MAP_LISTINGS_PAGE_SIZE));
@@ -187,8 +244,13 @@ export function useMapViewportListings(
     isInitialLoad,
     isRefreshing: isLoading && !isInitialLoad,
     error,
+    hasLocationRegion: isRegionSearch && Boolean(filters.location?.trim()),
+    locationLabel: filters.location?.trim() || '',
+    regionFitBounds,
     onBoundsChange,
     goToPage,
+    applyMapSearch,
     fitBoundsKey: filterKey,
+    markerFitKey: `${visibleAreaKey}|page:${currentPage}`,
   };
 }
