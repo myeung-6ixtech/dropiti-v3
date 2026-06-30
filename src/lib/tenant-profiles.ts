@@ -1,5 +1,5 @@
 import { tenantsAPI, usersAPI } from '@/lib/api-client';
-import type { TenantProfileData } from '@/types/tenant';
+import type { TenantListingStatus, TenantProfileData } from '@/types/tenant';
 
 /** Stable React key for tenant marketplace cards (prefer `tenant_uuid`). */
 export function getTenantProfileKey(
@@ -201,6 +201,82 @@ export function resolveTenantProfileDisplayUser(
   };
 }
 
+/** Writable tenant profile columns accepted by Nhost `POST/PATCH /tenants/profile`. */
+const TENANT_PROFILE_WRITABLE_FIELDS = [
+  'tenant_listing_title',
+  'tenant_listing_description',
+  'budget_min',
+  'budget_max',
+  'budget_currency',
+  'payment_preferences',
+  'deposit_capability',
+  'preferred_property_types',
+  'rental_space_preference',
+  'furnishing_preference',
+  'pets_allowed',
+  'preferred_locations',
+  'transportation_proximity',
+  'neighborhood_preferences',
+  'location_flexibility',
+  'preferred_move_in_date',
+  'preferred_lease_duration',
+  'notice_period',
+  'urgency_level',
+  'work_location',
+  'lifestyle_preferences',
+  'special_requirements',
+  'contact_preferences',
+  'best_contact_times',
+  'response_time_expectation',
+] as const satisfies readonly (keyof TenantProfileData)[];
+
+function toOptionalNumber(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  const num = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(num) ? num : undefined;
+}
+
+/** Build a clean upsert body — strips read-only fields and null DB values that fail API validation. */
+export function buildTenantProfileUpsertPayload(
+  data: TenantProfileData,
+  userId: string,
+  tenantListingStatus?: TenantListingStatus,
+): Record<string, unknown> & { user_nhost_user_id: string } {
+  const payload: Record<string, unknown> & { user_nhost_user_id: string } = {
+    user_nhost_user_id: userId,
+    privacy_settings: data.tenant_privacy_settings ?? {},
+  };
+
+  for (const key of TENANT_PROFILE_WRITABLE_FIELDS) {
+    const value = data[key];
+    if (value === null || value === undefined) continue;
+    if (Array.isArray(value) && value.length === 0) {
+      payload[key] = value;
+      continue;
+    }
+    payload[key] = value;
+  }
+
+  const budgetMin = toOptionalNumber(payload.budget_min);
+  const budgetMax = toOptionalNumber(payload.budget_max);
+  const leaseDuration = toOptionalNumber(payload.preferred_lease_duration);
+
+  if (budgetMin !== undefined) payload.budget_min = budgetMin;
+  else delete payload.budget_min;
+
+  if (budgetMax !== undefined) payload.budget_max = budgetMax;
+  else delete payload.budget_max;
+
+  if (leaseDuration !== undefined) payload.preferred_lease_duration = leaseDuration;
+  else delete payload.preferred_lease_duration;
+
+  if (tenantListingStatus) {
+    payload.tenant_listing_status = tenantListingStatus;
+  }
+
+  return payload;
+}
+
 /** Map API row → wizard / preview state. */
 export function mapTenantProfileRow(row: TenantProfileRow): TenantProfileData {
   return {
@@ -209,8 +285,8 @@ export function mapTenantProfileRow(row: TenantProfileRow): TenantProfileData {
     tenant_listing_title: row.tenant_listing_title,
     tenant_listing_description: row.tenant_listing_description,
     photo_url: row.photo_url,
-    budget_min: row.budget_min,
-    budget_max: row.budget_max,
+    budget_min: toOptionalNumber(row.budget_min),
+    budget_max: toOptionalNumber(row.budget_max),
     budget_currency: row.budget_currency,
     payment_preferences: row.payment_preferences || [],
     deposit_capability: row.deposit_capability,
@@ -222,8 +298,8 @@ export function mapTenantProfileRow(row: TenantProfileRow): TenantProfileData {
     transportation_proximity: row.transportation_proximity || [],
     neighborhood_preferences: row.neighborhood_preferences || [],
     location_flexibility: row.location_flexibility,
-    preferred_move_in_date: row.preferred_move_in_date,
-    preferred_lease_duration: row.preferred_lease_duration,
+    preferred_move_in_date: row.preferred_move_in_date ?? undefined,
+    preferred_lease_duration: toOptionalNumber(row.preferred_lease_duration),
     notice_period: row.notice_period,
     urgency_level: row.urgency_level,
     work_location: row.work_location,

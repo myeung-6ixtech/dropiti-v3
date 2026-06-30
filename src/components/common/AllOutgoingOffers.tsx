@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { offersAPI } from '@/lib/api-client';
+import { enhanceOffersWithProperty } from '@/lib/enhance-offers-list';
 import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
@@ -55,7 +56,7 @@ export default function AllOutgoingOffers({
         const response = await offersAPI.getOffersByInitiator(initiatorUserId);
 
         if (response.success && response.data) {
-          setOffers(response.data);
+          setOffers(await enhanceOffersWithProperty(response.data));
         } else {
           throw new Error(response.error || 'Failed to fetch applications');
         }
@@ -224,9 +225,9 @@ export default function AllOutgoingOffers({
                 // Refresh the offers list when an offer status changes
                 if (initiatorUserId) {
                   offersAPI.getOffersByInitiator(initiatorUserId)
-                    .then(response => {
+                    .then(async (response) => {
                       if (response.success && response.data) {
-                        setOffers(response.data);
+                        setOffers(await enhanceOffersWithProperty(response.data));
                       }
                     })
                     .catch(err => {

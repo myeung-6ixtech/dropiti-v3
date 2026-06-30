@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
-import { fetchMyTenantProfile, type TenantProfileEmbeddedUser } from '@/lib/tenant-profiles';
+import { fetchMyTenantProfile, buildTenantProfileUpsertPayload, type TenantProfileEmbeddedUser } from '@/lib/tenant-profiles';
 import { useTenantProfileDisplayUser } from '@/hooks/useTenantProfileDisplayUser';
 import TenantProfilePreview from '@/components/tenant-profile/TenantProfilePreview';
 import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
@@ -65,13 +65,9 @@ export default function TenantProfilePage() {
     if (!nhostUserId) return;
     try {
       setIsPublishing(true);
-      const { tenant_privacy_settings, ...rest } = profileData;
-      await tenantsAPI.upsertTenantProfile({ 
-        user_nhost_user_id: nhostUserId, 
-        ...rest,
-        privacy_settings: tenant_privacy_settings || {},
-        tenant_listing_status: 'active' as TenantListingStatus
-      });
+      await tenantsAPI.upsertTenantProfile(
+        buildTenantProfileUpsertPayload(profileData, nhostUserId, 'active'),
+      );
       showToast('success', 'Tenant profile published successfully!');
       // Update local state instead of reloading
       setProfileData(prev => ({
@@ -89,13 +85,9 @@ export default function TenantProfilePage() {
     if (!nhostUserId) return;
     try {
       setIsUnpublishing(true);
-      const { tenant_privacy_settings, ...rest } = profileData;
-      await tenantsAPI.upsertTenantProfile({ 
-        user_nhost_user_id: nhostUserId, 
-        ...rest,
-        privacy_settings: tenant_privacy_settings || {},
-        tenant_listing_status: 'inactive' as TenantListingStatus
-      });
+      await tenantsAPI.upsertTenantProfile(
+        buildTenantProfileUpsertPayload(profileData, nhostUserId, 'inactive'),
+      );
       showToast('success', 'Tenant profile has been unpublished');
       // Update local state instead of reloading
       setProfileData(prev => ({

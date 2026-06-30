@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/context/ToastContext';
 import { tenantsAPI } from '@/lib/api-client';
-import { fetchMyTenantProfile, type TenantProfileEmbeddedUser } from '@/lib/tenant-profiles';
+import { fetchMyTenantProfile, buildTenantProfileUpsertPayload, type TenantProfileEmbeddedUser } from '@/lib/tenant-profiles';
 import { useTenantProfileDisplayUser } from '@/hooks/useTenantProfileDisplayUser';
-import type { TenantProfileData, TenantListingStatus } from '@/types/tenant';
+import type { TenantProfileData } from '@/types/tenant';
 import Step1BasicInfo from '@/components/tenant-profile/Step1BasicInfo';
 import Step2Preferences from '@/components/tenant-profile/Step2Preferences';
 import Step3Review from '@/components/tenant-profile/Step3Review';
@@ -75,18 +75,9 @@ export default function TenantProfileView() {
     try {
       setIsSubmitting(true);
 
-      // Map client-only fields to DB schema
-      const { tenant_privacy_settings, ...rest } = profileData;
-      const payload = {
-        ...rest,
-        privacy_settings: tenant_privacy_settings || {},
-        tenant_listing_status: 'active' as TenantListingStatus,
-      } as Record<string, unknown>;
-
-      await tenantsAPI.upsertTenantProfile({ 
-        user_nhost_user_id: nhostUserId, 
-        ...payload
-      });
+      await tenantsAPI.upsertTenantProfile(
+        buildTenantProfileUpsertPayload(profileData, nhostUserId, 'active'),
+      );
       
       showToast('success', 'Tenant profile published successfully!');
       router.push('/dashboard/tenant-profile');

@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { offersAPI, propertiesAPI } from '@/lib/api-client';
+import { offersAPI } from '@/lib/api-client';
+import { enhanceOffersWithProperty } from '@/lib/enhance-offers-list';
 import { useLanguage } from '@/context/LanguageContext';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
@@ -52,86 +53,8 @@ export default function AllIncomingOffers({ recipientUserId }: AllIncomingOffers
             setOffers([]);
             return;
           }
-          
-          // Check if the API response includes property data
-          const hasPropertyData = response.data.some((offer: Offer) => offer.property);
-          
-          if (hasPropertyData) {
-            // The API response already includes property data, so we can use it directly
-            const enhancedOffers = response.data.map((offer: Offer) => {
-              // Use the property data that's already included in the API response
-              if (offer.property) {
-                return {
-                  ...offer,
-                  // Ensure property object has the correct structure for OfferCardDetails
-                  property: {
-                    propertyUuid: offer.propertyUuid, // Use the propertyUuid from the offer
-                    title: offer.property.title,
-                    location: offer.property.location,
-                    rentalPrice: offer.property.rentalPrice || 0,
-                    rentalPriceCurrency: offer.property.rentalPriceCurrency || 'HKD',
-                    propertyType: offer.property.propertyType,
-                    bedrooms: offer.property.bedrooms || 0,
-                    bathrooms: offer.property.bathrooms || 0,
-                    imageUrl: offer.property.imageUrl || ''
-                  },
-                  // Keep enhanced fields for grouping
-                  propertyTitle: offer.property.title,
-                  propertyLocation: offer.property.location,
-                  propertyImage: offer.property.imageUrl
-                };
-              } else {
-                // If no property data, still return the offer but without property info
-                return {
-                  ...offer,
-                  propertyTitle: 'Unknown Property',
-                  propertyLocation: 'Unknown Location',
-                  propertyImage: ''
-                };
-              }
-            });
-            
-            setOffers(enhancedOffers);
-          } else {
-            // Fallback to the original approach if property data is not in API response
-            const enhancedOffers = await Promise.all(
-              response.data.map(async (offer: Offer) => {
-                try {
-                  // Fetch property details for each offer
-                  const propertyResponse = await propertiesAPI.getPropertyByUuid(offer.propertyUuid);
-                  
-                  if (propertyResponse?.success && propertyResponse?.data?.property) {
-                    const property = propertyResponse.data.property;
-                    return {
-                      ...offer,
-                      // Add property object for OfferCardDetails
-                      property: {
-                        propertyUuid: property.uuid,
-                        title: property.title,
-                        location: property.location,
-                        rentalPrice: property.rental_price || 0,
-                        rentalPriceCurrency: property.rental_price_currency || 'HKD',
-                        propertyType: property.property_type,
-                        bedrooms: property.num_bedroom || 0,
-                        bathrooms: property.num_bathroom || 0,
-                        imageUrl: property.display_image || property.image_url || ''
-                      },
-                      // Keep enhanced fields for grouping
-                      propertyTitle: property.title,
-                      propertyLocation: property.location,
-                      propertyImage: property.display_image || property.image_url
-                    };
-                  }
-                  return offer;
-                } catch (err) {
-                  console.error('Error fetching property for offer:', offer.id, err);
-                  return offer;
-                }
-              })
-            );
-            
-            setOffers(enhancedOffers);
-          }
+
+          setOffers(await enhanceOffersWithProperty(response.data));
         } else {
           throw new Error(response.error || 'Failed to fetch offers');
         }
@@ -162,9 +85,9 @@ export default function AllIncomingOffers({ recipientUserId }: AllIncomingOffers
     const propertyKey = offer.propertyUuid;
     if (!acc[propertyKey]) {
       acc[propertyKey] = {
-        propertyTitle: offer.propertyTitle || 'Unknown Property',
-        propertyLocation: offer.propertyLocation || 'Unknown Location',
-        propertyImage: offer.propertyImage,
+        propertyTitle: offer.property?.title || offer.propertyTitle || 'Unknown Property',
+        propertyLocation: offer.property?.location || offer.propertyLocation || 'Unknown Location',
+        propertyImage: offer.property?.imageUrl || offer.propertyImage,
         offers: []
       };
     }

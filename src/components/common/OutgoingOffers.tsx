@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { offersAPI } from '@/lib/api-client';
+import { enhanceOffersWithProperty } from '@/lib/enhance-offers-list';
 import { CenteredLoadingSpinner } from '@/components/common/LoadingSpinner';
 import OfferCard from '@/components/common/OfferCard';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -53,8 +54,7 @@ export default function OutgoingOffers({
         const response = await offersAPI.getOffersByInitiator(initiatorUserId);
 
         if (response.success && response.data) {
-          setOffers(response.data);
-          console.log('Outgoing offers fetched successfully:', response.data);
+          setOffers(await enhanceOffersWithProperty(response.data));
         } else {
           throw new Error(response.error || 'Failed to fetch offers');
         }
@@ -141,9 +141,9 @@ export default function OutgoingOffers({
               // Refresh the offers list when an offer status changes
               if (initiatorUserId) {
                 offersAPI.getOffersByInitiator(initiatorUserId)
-                  .then(response => {
+                  .then(async (response) => {
                     if (response.success && response.data) {
-                      setOffers(response.data);
+                      setOffers(await enhanceOffersWithProperty(response.data));
                     }
                   })
                   .catch(err => {
@@ -164,7 +164,7 @@ export default function OutgoingOffers({
                   // Refresh offers list
                   const refreshResponse = await offersAPI.getOffersByInitiator(initiatorUserId);
                   if (refreshResponse.success && refreshResponse.data) {
-                    setOffers(refreshResponse.data);
+                    setOffers(await enhanceOffersWithProperty(refreshResponse.data));
                   }
                 } else {
                   showToast('Failed to accept offer', 'error');
@@ -182,7 +182,7 @@ export default function OutgoingOffers({
                   // Refresh offers list
                   const refreshResponse = await offersAPI.getOffersByInitiator(initiatorUserId);
                   if (refreshResponse.success && refreshResponse.data) {
-                    setOffers(refreshResponse.data);
+                    setOffers(await enhanceOffersWithProperty(refreshResponse.data));
                   }
                 } else {
                   showToast('Failed to reject offer', 'error');

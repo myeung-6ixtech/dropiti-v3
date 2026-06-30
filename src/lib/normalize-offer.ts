@@ -4,30 +4,33 @@ import type { Offer, OfferActionType, OfferStatus } from '@/types/offer';
 /** Raw Hasura row shape from Nhost Functions offer endpoints. */
 export type RawOfferRow = Record<string, unknown>;
 
-export function isRawOfferRow(value: unknown): value is RawOfferRow {
+/** True when a list item looks like an offer (snake_case Hasura or camelCase enriched). */
+export function looksLikeOffer(value: unknown): value is RawOfferRow {
   if (!value || typeof value !== 'object') return false;
   const row = value as Record<string, unknown>;
 
-  // Already enriched by Nhost (camelCase + nested recipient/property).
-  if ('recipientUserId' in row && ('recipient' in row || 'property' in row)) {
-    return false;
-  }
-
-  // Notifications also carry recipient_user_id — exclude them first.
   if ('is_read' in row || 'is_archived' in row || 'type_id' in row) {
     return false;
   }
 
   return (
-    'offer_status' in row ||
     'offer_key' in row ||
+    'offerKey' in row ||
     'proposing_rent_price' in row ||
-    ('initiator_user_id' in row && 'property_uuid' in row)
+    'proposingRentPrice' in row ||
+    ('initiator_user_id' in row && 'property_uuid' in row) ||
+    ('initiatorUserId' in row && 'propertyUuid' in row)
   );
 }
 
+export function isRawOfferRow(value: unknown): value is RawOfferRow {
+  if (!looksLikeOffer(value)) return false;
+  const row = value as Record<string, unknown>;
+  return 'offer_status' in row || 'offer_key' in row || 'proposing_rent_price' in row;
+}
+
 export function isOfferItemsPayload(items: unknown[]): boolean {
-  return items.length > 0 && items.some(isRawOfferRow);
+  return items.length > 0 && items.some(looksLikeOffer);
 }
 
 function readString(row: RawOfferRow, camel: string, snake: string): string {
@@ -102,7 +105,7 @@ export function normalizeOffer(row: RawOfferRow): Offer {
 
 export function normalizeOffers(items: unknown[]): Offer[] {
   return items.map((item) => {
-    if (isRawOfferRow(item)) {
+    if (looksLikeOffer(item)) {
       return normalizeOffer(item);
     }
     return item as Offer;
