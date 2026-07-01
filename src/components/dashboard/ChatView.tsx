@@ -36,6 +36,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
   const [contacts, setContacts] = useState<ChatContact[]>([]);
   const [isLoadingContacts, setIsLoadingContacts] = useState(true);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [selectedRoomDisplayName, setSelectedRoomDisplayName] = useState<string | null>(null);
 
   // Fetch user's chat rooms
   const fetchChatRooms = useCallback(async () => {
@@ -65,8 +66,12 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
   // Handle roomId from URL parameters
   useEffect(() => {
     const roomId = searchParams.get('roomId');
+    const name = searchParams.get('name');
     if (roomId) {
       setSelectedRoomId(roomId);
+    }
+    if (name) {
+      setSelectedRoomDisplayName(name);
     }
   }, [searchParams]);
 
@@ -139,6 +144,7 @@ export default function ChatView({ userType = 'tenant' }: ChatViewProps) {
           userType={userType}
           isLoadingContacts={isLoadingContacts}
           selectedRoomId={selectedRoomId}
+          selectedRoomDisplayName={selectedRoomDisplayName}
         />
       </div>
 

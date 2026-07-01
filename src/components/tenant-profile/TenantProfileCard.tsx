@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,6 +10,7 @@ import { DEFAULT_AVATAR_URL } from '@/constants';
 import { useAuth } from '@/context/AuthContext';
 import { useTenantProfileDisplayUser } from '@/hooks/useTenantProfileDisplayUser';
 import type { TenantProfileEmbeddedUser, TenantProfileRow } from '@/lib/tenant-profiles';
+import StartDirectChatModal from '@/components/chat/StartDirectChatModal';
 
 interface TenantProfileCardProps {
   data: TenantProfileData;
@@ -36,6 +37,7 @@ export default function TenantProfileCard({
 }: TenantProfileCardProps) {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const row = data as TenantProfileRow;
   const nhostUserId = data?.user_id ?? row.user?.nhost_user_id ?? user?.nhost_user_id;
@@ -61,7 +63,12 @@ export default function TenantProfileCard({
       router.push(`/auth/signin?callbackUrl=${encodeURIComponent(currentPath)}`);
       return;
     }
+
+    if (!nhostUserId) return;
+    setIsContactModalOpen(true);
   };
+
+  const canContact = Boolean(nhostUserId) && !isCurrentUser;
 
   const formatCurrency = (amount: number | undefined, currency: string = 'HKD') => {
     if (!amount) return 'Not specified';
@@ -224,8 +231,11 @@ export default function TenantProfileCard({
               </Link>
             ) : (
               <button
+                type="button"
                 onClick={handleContactClick}
-                className="form-button inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md"
+                disabled={!canContact}
+                title={!nhostUserId ? 'Contact unavailable for this profile' : undefined}
+                className="form-button inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Contact
               </button>
@@ -233,6 +243,18 @@ export default function TenantProfileCard({
           </div>
         </div>
       </div>
+
+      {nhostUserId && (
+        <StartDirectChatModal
+          isOpen={isContactModalOpen}
+          onClose={() => setIsContactModalOpen(false)}
+          recipientUserId={nhostUserId}
+          recipientName={userName}
+          recipientAvatar={userAvatar}
+          callerRole="landlord"
+          recipientRole="tenant"
+        />
+      )}
     </div>
   );
 }

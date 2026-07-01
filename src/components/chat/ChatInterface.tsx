@@ -41,10 +41,18 @@ interface ChatInterfaceProps {
   userType: 'landlord' | 'tenant' | 'support';
   isLoadingContacts?: boolean;
   selectedRoomId?: string | null;
+  selectedRoomDisplayName?: string | null;
   hideSidebar?: boolean;
 }
 
-export default function ChatInterface({ contacts, userType, isLoadingContacts = false, selectedRoomId, hideSidebar = false }: ChatInterfaceProps) {
+export default function ChatInterface({
+  contacts,
+  userType,
+  isLoadingContacts = false,
+  selectedRoomId,
+  selectedRoomDisplayName,
+  hideSidebar = false,
+}: ChatInterfaceProps) {
   const { user: authUser } = useAuth();
   const { showToast } = useToast();
   const { tap } = useHaptic();
@@ -119,25 +127,23 @@ export default function ChatInterface({ contacts, userType, isLoadingContacts = 
   // Handle selectedRoomId prop - find corresponding contact or create a placeholder
   useEffect(() => {
     if (selectedRoomId) {
-      // Find the contact that matches the selected room ID
-      const matchingContact = contacts.find(contact => contact.id === selectedRoomId);
+      const matchingContact = contacts.find((contact) => contact.id === selectedRoomId);
       if (matchingContact) {
         setSelectedContact(matchingContact);
-      } else if (contacts.length === 0) {
-        // If no contacts loaded yet but we have a roomId, create a placeholder contact
+      } else {
         setSelectedContact({
           id: selectedRoomId,
-          name: 'Loading...',
+          name: selectedRoomDisplayName?.trim() || 'Loading...',
           lastMessage: '',
           lastMessageTime: new Date(),
           unreadCount: 0,
           isOnline: false,
-          role: 'landlord',
-          nhostUserId: selectedRoomId
+          role: 'tenant',
+          nhostUserId: '',
         });
       }
     }
-  }, [selectedRoomId, contacts]);
+  }, [selectedRoomId, selectedRoomDisplayName, contacts]);
 
   // Update selected contact when contacts change (but only if no selectedRoomId is provided)
   useEffect(() => {
