@@ -173,16 +173,16 @@ apiClient.interceptors.response.use(
         if (data && typeof data === 'object' && 'items' in (data as object)) {
           const wrapped = data as { items: unknown[]; pagination?: unknown };
           const items = Array.isArray(wrapped.items) ? wrapped.items : [];
-          if (isListingItemsPayload(items)) {
-            response.data = {
-              success: true,
-              data: normalizeListings(items),
-              pagination: wrapped.pagination,
-            };
-          } else if (isOfferItemsPayload(items)) {
+          if (isOfferItemsPayload(items)) {
             response.data = {
               success: true,
               data: normalizeOffers(items),
+              pagination: wrapped.pagination,
+            };
+          } else if (isListingItemsPayload(items)) {
+            response.data = {
+              success: true,
+              data: normalizeListings(items),
               pagination: wrapped.pagination,
             };
           } else if (isNotificationItemsPayload(items)) {

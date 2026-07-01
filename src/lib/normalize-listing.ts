@@ -59,7 +59,11 @@ export function isRawListingRow(value: unknown): value is RawListingRow {
     'offer_status' in row ||
     'offer_key' in row ||
     'proposing_rent_price' in row ||
-    ('initiator_user_id' in row && 'property_uuid' in row)
+    ('initiator_user_id' in row && 'property_uuid' in row) ||
+    'offerStatus' in row ||
+    'offerKey' in row ||
+    'proposingRentPrice' in row ||
+    ('initiatorUserId' in row && 'propertyUuid' in row)
   ) {
     return false;
   }

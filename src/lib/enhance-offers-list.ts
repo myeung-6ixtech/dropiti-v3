@@ -1,8 +1,19 @@
 import { propertiesAPI } from '@/lib/api-client';
 import type { Offer, OfferProperty } from '@/types/offer';
 
+function resolveOfferPropertyUuid(offer: Offer): string {
+  const fromOffer = offer.propertyUuid?.trim();
+  if (fromOffer) return fromOffer;
+
+  const row = offer as Offer & { property_uuid?: string };
+  const fromSnake = row.property_uuid?.trim();
+  if (fromSnake) return fromSnake;
+
+  return offer.property?.propertyUuid?.trim() ?? '';
+}
+
 function mapPropertyRecordToOfferProperty(
-  offer: Offer,
+  propertyUuid: string,
   property: Record<string, unknown>,
 ): OfferProperty {
   const details =
@@ -11,7 +22,7 @@ function mapPropertyRecordToOfferProperty(
       : null;
 
   return {
-    propertyUuid: offer.propertyUuid,
+    propertyUuid,
     title: String(property.title ?? 'Property'),
     location: String(property.location ?? ''),
     rentalPrice: Number(property.rental_price ?? property.price ?? 0),
@@ -24,12 +35,15 @@ function mapPropertyRecordToOfferProperty(
 }
 
 function normalizeEmbeddedProperty(offer: Offer): Offer {
-  if (!offer.property) return offer;
+  if (!offer.property?.title) return offer;
+
+  const propertyUuid = resolveOfferPropertyUuid(offer);
 
   return {
     ...offer,
+    propertyUuid: propertyUuid || offer.propertyUuid,
     property: {
-      propertyUuid: offer.propertyUuid,
+      propertyUuid: propertyUuid || offer.property.propertyUuid,
       title: offer.property.title,
       location: offer.property.location,
       rentalPrice: offer.property.rentalPrice || 0,
@@ -42,36 +56,35 @@ function normalizeEmbeddedProperty(offer: Offer): Offer {
   };
 }
 
+async function enhanceSingleOffer(offer: Offer): Promise<Offer> {
+  if (offer.property?.title) {
+    return normalizeEmbeddedProperty(offer);
+  }
+
+  const propertyUuid = resolveOfferPropertyUuid(offer);
+  if (!propertyUuid) {
+    return offer;
+  }
+
+  try {
+    const propertyResponse = await propertiesAPI.getPropertyByUuid(propertyUuid);
+    if (propertyResponse?.success && propertyResponse?.data?.property) {
+      const property = propertyResponse.data.property as Record<string, unknown>;
+      return {
+        ...offer,
+        propertyUuid,
+        property: mapPropertyRecordToOfferProperty(propertyUuid, property),
+      };
+    }
+  } catch (err) {
+    console.error('[enhanceOffersWithProperty] failed for offer', offer.id, err);
+  }
+
+  return { ...offer, propertyUuid };
+}
+
 /** Ensure each offer has property details for OfferCard (API embed or per-uuid fetch). */
 export async function enhanceOffersWithProperty(offers: Offer[]): Promise<Offer[]> {
   if (offers.length === 0) return [];
-
-  const hasEmbeddedProperty = offers.some((offer) => Boolean(offer.property?.title));
-
-  if (hasEmbeddedProperty) {
-    return offers.map((offer) => normalizeEmbeddedProperty(offer));
-  }
-
-  return Promise.all(
-    offers.map(async (offer) => {
-      if (offer.property?.title) {
-        return normalizeEmbeddedProperty(offer);
-      }
-
-      try {
-        const propertyResponse = await propertiesAPI.getPropertyByUuid(offer.propertyUuid);
-        if (propertyResponse?.success && propertyResponse?.data?.property) {
-          const property = propertyResponse.data.property as Record<string, unknown>;
-          return {
-            ...offer,
-            property: mapPropertyRecordToOfferProperty(offer, property),
-          };
-        }
-      } catch (err) {
-        console.error('[enhanceOffersWithProperty] failed for offer', offer.id, err);
-      }
-
-      return offer;
-    }),
-  );
+  return Promise.all(offers.map((offer) => enhanceSingleOffer(offer)));
 }
